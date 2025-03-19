@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Layout from '../components/layout/Layout';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -17,34 +16,10 @@ const Discover: React.FC = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [userType, setUserType] = useState<string>("regular");
+  const [resourceType, setResourceType] = useState<string>("all");
   
-  // Define available tabs based on user type
-  const getTabsForUserType = (type: string) => {
-    switch (type) {
-      case "regular":
-        return ["artists", "spaces", "projects", "events"];
-      case "artist":
-        return ["brands", "venues", "spaces", "projects"];
-      case "brand":
-        return ["artists", "venues", "events"];
-      case "venue":
-        return ["artists", "brands", "events"];
-      case "resource":
-        return ["artists", "projects"];
-      default:
-        return ["artists", "spaces", "projects"];
-    }
-  };
+  const availableTabs = ["artists", "resources", "projects", "events", "brands", "venues"];
 
-  const availableTabs = getTabsForUserType(userType);
-
-  // Set first available tab when user type changes
-  useEffect(() => {
-    const tabs = getTabsForUserType(userType);
-    setActiveTab(tabs[0]);
-  }, [userType]);
-  
-  // Sample data for different tabs
   const artists = [
     {
       id: "1",
@@ -76,27 +51,55 @@ const Discover: React.FC = () => {
     }
   ];
 
-  const spaces = [
+  const resources = [
     {
-      id: "1",
+      id: "s1",
       name: "Downtown Recording Studio",
       type: "space" as const,
       location: "New York, NY",
       tags: ["Studio", "Soundproofed", "200 sq ft"]
     },
     {
-      id: "2",
+      id: "s2",
       name: "Artist Collective Gallery",
       type: "space" as const,
       location: "Portland, OR",
       tags: ["Gallery", "Exhibition Space", "1500 sq ft"]
     },
     {
-      id: "3",
+      id: "s3",
       name: "Musician's Practice Space",
       type: "space" as const,
       location: "Austin, TX",
       tags: ["Practice Room", "24/7 Access", "150 sq ft"]
+    },
+    {
+      id: "t1",
+      name: "Professional Lighting Kit",
+      type: "tool" as const,
+      location: "Chicago, IL",
+      tags: ["Equipment Available", "Photography"]
+    },
+    {
+      id: "t2",
+      name: "Mobile Recording Equipment",
+      type: "tool" as const,
+      location: "Nashville, TN",
+      tags: ["Equipment Available", "Music Production"]
+    },
+    {
+      id: "o1",
+      name: "Sound Engineer Services",
+      type: "offerer" as const,
+      location: "Los Angeles, CA",
+      tags: ["Music Production", "Studio"]
+    },
+    {
+      id: "o2",
+      name: "Session Musicians Network",
+      type: "offerer" as const,
+      location: "Nashville, TN",
+      tags: ["Music Production", "Jazz", "Blues"]
     }
   ];
 
@@ -196,49 +199,43 @@ const Discover: React.FC = () => {
     }
   ];
 
-  // Combined tags for filtering
   const allTags = [
-    // Artist tags
     "Vocalist", "R&B", "Soul", "Guitar", "Blues", "Jazz", 
     "Producer", "Electronic", "Hip-Hop", "Rapper",
     
-    // Space tags
     "Studio", "Gallery", "Practice Room", "Soundproofed",
     "24/7 Access", "Exhibition Space", "200 sq ft", "1500 sq ft", "150 sq ft",
     "Workshop", "Treehouse", "Equipment Available", "Storage",
     
-    // Project tags
     "Music Production", "Photography", "Film", "2-Month Timeline",
     "1-Week Timeline", "3-Month Timeline", "Budget: $5-10K",
     "Budget: $2-5K", "Remote Possible",
     
-    // Event tags
     "Concert", "Exhibition", "Workshop", "Networking",
     "Outdoor", "Multiple Days", "One-Day Event", "Weekend Event", "Educational",
     
-    // Brand tags
     "Record Label", "Fashion", "Technology", "Food & Beverage",
     "Streetwear", "Collaborations", "Audio Equipment", "Sponsorships",
     
-    // Venue tags
     "Club", "Theater", "Outdoor", "Live Music", "All Ages",
     "200 Capacity", "1000 Capacity", "5000 Capacity"
   ];
 
-  // Filter function based on search query and tags
   const filterItems = (items: any[]) => {
     return items.filter(item => {
-      // Search filter
       const matchesSearch = searchQuery === "" || 
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.tags.some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
       
-      // Tags filter
       const matchesTags = selectedTags.length === 0 || 
         selectedTags.some(tag => item.tags.includes(tag));
       
-      return matchesSearch && matchesTags;
+      const matchesResourceType = activeTab !== "resources" || 
+        resourceType === "all" || 
+        item.type === resourceType;
+      
+      return matchesSearch && matchesTags && matchesResourceType;
     });
   };
 
@@ -256,15 +253,18 @@ const Discover: React.FC = () => {
 
   const handleUserTypeChange = (type: string) => {
     setUserType(type);
-    setSelectedTags([]);
+  };
+
+  const handleResourceTypeChange = (type: string) => {
+    setResourceType(type);
   };
 
   const getActiveItems = () => {
     switch (activeTab) {
       case "artists":
         return filterItems(artists);
-      case "spaces":
-        return filterItems(spaces);
+      case "resources":
+        return filterItems(resources);
       case "projects":
         return filterItems(projects);
       case "events":
@@ -278,11 +278,10 @@ const Discover: React.FC = () => {
     }
   };
 
-  // Helper function to get a label from a tab value
   const getTabLabel = (tab: string) => {
     const labels: Record<string, string> = {
       artists: "Artists",
-      spaces: "Spaces",
+      resources: "Resources",
       projects: "Projects",
       events: "Events",
       brands: "Brands",
@@ -291,17 +290,28 @@ const Discover: React.FC = () => {
     return labels[tab] || tab.charAt(0).toUpperCase() + tab.slice(1);
   };
 
+  const getResourceTypeLabel = (item: any) => {
+    if (activeTab !== "resources") return null;
+    
+    const typeLabels: Record<string, string> = {
+      space: "Space",
+      tool: "Tool/Equipment",
+      offerer: "Service Provider",
+      other: "Other Resource"
+    };
+    
+    return typeLabels[item.type] || "";
+  };
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row justify-between items-start gap-6">
-          {/* Main Content */}
           <div className="w-full md:w-8/12">
             <AnimatedSection animation="fade-in-up">
               <h1 className="text-3xl md:text-4xl font-bold mb-6">Discover</h1>
             </AnimatedSection>
             
-            {/* Search and Filter Bar */}
             <AnimatedSection animation="fade-in-up" delay={100}>
               <div className="flex flex-col sm:flex-row gap-3 mb-6">
                 <div className="relative flex-grow">
@@ -323,7 +333,6 @@ const Discover: React.FC = () => {
               </div>
             </AnimatedSection>
 
-            {/* Selected Tags */}
             {selectedTags.length > 0 && (
               <AnimatedSection animation="fade-in-up" delay={150}>
                 <div className="flex flex-wrap gap-2 mb-6">
@@ -348,7 +357,6 @@ const Discover: React.FC = () => {
               </AnimatedSection>
             )}
 
-            {/* Filter Panel */}
             {showFilters && (
               <AnimatedSection animation="fade-in-down" delay={200}>
                 <MarketplaceFilters 
@@ -357,12 +365,13 @@ const Discover: React.FC = () => {
                   onTagSelect={handleTagSelect}
                   userType={userType}
                   onUserTypeChange={handleUserTypeChange}
+                  resourceType={resourceType}
+                  onResourceTypeChange={handleResourceTypeChange}
                   onClose={() => setShowFilters(false)}
                 />
               </AnimatedSection>
             )}
 
-            {/* User Type Indicator */}
             <AnimatedSection animation="fade-in-up" delay={150}>
               <div className="mb-6">
                 <Badge className="px-3 py-1.5">
@@ -371,14 +380,13 @@ const Discover: React.FC = () => {
               </div>
             </AnimatedSection>
 
-            {/* Tabs */}
             <AnimatedSection animation="fade-in-up" delay={200}>
               <Tabs 
                 value={activeTab} 
                 onValueChange={handleTabChange}
                 className="mb-8"
               >
-                <TabsList className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 mb-6">
+                <TabsList className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 mb-6">
                   {availableTabs.map(tab => (
                     <TabsTrigger key={tab} value={tab}>
                       {getTabLabel(tab)}
@@ -400,6 +408,7 @@ const Discover: React.FC = () => {
                             type={item.type}
                             location={item.location}
                             tags={item.tags}
+                            subtag={getResourceTypeLabel(item)}
                           />
                         </AnimatedSection>
                       ))}
@@ -415,14 +424,11 @@ const Discover: React.FC = () => {
             </AnimatedSection>
           </div>
           
-          {/* Sidebar */}
           <div className="w-full md:w-4/12 space-y-6">
-            {/* Saved Items Tracker */}
             <AnimatedSection animation="slide-in-left" delay={200}>
               <SavedItemsTracker />
             </AnimatedSection>
 
-            {/* Chat Component */}
             <AnimatedSection animation="slide-in-left" delay={300}>
               <MarketplaceChat />
             </AnimatedSection>

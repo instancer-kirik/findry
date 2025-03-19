@@ -1,10 +1,17 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { X } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface MarketplaceFiltersProps {
   allTags: string[];
@@ -12,6 +19,8 @@ interface MarketplaceFiltersProps {
   onTagSelect: (tag: string) => void;
   userType: string;
   onUserTypeChange: (userType: string) => void;
+  resourceType: string;
+  onResourceTypeChange: (resourceType: string) => void;
   onClose: () => void;
 }
 
@@ -21,14 +30,16 @@ const MarketplaceFilters: React.FC<MarketplaceFiltersProps> = ({
   onTagSelect,
   userType,
   onUserTypeChange,
+  resourceType,
+  onResourceTypeChange,
   onClose
 }) => {
   // Group tags by categories for better organization
   const tagCategories = {
     'Artist Types': ['Vocalist', 'Guitar', 'Producer', 'Rapper'],
     'Genres': ['R&B', 'Soul', 'Blues', 'Jazz', 'Electronic', 'Hip-Hop'],
-    'Space Types': ['Studio', 'Gallery', 'Practice Room', 'Exhibition Space', 'Workshop', 'Treehouse'],
-    'Space Features': ['Soundproofed', '24/7 Access', 'Equipment Available', 'Storage'],
+    'Resource Types': ['Studio', 'Gallery', 'Practice Room', 'Exhibition Space', 'Workshop', 'Treehouse'],
+    'Resource Features': ['Soundproofed', '24/7 Access', 'Equipment Available', 'Storage'],
     'Space Size': ['200 sq ft', '1500 sq ft', '150 sq ft'],
     'Project Types': ['Music Production', 'Photography', 'Film'],
     'Timeline': ['2-Month Timeline', '1-Week Timeline', '3-Month Timeline'],
@@ -37,6 +48,15 @@ const MarketplaceFilters: React.FC<MarketplaceFiltersProps> = ({
     'Brand Types': ['Record Label', 'Fashion', 'Technology', 'Food & Beverage'],
     'Venue Types': ['Concert Hall', 'Club', 'Theater', 'Outdoor']
   };
+
+  // Resource type options
+  const resourceTypes = [
+    { value: "all", label: "All Resources" },
+    { value: "space", label: "Spaces" },
+    { value: "tool", label: "Tools & Equipment" },
+    { value: "offerer", label: "Service Providers" },
+    { value: "other", label: "Other Resources" }
+  ];
 
   return (
     <Card className="mb-6">
@@ -80,6 +100,23 @@ const MarketplaceFilters: React.FC<MarketplaceFiltersProps> = ({
                 <Label htmlFor="resource">Resource Provider</Label>
               </div>
             </RadioGroup>
+          </div>
+
+          {/* Resource Type Selector */}
+          <div>
+            <h4 className="text-sm font-medium mb-3">Resource Type</h4>
+            <Select value={resourceType} onValueChange={onResourceTypeChange}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select resource type" />
+              </SelectTrigger>
+              <SelectContent>
+                {resourceTypes.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Tags by Category */}
