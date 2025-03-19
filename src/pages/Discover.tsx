@@ -50,62 +50,68 @@ const Discover: React.FC = () => {
     }
   ];
 
-  const brands = [
+  const spaces = [
     {
       id: "1",
-      name: "Summit Beats",
-      type: "brand" as const,
+      name: "Downtown Recording Studio",
+      type: "space" as const,
       location: "New York, NY",
-      tags: ["Music Production", "Events"]
+      tags: ["Studio", "Soundproofed", "200 sq ft"]
     },
     {
       id: "2",
-      name: "Rhythm Collective",
-      type: "brand" as const,
-      location: "Los Angeles, CA",
-      tags: ["Lifestyle", "Apparel", "Events"]
+      name: "Artist Collective Gallery",
+      type: "space" as const,
+      location: "Portland, OR",
+      tags: ["Gallery", "Exhibition Space", "1500 sq ft"]
     },
     {
       id: "3",
-      name: "SoundWave Media",
-      type: "brand" as const,
-      location: "Miami, FL",
-      tags: ["Media", "Promotion", "Distribution"]
+      name: "Musician's Practice Space",
+      type: "space" as const,
+      location: "Austin, TX",
+      tags: ["Practice Room", "24/7 Access", "150 sq ft"]
     }
   ];
 
-  const venues = [
+  const projects = [
     {
       id: "1",
-      name: "The Acoustic Lounge",
-      type: "venue" as const,
-      location: "Austin, TX",
-      tags: ["Live Music", "Intimate", "200 capacity"]
+      name: "Indie Album Recording",
+      type: "project" as const,
+      location: "Nashville, TN",
+      tags: ["Music Production", "2-Month Timeline", "Budget: $5-10K"]
     },
     {
       id: "2",
-      name: "Electric Stadium",
-      type: "venue" as const,
-      location: "Nashville, TN",
-      tags: ["Large Venue", "3000 capacity", "Sound System"]
+      name: "Fashion Photography Series",
+      type: "project" as const,
+      location: "Los Angeles, CA",
+      tags: ["Photography", "1-Week Timeline", "Budget: $2-5K"]
     },
     {
       id: "3",
-      name: "Jazz Corner",
-      type: "venue" as const,
-      location: "New Orleans, LA",
-      tags: ["Jazz", "Bar", "150 capacity"]
+      name: "Documentary Film Editing",
+      type: "project" as const,
+      location: "Chicago, IL",
+      tags: ["Film", "3-Month Timeline", "Remote Possible"]
     }
   ];
 
   // Combined tags for filtering
   const allTags = [
+    // Artist tags
     "Vocalist", "R&B", "Soul", "Guitar", "Blues", "Jazz", 
     "Producer", "Electronic", "Hip-Hop", "Rapper",
-    "Music Production", "Events", "Lifestyle", "Apparel", 
-    "Media", "Promotion", "Distribution",
-    "Live Music", "Intimate", "200 capacity", "Large Venue", 
-    "3000 capacity", "Sound System", "Jazz", "Bar", "150 capacity"
+    
+    // Space tags
+    "Studio", "Gallery", "Practice Room", "Soundproofed",
+    "24/7 Access", "Exhibition Space", "200 sq ft", "1500 sq ft", "150 sq ft",
+    
+    // Project tags
+    "Music Production", "Photography", "Film", "2-Month Timeline",
+    "1-Week Timeline", "3-Month Timeline", "Budget: $5-10K",
+    "Budget: $2-5K", "Remote Possible"
   ];
 
   // Filter function based on search query and tags
@@ -141,10 +147,10 @@ const Discover: React.FC = () => {
     switch (activeTab) {
       case "artists":
         return filterItems(artists);
-      case "brands":
-        return filterItems(brands);
-      case "venues":
-        return filterItems(venues);
+      case "spaces":
+        return filterItems(spaces);
+      case "projects":
+        return filterItems(projects);
       default:
         return [];
     }
@@ -229,8 +235,8 @@ const Discover: React.FC = () => {
               >
                 <TabsList className="w-full grid grid-cols-3 mb-6">
                   <TabsTrigger value="artists">Artists</TabsTrigger>
-                  <TabsTrigger value="brands">Brands</TabsTrigger>
-                  <TabsTrigger value="venues">Venues</TabsTrigger>
+                  <TabsTrigger value="spaces">Spaces</TabsTrigger>
+                  <TabsTrigger value="projects">Projects</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="artists" className="space-y-4">
@@ -257,49 +263,49 @@ const Discover: React.FC = () => {
                   </div>
                 </TabsContent>
 
-                <TabsContent value="brands" className="space-y-4">
+                <TabsContent value="spaces" className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filterItems(brands).map((brand, index) => (
+                    {filterItems(spaces).map((space, index) => (
                       <AnimatedSection 
-                        key={brand.id} 
+                        key={space.id} 
                         animation="fade-in-up" 
                         delay={100 * index}
                       >
                         <ProfileCard 
-                          name={brand.name}
-                          type={brand.type}
-                          location={brand.location}
-                          tags={brand.tags}
+                          name={space.name}
+                          type={space.type}
+                          location={space.location}
+                          tags={space.tags}
                         />
                       </AnimatedSection>
                     ))}
-                    {filterItems(brands).length === 0 && (
+                    {filterItems(spaces).length === 0 && (
                       <div className="col-span-full text-center py-10">
-                        <p className="text-muted-foreground">No brands found matching your filters.</p>
+                        <p className="text-muted-foreground">No spaces found matching your filters.</p>
                       </div>
                     )}
                   </div>
                 </TabsContent>
 
-                <TabsContent value="venues" className="space-y-4">
+                <TabsContent value="projects" className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filterItems(venues).map((venue, index) => (
+                    {filterItems(projects).map((project, index) => (
                       <AnimatedSection 
-                        key={venue.id} 
+                        key={project.id} 
                         animation="fade-in-up" 
                         delay={100 * index}
                       >
                         <ProfileCard 
-                          name={venue.name}
-                          type={venue.type}
-                          location={venue.location}
-                          tags={venue.tags}
+                          name={project.name}
+                          type={project.type}
+                          location={project.location}
+                          tags={project.tags}
                         />
                       </AnimatedSection>
                     ))}
-                    {filterItems(venues).length === 0 && (
+                    {filterItems(projects).length === 0 && (
                       <div className="col-span-full text-center py-10">
-                        <p className="text-muted-foreground">No venues found matching your filters.</p>
+                        <p className="text-muted-foreground">No projects found matching your filters.</p>
                       </div>
                     )}
                   </div>
@@ -311,12 +317,12 @@ const Discover: React.FC = () => {
           {/* Sidebar */}
           <div className="w-full md:w-4/12 space-y-6">
             {/* Saved Items Tracker */}
-            <AnimatedSection animation="fade-in-left" delay={200}>
+            <AnimatedSection animation="slide-in-left" delay={200}>
               <SavedItemsTracker />
             </AnimatedSection>
 
             {/* Chat Component */}
-            <AnimatedSection animation="fade-in-left" delay={300}>
+            <AnimatedSection animation="slide-in-left" delay={300}>
               <MarketplaceChat />
             </AnimatedSection>
           </div>

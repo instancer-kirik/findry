@@ -21,9 +21,12 @@ const MarketplaceFilters: React.FC<MarketplaceFiltersProps> = ({
   const tagCategories = {
     'Artist Types': ['Vocalist', 'Guitar', 'Producer', 'Rapper'],
     'Genres': ['R&B', 'Soul', 'Blues', 'Jazz', 'Electronic', 'Hip-Hop'],
-    'Venue Features': ['Live Music', 'Intimate', 'Large Venue', 'Sound System', 'Bar'],
-    'Capacity': ['200 capacity', '150 capacity', '3000 capacity'],
-    'Business': ['Music Production', 'Events', 'Lifestyle', 'Apparel', 'Media', 'Promotion', 'Distribution']
+    'Space Types': ['Studio', 'Gallery', 'Practice Room', 'Exhibition Space'],
+    'Space Features': ['Soundproofed', '24/7 Access'],
+    'Space Size': ['200 sq ft', '1500 sq ft', '150 sq ft'],
+    'Project Types': ['Music Production', 'Photography', 'Film'],
+    'Timeline': ['2-Month Timeline', '1-Week Timeline', '3-Month Timeline'],
+    'Budget': ['Budget: $5-10K', 'Budget: $2-5K', 'Remote Possible']
   };
 
   return (
