@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '../components/layout/Layout';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,33 @@ const Discover: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState<boolean>(false);
-  const [showChat, setShowChat] = useState<boolean>(false);
+  const [userType, setUserType] = useState<string>("regular");
+  
+  // Define available tabs based on user type
+  const getTabsForUserType = (type: string) => {
+    switch (type) {
+      case "regular":
+        return ["artists", "spaces", "projects", "events"];
+      case "artist":
+        return ["brands", "venues", "spaces", "projects"];
+      case "brand":
+        return ["artists", "venues", "events"];
+      case "venue":
+        return ["artists", "brands", "events"];
+      case "resource":
+        return ["artists", "projects"];
+      default:
+        return ["artists", "spaces", "projects"];
+    }
+  };
+
+  const availableTabs = getTabsForUserType(userType);
+
+  // Set first available tab when user type changes
+  useEffect(() => {
+    const tabs = getTabsForUserType(userType);
+    setActiveTab(tabs[0]);
+  }, [userType]);
   
   // Sample data for different tabs
   const artists = [
@@ -98,6 +124,78 @@ const Discover: React.FC = () => {
     }
   ];
 
+  const events = [
+    {
+      id: "1",
+      name: "Summer Music Festival",
+      type: "venue" as const,
+      location: "Austin, TX",
+      tags: ["Concert", "Outdoor", "Multiple Days"]
+    },
+    {
+      id: "2",
+      name: "Art Gallery Opening",
+      type: "venue" as const,
+      location: "New York, NY",
+      tags: ["Exhibition", "Networking", "One-Day Event"]
+    },
+    {
+      id: "3",
+      name: "Music Industry Workshop",
+      type: "venue" as const,
+      location: "Los Angeles, CA",
+      tags: ["Workshop", "Educational", "Weekend Event"]
+    }
+  ];
+
+  const brands = [
+    {
+      id: "1",
+      name: "Harmony Records",
+      type: "brand" as const,
+      location: "Los Angeles, CA",
+      tags: ["Record Label", "R&B", "Hip-Hop"]
+    },
+    {
+      id: "2",
+      name: "Urban Streetwear",
+      type: "brand" as const,
+      location: "New York, NY",
+      tags: ["Fashion", "Streetwear", "Collaborations"]
+    },
+    {
+      id: "3",
+      name: "SoundTech Audio",
+      type: "brand" as const,
+      location: "Nashville, TN",
+      tags: ["Technology", "Audio Equipment", "Sponsorships"]
+    }
+  ];
+
+  const venues = [
+    {
+      id: "1",
+      name: "The Echo Lounge",
+      type: "venue" as const,
+      location: "Seattle, WA",
+      tags: ["Club", "Live Music", "200 Capacity"]
+    },
+    {
+      id: "2",
+      name: "Grand Theater",
+      type: "venue" as const,
+      location: "Chicago, IL",
+      tags: ["Theater", "All Ages", "1000 Capacity"]
+    },
+    {
+      id: "3",
+      name: "Sunset Amphitheater",
+      type: "venue" as const,
+      location: "San Diego, CA",
+      tags: ["Outdoor", "Concert", "5000 Capacity"]
+    }
+  ];
+
   // Combined tags for filtering
   const allTags = [
     // Artist tags
@@ -107,11 +205,24 @@ const Discover: React.FC = () => {
     // Space tags
     "Studio", "Gallery", "Practice Room", "Soundproofed",
     "24/7 Access", "Exhibition Space", "200 sq ft", "1500 sq ft", "150 sq ft",
+    "Workshop", "Treehouse", "Equipment Available", "Storage",
     
     // Project tags
     "Music Production", "Photography", "Film", "2-Month Timeline",
     "1-Week Timeline", "3-Month Timeline", "Budget: $5-10K",
-    "Budget: $2-5K", "Remote Possible"
+    "Budget: $2-5K", "Remote Possible",
+    
+    // Event tags
+    "Concert", "Exhibition", "Workshop", "Networking",
+    "Outdoor", "Multiple Days", "One-Day Event", "Weekend Event", "Educational",
+    
+    // Brand tags
+    "Record Label", "Fashion", "Technology", "Food & Beverage",
+    "Streetwear", "Collaborations", "Audio Equipment", "Sponsorships",
+    
+    // Venue tags
+    "Club", "Theater", "Outdoor", "Live Music", "All Ages",
+    "200 Capacity", "1000 Capacity", "5000 Capacity"
   ];
 
   // Filter function based on search query and tags
@@ -143,6 +254,11 @@ const Discover: React.FC = () => {
     setActiveTab(value);
   };
 
+  const handleUserTypeChange = (type: string) => {
+    setUserType(type);
+    setSelectedTags([]);
+  };
+
   const getActiveItems = () => {
     switch (activeTab) {
       case "artists":
@@ -151,9 +267,28 @@ const Discover: React.FC = () => {
         return filterItems(spaces);
       case "projects":
         return filterItems(projects);
+      case "events":
+        return filterItems(events);
+      case "brands":
+        return filterItems(brands);
+      case "venues":
+        return filterItems(venues);
       default:
         return [];
     }
+  };
+
+  // Helper function to get a label from a tab value
+  const getTabLabel = (tab: string) => {
+    const labels: Record<string, string> = {
+      artists: "Artists",
+      spaces: "Spaces",
+      projects: "Projects",
+      events: "Events",
+      brands: "Brands",
+      venues: "Venues"
+    };
+    return labels[tab] || tab.charAt(0).toUpperCase() + tab.slice(1);
   };
 
   return (
@@ -220,96 +355,62 @@ const Discover: React.FC = () => {
                   allTags={allTags} 
                   selectedTags={selectedTags} 
                   onTagSelect={handleTagSelect}
+                  userType={userType}
+                  onUserTypeChange={handleUserTypeChange}
                   onClose={() => setShowFilters(false)}
                 />
               </AnimatedSection>
             )}
 
+            {/* User Type Indicator */}
+            <AnimatedSection animation="fade-in-up" delay={150}>
+              <div className="mb-6">
+                <Badge className="px-3 py-1.5">
+                  Viewing as: {userType.charAt(0).toUpperCase() + userType.slice(1)} User
+                </Badge>
+              </div>
+            </AnimatedSection>
+
             {/* Tabs */}
             <AnimatedSection animation="fade-in-up" delay={200}>
               <Tabs 
-                defaultValue="artists" 
                 value={activeTab} 
                 onValueChange={handleTabChange}
                 className="mb-8"
               >
-                <TabsList className="w-full grid grid-cols-3 mb-6">
-                  <TabsTrigger value="artists">Artists</TabsTrigger>
-                  <TabsTrigger value="spaces">Spaces</TabsTrigger>
-                  <TabsTrigger value="projects">Projects</TabsTrigger>
+                <TabsList className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 mb-6">
+                  {availableTabs.map(tab => (
+                    <TabsTrigger key={tab} value={tab}>
+                      {getTabLabel(tab)}
+                    </TabsTrigger>
+                  ))}
                 </TabsList>
 
-                <TabsContent value="artists" className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filterItems(artists).map((artist, index) => (
-                      <AnimatedSection 
-                        key={artist.id} 
-                        animation="fade-in-up" 
-                        delay={100 * index}
-                      >
-                        <ProfileCard 
-                          name={artist.name}
-                          type={artist.type}
-                          location={artist.location}
-                          tags={artist.tags}
-                        />
-                      </AnimatedSection>
-                    ))}
-                    {filterItems(artists).length === 0 && (
-                      <div className="col-span-full text-center py-10">
-                        <p className="text-muted-foreground">No artists found matching your filters.</p>
-                      </div>
-                    )}
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="spaces" className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filterItems(spaces).map((space, index) => (
-                      <AnimatedSection 
-                        key={space.id} 
-                        animation="fade-in-up" 
-                        delay={100 * index}
-                      >
-                        <ProfileCard 
-                          name={space.name}
-                          type={space.type}
-                          location={space.location}
-                          tags={space.tags}
-                        />
-                      </AnimatedSection>
-                    ))}
-                    {filterItems(spaces).length === 0 && (
-                      <div className="col-span-full text-center py-10">
-                        <p className="text-muted-foreground">No spaces found matching your filters.</p>
-                      </div>
-                    )}
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="projects" className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filterItems(projects).map((project, index) => (
-                      <AnimatedSection 
-                        key={project.id} 
-                        animation="fade-in-up" 
-                        delay={100 * index}
-                      >
-                        <ProfileCard 
-                          name={project.name}
-                          type={project.type}
-                          location={project.location}
-                          tags={project.tags}
-                        />
-                      </AnimatedSection>
-                    ))}
-                    {filterItems(projects).length === 0 && (
-                      <div className="col-span-full text-center py-10">
-                        <p className="text-muted-foreground">No projects found matching your filters.</p>
-                      </div>
-                    )}
-                  </div>
-                </TabsContent>
+                {availableTabs.map(tab => (
+                  <TabsContent key={tab} value={tab} className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {getActiveItems().map((item, index) => (
+                        <AnimatedSection 
+                          key={item.id} 
+                          animation="fade-in-up" 
+                          delay={100 * index}
+                        >
+                          <ProfileCard 
+                            name={item.name}
+                            type={item.type}
+                            location={item.location}
+                            tags={item.tags}
+                          />
+                        </AnimatedSection>
+                      ))}
+                      {getActiveItems().length === 0 && (
+                        <div className="col-span-full text-center py-10">
+                          <p className="text-muted-foreground">No {activeTab} found matching your filters.</p>
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
+                ))}
               </Tabs>
             </AnimatedSection>
           </div>
