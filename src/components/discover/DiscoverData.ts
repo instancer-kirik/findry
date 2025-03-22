@@ -203,6 +203,33 @@ export const communities: ContentItemProps[] = [
   }
 ];
 
+export const brands: ContentItemProps[] = [
+  {
+    id: "1",
+    name: "Melody Records",
+    type: "brand",
+    location: "Los Angeles, CA",
+    tags: ["Record Label", "Indie", "Distribution"],
+    subtype: "Label"
+  },
+  {
+    id: "2",
+    name: "Soundwave Audio",
+    type: "brand",
+    location: "Nashville, TN",
+    tags: ["Audio Equipment", "Professional", "Industry"],
+    subtype: "Equipment"
+  },
+  {
+    id: "3",
+    name: "UrbanWear",
+    type: "brand",
+    location: "New York, NY",
+    tags: ["Fashion", "Streetwear", "Collaborations"],
+    subtype: "Fashion"
+  }
+];
+
 export const allTags: string[] = [
   "Vocalist", "R&B", "Soul", "Guitar", "Blues", "Jazz", 
   "Producer", "Electronic", "Hip-Hop", "Rapper",
@@ -234,10 +261,11 @@ export const tabSubcategories: Record<string, string[]> = {
   projects: ["all", "music", "art", "film", "fashion", "tech"],
   events: ["all", "concerts", "exhibitions", "workshops", "festivals", "networking"],
   venues: ["all", "clubs", "concert halls", "theaters", "outdoor", "cafes", "galleries"],
-  communities: ["all", "music", "art", "tech", "social", "professional", "interest"]
+  communities: ["all", "music", "art", "tech", "social", "professional", "interest"],
+  brands: ["all", "labels", "equipment", "fashion", "food", "tech", "media"]
 };
 
-export const availableTabs = ["artists", "resources", "projects", "events", "venues", "communities"];
+export const availableTabs = ["artists", "resources", "projects", "events", "venues", "communities", "brands"];
 
 export const resourceTypes = [
   { value: "all", label: "All Resources" },

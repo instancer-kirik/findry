@@ -1,14 +1,21 @@
 
-import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
-import { CalendarIcon, Clock, MapPin, Users, Share2, Bookmark, Calendar } from 'lucide-react';
-import { toast } from 'sonner';
-
+import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { 
+  Calendar, 
+  Clock, 
+  MapPin, 
+  Users, 
+  Share2, 
+  Heart, 
+  MessageSquare, 
+  Star,
+  ChevronLeft
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import {
   Card,
   CardContent,
@@ -17,235 +24,394 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
 import AnimatedSection from '../components/ui-custom/AnimatedSection';
+import { format } from 'date-fns';
+
+// Mock data for event details
+const eventMockData = {
+  id: '1',
+  title: 'Summer Music Festival',
+  description: 'Join us for a weekend of amazing music featuring local and international artists. This family-friendly event includes food vendors, art installations, and activities for all ages.',
+  longDescription: 'The Summer Music Festival is the highlight of the season, bringing together musical talents from across the globe. Set in the beautiful outdoor amphitheater, this three-day extravaganza features multiple stages, interactive art installations, and a diverse lineup of performers spanning genres from indie rock to electronic, jazz, and world music.\n\nIn addition to the musical performances, attendees can enjoy culinary delights from local food vendors, browse handcrafted goods at the artisan market, and participate in workshops and activities suitable for all ages. The festival grounds open at 11 AM each day, with performances running until 11 PM.\n\nFor families, a dedicated kids' zone offers face painting, musical instrument crafting, and other fun activities to keep younger attendees engaged and entertained.',
+  date: new Date(2023, 6, 15),
+  startTime: '12:00',
+  endTime: '23:00',
+  location: 'Riverfront Park, Austin, TX',
+  organizer: 'Austin Music Collective',
+  organizerId: '123',
+  capacity: '500',
+  attendees: 350,
+  price: 'Free',
+  imageUrl: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+  tags: ['Music', 'Outdoor', 'Festival', 'Family-Friendly'],
+  type: 'Festival',
+  attending: false,
+  interested: true,
+};
+
+const reviewsMockData = [
+  {
+    id: '1',
+    userId: '1',
+    userName: 'Maria L.',
+    userAvatar: '',
+    rating: 5,
+    comment: 'Amazing event! The lineup was incredible and the atmosphere was perfect.',
+    date: new Date(2022, 6, 18),
+  },
+  {
+    id: '2',
+    userId: '2',
+    userName: 'James T.',
+    userAvatar: '',
+    rating: 4,
+    comment: 'Great music and food. Would definitely attend again next year.',
+    date: new Date(2022, 6, 17),
+  },
+  {
+    id: '3',
+    userId: '3',
+    userName: 'Sophia R.',
+    userAvatar: '',
+    rating: 5,
+    comment: 'One of the best festivals I\'ve been to. Very well organized.',
+    date: new Date(2022, 6, 16),
+  },
+];
 
 const EventDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const [event] = useState(eventMockData);
+  const [isAttending, setIsAttending] = useState(event.attending);
+  const [isInterested, setIsInterested] = useState(event.interested);
+  const [activeTab, setActiveTab] = useState('details');
   
-  // In a real app, we would fetch event data from an API
-  // For demo purposes, we'll use mock data
-  const event = {
-    id: id || '1',
-    title: 'Summer Music Festival',
-    description: 'Join us for three days of amazing live music featuring local and international artists. This outdoor event will include food trucks, art installations, and activities for all ages. Bring your friends and family for an unforgettable weekend of music and fun!',
-    date: new Date('2023-07-15'),
-    startTime: '12:00',
-    endTime: '22:00',
-    location: 'Central Park, New York, NY',
-    eventType: 'festival',
-    capacity: '5000',
-    organizer: {
-      name: 'NYC Music Collective',
-      avatar: '/placeholder.svg'
-    },
-    attendees: 3240,
-    tags: ['Music', 'Outdoor', 'Festival', 'Live Performance'],
-    image: '/placeholder.svg'
+  // This would be an API call in a real app
+  const handleAttend = () => {
+    setIsAttending(!isAttending);
   };
   
-  const handleRegister = () => {
-    toast.success('Registration successful!', {
-      description: `You're registered for "${event.title}". We've sent details to your email.`,
-    });
+  const handleInterest = () => {
+    setIsInterested(!isInterested);
   };
   
-  const handleSave = () => {
-    toast.success('Event saved!', {
-      description: 'You can find this event in your saved items.',
-    });
-  };
+  // Calculate days remaining until event
+  const today = new Date();
+  const eventDate = new Date(event.date);
+  const daysRemaining = Math.floor((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   
-  const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
-    toast.success('Link copied to clipboard!', {
-      description: 'Share this event with your friends and network.',
-    });
-  };
-  
-  const handleAddToCalendar = () => {
-    toast.success('Added to calendar!', {
-      description: 'This event has been added to your calendar.',
-    });
-  };
-
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Main Content */}
-          <div className="w-full lg:w-8/12">
-            <AnimatedSection animation="fade-in-up">
-              <div className="relative rounded-xl overflow-hidden h-[300px] md:h-[400px] mb-8">
-                <img 
-                  src={event.image} 
-                  alt={event.title} 
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
-                  <div className="p-6 text-white">
-                    <Badge className="mb-3">{event.eventType.charAt(0).toUpperCase() + event.eventType.slice(1)}</Badge>
-                    <h1 className="text-3xl md:text-4xl font-bold mb-2">{event.title}</h1>
-                    <div className="flex items-center gap-2">
-                      <CalendarIcon className="h-4 w-4" />
-                      <span>{format(event.date, 'EEEE, MMMM d, yyyy')}</span>
+        <AnimatedSection animation="fade-in-up">
+          <div className="mb-6">
+            <Link to="/events" className="flex items-center text-muted-foreground hover:text-foreground transition-colors">
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Back to Events
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Main content */}
+            <div className="md:col-span-2 space-y-6">
+              {/* Event cover image */}
+              <AnimatedSection animation="fade-in-up" delay={100}>
+                <div className="relative rounded-lg overflow-hidden h-64 md:h-80">
+                  <img 
+                    src={event.imageUrl} 
+                    alt={event.title} 
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent">
+                    <div className="absolute bottom-0 left-0 p-4 md:p-6">
+                      <Badge className="mb-2">{event.type}</Badge>
+                      <h1 className="text-2xl md:text-4xl font-bold text-white">{event.title}</h1>
+                      <p className="text-white/80 mt-1">{format(event.date, 'MMMM d, yyyy')}</p>
                     </div>
                   </div>
                 </div>
-              </div>
-            </AnimatedSection>
-
-            <div className="flex flex-col md:flex-row gap-6 mb-8">
-              <AnimatedSection animation="fade-in-up" delay={100} className="w-full md:w-8/12">
+              </AnimatedSection>
+              
+              {/* Event actions */}
+              <AnimatedSection animation="fade-in-up" delay={150}>
+                <div className="flex flex-wrap gap-3">
+                  <Button 
+                    onClick={handleAttend} 
+                    variant={isAttending ? "default" : "outline"}
+                    className="flex-1 md:flex-none"
+                  >
+                    <Users className="mr-2 h-4 w-4" /> 
+                    {isAttending ? 'Attending' : 'Attend'}
+                  </Button>
+                  
+                  <Button 
+                    onClick={handleInterest} 
+                    variant="outline" 
+                    className={`flex-1 md:flex-none ${isInterested ? 'text-rose-500' : ''}`}
+                  >
+                    <Heart className={`mr-2 h-4 w-4 ${isInterested ? 'fill-rose-500' : ''}`} /> 
+                    {isInterested ? 'Interested' : 'Interest'}
+                  </Button>
+                  
+                  <Button variant="outline" className="flex-1 md:flex-none">
+                    <Share2 className="mr-2 h-4 w-4" /> Share
+                  </Button>
+                </div>
+              </AnimatedSection>
+              
+              {/* Event tabs */}
+              <AnimatedSection animation="fade-in-up" delay={200}>
+                <Tabs defaultValue="details" value={activeTab} onValueChange={setActiveTab}>
+                  <TabsList className="grid grid-cols-3 w-full mb-6">
+                    <TabsTrigger value="details">Details</TabsTrigger>
+                    <TabsTrigger value="attendees">Attendees</TabsTrigger>
+                    <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="details" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>About This Event</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="whitespace-pre-line">{event.longDescription}</p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                          <div className="flex items-start gap-3">
+                            <Calendar className="h-5 w-5 text-primary mt-0.5" />
+                            <div>
+                              <h3 className="font-medium">Date & Time</h3>
+                              <p className="text-sm text-muted-foreground">
+                                {format(event.date, 'EEEE, MMMM d, yyyy')}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {event.startTime} - {event.endTime}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-start gap-3">
+                            <MapPin className="h-5 w-5 text-primary mt-0.5" />
+                            <div>
+                              <h3 className="font-medium">Location</h3>
+                              <p className="text-sm text-muted-foreground">{event.location}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-start gap-3">
+                            <Users className="h-5 w-5 text-primary mt-0.5" />
+                            <div>
+                              <h3 className="font-medium">Capacity</h3>
+                              <p className="text-sm text-muted-foreground">
+                                {event.attendees} / {event.capacity} attending
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-start gap-3">
+                            <Clock className="h-5 w-5 text-primary mt-0.5" />
+                            <div>
+                              <h3 className="font-medium">Duration</h3>
+                              <p className="text-sm text-muted-foreground">
+                                {parseInt(event.endTime) - parseInt(event.startTime)} hours
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Tags</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex flex-wrap gap-2">
+                          {event.tags.map(tag => (
+                            <Badge key={tag} variant="secondary">{tag}</Badge>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                  
+                  <TabsContent value="attendees">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>People Attending</CardTitle>
+                        <CardDescription>
+                          {event.attendees} people are going to this event
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {[1, 2, 3, 4, 5].map((person) => (
+                            <div key={person} className="flex items-center gap-3">
+                              <Avatar>
+                                <AvatarImage src={`https://i.pravatar.cc/150?img=${person + 10}`} />
+                                <AvatarFallback>U{person}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium">User {person}</p>
+                                <p className="text-sm text-muted-foreground">Attending</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                      <CardFooter>
+                        <Button variant="outline" className="w-full">View All Attendees</Button>
+                      </CardFooter>
+                    </Card>
+                  </TabsContent>
+                  
+                  <TabsContent value="reviews">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Reviews</CardTitle>
+                        <CardDescription>
+                          See what others thought about this event
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-6">
+                          {reviewsMockData.map((review) => (
+                            <div key={review.id}>
+                              <div className="flex items-start gap-3">
+                                <Avatar>
+                                  <AvatarImage src={review.userAvatar} />
+                                  <AvatarFallback>{review.userName[0]}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                  <div className="flex justify-between items-start">
+                                    <div>
+                                      <p className="font-medium">{review.userName}</p>
+                                      <div className="flex text-amber-500 mt-0.5">
+                                        {Array.from({ length: 5 }).map((_, i) => (
+                                          <Star key={i} className={`h-4 w-4 ${i < review.rating ? 'fill-amber-500' : ''}`} />
+                                        ))}
+                                      </div>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                      {format(review.date, 'MMM d, yyyy')}
+                                    </p>
+                                  </div>
+                                  <p className="mt-2 text-sm">{review.comment}</p>
+                                </div>
+                              </div>
+                              <Separator className="mt-4" />
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                      <CardFooter className="flex justify-between">
+                        <Button variant="outline">
+                          <MessageSquare className="mr-2 h-4 w-4" /> Add Review
+                        </Button>
+                        <Button variant="outline">View All</Button>
+                      </CardFooter>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </AnimatedSection>
+            </div>
+            
+            {/* Sidebar */}
+            <div className="space-y-6">
+              <AnimatedSection animation="fade-in-left" delay={100}>
                 <Card>
                   <CardHeader>
-                    <CardTitle>About this event</CardTitle>
+                    <CardTitle>Event Details</CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground whitespace-pre-line">
-                      {event.description}
-                    </p>
-                    
-                    <div className="mt-6 space-y-4">
-                      <div className="flex items-start gap-4">
-                        <CalendarIcon className="h-5 w-5 text-primary mt-0.5" />
-                        <div>
-                          <h3 className="font-medium">Date and Time</h3>
-                          <p className="text-muted-foreground">
-                            {format(event.date, 'EEEE, MMMM d, yyyy')}
-                          </p>
-                          <p className="text-muted-foreground">
-                            {event.startTime} - {event.endTime}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start gap-4">
-                        <MapPin className="h-5 w-5 text-primary mt-0.5" />
-                        <div>
-                          <h3 className="font-medium">Location</h3>
-                          <p className="text-muted-foreground">{event.location}</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start gap-4">
-                        <Users className="h-5 w-5 text-primary mt-0.5" />
-                        <div>
-                          <h3 className="font-medium">Attendees</h3>
-                          <p className="text-muted-foreground">{event.attendees} / {event.capacity}</p>
-                        </div>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <Calendar className="h-5 w-5 text-primary" />
+                      <div>
+                        <p className="text-sm font-medium">
+                          {format(event.date, 'EEEE, MMMM d, yyyy')}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {daysRemaining > 0 ? `${daysRemaining} days remaining` : 'Today!'}
+                        </p>
                       </div>
                     </div>
                     
-                    <div className="mt-6">
-                      <h3 className="font-medium mb-2">Tags</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {event.tags.map((tag, index) => (
-                          <Badge key={index} variant="outline">{tag}</Badge>
-                        ))}
+                    <div className="flex items-center gap-3">
+                      <Clock className="h-5 w-5 text-primary" />
+                      <div>
+                        <p className="text-sm font-medium">{event.startTime} - {event.endTime}</p>
+                        <p className="text-xs text-muted-foreground">Event time</p>
                       </div>
                     </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <MapPin className="h-5 w-5 text-primary" />
+                      <div>
+                        <p className="text-sm font-medium">{event.location}</p>
+                        <p className="text-xs text-muted-foreground">Event location</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <Users className="h-5 w-5 text-primary" />
+                      <div>
+                        <p className="text-sm font-medium">{event.attendees} / {event.capacity}</p>
+                        <p className="text-xs text-muted-foreground">People attending</p>
+                      </div>
+                    </div>
+                    
+                    <Button className="w-full">Get Tickets: {event.price}</Button>
                   </CardContent>
                 </Card>
               </AnimatedSection>
               
-              <AnimatedSection animation="fade-in-up" delay={200} className="w-full md:w-4/12">
+              <AnimatedSection animation="fade-in-left" delay={200}>
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Registration</CardTitle>
-                    <CardDescription>Secure your spot at this event</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Price</span>
-                        <span className="font-medium">Free</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Availability</span>
-                        <span className="font-medium">{event.capacity - event.attendees} spots left</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="flex flex-col gap-3">
-                    <Button className="w-full" onClick={handleRegister}>
-                      Register Now
-                    </Button>
-                    <div className="flex gap-2 w-full">
-                      <Button variant="outline" className="flex-1" onClick={handleSave}>
-                        <Bookmark className="mr-1 h-4 w-4" />
-                        Save
-                      </Button>
-                      <Button variant="outline" className="flex-1" onClick={handleShare}>
-                        <Share2 className="mr-1 h-4 w-4" />
-                        Share
-                      </Button>
-                      <Button variant="outline" className="flex-1" onClick={handleAddToCalendar}>
-                        <Calendar className="mr-1 h-4 w-4" />
-                        Calendar
-                      </Button>
-                    </div>
-                  </CardFooter>
-                </Card>
-                
-                <Card className="mt-6">
                   <CardHeader>
                     <CardTitle>Organizer</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                       <Avatar>
-                        <AvatarImage src={event.organizer.avatar} />
-                        <AvatarFallback>{event.organizer.name.charAt(0)}</AvatarFallback>
+                        <AvatarImage src="" />
+                        <AvatarFallback>AC</AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-medium">{event.organizer.name}</p>
-                        <p className="text-sm text-muted-foreground">Event Organizer</p>
+                        <p className="font-medium">{event.organizer}</p>
+                        <p className="text-xs text-muted-foreground">Event Organizer</p>
                       </div>
                     </div>
+                    <Button variant="outline" className="w-full mt-4">Contact Organizer</Button>
                   </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" className="w-full" 
-                      onClick={() => navigate('/communities')}>
-                      View Community
-                    </Button>
-                  </CardFooter>
+                </Card>
+              </AnimatedSection>
+              
+              <AnimatedSection animation="fade-in-left" delay={300}>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Similar Events</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {[1, 2, 3].map((item) => (
+                        <Link key={item} to={`/events/${item + 1}`} className="flex items-start gap-3 hover:bg-muted p-2 rounded-md transition-colors">
+                          <Calendar className="h-5 w-5 text-primary mt-0.5" />
+                          <div>
+                            <h3 className="font-medium line-clamp-1">Similar Festival {item}</h3>
+                            <p className="text-xs text-muted-foreground">Aug {10 + item}, 2023</p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </CardContent>
                 </Card>
               </AnimatedSection>
             </div>
           </div>
-          
-          {/* Sidebar */}
-          <div className="w-full lg:w-4/12">
-            <AnimatedSection animation="slide-in-left" delay={300}>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Similar Events</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {[1, 2, 3].map((item) => (
-                      <div key={item} className="flex gap-4 cursor-pointer hover:bg-muted p-2 rounded-lg" 
-                        onClick={() => navigate(`/events/${item + 1}`)}>
-                        <img src="/placeholder.svg" alt="Event" className="w-20 h-20 rounded-md object-cover" />
-                        <div>
-                          <h3 className="font-medium line-clamp-1">Another Music Event {item}</h3>
-                          <p className="text-sm text-muted-foreground">Aug {10 + item}, 2023</p>
-                          <p className="text-sm text-muted-foreground line-clamp-1">Downtown Music Hall</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button variant="outline" className="w-full" onClick={() => navigate('/events')}>
-                    View All Events
-                  </Button>
-                </CardFooter>
-              </Card>
-            </AnimatedSection>
-          </div>
-        </div>
+        </AnimatedSection>
       </div>
     </Layout>
   );

@@ -1,8 +1,11 @@
 
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import MarketplaceFilters from '../components/marketplace/MarketplaceFilters';
 import { ContentItemProps } from '../components/marketplace/ContentCard';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 // New refactored components
 import DiscoverHeader from '../components/discover/DiscoverHeader';
@@ -18,21 +21,34 @@ import {
   events,
   venues,
   communities,
+  brands,
   allTags,
   tabSubcategories,
   availableTabs
 } from '../components/discover/DiscoverData';
 
 import AnimatedSection from '../components/ui-custom/AnimatedSection';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const Discover: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>("artists");
+  const location = useLocation();
+  // Determine the initial active tab based on the current URL path
+  const getInitialActiveTab = () => {
+    const path = location.pathname.substring(1); // Remove leading slash
+    if (availableTabs.includes(path)) {
+      return path;
+    }
+    return "artists"; // Default tab
+  };
+
+  const [activeTab, setActiveTab] = useState<string>(getInitialActiveTab());
   const [activeSubTab, setActiveSubTab] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [userType, setUserType] = useState<string>("regular");
   const [resourceType, setResourceType] = useState<string>("all");
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
   
   const filterItems = (items: ContentItemProps[]) => {
     return items.filter(item => {
@@ -95,6 +111,8 @@ const Discover: React.FC = () => {
         return filterItems(venues);
       case "communities":
         return filterItems(communities);
+      case "brands":
+        return filterItems(brands);
       default:
         return [];
     }
@@ -107,7 +125,8 @@ const Discover: React.FC = () => {
       projects: "Projects",
       events: "Events",
       venues: "Venues",
-      communities: "Communities"
+      communities: "Communities",
+      brands: "Brands"
     };
     return labels[tab] || tab.charAt(0).toUpperCase() + tab.slice(1);
   };
@@ -137,6 +156,10 @@ const Discover: React.FC = () => {
         </div>
       </div>
     );
+  };
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
   };
 
   return (
@@ -186,7 +209,27 @@ const Discover: React.FC = () => {
             />
           </div>
           
-          <DiscoverSidebar />
+          <Collapsible 
+            open={sidebarOpen} 
+            onOpenChange={setSidebarOpen}
+            className="w-full md:w-4/12 relative"
+          >
+            <div className="absolute -left-4 top-1/2 transform -translate-y-1/2 z-10">
+              <CollapsibleTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className="h-8 w-8 rounded-full border-border shadow-sm bg-background"
+                  onClick={toggleSidebar}
+                >
+                  {sidebarOpen ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+                </Button>
+              </CollapsibleTrigger>
+            </div>
+            <CollapsibleContent className="transition-all duration-300 ease-in-out">
+              <DiscoverSidebar activeTabData={getActiveItems()} activeTab={activeTab} />
+            </CollapsibleContent>
+          </Collapsible>
         </div>
       </div>
     </Layout>
