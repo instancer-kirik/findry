@@ -6,10 +6,10 @@ import MarketplaceSection from '../components/home/MarketplaceSection';
 import FeatureSection from '../components/home/FeatureSection';
 import ProfileCard from '../components/home/ProfileCard';
 import AnimatedSection from '../components/ui-custom/AnimatedSection';
-import Button from '../components/ui-custom/Button';
-import { ArrowRight, Users, Music, Building, Store, Calendar, Sparkles } from 'lucide-react';
+import { Button } from '../components/ui/button';
+import { ArrowRight, Users, Music, Building, Store, Calendar, Sparkles, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger, SubTabs, SubTabsList, SubTabsTrigger } from '../components/ui/tabs';
 
 const Index: React.FC = () => {
   // Sample profiles for the discover section with more variety
@@ -21,8 +21,8 @@ const Index: React.FC = () => {
       tags: ["Vocalist", "R&B", "Soul"]
     },
     {
-      name: "Summit Beats",
-      type: "brand" as const,
+      name: "Summit Group",
+      type: "group" as const,
       location: "New York, NY",
       tags: ["Music Production", "Events"]
     },
@@ -72,7 +72,7 @@ const Index: React.FC = () => {
           <AnimatedSection animation="fade-in-up" className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">Discover Our Multi-Way Marketplace</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Connect with artists, brands, venues, and resources in our comprehensive ecosystem.
+              Connect with artists, groups, venues, and resources in our comprehensive ecosystem.
             </p>
           </AnimatedSection>
 
@@ -86,9 +86,9 @@ const Index: React.FC = () => {
                 <Music className="h-4 w-4" />
                 <span>Artists</span>
               </TabsTrigger>
-              <TabsTrigger value="brands" className="flex items-center gap-2">
-                <Store className="h-4 w-4" />
-                <span>Brands</span>
+              <TabsTrigger value="groups" className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                <span>Groups</span>
               </TabsTrigger>
               <TabsTrigger value="venues" className="flex items-center gap-2">
                 <Building className="h-4 w-4" />
@@ -123,7 +123,7 @@ const Index: React.FC = () => {
                       <h3 className="text-xl font-semibold">Talent & Resources</h3>
                     </div>
                     <p className="text-muted-foreground mb-4">
-                      Browse our curated selection of artists, brands, venues, and creative resources all in one place.
+                      Browse our curated selection of artists, groups, venues, and creative resources all in one place.
                     </p>
                     <Link to="/discover" className="text-primary font-medium flex items-center hover:underline">
                       Discover talent
@@ -139,7 +139,7 @@ const Index: React.FC = () => {
                 <div className="bg-background rounded-lg p-6 shadow-sm">
                   <h3 className="text-xl font-semibold mb-3">For Artists</h3>
                   <p className="text-muted-foreground mb-4">
-                    Connect with brands for sponsorships, find venues for performances, and discover resources to enhance your craft.
+                    Connect with groups for collaborations, find venues for performances, and discover resources to enhance your craft.
                   </p>
                   <ul className="space-y-2 mb-4">
                     <li className="flex items-center">
@@ -148,7 +148,7 @@ const Index: React.FC = () => {
                     </li>
                     <li className="flex items-center">
                       <ArrowRight className="h-4 w-4 mr-2 text-primary" />
-                      <span>Brand partnerships and sponsorships</span>
+                      <span>Group collaborations and partnerships</span>
                     </li>
                     <li className="flex items-center">
                       <ArrowRight className="h-4 w-4 mr-2 text-primary" />
@@ -163,25 +163,25 @@ const Index: React.FC = () => {
               </AnimatedSection>
             </TabsContent>
 
-            <TabsContent value="brands" className="space-y-6">
+            <TabsContent value="groups" className="space-y-6">
               <AnimatedSection animation="fade-in-up">
                 <div className="bg-background rounded-lg p-6 shadow-sm">
-                  <h3 className="text-xl font-semibold mb-3">For Brands</h3>
+                  <h3 className="text-xl font-semibold mb-3">For Groups</h3>
                   <p className="text-muted-foreground mb-4">
-                    Connect with artists for endorsements, book venues for events, and find creative resources for campaigns.
+                    Create and manage events, connect with artists, book venues, and find creative resources for your group.
                   </p>
                   <ul className="space-y-2 mb-4">
                     <li className="flex items-center">
                       <ArrowRight className="h-4 w-4 mr-2 text-primary" />
-                      <span>Artist collaborations and ambassadors</span>
+                      <span>Create and manage free group events</span>
                     </li>
                     <li className="flex items-center">
                       <ArrowRight className="h-4 w-4 mr-2 text-primary" />
-                      <span>Venue bookings for brand events</span>
+                      <span>Find artists for performances</span>
                     </li>
                     <li className="flex items-center">
                       <ArrowRight className="h-4 w-4 mr-2 text-primary" />
-                      <span>Creative production resources</span>
+                      <span>Book venues for meetups</span>
                     </li>
                   </ul>
                   <Link to="/discover" className="text-primary font-medium flex items-center hover:underline">
@@ -197,7 +197,7 @@ const Index: React.FC = () => {
                 <div className="bg-background rounded-lg p-6 shadow-sm">
                   <h3 className="text-xl font-semibold mb-3">For Venues</h3>
                   <p className="text-muted-foreground mb-4">
-                    Find talented artists to book, connect with brands for sponsorships, and discover resources for your space.
+                    Find talented artists to book, connect with groups for events, and discover resources for your space.
                   </p>
                   <ul className="space-y-2 mb-4">
                     <li className="flex items-center">
@@ -206,7 +206,7 @@ const Index: React.FC = () => {
                     </li>
                     <li className="flex items-center">
                       <ArrowRight className="h-4 w-4 mr-2 text-primary" />
-                      <span>Brand partnerships for events</span>
+                      <span>Connect with groups for events</span>
                     </li>
                     <li className="flex items-center">
                       <ArrowRight className="h-4 w-4 mr-2 text-primary" />
@@ -244,12 +244,10 @@ const Index: React.FC = () => {
           <AnimatedSection animation="fade-in-up" delay={500} className="text-center mt-12">
             <Button 
               variant="outline" 
-              icon={<ArrowRight className="w-4 h-4" />}
-              iconPosition="right"
-              as={Link}
-              to="/discover"
+              className="inline-flex items-center gap-2"
             >
-              Explore Full Marketplace
+              <span>Explore Full Marketplace</span>
+              <ArrowRight className="h-4 w-4" />
             </Button>
           </AnimatedSection>
         </div>
@@ -313,14 +311,14 @@ const Index: React.FC = () => {
         </div>
       </section>
       
-      {/* CTA Section - Updated to reflect multi-way marketplace */}
+      {/* CTA Section - Updated to reflect multi-way marketplace with groups */}
       <section className="section-padding bg-black text-white">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
             <AnimatedSection animation="fade-in-up">
               <h2 className="text-3xl md:text-4xl font-bold mb-6">Join the TandemX Ecosystem Today</h2>
               <p className="text-lg text-gray-300 mb-8">
-                Whether you're an artist, brand, venue, or creative resource provider - our platform is designed to help you make meaningful connections and grow.
+                Whether you're an artist, group organizer, venue, or creative resource provider - our platform is designed to help you make meaningful connections and grow.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 
@@ -333,8 +331,6 @@ const Index: React.FC = () => {
                   variant="outline"
                   size="lg" 
                   className="border-white text-white hover:bg-white/10"
-                  as={Link}
-                  to="/discover"
                 >
                   Explore First
                 </Button>
