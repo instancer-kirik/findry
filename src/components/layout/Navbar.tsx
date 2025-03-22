@@ -45,8 +45,8 @@ const Navbar: React.FC = () => {
             <Link to="/artists" className="text-sm font-medium hover:text-primary/80 transition-colors">
               Artists
             </Link>
-            <Link to="/groups" className="text-sm font-medium hover:text-primary/80 transition-colors">
-              Groups
+            <Link to="/communities" className="text-sm font-medium hover:text-primary/80 transition-colors">
+              Communities
             </Link>
             <Link to="/venues" className="text-sm font-medium hover:text-primary/80 transition-colors">
               Venues
@@ -98,11 +98,11 @@ const Navbar: React.FC = () => {
             Artists
           </Link>
           <Link 
-            to="/groups" 
+            to="/communities" 
             className="text-lg font-medium py-2 border-b border-border"
             onClick={() => setMobileMenuOpen(false)}
           >
-            Groups
+            Communities
           </Link>
           <Link 
             to="/venues" 

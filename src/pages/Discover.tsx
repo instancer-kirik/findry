@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '../components/layout/Layout';
 import { 
@@ -28,16 +27,15 @@ const Discover: React.FC = () => {
   const [userType, setUserType] = useState<string>("regular");
   const [resourceType, setResourceType] = useState<string>("all");
   
-  const availableTabs = ["artists", "resources", "projects", "events", "brands", "venues"];
+  const availableTabs = ["artists", "resources", "projects", "events", "brands", "communities"];
 
-  // Add subtabs for each main tab
   const tabSubcategories: Record<string, string[]> = {
     artists: ["all", "vocalists", "producers", "instrumentalists", "djs", "composers"],
     resources: ["all", "spaces", "tools", "services", "materials"],
     projects: ["all", "music", "art", "film", "fashion", "tech"],
     events: ["all", "concerts", "exhibitions", "workshops", "festivals", "networking"],
     brands: ["all", "labels", "fashion", "tech", "media", "food & drink"],
-    venues: ["all", "clubs", "theaters", "galleries", "studios", "outdoor"]
+    communities: ["all", "music", "art", "tech", "social", "professional", "interest"]
   };
 
   const artists = [
@@ -215,30 +213,30 @@ const Discover: React.FC = () => {
     }
   ];
 
-  const venues = [
+  const communities = [
     {
       id: "1",
-      name: "The Echo Lounge",
-      type: "venue",
-      location: "Seattle, WA",
-      tags: ["Club", "Live Music", "200 Capacity"],
-      subtype: "Club"
+      name: "Beat Makers Alliance",
+      type: "community",
+      location: "Worldwide (Online)",
+      tags: ["Music Production", "Collaboration", "200+ Members"],
+      subtype: "Music"
     },
     {
       id: "2",
-      name: "Grand Theater",
-      type: "venue",
-      location: "Chicago, IL",
-      tags: ["Theater", "All Ages", "1000 Capacity"],
-      subtype: "Theater"
+      name: "Art Collective NYC",
+      type: "community",
+      location: "New York, NY",
+      tags: ["Visual Arts", "Exhibitions", "50+ Members"],
+      subtype: "Art"
     },
     {
       id: "3",
-      name: "Sunset Amphitheater",
-      type: "venue",
-      location: "San Diego, CA",
-      tags: ["Outdoor", "Concert", "5000 Capacity"],
-      subtype: "Outdoor"
+      name: "Tech Musicians Network",
+      type: "community",
+      location: "San Francisco, CA",
+      tags: ["Music Tech", "Networking", "100+ Members"],
+      subtype: "Tech"
     }
   ];
 
@@ -323,8 +321,8 @@ const Discover: React.FC = () => {
         return filterItems(events);
       case "brands":
         return filterItems(brands);
-      case "venues":
-        return filterItems(venues);
+      case "communities":
+        return filterItems(communities);
       default:
         return [];
     }
@@ -337,7 +335,7 @@ const Discover: React.FC = () => {
       projects: "Projects",
       events: "Events",
       brands: "Brands",
-      venues: "Venues"
+      communities: "Communities"
     };
     return labels[tab] || tab.charAt(0).toUpperCase() + tab.slice(1);
   };

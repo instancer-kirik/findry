@@ -21,7 +21,7 @@ const App = () => (
           <Route path="/discover" element={<Discover />} />
           {/* These routes will be implemented in future iterations */}
           <Route path="/artists" element={<NotFound />} />
-          <Route path="/groups" element={<NotFound />} />
+          <Route path="/communities" element={<NotFound />} />
           <Route path="/venues" element={<NotFound />} />
           <Route path="/login" element={<NotFound />} />
           <Route path="/signup" element={<NotFound />} />

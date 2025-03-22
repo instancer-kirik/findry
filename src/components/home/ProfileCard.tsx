@@ -3,7 +3,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { Users, Music, Building, Store, Bot, ArrowRight } from 'lucide-react';
 
-type ProfileType = 'artist' | 'brand' | 'venue' | 'resource' | 'group';
+type ProfileType = 'artist' | 'brand' | 'venue' | 'resource' | 'community';
 
 interface ProfileCardProps {
   name: string;
@@ -30,7 +30,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         return <Building className="h-5 w-5" />;
       case 'resource':
         return <Bot className="h-5 w-5" />;
-      case 'group':
+      case 'community':
         return <Users className="h-5 w-5" />;
       default:
         return <Users className="h-5 w-5" />;
@@ -47,8 +47,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         return 'Venue';
       case 'resource':
         return 'Resource';
-      case 'group':
-        return 'Group';
+      case 'community':
+        return 'Community';
       default:
         return 'Profile';
     }
@@ -64,7 +64,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300';
       case 'resource':
         return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300';
-      case 'group':
+      case 'community':
         return 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
