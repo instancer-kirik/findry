@@ -3,7 +3,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { Users, Music, Building, Store, Bot, ArrowRight } from 'lucide-react';
 
-type ProfileType = 'artist' | 'brand' | 'venue' | 'resource' | 'community';
+type ProfileType = 'artist' | 'community' | 'venue' | 'resource' | 'brand';
 
 interface ProfileCardProps {
   name: string;

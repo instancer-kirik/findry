@@ -19,10 +19,13 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/discover" element={<Discover />} />
-          {/* These routes will be implemented in future iterations */}
-          <Route path="/artists" element={<NotFound />} />
-          <Route path="/communities" element={<NotFound />} />
-          <Route path="/venues" element={<NotFound />} />
+          {/* Dedicated routes for specific discovery tabs */}
+          <Route path="/artists" element={<Discover />} />
+          <Route path="/venues" element={<Discover />} />
+          <Route path="/communities" element={<Discover />} />
+          <Route path="/resources" element={<Discover />} />
+          <Route path="/projects" element={<Discover />} />
+          <Route path="/events" element={<Discover />} />
           <Route path="/login" element={<NotFound />} />
           <Route path="/signup" element={<NotFound />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
