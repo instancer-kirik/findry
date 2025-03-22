@@ -120,12 +120,8 @@ const Discover: React.FC = () => {
     const subcategories = tabSubcategories[tabKey] || [];
     
     return (
-      <div className="SubTabs" 
-        value={activeSubTab} 
-        onValueChange={handleSubTabChange}
-        className="mb-4"
-      >
-        <div className="SubTabsList className="w-full overflow-x-auto">
+      <div className="mb-4">
+        <div className="w-full overflow-x-auto flex space-x-4">
           {subcategories.map(subTab => (
             <button 
               key={subTab} 
