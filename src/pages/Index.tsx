@@ -13,7 +13,7 @@ import AnimatedSection from '../components/ui-custom/AnimatedSection';
 interface ProfileType {
   id: string;
   name: string;
-  type: string;
+  type: 'artist' | 'resource' | 'venue' | 'community' | 'brand' | 'project' | 'event';
   location: string;
   image: string;
   tags: string[];

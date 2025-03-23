@@ -9,6 +9,9 @@ import Discover from "./pages/Discover";
 import NotFound from "./pages/NotFound";
 import CreateEvent from "./pages/CreateEvent";
 import EventDetail from "./pages/EventDetail";
+import SignUp from "./pages/SignUp";
+import Login from "./pages/Login";
+import ProfileSetup from "./pages/ProfileSetup";
 
 const queryClient = new QueryClient();
 
@@ -34,8 +37,11 @@ const App = () => (
           <Route path="/events/create" element={<CreateEvent />} />
           <Route path="/events/:id" element={<EventDetail />} />
           
-          <Route path="/login" element={<NotFound />} />
-          <Route path="/signup" element={<NotFound />} />
+          {/* Authentication routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/profile/setup" element={<ProfileSetup />} />
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
