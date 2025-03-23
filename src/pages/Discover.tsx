@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import MarketplaceFilters from '../components/marketplace/MarketplaceFilters';
@@ -29,9 +29,12 @@ import {
 
 import AnimatedSection from '../components/ui-custom/AnimatedSection';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Discover: React.FC = () => {
   const location = useLocation();
+  const isMobile = useIsMobile();
+  
   // Determine the initial active tab based on the current URL path
   const getInitialActiveTab = () => {
     const path = location.pathname.substring(1); // Remove leading slash
@@ -50,8 +53,13 @@ const Discover: React.FC = () => {
   const [resourceType, setResourceType] = useState<string>("all");
   const [artistStyle, setArtistStyle] = useState<string>("all");
   const [disciplinaryType, setDisciplinaryType] = useState<string>("all");
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(!isMobile);
   
+  // Update sidebar visibility when screen size changes
+  useEffect(() => {
+    setSidebarOpen(!isMobile);
+  }, [isMobile]);
+
   const filterItems = (items: ContentItemProps[]) => {
     return items.filter(item => {
       const matchesSearch = searchQuery === "" || 

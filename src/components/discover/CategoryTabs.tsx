@@ -1,9 +1,25 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { SubTabs, SubTabsList, SubTabsTrigger } from "@/components/ui/tabs";
 import AnimatedSection from '../ui-custom/AnimatedSection';
 import { ContentItemProps } from '../marketplace/ContentCard';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuTrigger, 
+  DropdownMenuItem 
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { ChevronDown } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface CategoryTabsProps {
   activeTab: string;
@@ -30,28 +46,72 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({
   getTabLabel,
   renderTabContent
 }) => {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const isDesktop = window.innerWidth >= 1024; // Simple check for desktop
+
+  // For mobile devices, show tabs in a scrollable row
+  // For desktop, show first 4 tabs as buttons and the rest in a dropdown/dialog
+  const visibleTabs = isDesktop ? availableTabs.slice(0, 4) : availableTabs;
+  const dropdownTabs = isDesktop ? availableTabs.slice(4) : [];
+
   return (
     <AnimatedSection animation="fade-in-up" delay={200}>
-      <Tabs 
-        value={activeTab} 
-        onValueChange={handleTabChange}
-        className="mb-8"
-      >
-        <TabsList className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 mb-6">
-          {availableTabs.map(tab => (
-            <TabsTrigger key={tab} value={tab}>
-              {getTabLabel(tab)}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+      <div className="mb-8">
+        {/* Visible tab buttons + dropdown for extra tabs on desktop */}
+        <div className="flex items-center mb-6 overflow-x-auto">
+          <TabsList className="inline-flex mr-2 space-x-1">
+            {visibleTabs.map(tab => (
+              <TabsTrigger
+                key={tab}
+                value={tab}
+                onClick={() => handleTabChange(tab)}
+                className={activeTab === tab ? "bg-primary text-primary-foreground" : ""}
+              >
+                {getTabLabel(tab)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-        {availableTabs.map(tab => (
-          <TabsContent key={tab} value={tab} className="space-y-4">
-            {renderSubTabs(tab)}
-            {renderTabContent(getActiveItems())}
-          </TabsContent>
-        ))}
-      </Tabs>
+          {dropdownTabs.length > 0 && (
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="ml-2">
+                  More <ChevronDown className="ml-1 h-4 w-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Select Category</DialogTitle>
+                  <DialogDescription>
+                    Choose a category to explore content
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid grid-cols-2 gap-4 py-4">
+                  {dropdownTabs.map(tab => (
+                    <Button
+                      key={tab}
+                      variant={activeTab === tab ? "default" : "outline"}
+                      onClick={() => {
+                        handleTabChange(tab);
+                        setDialogOpen(false);
+                      }}
+                      className="justify-start"
+                    >
+                      {getTabLabel(tab)}
+                    </Button>
+                  ))}
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
+
+        {/* Tab content */}
+        <div>
+          {renderSubTabs(activeTab)}
+          {renderTabContent(getActiveItems())}
+        </div>
+      </div>
     </AnimatedSection>
   );
 };
