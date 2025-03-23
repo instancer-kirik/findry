@@ -48,6 +48,8 @@ const Discover: React.FC = () => {
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [userType, setUserType] = useState<string>("regular");
   const [resourceType, setResourceType] = useState<string>("all");
+  const [artistStyle, setArtistStyle] = useState<string>("all");
+  const [disciplinaryType, setDisciplinaryType] = useState<string>("all");
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
   
   const filterItems = (items: ContentItemProps[]) => {
@@ -68,7 +70,17 @@ const Discover: React.FC = () => {
         (item.subtype && item.subtype.toLowerCase() === activeSubTab) ||
         item.type.toLowerCase() === activeSubTab;
       
-      return matchesSearch && matchesTags && matchesResourceType && matchesSubTab;
+      // Artist style filtering
+      const matchesArtistStyle = artistStyle === "all" || 
+        (item.styles && item.styles.includes(artistStyle.charAt(0).toUpperCase() + artistStyle.slice(1)));
+      
+      // Disciplinary type filtering
+      const matchesDisciplinaryType = disciplinaryType === "all" || 
+        (disciplinaryType === "multi" && item.multidisciplinary) ||
+        (disciplinaryType === "single" && !item.multidisciplinary);
+      
+      return matchesSearch && matchesTags && matchesResourceType && 
+             matchesSubTab && matchesArtistStyle && matchesDisciplinaryType;
     });
   };
 
@@ -95,6 +107,14 @@ const Discover: React.FC = () => {
 
   const handleResourceTypeChange = (type: string) => {
     setResourceType(type);
+  };
+
+  const handleArtistStyleChange = (style: string) => {
+    setArtistStyle(style);
+  };
+
+  const handleDisciplinaryTypeChange = (type: string) => {
+    setDisciplinaryType(type);
   };
 
   const getActiveItems = () => {
@@ -188,6 +208,11 @@ const Discover: React.FC = () => {
                   onUserTypeChange={handleUserTypeChange}
                   resourceType={resourceType}
                   onResourceTypeChange={handleResourceTypeChange}
+                  artistStyle={artistStyle}
+                  onArtistStyleChange={handleArtistStyleChange}
+                  disciplinaryType={disciplinaryType}
+                  onDisciplinaryTypeChange={handleDisciplinaryTypeChange}
+                  activeTab={activeTab}
                   onClose={() => setShowFilters(false)}
                 />
               </AnimatedSection>

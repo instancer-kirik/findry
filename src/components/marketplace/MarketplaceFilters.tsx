@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { artistStyleFilters, disciplinaryFilters } from '../discover/DiscoverData';
 
 interface MarketplaceFiltersProps {
   allTags: string[];
@@ -21,6 +22,11 @@ interface MarketplaceFiltersProps {
   onUserTypeChange: (userType: string) => void;
   resourceType: string;
   onResourceTypeChange: (resourceType: string) => void;
+  artistStyle?: string;
+  onArtistStyleChange?: (style: string) => void;
+  disciplinaryType?: string;
+  onDisciplinaryTypeChange?: (type: string) => void;
+  activeTab?: string;
   onClose: () => void;
 }
 
@@ -32,12 +38,20 @@ const MarketplaceFilters: React.FC<MarketplaceFiltersProps> = ({
   onUserTypeChange,
   resourceType,
   onResourceTypeChange,
+  artistStyle = "all",
+  onArtistStyleChange = () => {},
+  disciplinaryType = "all",
+  onDisciplinaryTypeChange = () => {},
+  activeTab = "",
   onClose
 }) => {
   // Group tags by categories for better organization
   const tagCategories = {
-    'Artist Types': ['Vocalist', 'Guitar', 'Producer', 'Rapper'],
+    'Artist Types': ['Vocalist', 'Guitar', 'Producer', 'Rapper', 'Performance Artist', 'Visual Artist'],
     'Genres': ['R&B', 'Soul', 'Blues', 'Jazz', 'Electronic', 'Hip-Hop'],
+    'Styles': ['Minimalist', 'Abstract', 'Contemporary', 'Traditional', 'Experimental', 'Surrealist', 'Urban', 'Folk'],
+    'Multidisciplinary': ['Sound & Visual', 'Performance & Media', 'Installation & Sculpture', 'Digital & Physical', 'Text & Image', 'Movement & Sound'],
+    'Disciplines': ['Dance', 'Sculpture', 'Sound Design', 'Video Production', 'Digital Art', 'Music', 'Visual Art'],
     'Resource Types': ['Studio', 'Gallery', 'Practice Room', 'Exhibition Space', 'Workshop', 'Treehouse'],
     'Resource Features': ['Soundproofed', '24/7 Access', 'Equipment Available', 'Storage'],
     'Space Size': ['200 sq ft', '1500 sq ft', '150 sq ft'],
@@ -57,6 +71,32 @@ const MarketplaceFilters: React.FC<MarketplaceFiltersProps> = ({
     { value: "offerer", label: "Service Providers" },
     { value: "other", label: "Other Resources" }
   ];
+
+  // Determine which categories to show based on the active tab
+  const getRelevantCategories = () => {
+    if (activeTab === "artists") {
+      return ['Artist Types', 'Genres', 'Styles', 'Multidisciplinary', 'Disciplines'];
+    }
+    if (activeTab === "resources") {
+      return ['Resource Types', 'Resource Features', 'Space Size'];
+    }
+    if (activeTab === "projects") {
+      return ['Project Types', 'Timeline', 'Budget'];
+    }
+    if (activeTab === "events") {
+      return ['Events'];
+    }
+    if (activeTab === "brands") {
+      return ['Brand Types'];
+    }
+    if (activeTab === "venues") {
+      return ['Venue Types'];
+    }
+    // Default to showing all categories
+    return Object.keys(tagCategories);
+  };
+
+  const relevantCategories = getRelevantCategories();
 
   return (
     <Card className="mb-6">
@@ -102,30 +142,70 @@ const MarketplaceFilters: React.FC<MarketplaceFiltersProps> = ({
             </RadioGroup>
           </div>
 
-          {/* Resource Type Selector */}
-          <div>
-            <h4 className="text-sm font-medium mb-3">Resource Type</h4>
-            <Select value={resourceType} onValueChange={onResourceTypeChange}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select resource type" />
-              </SelectTrigger>
-              <SelectContent>
-                {resourceTypes.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Artist Style Selector - only show when on Artists tab */}
+          {activeTab === "artists" && (
+            <div>
+              <h4 className="text-sm font-medium mb-3">Artist Style</h4>
+              <Select value={artistStyle} onValueChange={onArtistStyleChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select artist style" />
+                </SelectTrigger>
+                <SelectContent>
+                  {artistStyleFilters.map((style) => (
+                    <SelectItem key={style.value} value={style.value}>
+                      {style.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Disciplinary Type Selector - only show when on Artists tab */}
+          {activeTab === "artists" && (
+            <div>
+              <h4 className="text-sm font-medium mb-3">Disciplinary Type</h4>
+              <Select value={disciplinaryType} onValueChange={onDisciplinaryTypeChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select disciplinary type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {disciplinaryFilters.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Resource Type Selector - only show when on Resources tab */}
+          {activeTab === "resources" && (
+            <div>
+              <h4 className="text-sm font-medium mb-3">Resource Type</h4>
+              <Select value={resourceType} onValueChange={onResourceTypeChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select resource type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {resourceTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Tags by Category */}
           <div className="space-y-4">
-            {Object.entries(tagCategories).map(([category, tags]) => (
+            {relevantCategories.map((category) => (
               <div key={category}>
                 <h4 className="text-sm font-medium mb-2">{category}</h4>
                 <div className="flex flex-wrap gap-2">
-                  {tags.filter(tag => allTags.includes(tag)).map(tag => (
+                  {tagCategories[category].filter(tag => allTags.includes(tag)).map(tag => (
                     <Badge 
                       key={tag}
                       variant={selectedTags.includes(tag) ? "default" : "outline"}

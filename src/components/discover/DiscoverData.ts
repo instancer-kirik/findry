@@ -1,5 +1,30 @@
-
 import { ContentItemProps } from '../marketplace/ContentCard';
+
+export interface StyleType {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export const artistStyles: StyleType[] = [
+  { id: "s1", name: "Minimalist", description: "Simple, uncluttered aesthetics with a focus on essential elements" },
+  { id: "s2", name: "Abstract", description: "Non-representational approach focusing on shapes, colors, and textures" },
+  { id: "s3", name: "Contemporary", description: "Current, innovative approaches that push boundaries" },
+  { id: "s4", name: "Traditional", description: "Time-honored techniques and aesthetic principles" },
+  { id: "s5", name: "Experimental", description: "Innovative approaches that challenge conventional methods" },
+  { id: "s6", name: "Surrealist", description: "Dreamlike imagery and unexpected juxtapositions" },
+  { id: "s7", name: "Urban", description: "Street-influenced aesthetics with cultural commentary" },
+  { id: "s8", name: "Folk", description: "Cultural traditions and community-based practices" }
+];
+
+export const multidisciplinaryTypes: StyleType[] = [
+  { id: "m1", name: "Sound & Visual", description: "Combining auditory and visual elements" },
+  { id: "m2", name: "Performance & Media", description: "Live performance integrated with digital media" },
+  { id: "m3", name: "Installation & Sculpture", description: "Three-dimensional works in relationship to space" },
+  { id: "m4", name: "Digital & Physical", description: "Bridging digital technologies with physical materials" },
+  { id: "m5", name: "Text & Image", description: "Integration of written language with visual elements" },
+  { id: "m6", name: "Movement & Sound", description: "Choreography and sonic elements in harmony" }
+];
 
 export const artists: ContentItemProps[] = [
   {
@@ -7,32 +32,66 @@ export const artists: ContentItemProps[] = [
     name: "Elena Rivera",
     type: "artist",
     location: "Los Angeles, CA",
-    tags: ["Vocalist", "R&B", "Soul"],
-    subtype: "Vocalist"
+    tags: ["Vocalist", "R&B", "Soul", "Contemporary", "Sound & Visual"],
+    subtype: "Vocalist",
+    multidisciplinary: true,
+    styles: ["Contemporary", "Urban"],
+    disciplines: ["Music", "Video Production"]
   },
   {
     id: "2",
     name: "James Wilson",
     type: "artist",
     location: "Chicago, IL",
-    tags: ["Guitar", "Blues", "Jazz"],
-    subtype: "Instrumentalist"
+    tags: ["Guitar", "Blues", "Jazz", "Traditional"],
+    subtype: "Instrumentalist",
+    multidisciplinary: false,
+    styles: ["Traditional", "Folk"],
+    disciplines: ["Music"]
   },
   {
     id: "3",
     name: "Mia Chen",
     type: "artist",
     location: "New York, NY",
-    tags: ["Producer", "Electronic", "Hip-Hop"],
-    subtype: "Producer"
+    tags: ["Producer", "Electronic", "Hip-Hop", "Experimental", "Digital & Physical"],
+    subtype: "Producer",
+    multidisciplinary: true,
+    styles: ["Experimental", "Contemporary"],
+    disciplines: ["Music Production", "Digital Art"]
   },
   {
     id: "4",
     name: "Marcus Johnson",
     type: "artist",
     location: "Atlanta, GA",
-    tags: ["Rapper", "Hip-Hop", "Producer"],
-    subtype: "Vocalist"
+    tags: ["Rapper", "Hip-Hop", "Producer", "Urban"],
+    subtype: "Vocalist",
+    multidisciplinary: false,
+    styles: ["Urban", "Contemporary"],
+    disciplines: ["Music"]
+  },
+  {
+    id: "5",
+    name: "Sophia Rodriguez",
+    type: "artist",
+    location: "Miami, FL",
+    tags: ["Multimedia", "Performance", "Movement & Sound"],
+    subtype: "Performance Artist",
+    multidisciplinary: true,
+    styles: ["Experimental", "Surrealist"],
+    disciplines: ["Dance", "Visual Art", "Music"]
+  },
+  {
+    id: "6",
+    name: "David Kim",
+    type: "artist",
+    location: "Seattle, WA",
+    tags: ["Installation", "Sculpture", "Sound", "Installation & Sculpture"],
+    subtype: "Visual Artist",
+    multidisciplinary: true,
+    styles: ["Minimalist", "Abstract"],
+    disciplines: ["Sculpture", "Sound Design"]
   }
 ];
 
@@ -252,11 +311,20 @@ export const allTags: string[] = [
   "200 Capacity", "1000 Capacity", "5000 Capacity",
   
   "Visual Arts", "Collaboration", "200+ Members", "50+ Members", "100+ Members",
-  "Music Tech", "Classical", "400 Capacity", "Grand Piano", "Sound System"
+  "Music Tech", "Classical", "400 Capacity", "Grand Piano", "Sound System",
+  
+  "Minimalist", "Abstract", "Contemporary", "Traditional", 
+  "Experimental", "Surrealist", "Urban", "Folk",
+  
+  "Sound & Visual", "Performance & Media", "Installation & Sculpture",
+  "Digital & Physical", "Text & Image", "Movement & Sound",
+  
+  "Dance", "Sculpture", "Sound Design", "Video Production", "Digital Art",
+  "Multimedia", "Performance Artist", "Visual Artist"
 ];
 
 export const tabSubcategories: Record<string, string[]> = {
-  artists: ["all", "vocalists", "producers", "instrumentalists", "djs", "composers"],
+  artists: ["all", "vocalists", "producers", "instrumentalists", "djs", "composers", "multidisciplinary", "visual artists", "performance artists"],
   resources: ["all", "spaces", "tools", "services", "materials"],
   projects: ["all", "music", "art", "film", "fashion", "tech"],
   events: ["all", "concerts", "exhibitions", "workshops", "festivals", "networking"],
@@ -273,4 +341,22 @@ export const resourceTypes = [
   { value: "tool", label: "Tools & Equipment" },
   { value: "offerer", label: "Service Providers" },
   { value: "other", label: "Other Resources" }
+];
+
+export const artistStyleFilters = [
+  { value: "all", label: "All Styles" },
+  { value: "minimalist", label: "Minimalist" },
+  { value: "abstract", label: "Abstract" },
+  { value: "contemporary", label: "Contemporary" },
+  { value: "traditional", label: "Traditional" },
+  { value: "experimental", label: "Experimental" },
+  { value: "surrealist", label: "Surrealist" },
+  { value: "urban", label: "Urban" },
+  { value: "folk", label: "Folk" }
+];
+
+export const disciplinaryFilters = [
+  { value: "all", label: "All Types" },
+  { value: "single", label: "Single Discipline" },
+  { value: "multi", label: "Multidisciplinary" }
 ];

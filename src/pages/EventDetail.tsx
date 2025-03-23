@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { 
@@ -35,7 +34,7 @@ const eventMockData = {
   id: '1',
   title: 'Summer Music Festival',
   description: 'Join us for a weekend of amazing music featuring local and international artists. This family-friendly event includes food vendors, art installations, and activities for all ages.',
-  longDescription: 'The Summer Music Festival is the highlight of the season, bringing together musical talents from across the globe. Set in the beautiful outdoor amphitheater, this three-day extravaganza features multiple stages, interactive art installations, and a diverse lineup of performers spanning genres from indie rock to electronic, jazz, and world music.\n\nIn addition to the musical performances, attendees can enjoy culinary delights from local food vendors, browse handcrafted goods at the artisan market, and participate in workshops and activities suitable for all ages. The festival grounds open at 11 AM each day, with performances running until 11 PM.\n\nFor families, a dedicated kids' zone offers face painting, musical instrument crafting, and other fun activities to keep younger attendees engaged and entertained.',
+  longDescription: 'The Summer Music Festival is the highlight of the season, bringing together musical talents from across the globe. Set in the beautiful outdoor amphitheater, this three-day extravaganza features multiple stages, interactive art installations, and a diverse lineup of performers spanning genres from indie rock to electronic, jazz, and world music.\n\nIn addition to the musical performances, attendees can enjoy culinary delights from local food vendors, browse handcrafted goods at the artisan market, and participate in workshops and activities suitable for all ages. The festival grounds open at 11 AM each day, with performances running until 11 PM.\n\nFor families, a dedicated kids\' zone offers face painting, musical instrument crafting, and other fun activities to keep younger attendees engaged and entertained.',
   date: new Date(2023, 6, 15),
   startTime: '12:00',
   endTime: '23:00',
@@ -49,7 +48,7 @@ const eventMockData = {
   tags: ['Music', 'Outdoor', 'Festival', 'Family-Friendly'],
   type: 'Festival',
   attending: false,
-  interested: true,
+  interested: true
 };
 
 const reviewsMockData = [
@@ -89,7 +88,6 @@ const EventDetail: React.FC = () => {
   const [isInterested, setIsInterested] = useState(event.interested);
   const [activeTab, setActiveTab] = useState('details');
   
-  // This would be an API call in a real app
   const handleAttend = () => {
     setIsAttending(!isAttending);
   };
@@ -98,7 +96,6 @@ const EventDetail: React.FC = () => {
     setIsInterested(!isInterested);
   };
   
-  // Calculate days remaining until event
   const today = new Date();
   const eventDate = new Date(event.date);
   const daysRemaining = Math.floor((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
@@ -115,9 +112,7 @@ const EventDetail: React.FC = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Main content */}
             <div className="md:col-span-2 space-y-6">
-              {/* Event cover image */}
               <AnimatedSection animation="fade-in-up" delay={100}>
                 <div className="relative rounded-lg overflow-hidden h-64 md:h-80">
                   <img 
@@ -135,7 +130,6 @@ const EventDetail: React.FC = () => {
                 </div>
               </AnimatedSection>
               
-              {/* Event actions */}
               <AnimatedSection animation="fade-in-up" delay={150}>
                 <div className="flex flex-wrap gap-3">
                   <Button 
@@ -162,7 +156,6 @@ const EventDetail: React.FC = () => {
                 </div>
               </AnimatedSection>
               
-              {/* Event tabs */}
               <AnimatedSection animation="fade-in-up" delay={200}>
                 <Tabs defaultValue="details" value={activeTab} onValueChange={setActiveTab}>
                   <TabsList className="grid grid-cols-3 w-full mb-6">
@@ -319,7 +312,6 @@ const EventDetail: React.FC = () => {
               </AnimatedSection>
             </div>
             
-            {/* Sidebar */}
             <div className="space-y-6">
               <AnimatedSection animation="fade-in-left" delay={100}>
                 <Card>
