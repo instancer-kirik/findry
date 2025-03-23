@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 interface AnimatedSectionProps {
   children: React.ReactNode;
   className?: string;
-  animation?: 'fade-in' | 'fade-in-up' | 'fade-in-down' | 'slide-in-left' | 'slide-in-right' | 'blur-in';
+  animation?: 'fade-in' | 'fade-in-up' | 'fade-in-down' | 'slide-in-left' | 'slide-in-right' | 'blur-in' | 'fade-in-left';
   delay?: number;
   threshold?: number;
   once?: boolean;
@@ -58,6 +58,7 @@ const AnimatedSection: React.FC<AnimatedSectionProps> = ({
     'slide-in-left': 'animate-slide-in-left',
     'slide-in-right': 'animate-slide-in-right',
     'blur-in': 'animate-blur-in',
+    'fade-in-left': 'animate-fade-in-left',
   }[animation];
 
   const delayClass = delay ? `animate-delay-${delay}` : '';

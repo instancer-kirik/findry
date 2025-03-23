@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
@@ -26,7 +27,7 @@ const truncateText = (text: string, maxLength: number): string => {
   return text.substring(0, maxLength) + "...";
 };
 
-const featuredProfiles = [
+const featuredProfiles: ProfileType[] = [
   {
     id: "1",
     name: "Elena Rivera",
