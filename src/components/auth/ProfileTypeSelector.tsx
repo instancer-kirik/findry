@@ -11,7 +11,8 @@ import {
   Briefcase 
 } from 'lucide-react';
 
-type ProfileType = 'artist' | 'community' | 'venue' | 'resource' | 'brand' | 'event' | 'project';
+// Update the ProfileType to include all possible types
+export type ProfileType = 'artist' | 'community' | 'venue' | 'resource' | 'brand' | 'event' | 'project';
 
 interface ProfileOption {
   id: ProfileType;
@@ -80,7 +81,7 @@ const ProfileTypeSelector: React.FC<ProfileTypeSelectorProps> = ({ value, onChan
   };
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       {profileOptions.map((option) => (
         <Button
           key={option.id}

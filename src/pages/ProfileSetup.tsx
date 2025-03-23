@@ -16,12 +16,13 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ArtistProfileForm from '../components/profile/ArtistProfileForm';
 import AnimatedSection from '../components/ui-custom/AnimatedSection';
+import { ProfileType } from '../components/auth/ProfileTypeSelector';
 
 const ProfileSetup: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState('artist');
+  const [activeTab, setActiveTab] = useState<ProfileType>('artist');
 
   const handleSubmit = () => {
     setIsSubmitting(true);
@@ -50,13 +51,15 @@ const ProfileSetup: React.FC = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Tabs defaultValue="artist" value={activeTab} onValueChange={setActiveTab}>
-                  <TabsList className="grid grid-cols-3 md:grid-cols-5 mb-6">
+                <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as ProfileType)}>
+                  <TabsList className="grid grid-cols-3 md:grid-cols-7 mb-6">
                     <TabsTrigger value="artist">Artist</TabsTrigger>
                     <TabsTrigger value="venue">Venue</TabsTrigger>
                     <TabsTrigger value="resource">Resource</TabsTrigger>
                     <TabsTrigger value="community">Community</TabsTrigger>
                     <TabsTrigger value="brand">Brand</TabsTrigger>
+                    <TabsTrigger value="event">Event</TabsTrigger>
+                    <TabsTrigger value="project">Project</TabsTrigger>
                   </TabsList>
                   <TabsContent value="artist">
                     <ArtistProfileForm />
@@ -79,6 +82,16 @@ const ProfileSetup: React.FC = () => {
                   <TabsContent value="brand">
                     <p className="text-muted-foreground py-8 text-center">
                       Brand profile setup coming soon
+                    </p>
+                  </TabsContent>
+                  <TabsContent value="event">
+                    <p className="text-muted-foreground py-8 text-center">
+                      Event profile setup coming soon
+                    </p>
+                  </TabsContent>
+                  <TabsContent value="project">
+                    <p className="text-muted-foreground py-8 text-center">
+                      Project profile setup coming soon
                     </p>
                   </TabsContent>
                 </Tabs>

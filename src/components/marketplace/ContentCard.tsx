@@ -5,12 +5,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Palette, Users, Music, Building, Store, Bot, ArrowRight, Star } from 'lucide-react';
+import { Palette, Users, Music, Building, Store, Bot, ArrowRight, Star, Calendar, Briefcase } from 'lucide-react';
+import { ProfileType } from '../auth/ProfileTypeSelector';
 
 export interface ContentItemProps {
   id: string;
   name: string;
-  type: string;
+  type: ProfileType | string; // Allow for additional types beyond ProfileType
   subtype?: string;
   location: string;
   tags: string[];
@@ -40,6 +41,10 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
         return <Bot className="h-5 w-5" />;
       case 'community':
         return <Users className="h-5 w-5" />;
+      case 'event':
+        return <Calendar className="h-5 w-5" />;
+      case 'project':
+        return <Briefcase className="h-5 w-5" />;
       default:
         return <Star className="h-5 w-5" />;
     }

@@ -8,16 +8,7 @@ import ProfileCard from '../components/home/ProfileCard';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import AnimatedSection from '../components/ui-custom/AnimatedSection';
-
-// Define the structure for profile data
-interface ProfileType {
-  id: string;
-  name: string;
-  type: 'artist' | 'resource' | 'venue' | 'community' | 'brand' | 'project' | 'event';
-  location: string;
-  image: string;
-  tags: string[];
-}
+import { ProfileType } from '../components/auth/ProfileTypeSelector';
 
 // Helper function to truncate text
 const truncateText = (text: string, maxLength: number): string => {
@@ -27,7 +18,16 @@ const truncateText = (text: string, maxLength: number): string => {
   return text.substring(0, maxLength) + "...";
 };
 
-const featuredProfiles: ProfileType[] = [
+interface ProfileData {
+  id: string;
+  name: string;
+  type: ProfileType;
+  location: string;
+  image: string;
+  tags: string[];
+}
+
+const featuredProfiles: ProfileData[] = [
   {
     id: "1",
     name: "Elena Rivera",

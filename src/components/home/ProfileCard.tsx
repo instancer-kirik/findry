@@ -1,15 +1,16 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Users, Music, Building, Store, Bot, ArrowRight } from 'lucide-react';
-
-type ProfileType = 'artist' | 'community' | 'venue' | 'resource' | 'brand';
+import { Users, Music, Building, Store, Bot, ArrowRight, Calendar, Briefcase } from 'lucide-react';
+import { ProfileType } from '../auth/ProfileTypeSelector';
 
 interface ProfileCardProps {
+  id?: string;
   name: string;
   type: ProfileType;
   location: string;
   tags: string[];
+  image?: string;
   className?: string;
 }
 
@@ -32,6 +33,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         return <Bot className="h-5 w-5" />;
       case 'community':
         return <Users className="h-5 w-5" />;
+      case 'event':
+        return <Calendar className="h-5 w-5" />;
+      case 'project':
+        return <Briefcase className="h-5 w-5" />;
       default:
         return <Users className="h-5 w-5" />;
     }
@@ -49,6 +54,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         return 'Resource';
       case 'community':
         return 'Community';
+      case 'event':
+        return 'Event';
+      case 'project':
+        return 'Project';
       default:
         return 'Profile';
     }
@@ -66,6 +75,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300';
       case 'community':
         return 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300';
+      case 'event':
+        return 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300';
+      case 'project':
+        return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
     }
