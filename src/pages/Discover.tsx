@@ -53,7 +53,7 @@ const Discover: React.FC = () => {
   const [resourceType, setResourceType] = useState<string>("all");
   const [artistStyle, setArtistStyle] = useState<string>("all");
   const [disciplinaryType, setDisciplinaryType] = useState<string>("all");
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(!isMobile);
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
   
   // Update sidebar visibility when screen size changes
   useEffect(() => {
@@ -188,9 +188,9 @@ const Discover: React.FC = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 min-h-screen">
         <div className="flex flex-col md:flex-row justify-between items-start gap-6">
-          <div className="w-full md:w-8/12">
+          <div className={`w-full ${sidebarOpen ? 'md:w-8/12' : 'md:w-11/12'} transition-all duration-300`}>
             <DiscoverHeader 
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
@@ -238,27 +238,22 @@ const Discover: React.FC = () => {
             />
           </div>
           
-          <Collapsible 
-            open={sidebarOpen} 
-            onOpenChange={setSidebarOpen}
-            className="w-full md:w-4/12 relative"
-          >
-            <div className="absolute -left-4 top-1/2 transform -translate-y-1/2 z-10">
-              <CollapsibleTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  className="h-8 w-8 rounded-full border-border shadow-sm bg-background"
-                  onClick={toggleSidebar}
-                >
-                  {sidebarOpen ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-                </Button>
-              </CollapsibleTrigger>
-            </div>
-            <CollapsibleContent className="transition-all duration-300 ease-in-out">
+          <div className={`fixed top-1/2 ${sidebarOpen ? 'right-[calc(33.333%-1rem)]' : 'right-4'} transform -translate-y-1/2 z-10 md:block hidden`}>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="h-8 w-8 rounded-full border-border shadow-sm bg-background"
+              onClick={toggleSidebar}
+            >
+              {sidebarOpen ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            </Button>
+          </div>
+          
+          <div className={`w-full md:w-4/12 transition-all duration-300 ease-in-out ${sidebarOpen ? 'block' : 'hidden md:block md:w-1/12'}`}>
+            {sidebarOpen && (
               <DiscoverSidebar activeTabData={getActiveItems()} activeTab={activeTab} />
-            </CollapsibleContent>
-          </Collapsible>
+            )}
+          </div>
         </div>
       </div>
     </Layout>
