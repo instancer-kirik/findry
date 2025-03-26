@@ -1,53 +1,40 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import Discover from "./pages/Discover";
-import NotFound from "./pages/NotFound";
-import CreateEvent from "./pages/CreateEvent";
-import EventDetail from "./pages/EventDetail";
-import SignUp from "./pages/SignUp";
-import Login from "./pages/Login";
-import ProfileSetup from "./pages/ProfileSetup";
+import { useState } from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { Toaster } from '@/components/ui/sonner'
 
-const queryClient = new QueryClient();
+// Pages
+import Index from './pages/Index'
+import Discover from './pages/Discover'
+import Login from './pages/Login'
+import SignUp from './pages/SignUp'
+import NotFound from './pages/NotFound'
+import ProfileSetup from './pages/ProfileSetup'
+import CreateEvent from './pages/CreateEvent'
+import EventDetail from './pages/EventDetail'
+import Collaboration from './pages/Collaboration'
+import ProjectDetail from './pages/ProjectDetail'
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
+import './App.css'
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/discover" element={<Discover />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/profile-setup" element={<ProfileSetup />} />
+        <Route path="/events/create" element={<CreateEvent />} />
+        <Route path="/events/:eventId" element={<EventDetail />} />
+        <Route path="/collaboration" element={<Collaboration />} />
+        <Route path="/projects/:projectId" element={<ProjectDetail />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
       <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/discover" element={<Discover />} />
-          {/* Dedicated routes for specific discovery tabs */}
-          <Route path="/artists" element={<Discover />} />
-          <Route path="/venues" element={<Discover />} />
-          <Route path="/communities" element={<Discover />} />
-          <Route path="/resources" element={<Discover />} />
-          <Route path="/projects" element={<Discover />} />
-          <Route path="/events" element={<Discover />} />
-          <Route path="/brands" element={<Discover />} />
-          
-          {/* Event management routes */}
-          <Route path="/events/create" element={<CreateEvent />} />
-          <Route path="/events/:id" element={<EventDetail />} />
-          
-          {/* Authentication routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/profile/setup" element={<ProfileSetup />} />
-          
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+    </Router>
+  )
+}
 
-export default App;
+export default App
