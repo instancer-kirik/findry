@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
@@ -30,6 +29,7 @@ import {
 import AnimatedSection from '../components/ui-custom/AnimatedSection';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Discover: React.FC = () => {
   const location = useLocation();
@@ -168,20 +168,16 @@ const Discover: React.FC = () => {
     
     return (
       <div className="mb-4">
-        <div className="w-full overflow-x-auto flex space-x-4">
-          {subcategories.map(subTab => (
-            <button 
-              key={subTab} 
-              onClick={() => handleSubTabChange(subTab)}
-              className={`px-3 py-1 text-sm font-medium rounded-sm transition-all
-                ${activeSubTab === subTab ? 
-                  'text-foreground border-b-2 border-primary' : 
-                  'text-muted-foreground hover:text-foreground'}`}
-            >
-              {getSubTabLabel(subTab)}
-            </button>
-          ))}
-        </div>
+        <Tabs value={activeSubTab} onValueChange={handleSubTabChange}>
+          <TabsList className="w-full overflow-x-auto flex">
+            <TabsTrigger value="all">All</TabsTrigger>
+            {subcategories.map(subTab => (
+              <TabsTrigger key={subTab} value={subTab}>
+                {getSubTabLabel(subTab)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </div>
     );
   };

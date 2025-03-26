@@ -5,8 +5,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Heart, Bookmark, Clock, User, Building, Music } from 'lucide-react';
 
 const SavedItemsTracker: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>("liked");
-  
   // Sample saved items
   const likedItems = [
     { id: "1", name: "Elena Rivera", type: "artist" },
@@ -56,7 +54,7 @@ const SavedItemsTracker: React.FC = () => {
         <CardTitle className="text-lg">Your Activity</CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
-        <Tabs defaultValue="liked" value={activeTab} onValueChange={setActiveTab}>
+        <Tabs defaultValue="liked">
           <TabsList className="w-full grid grid-cols-3">
             <TabsTrigger value="liked" className="flex items-center gap-1">
               <Heart className="h-4 w-4" />
