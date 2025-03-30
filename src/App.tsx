@@ -15,6 +15,8 @@ import EventDetail from './pages/EventDetail'
 import Collaboration from './pages/Collaboration'
 import ProjectDetail from './pages/ProjectDetail'
 import MeetingScheduler from './pages/MeetingScheduler'
+import Communities from './pages/Communities'
+import Chats from './pages/Chats'
 
 import './App.css'
 
@@ -29,8 +31,8 @@ function App() {
         <Route path="/projects" element={<Discover />} />
         <Route path="/events" element={<Discover />} />
         <Route path="/venues" element={<Discover />} />
-        <Route path="/communities" element={<Discover />} />
-        <Route path="/chats" element={<Discover />} />
+        <Route path="/communities" element={<Communities />} />
+        <Route path="/chats" element={<Chats />} />
         <Route path="/brands" element={<Discover />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />

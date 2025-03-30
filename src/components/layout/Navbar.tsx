@@ -49,19 +49,22 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 const Navbar: React.FC = () => {
   const location = useLocation();
   const [isLoggedIn, setIsLoggedIn] = useState(true); // Set to true for now to show the user menu
   const [notificationCount, setNotificationCount] = useState(3);
+  const [messageCount, setMessageCount] = useState(5);
+  const [communityCount, setCommunityCount] = useState(2);
 
   const navLinks = [
     { name: 'Discover', path: '/discover', icon: <Compass className="h-5 w-5" /> },
     // Events is now handled with NavigationMenu dropdown
     { name: 'Collaboration', path: '/collaboration', icon: <UsersRound className="h-5 w-5" /> },
     { name: 'Projects', path: '/projects', icon: <Layers className="h-5 w-5" /> },
-    { name: 'Communities', path: '/communities', icon: <Users className="h-5 w-5" /> },
-    { name: 'Chats', path: '/chats', icon: <MessagesSquare className="h-5 w-5" /> },
+    { name: 'Communities', path: '/communities', icon: <Users className="h-5 w-5" />, count: communityCount },
+    { name: 'Chats', path: '/chats', icon: <MessagesSquare className="h-5 w-5" />, count: messageCount },
   ];
 
   const isActive = (path: string) => {
@@ -84,14 +87,19 @@ const Navbar: React.FC = () => {
       <Button variant="outline" size="icon" className="relative">
         <Bell className="h-5 w-5" />
         {notificationCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
             {notificationCount}
           </span>
         )}
       </Button>
       
-      <Button variant="outline" size="icon">
+      <Button variant="outline" size="icon" className="relative">
         <MessageSquare className="h-5 w-5" />
+        {messageCount > 0 && (
+          <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+            {messageCount}
+          </span>
+        )}
       </Button>
       
       <DropdownMenu>
