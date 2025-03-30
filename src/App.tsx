@@ -23,6 +23,13 @@ function App() {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/discover" element={<Discover />} />
+        <Route path="/artists" element={<Discover />} />
+        <Route path="/resources" element={<Discover />} />
+        <Route path="/projects" element={<Discover />} />
+        <Route path="/events" element={<Discover />} />
+        <Route path="/venues" element={<Discover />} />
+        <Route path="/communities" element={<Discover />} />
+        <Route path="/brands" element={<Discover />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/profile-setup" element={<ProfileSetup />} />

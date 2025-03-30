@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import MarketplaceFilters from '../components/marketplace/MarketplaceFilters';
 import { ContentItemProps } from '../components/marketplace/ContentCard';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Grip } from 'lucide-react';
 
 // New refactored components
 import DiscoverHeader from '../components/discover/DiscoverHeader';
@@ -30,6 +31,15 @@ import AnimatedSection from '../components/ui-custom/AnimatedSection';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerFooter, 
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger 
+} from '@/components/ui/drawer';
 
 const Discover: React.FC = () => {
   const location = useLocation();
@@ -238,6 +248,7 @@ const Discover: React.FC = () => {
             />
           </div>
           
+          {/* Desktop sidebar toggle button */}
           <div className={`fixed top-1/2 ${sidebarOpen ? 'right-[calc(33.333%-1rem)]' : 'right-4'} transform -translate-y-1/2 z-10 md:block hidden`}>
             <Button 
               variant="outline" 
@@ -249,12 +260,43 @@ const Discover: React.FC = () => {
             </Button>
           </div>
           
+          {/* Desktop sidebar */}
           <div className={`w-full md:w-4/12 transition-all duration-300 ease-in-out ${sidebarOpen ? 'block' : 'hidden md:block md:w-1/12'}`}>
             {sidebarOpen && (
-              <DiscoverSidebar activeTabData={getActiveItems()} activeTab={activeTab} />
+              <div className="h-[600px] overflow-y-auto">
+                <DiscoverSidebar activeTabData={getActiveItems()} activeTab={activeTab} />
+              </div>
             )}
           </div>
         </div>
+        
+        {/* Mobile bottom drawer for sidebar */}
+        {isMobile && (
+          <Drawer>
+            <DrawerTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="fixed bottom-4 right-4 h-12 w-12 rounded-full shadow-lg z-50 flex md:hidden"
+              >
+                <Grip className="h-6 w-6" />
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent className="h-[85vh] max-h-[85vh] overflow-y-auto">
+              <DrawerHeader>
+                <DrawerTitle>Categories & Circles</DrawerTitle>
+              </DrawerHeader>
+              <div className="px-4 pb-4 overflow-y-auto">
+                <DiscoverSidebar activeTabData={getActiveItems()} activeTab={activeTab} />
+              </div>
+              <DrawerFooter>
+                <DrawerClose asChild>
+                  <Button variant="outline">Close</Button>
+                </DrawerClose>
+              </DrawerFooter>
+            </DrawerContent>
+          </Drawer>
+        )}
       </div>
     </Layout>
   );
