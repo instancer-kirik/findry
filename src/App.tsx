@@ -30,12 +30,14 @@ function App() {
         <Route path="/events" element={<Discover />} />
         <Route path="/venues" element={<Discover />} />
         <Route path="/communities" element={<Discover />} />
+        <Route path="/chats" element={<Discover />} />
         <Route path="/brands" element={<Discover />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/profile-setup" element={<ProfileSetup />} />
         <Route path="/events/create" element={<CreateEvent />} />
         <Route path="/events/:eventId" element={<EventDetail />} />
+        <Route path="/events/interested" element={<Discover />} />
         <Route path="/collaboration" element={<Collaboration />} />
         <Route path="/projects/:projectId" element={<ProjectDetail />} />
         <Route path="/meetings" element={<MeetingScheduler />} />

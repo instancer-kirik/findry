@@ -16,7 +16,9 @@ import {
   CalendarClock,
   CalendarDays,
   CalendarCheck,
-  CalendarHeart
+  CalendarHeart,
+  MessagesSquare,
+  Users
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
@@ -58,6 +60,8 @@ const Navbar: React.FC = () => {
     // Events is now handled with NavigationMenu dropdown
     { name: 'Collaboration', path: '/collaboration', icon: <UsersRound className="h-5 w-5" /> },
     { name: 'Projects', path: '/projects', icon: <Layers className="h-5 w-5" /> },
+    { name: 'Communities', path: '/communities', icon: <Users className="h-5 w-5" /> },
+    { name: 'Chats', path: '/chats', icon: <MessagesSquare className="h-5 w-5" /> },
   ];
 
   const isActive = (path: string) => {
