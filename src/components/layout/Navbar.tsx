@@ -12,7 +12,11 @@ import {
   Calendar,
   Compass,
   UsersRound,
-  Layers
+  Layers,
+  CalendarClock,
+  CalendarDays,
+  CalendarCheck,
+  CalendarHeart
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
@@ -33,15 +37,25 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
+import { cn } from "@/lib/utils";
 
 const Navbar: React.FC = () => {
   const location = useLocation();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true); // Set to true for now to show the user menu
   const [notificationCount, setNotificationCount] = useState(3);
 
   const navLinks = [
     { name: 'Discover', path: '/discover', icon: <Compass className="h-5 w-5" /> },
-    { name: 'Events', path: '/events', icon: <Calendar className="h-5 w-5" /> },
+    // Events is now handled with NavigationMenu dropdown
     { name: 'Collaboration', path: '/collaboration', icon: <UsersRound className="h-5 w-5" /> },
     { name: 'Projects', path: '/projects', icon: <Layers className="h-5 w-5" /> },
   ];
@@ -142,6 +156,74 @@ const Navbar: React.FC = () => {
               {link.name}
             </Link>
           ))}
+
+          {/* Events NavigationMenu with dropdown */}
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger className={`${
+                  isActive('/events') 
+                    ? 'bg-primary/10 text-primary' 
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}>
+                  Events
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                    <li className="row-span-3">
+                      <NavigationMenuLink asChild>
+                        <Link
+                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                          to="/events"
+                        >
+                          <Calendar className="h-6 w-6" />
+                          <div className="mb-2 mt-4 text-lg font-medium">
+                            Events
+                          </div>
+                          <p className="text-sm leading-tight text-muted-foreground">
+                            Discover upcoming events and get involved with your community
+                          </p>
+                        </Link>
+                      </NavigationMenuLink>
+                    </li>
+                    <li>
+                      <Link to="/meetings" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                        <div className="flex items-center gap-2">
+                          <CalendarCheck className="h-4 w-4" />
+                          <div className="text-sm font-medium leading-none">My Calendar</div>
+                        </div>
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          View and manage your scheduled events and meetings
+                        </p>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/events?filter=interested" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                        <div className="flex items-center gap-2">
+                          <CalendarHeart className="h-4 w-4" />
+                          <div className="text-sm font-medium leading-none">Interested Events</div>
+                        </div>
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          Events you've shown interest in attending
+                        </p>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/events/create" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                        <div className="flex items-center gap-2">
+                          <CalendarClock className="h-4 w-4" />
+                          <div className="text-sm font-medium leading-none">Create Event</div>
+                        </div>
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          Create and schedule your own events or meetings
+                        </p>
+                      </Link>
+                    </li>
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
         </div>
 
         {/* Search Button */}
@@ -221,6 +303,63 @@ const Navbar: React.FC = () => {
                     </Link>
                   </SheetClose>
                 ))}
+
+                {/* Events section in mobile view */}
+                <div className="pt-2">
+                  <p className="px-3 text-sm font-medium text-muted-foreground">Events</p>
+                  <SheetClose asChild>
+                    <Link 
+                      to="/events"
+                      className={`flex items-center py-2 px-3 rounded-md text-sm ${
+                        isActive('/events') && !location.pathname.includes('create') && !location.pathname.includes('interested')
+                          ? 'bg-primary/10 text-primary' 
+                          : 'hover:bg-gray-100'
+                      }`}
+                    >
+                      <Calendar className="h-5 w-5 mr-2" />
+                      <span>All Events</span>
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link 
+                      to="/meetings"
+                      className={`flex items-center py-2 px-3 rounded-md text-sm ${
+                        isActive('/meetings') 
+                          ? 'bg-primary/10 text-primary' 
+                          : 'hover:bg-gray-100'
+                      }`}
+                    >
+                      <CalendarCheck className="h-5 w-5 mr-2" />
+                      <span>My Calendar</span>
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link 
+                      to="/events?filter=interested"
+                      className={`flex items-center py-2 px-3 rounded-md text-sm ${
+                        location.pathname.includes('interested')
+                          ? 'bg-primary/10 text-primary' 
+                          : 'hover:bg-gray-100'
+                      }`}
+                    >
+                      <CalendarHeart className="h-5 w-5 mr-2" />
+                      <span>Interested Events</span>
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link 
+                      to="/events/create"
+                      className={`flex items-center py-2 px-3 rounded-md text-sm ${
+                        location.pathname.includes('create')
+                          ? 'bg-primary/10 text-primary' 
+                          : 'hover:bg-gray-100'
+                      }`}
+                    >
+                      <CalendarClock className="h-5 w-5 mr-2" />
+                      <span>Create Event</span>
+                    </Link>
+                  </SheetClose>
+                </div>
               </div>
               
               <div className="mt-6 pt-4 border-t">

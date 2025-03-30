@@ -92,7 +92,7 @@ const MeetingsCard: React.FC<MeetingsCardProps> = ({
                 <div className="flex -space-x-2">
                   {meeting.participants.slice(0, 3).map((participant, i) => (
                     <Avatar key={i} className="border-2 border-background w-6 h-6">
-                      <AvatarImage src={participant.imageUrl} alt={participant.name} />
+                      <AvatarImage src={participant.avatar || participant.imageUrl} alt={participant.name} />
                       <AvatarFallback>{participant.name[0]}</AvatarFallback>
                     </Avatar>
                   ))}

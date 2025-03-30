@@ -40,6 +40,7 @@ function App() {
         <Route path="/projects/:projectId" element={<ProjectDetail />} />
         <Route path="/meetings" element={<MeetingScheduler />} />
         <Route path="/meetings/schedule" element={<MeetingScheduler />} />
+        <Route path="/meetings/:meetingId" element={<MeetingScheduler />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
