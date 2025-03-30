@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { 
   Calendar, 
   Clock, 
@@ -9,9 +9,10 @@ import {
   Heart, 
   MessageSquare, 
   Star,
-  ChevronLeft
+  ChevronLeft,
+  Video
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { format } from 'date-fns';
 import Layout from '../components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -27,9 +28,19 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import AnimatedSection from '../components/ui-custom/AnimatedSection';
-import { format } from 'date-fns';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { toast } from 'sonner';
 
-// Mock data for event details
+import MeetingsCard from '../components/meetings/MeetingsCard';
+
 const eventMockData = {
   id: '1',
   title: 'Summer Music Festival',
@@ -50,6 +61,42 @@ const eventMockData = {
   attending: false,
   interested: true
 };
+
+const relatedMeetingsMock = [
+  {
+    id: '1',
+    title: 'Event Planning Session',
+    description: 'Pre-event coordination meeting with all participants',
+    date: new Date(2023, 6, 10),
+    startTime: '15:00',
+    endTime: '16:00',
+    meetingType: 'video',
+    organizer: { id: '123', name: 'Austin Music Collective', imageUrl: '' },
+    participants: [
+      { id: '1', name: 'Maria L.', imageUrl: '' },
+      { id: '2', name: 'James T.', imageUrl: '' },
+      { id: '3', name: 'Sophia R.', imageUrl: '' },
+    ],
+    isPublic: false,
+    meetingLink: 'https://meet.example.com/abc123',
+  },
+  {
+    id: '2',
+    title: 'Post-Event Debrief',
+    description: 'Review event success and discuss future improvements',
+    date: new Date(2023, 6, 18),
+    startTime: '14:00',
+    endTime: '15:00',
+    meetingType: 'in-person',
+    organizer: { id: '123', name: 'Austin Music Collective', imageUrl: '' },
+    participants: [
+      { id: '1', name: 'Maria L.', imageUrl: '' },
+      { id: '2', name: 'James T.', imageUrl: '' },
+    ],
+    isPublic: true,
+    location: 'Riverfront Park Office, Austin, TX',
+  },
+];
 
 const reviewsMockData = [
   {
@@ -82,18 +129,38 @@ const reviewsMockData = [
 ];
 
 const EventDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { eventId } = useParams<{ eventId: string }>();
   const [event] = useState(eventMockData);
   const [isAttending, setIsAttending] = useState(event.attending);
   const [isInterested, setIsInterested] = useState(event.interested);
   const [activeTab, setActiveTab] = useState('details');
+  const [showMeetingDialog, setShowMeetingDialog] = useState(false);
   
   const handleAttend = () => {
     setIsAttending(!isAttending);
+    
+    if (!isAttending) {
+      toast.success('You are now attending this event!', {
+        description: 'You will receive updates about this event.',
+      });
+    }
   };
   
   const handleInterest = () => {
     setIsInterested(!isInterested);
+    
+    if (!isInterested) {
+      toast.success('Added to your interested events!', {
+        description: 'You will be notified about updates.',
+      });
+    }
+  };
+  
+  const handleScheduleMeeting = () => {
+    toast.success('Meeting request sent!', {
+      description: 'The organizer will contact you soon.',
+    });
+    setShowMeetingDialog(false);
   };
   
   const today = new Date();
@@ -153,14 +220,58 @@ const EventDetail: React.FC = () => {
                   <Button variant="outline" className="flex-1 md:flex-none">
                     <Share2 className="mr-2 h-4 w-4" /> Share
                   </Button>
+                  
+                  <Dialog open={showMeetingDialog} onOpenChange={setShowMeetingDialog}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="flex-1 md:flex-none">
+                        <Video className="mr-2 h-4 w-4" /> Schedule Meeting
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Schedule a Meeting</DialogTitle>
+                        <DialogDescription>
+                          Connect with the organizer or other attendees
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="flex flex-col gap-2">
+                          <label className="text-sm font-medium">Meeting Type</label>
+                          <select className="border rounded-md p-2">
+                            <option value="video">Video Call</option>
+                            <option value="in-person">In Person</option>
+                          </select>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <label className="text-sm font-medium">With</label>
+                          <select className="border rounded-md p-2">
+                            <option value="organizer">Event Organizer</option>
+                            <option value="attendees">Other Attendees</option>
+                          </select>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <label className="text-sm font-medium">Message</label>
+                          <textarea 
+                            className="border rounded-md p-2 min-h-24" 
+                            placeholder="Share what you'd like to discuss..."
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowMeetingDialog(false)}>Cancel</Button>
+                        <Button onClick={handleScheduleMeeting}>Request Meeting</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </AnimatedSection>
               
               <AnimatedSection animation="fade-in-up" delay={200}>
                 <Tabs defaultValue="details" value={activeTab} onValueChange={setActiveTab}>
-                  <TabsList className="grid grid-cols-3 w-full mb-6">
+                  <TabsList className="grid grid-cols-4 w-full mb-6">
                     <TabsTrigger value="details">Details</TabsTrigger>
                     <TabsTrigger value="attendees">Attendees</TabsTrigger>
+                    <TabsTrigger value="meetings">Meetings</TabsTrigger>
                     <TabsTrigger value="reviews">Reviews</TabsTrigger>
                   </TabsList>
                   
@@ -258,6 +369,96 @@ const EventDetail: React.FC = () => {
                       <CardFooter>
                         <Button variant="outline" className="w-full">View All Attendees</Button>
                       </CardFooter>
+                    </Card>
+                  </TabsContent>
+                  
+                  <TabsContent value="meetings">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex justify-between items-center">
+                          <CardTitle>Event Meetings</CardTitle>
+                          <Button size="sm" asChild>
+                            <Link to="/meetings/schedule">
+                              <Video className="mr-2 h-4 w-4" />
+                              Schedule Meeting
+                            </Link>
+                          </Button>
+                        </div>
+                        <CardDescription>
+                          Meetings related to this event
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-6">
+                          {relatedMeetingsMock.map(meeting => (
+                            <div key={meeting.id} className="border-b pb-6 last:border-0 last:pb-0">
+                              <div className="flex justify-between items-start mb-2">
+                                <div>
+                                  <Badge className="mb-1">{meeting.meetingType === 'video' ? 'Video Call' : 'In Person'}</Badge>
+                                  <h3 className="font-medium">{meeting.title}</h3>
+                                </div>
+                                {meeting.meetingType === 'video' ? 
+                                  <Video className="h-4 w-4 text-primary" /> : 
+                                  <Users className="h-4 w-4 text-primary" />
+                                }
+                              </div>
+                              
+                              <p className="text-sm text-muted-foreground mb-3">{meeting.description}</p>
+                              
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="h-4 w-4 text-primary" />
+                                  <span>{format(meeting.date, 'PPP')}</span>
+                                </div>
+                                
+                                <div className="flex items-center gap-2">
+                                  <Clock className="h-4 w-4 text-primary" />
+                                  <span>{meeting.startTime} - {meeting.endTime}</span>
+                                </div>
+                                
+                                {meeting.location && (
+                                  <div className="flex items-center gap-2 sm:col-span-2">
+                                    <MapPin className="h-4 w-4 text-primary" />
+                                    <span>{meeting.location}</span>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              <div className="flex justify-between items-center mt-4">
+                                <div className="flex -space-x-2">
+                                  {meeting.participants.map((participant, i) => (
+                                    <Avatar key={i} className="border-2 border-background w-8 h-8">
+                                      <AvatarImage src={participant.imageUrl} alt={participant.name} />
+                                      <AvatarFallback>{participant.name[0]}</AvatarFallback>
+                                    </Avatar>
+                                  ))}
+                                </div>
+                                
+                                <div className="flex gap-2">
+                                  {meeting.meetingType === 'video' && (
+                                    <Button size="sm">
+                                      <Video className="mr-2 h-4 w-4" />
+                                      Join
+                                    </Button>
+                                  )}
+                                  <Button variant="outline" size="sm" asChild>
+                                    <Link to={`/meetings/${meeting.id}`}>Details</Link>
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                          
+                          {relatedMeetingsMock.length === 0 && (
+                            <div className="text-center py-6">
+                              <p className="text-muted-foreground mb-4">No meetings scheduled for this event yet</p>
+                              <Button asChild>
+                                <Link to="/meetings/schedule">Schedule a Meeting</Link>
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
                     </Card>
                   </TabsContent>
                   
@@ -382,24 +583,11 @@ const EventDetail: React.FC = () => {
               </AnimatedSection>
               
               <AnimatedSection animation="fade-in-left" delay={300}>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Similar Events</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {[1, 2, 3].map((item) => (
-                        <Link key={item} to={`/events/${item + 1}`} className="flex items-start gap-3 hover:bg-muted p-2 rounded-md transition-colors">
-                          <Calendar className="h-5 w-5 text-primary mt-0.5" />
-                          <div>
-                            <h3 className="font-medium line-clamp-1">Similar Festival {item}</h3>
-                            <p className="text-xs text-muted-foreground">Aug {10 + item}, 2023</p>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                <MeetingsCard 
+                  meetings={relatedMeetingsMock} 
+                  title="Related Meetings"
+                  limit={2}
+                />
               </AnimatedSection>
             </div>
           </div>

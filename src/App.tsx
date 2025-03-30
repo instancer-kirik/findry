@@ -14,6 +14,7 @@ import CreateEvent from './pages/CreateEvent'
 import EventDetail from './pages/EventDetail'
 import Collaboration from './pages/Collaboration'
 import ProjectDetail from './pages/ProjectDetail'
+import MeetingScheduler from './pages/MeetingScheduler'
 
 import './App.css'
 
@@ -37,6 +38,8 @@ function App() {
         <Route path="/events/:eventId" element={<EventDetail />} />
         <Route path="/collaboration" element={<Collaboration />} />
         <Route path="/projects/:projectId" element={<ProjectDetail />} />
+        <Route path="/meetings" element={<MeetingScheduler />} />
+        <Route path="/meetings/schedule" element={<MeetingScheduler />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
