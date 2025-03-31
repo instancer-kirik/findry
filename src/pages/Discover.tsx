@@ -2,21 +2,17 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
-import { ContentItemProps } from '../components/marketplace/ContentCard';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Grip } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Components
 import DiscoverHeader from '../components/discover/DiscoverHeader';
-import CategoryTabs from '../components/discover/CategoryTabs';
 import CategoryItemsGrid from '../components/discover/CategoryItemsGrid';
 import DiscoverSidebar from '../components/discover/DiscoverSidebar';
-import AnimatedSection from '../components/ui-custom/AnimatedSection';
+import DiscoverFilters from '../components/discover/DiscoverFilters';
+import DiscoverMobileDrawer from '../components/discover/DiscoverMobileDrawer';
 
-// Import data - we'll use this as fallback
+// Data and hooks
 import {
   allTags,
   tabSubcategories,
@@ -24,28 +20,11 @@ import {
   artistStyleFilters,
   disciplinaryFilters
 } from '../components/discover/DiscoverData';
-
-import { useIsMobile } from '@/hooks/use-mobile';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerFooter, 
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger 
-} from '@/components/ui/drawer';
-
-// Define the JSON type for Supabase data
-interface Json {
-  [key: string]: any;
-}
+import { useDiscoverData } from '@/hooks/use-discover-data';
 
 const Discover: React.FC = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
-  const { toast } = useToast();
   
   // Determine the initial active tab based on the current URL path
   const getInitialActiveTab = () => {
@@ -67,8 +46,6 @@ const Discover: React.FC = () => {
   const [disciplinaryType, setDisciplinaryType] = useState<string>("all");
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
   const [selectedSubfilters, setSelectedSubfilters] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [items, setItems] = useState<ContentItemProps[]>([]);
   
   // Create a form for multi-select filtering
   const form = useForm({
@@ -77,131 +54,28 @@ const Discover: React.FC = () => {
     },
   });
   
+  // Use our custom hook to fetch and filter data
+  const { items, isLoading } = useDiscoverData(
+    activeTab,
+    searchQuery,
+    selectedTags,
+    resourceType,
+    artistStyle,
+    disciplinaryType,
+    activeSubTab,
+    selectedSubfilters
+  );
+  
   // Update sidebar visibility when screen size changes
   useEffect(() => {
     setSidebarOpen(!isMobile);
   }, [isMobile]);
 
-  // Update available subfilters when active tab changes
+  // Reset subfilters when tab changes
   useEffect(() => {
-    // Reset subfilters when tab changes
     setSelectedSubfilters([]);
     form.reset({ subfilters: [] });
-    
-    // Fetch data when the active tab changes
-    fetchData();
   }, [activeTab, form]);
-
-  // Fetch data when search or filters change
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchData();
-    }, 300); // Debounce for search input
-    
-    return () => clearTimeout(timer);
-  }, [searchQuery, selectedTags, resourceType, artistStyle, disciplinaryType, activeSubTab]);
-
-  const fetchData = async () => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase.rpc('search_discover_content', {
-        content_type: activeTab,
-        search_query: searchQuery,
-        tag_filters: selectedTags.length > 0 ? selectedTags : null
-      });
-      
-      if (error) {
-        console.error('Error fetching data:', error);
-        toast({
-          title: "Error loading data",
-          description: "There was a problem fetching the content",
-          variant: "destructive"
-        });
-        setItems([]);
-      } else {
-        let filteredItems: ContentItemProps[] = [];
-        
-        if (data && Array.isArray(data)) {
-          // Properly map the data to ContentItemProps format
-          filteredItems = data.map(item => ({
-            id: item.id,
-            title: item.name,
-            subtitle: item.subtype || item.type || '',
-            location: item.location || 'Location not specified',
-            tags: Array.isArray(item.tags) ? item.tags : [],
-            type: item.type || '',
-            imageUrl: item.image_url || '/placeholder.svg',
-          }));
-          
-          // Apply additional filters that are not handled by the database function
-          if (activeTab === 'resources' && resourceType !== 'all') {
-            filteredItems = filteredItems.filter(item => 
-              item.type.toLowerCase() === resourceType.toLowerCase()
-            );
-          }
-          
-          if (activeTab === 'artists') {
-            if (artistStyle !== 'all' && Array.isArray(item.styles)) {
-              filteredItems = filteredItems.filter(item => {
-                const itemData = data.find(d => d.id === item.id);
-                return itemData && 
-                       Array.isArray(itemData.styles) && 
-                       itemData.styles.some((style: string) => 
-                         style.toLowerCase() === artistStyle.toLowerCase()
-                       );
-              });
-            }
-            
-            if (disciplinaryType !== 'all') {
-              filteredItems = filteredItems.filter(item => {
-                const itemData = data.find(d => d.id === item.id);
-                return itemData && 
-                       (disciplinaryType === 'multi' && itemData.multidisciplinary) || 
-                       (disciplinaryType === 'single' && !itemData.multidisciplinary);
-              });
-            }
-          }
-          
-          // Apply subtab filtering
-          if (activeSubTab !== 'all') {
-            filteredItems = filteredItems.filter(item => {
-              const itemData = data.find(d => d.id === item.id);
-              return itemData && 
-                     ((itemData.subtype && itemData.subtype.toLowerCase() === activeSubTab.toLowerCase()) || 
-                      (itemData.type && itemData.type.toLowerCase() === activeSubTab.toLowerCase()));
-            });
-          }
-          
-          // Apply multi-select subfilters
-          if (selectedSubfilters.length > 0) {
-            filteredItems = filteredItems.filter(item => {
-              const itemData = data.find(d => d.id === item.id);
-              return selectedSubfilters.some(filter => {
-                if (item.tags.includes(filter)) return true;
-                if (item.type.toLowerCase() === filter.toLowerCase()) return true;
-                if (itemData && itemData.subtype && itemData.subtype.toLowerCase() === filter.toLowerCase()) return true;
-                if (itemData && Array.isArray(itemData.styles) && 
-                    itemData.styles.some((style: string) => style.toLowerCase() === filter.toLowerCase())) return true;
-                return false;
-              });
-            });
-          }
-        }
-        
-        setItems(filteredItems);
-      }
-    } catch (error) {
-      console.error('Unexpected error:', error);
-      toast({
-        title: "Error loading data",
-        description: "An unexpected error occurred",
-        variant: "destructive"
-      });
-      setItems([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleTagSelect = (tag: string) => {
     if (selectedTags.includes(tag)) {
@@ -326,44 +200,19 @@ const Discover: React.FC = () => {
               availableSubfilters={getAvailableSubfilters()}
             />
 
-            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full mb-6">
-              <TabsList className="w-full overflow-x-auto flex">
-                {availableTabs.map((tab) => (
-                  <TabsTrigger key={tab} value={tab}>
-                    {getTabLabel(tab)}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
-
-            {activeTab && tabSubcategories[activeTab] && (
-              <div className="mb-6">
-                <Tabs value={activeSubTab} onValueChange={handleSubTabChange}>
-                  <TabsList className="w-full overflow-x-auto flex">
-                    <TabsTrigger value="all">All</TabsTrigger>
-                    {tabSubcategories[activeTab].map(subTab => (
-                      <TabsTrigger key={subTab} value={subTab}>
-                        {subTab.charAt(0).toUpperCase() + subTab.slice(1)}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                </Tabs>
-              </div>
-            )}
+            <DiscoverFilters
+              activeTab={activeTab}
+              handleTabChange={handleTabChange}
+              activeSubTab={activeSubTab}
+              handleSubTabChange={handleSubTabChange}
+              availableTabs={availableTabs}
+              tabSubcategories={tabSubcategories}
+              sidebarOpen={sidebarOpen}
+              toggleSidebar={toggleSidebar}
+              getTabLabel={getTabLabel}
+            />
 
             <CategoryItemsGrid items={items} isLoading={isLoading} />
-          </div>
-          
-          {/* Desktop sidebar toggle button */}
-          <div className={`fixed top-1/2 ${sidebarOpen ? 'right-[calc(33.333%-1rem)]' : 'right-4'} transform -translate-y-1/2 z-10 md:block hidden`}>
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="h-8 w-8 rounded-full border-border shadow-sm bg-background"
-              onClick={toggleSidebar}
-            >
-              {sidebarOpen ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-            </Button>
           </div>
           
           {/* Desktop sidebar */}
@@ -377,32 +226,11 @@ const Discover: React.FC = () => {
         </div>
         
         {/* Mobile bottom drawer for sidebar */}
-        {isMobile && (
-          <Drawer>
-            <DrawerTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="icon" 
-                className="fixed bottom-4 right-4 h-12 w-12 rounded-full shadow-lg z-50 flex md:hidden"
-              >
-                <Grip className="h-6 w-6" />
-              </Button>
-            </DrawerTrigger>
-            <DrawerContent className="h-[85vh] max-h-[85vh] overflow-y-auto">
-              <DrawerHeader>
-                <DrawerTitle>Categories & Circles</DrawerTitle>
-              </DrawerHeader>
-              <div className="px-4 pb-4 overflow-y-auto">
-                <DiscoverSidebar activeTabData={items} activeTab={activeTab} />
-              </div>
-              <DrawerFooter>
-                <DrawerClose asChild>
-                  <Button variant="outline">Close</Button>
-                </DrawerClose>
-              </DrawerFooter>
-            </DrawerContent>
-          </Drawer>
-        )}
+        <DiscoverMobileDrawer 
+          items={items} 
+          activeTab={activeTab} 
+          isMobile={isMobile} 
+        />
       </div>
     </Layout>
   );

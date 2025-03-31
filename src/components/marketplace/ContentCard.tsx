@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +14,7 @@ export interface ContentItemProps {
   subtype?: string;
   location: string;
   tags: string[];
-  image?: string;
+  image_url?: string;
   multidisciplinary?: boolean;
   styles?: string[];
   disciplines?: string[];

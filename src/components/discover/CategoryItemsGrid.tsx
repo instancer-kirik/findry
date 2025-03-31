@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Users, Music, Building, Store, Bot, Calendar, Briefcase } from 'lucide-react';
 import { ProfileType } from '../auth/ProfileTypeSelector';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 interface CategoryItemsGridProps {
   items: ContentItemProps[];
@@ -16,6 +17,7 @@ interface CategoryItemsGridProps {
 
 const CategoryItemsGrid: React.FC<CategoryItemsGridProps> = ({ items, isLoading = false }) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const renderLoadingSkeletons = () => {
     return Array(6).fill(0).map((_, index) => (
@@ -102,8 +104,11 @@ const CategoryItemsGrid: React.FC<CategoryItemsGridProps> = ({ items, isLoading 
     console.log('Navigating to profile:', item.id);
     // navigate(`/profile/${item.id}`);
     
-    // For now, just show a toast or alert
-    alert(`Viewing profile for ${item.title}`);
+    // For now, just show a toast
+    toast({
+      title: `Viewing profile for ${item.name}`,
+      description: `Type: ${item.type}, Location: ${item.location}`,
+    });
   };
 
   if (isLoading) {
