@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import { useToast } from '@/hooks/use-toast';
@@ -11,7 +11,6 @@ const ProfileSetup: React.FC = () => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const useWizard = searchParams.get('wizard') !== 'false'; // Default to wizard mode
-  const [activeProfileType, setActiveProfileType] = useState<ProfileType>('artist');
   
   const handleCompleteProfile = () => {
     toast({
@@ -30,7 +29,6 @@ const ProfileSetup: React.FC = () => {
           </div>
           
           <ProfileWizard 
-            initialProfileType={activeProfileType} 
             onComplete={handleCompleteProfile}
             allowMultipleTypes={true} // Enable selection of multiple profile types
           />

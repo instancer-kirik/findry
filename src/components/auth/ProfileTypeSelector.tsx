@@ -8,11 +8,12 @@ import {
   Bot, 
   Store, 
   Calendar, 
-  Briefcase 
+  Briefcase,
+  UserCircle 
 } from 'lucide-react';
 
-// Update the ProfileType to include all possible types
-export type ProfileType = 'artist' | 'community' | 'venue' | 'resource' | 'brand' | 'event' | 'project';
+// Update the ProfileType to include all possible types and a generic "user" type
+export type ProfileType = 'artist' | 'community' | 'venue' | 'resource' | 'brand' | 'event' | 'project' | 'user';
 
 interface ProfileOption {
   id: ProfileType;
@@ -28,6 +29,12 @@ interface ProfileTypeSelectorProps {
 
 const ProfileTypeSelector: React.FC<ProfileTypeSelectorProps> = ({ value, onChange }) => {
   const profileOptions: ProfileOption[] = [
+    {
+      id: 'user',
+      label: 'User',
+      icon: <UserCircle className="h-5 w-5" />,
+      description: 'Regular user account with basic features'
+    },
     {
       id: 'artist',
       label: 'Artist',

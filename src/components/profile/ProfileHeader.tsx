@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
 import { Edit, Settings } from 'lucide-react';
-import { ProfileType } from '../auth/ProfileTypeSelector';
 import { Link, useNavigate } from 'react-router-dom';
 
 interface Profile {
@@ -13,7 +12,7 @@ interface Profile {
   full_name: string;
   avatar_url?: string;
   bio?: string;
-  profile_types?: string[]; // Add support for multiple profile types
+  profile_types?: string[]; // Support for multiple profile types
 }
 
 interface ProfileHeaderProps {
