@@ -1,6 +1,7 @@
 
 import React, { useEffect } from 'react';
 import Navbar from './Navbar';
+import ThemeNavbarToggle from './ThemeNavbarToggle';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -32,7 +33,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <Navbar />
+      <div className="flex items-center">
+        <Navbar />
+        <ThemeNavbarToggle />
+      </div>
       <main className="flex-grow">
         {children}
       </main>
