@@ -1,11 +1,14 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import Layout from '../components/layout/Layout';
 import ProfileHeader from '../components/profile/ProfileHeader';
 import ProfileTabs from '../components/profile/ProfileTabs';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const ProfilePage: React.FC = () => {
   const { username } = useParams<{ username?: string }>();
@@ -26,7 +29,13 @@ const ProfilePage: React.FC = () => {
           .eq('id', user.id)
           .single();
           
-        if (error) throw error;
+        if (error) {
+          if (error.code === 'PGRST116') {
+            // Profile not found for this user
+            return { id: user.id, notFound: true };
+          }
+          throw error;
+        }
         return data;
       } else {
         // Otherwise fetch the requested profile by username
@@ -48,6 +57,36 @@ const ProfilePage: React.FC = () => {
       <Layout>
         <div className="flex justify-center items-center min-h-[50vh]">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </Layout>
+    );
+  }
+
+  // Handle case where current user doesn't have a profile yet
+  if (isOwnProfile && profileData?.notFound) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-12">
+          <Alert className="mb-8">
+            <AlertCircle className="h-5 w-5" />
+            <AlertTitle>Profile not found</AlertTitle>
+            <AlertDescription>
+              You don't have a profile set up yet. Create your profile to connect with others.
+            </AlertDescription>
+          </Alert>
+          
+          <div className="flex flex-col items-center gap-6 p-8 text-center border rounded-lg bg-muted/20">
+            <h1 className="text-2xl font-bold">Get Started</h1>
+            <p className="max-w-md text-muted-foreground">
+              Set up your profile to showcase your work, connect with other creative professionals, 
+              and find collaboration opportunities.
+            </p>
+            <Link to="/profile-setup">
+              <Button size="lg">
+                Create Your Profile
+              </Button>
+            </Link>
+          </div>
         </div>
       </Layout>
     );
