@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -76,41 +75,81 @@ const SignUpForm: React.FC = () => {
         throw authError;
       }
 
-      // If successful, create profile in profiles table
-      if (authData.user) {
-        const { error: profileError } = await supabase
+      if (!authData.user) {
+        throw new Error('Failed to create user account');
+      }
+
+      // Generate a unique username
+      const baseUsername = values.name.toLowerCase().replace(/\s+/g, '_');
+      let username = baseUsername;
+      let counter = 1;
+      let isUnique = false;
+
+      // Try to find a unique username
+      while (!isUnique) {
+        const { data: existingUser } = await supabase
           .from('profiles')
-          .insert([
-            {
-              id: authData.user.id,
-              username: values.name.toLowerCase().replace(/\s+/g, '_'),
-              full_name: values.name,
-              profile_types: values.profileType,
-              role_attributes: {},
-            },
-          ]);
-        
-        if (profileError) {
-          console.error('Profile creation error:', profileError);
+          .select('username')
+          .eq('username', username)
+          .single();
+
+        if (existingUser) {
+          username = `${baseUsername}_${counter}`;
+          counter++;
+        } else {
+          isUnique = true;
         }
       }
+
+      // Create profile in profiles table
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert([
+          {
+            id: authData.user.id,
+            username,
+            full_name: values.name,
+            profile_types: values.profileType,
+            role_attributes: {},
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+        ]);
       
-      // Show success toast
-      toast({
-        title: 'Account created!',
-        description: 'Welcome to Findry. Please complete your profile setup.',
-      });
+      if (profileError) {
+        console.error('Profile creation error:', profileError);
+        throw new Error('Failed to create user profile');
+      }
       
-      // Navigate to profile completion page
-      setTimeout(() => {
+      // Check if email verification is required
+      if (authData.user.identities?.length === 0) {
+        toast({
+          title: 'Verification email sent!',
+          description: 'Please check your email to verify your account before logging in.',
+        });
+        navigate('/login');
+      } else {
+        // Show success toast
+        toast({
+          title: 'Account created!',
+          description: 'Welcome to Findry. Please complete your profile setup.',
+        });
+        
+        // Navigate to profile completion page
         navigate('/profile-setup?wizard=true');
-      }, 1500);
+      }
     } catch (error: any) {
       console.error('Signup error:', error);
       
       let errorMessage = 'Please try again later.';
       if (error.message) {
-        errorMessage = error.message;
+        if (error.message.includes('email already registered')) {
+          errorMessage = 'This email is already registered. Please log in instead.';
+        } else if (error.message.includes('password')) {
+          errorMessage = 'Password must be at least 8 characters long.';
+        } else {
+          errorMessage = error.message;
+        }
       }
       
       toast({

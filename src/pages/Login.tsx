@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -73,6 +72,21 @@ const Login: React.FC = () => {
       if (error) {
         throw error;
       }
+
+      // Check if email is verified
+      if (!data.user?.email_confirmed_at) {
+        // Sign out the user if email is not verified
+        await supabase.auth.signOut();
+        
+        toast({
+          title: 'Email not verified',
+          description: 'Please check your email for a verification link before logging in.',
+          variant: 'destructive',
+        });
+        
+        // Optionally, you could add a resend verification email button here
+        return;
+      }
       
       // Show success toast
       toast({
@@ -84,9 +98,21 @@ const Login: React.FC = () => {
       navigate('/');
     } catch (error: any) {
       console.error('Login error:', error);
+      
+      let errorMessage = 'Invalid email or password.';
+      if (error.message) {
+        if (error.message.includes('Email not confirmed')) {
+          errorMessage = 'Please verify your email before logging in.';
+        } else if (error.message.includes('Invalid login credentials')) {
+          errorMessage = 'Invalid email or password.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: 'Login failed',
-        description: error.message || 'Invalid email or password.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
