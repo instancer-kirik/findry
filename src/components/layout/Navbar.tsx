@@ -1,8 +1,6 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
-  Globe, 
   Search, 
   Bell, 
   Menu, 
@@ -62,7 +60,7 @@ const Navbar: React.FC = () => {
   const { toast } = useToast();
 
   const navLinks = [
-    { name: 'Discover', path: '/discover', icon: <Compass className="h-5 w-5" /> },
+    { name: 'Findary', path: '/discover', icon: <Search className="h-5 w-5" /> }, // Renamed from "Discover" to "Findary" with search icon
     // Events is now handled with NavigationMenu dropdown
     { name: 'Collaboration', path: '/collaboration', icon: <UsersRound className="h-5 w-5" /> },
     { name: 'Projects', path: '/projects', icon: <Layers className="h-5 w-5" /> },
@@ -201,7 +199,7 @@ const Navbar: React.FC = () => {
         {/* Logo */}
         <div className="flex items-center">
           <Link to="/" className="flex items-center">
-            <Globe className="h-8 w-8 text-primary mr-2" />
+            <Search className="h-8 w-8 text-primary mr-2" /> {/* Changed from Globe to Search icon */}
             <span className="font-bold text-xl hidden sm:inline">CreativeConnect</span>
           </Link>
         </div>
@@ -227,22 +225,7 @@ const Navbar: React.FC = () => {
             </Link>
           ))}
 
-          {/* Chats Link - Only display in the navbar but functionality also in icon */}
-          <Link 
-            to="/chats"
-            className={`px-3 py-2 rounded-md text-sm font-medium flex items-center ${
-              isActive('/chats') 
-                ? 'bg-primary/10 text-primary' 
-                : 'text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            Chats
-            {messageCount > 0 && (
-              <Badge variant="secondary" className="ml-2 text-xs">
-                {messageCount}
-              </Badge>
-            )}
-          </Link>
+          {/* Remove Chats text link from navbar - keep icon only in user menu */}
 
           {/* Events NavigationMenu with dropdown */}
           <NavigationMenu>
@@ -411,7 +394,7 @@ const Navbar: React.FC = () => {
                   </SheetClose>
                 ))}
 
-                {/* Chats Link */}
+                {/* Modified Chats Link to match MessageSquare icon in mobile menu */}
                 <SheetClose asChild>
                   <Link 
                     to="/chats"
@@ -422,7 +405,7 @@ const Navbar: React.FC = () => {
                     }`}
                   >
                     <MessagesSquare className="h-5 w-5" />
-                    <span className="ml-2">Chats</span>
+                    <span className="ml-2">Messages</span> {/* Changed from "Chats" to "Messages" */}
                     {messageCount > 0 && (
                       <Badge variant="secondary" className="ml-auto">
                         {messageCount}

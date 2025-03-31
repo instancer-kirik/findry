@@ -13,7 +13,8 @@ import {
   brands 
 } from '../components/discover/DiscoverData';
 
-export interface Json {
+// Use a local Json interface to avoid conflicts
+interface LocalJson {
   [key: string]: any;
 }
 
@@ -104,9 +105,9 @@ export const useDiscoverData = (
     setItems(filteredItems);
   };
 
-  const processData = (data: Json[]): ContentItemProps[] => {
+  const processData = (data: any[]): ContentItemProps[] => {
     // Map any data format to ContentItemProps
-    let itemsData = data.map((item: Json) => ({
+    let itemsData = data.map((item: LocalJson) => ({
       id: item.id,
       name: item.name,
       subtitle: item.subtype || item.type || '',

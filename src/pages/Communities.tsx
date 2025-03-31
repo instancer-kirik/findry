@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import CreateCommunityModal from '@/components/communities/CreateCommunityModal';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 // Define a consistent community type
 interface Community {
@@ -30,8 +31,14 @@ interface Community {
 
 const Communities = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  
+  // Redirect to Discover page when clicking on "Discover" button
+  const handleDiscoverClick = () => {
+    navigate('/discover');
+  };
   
   const { data: communitiesData, isLoading, error, refetch } = useQuery({
     queryKey: ['communities'],
@@ -192,9 +199,13 @@ const Communities = () => {
                 </div>
                 
                 <div className="space-y-1">
-                  <Button variant="ghost" className="w-full justify-start">
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start"
+                    onClick={handleDiscoverClick} // Add click handler
+                  >
                     <Globe className="mr-2 h-4 w-4" />
-                    Explore
+                    Discover
                   </Button>
                   <Button variant="ghost" className="w-full justify-start">
                     <Users className="mr-2 h-4 w-4" />

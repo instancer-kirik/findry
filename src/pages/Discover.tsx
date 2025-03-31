@@ -11,6 +11,7 @@ import CategoryItemsGrid from '../components/discover/CategoryItemsGrid';
 import DiscoverSidebar from '../components/discover/DiscoverSidebar';
 import DiscoverFilters from '../components/discover/DiscoverFilters';
 import DiscoverMobileDrawer from '../components/discover/DiscoverMobileDrawer';
+import UnifiedFilters from '../components/discover/UnifiedFilters';
 
 // Data and hooks
 import {
