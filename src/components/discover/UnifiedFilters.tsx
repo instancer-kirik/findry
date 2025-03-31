@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, X, Tag, Sliders, Users, Filter, CircleUserRound, Plus } from 'lucide-react';
+import { Check, X, Tag, Sliders, Filter, CircleUserRound, Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
@@ -88,7 +89,7 @@ const UnifiedFilters: React.FC<UnifiedFiltersProps> = ({
       'communities': ['Educational', 'Professional', 'Neighborhood', 'Interest-based']
     };
     
-    return (contextMap[activeTab] || []).filter(tag => allTags.includes(tag));
+    return (contextMap[activeTab as keyof typeof contextMap] || []).filter(tag => allTags.includes(tag));
   };
 
   const contextTags = getContextTags();
@@ -118,6 +119,7 @@ const UnifiedFilters: React.FC<UnifiedFiltersProps> = ({
             <TabsTrigger value="user">User Type</TabsTrigger>
           </TabsList>
           
+          {/* Main Filters Tab */}
           <TabsContent value="main" className="space-y-4">
             {/* Category-specific filters */}
             {activeTab === "artists" && (
@@ -234,6 +236,7 @@ const UnifiedFilters: React.FC<UnifiedFiltersProps> = ({
             </div>
           </TabsContent>
           
+          {/* Tags Tab */}
           <TabsContent value="tags" className="space-y-4">
             <div>
               <label className="text-sm font-medium mb-2 block">Popular Tags for {activeTab}</label>
@@ -283,6 +286,7 @@ const UnifiedFilters: React.FC<UnifiedFiltersProps> = ({
             )}
           </TabsContent>
           
+          {/* User Type Tab */}
           <TabsContent value="user" className="space-y-4">
             <div>
               <label className="text-sm font-medium mb-2 block">View Content As</label>

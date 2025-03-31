@@ -85,6 +85,10 @@ const Discover: React.FC = () => {
     }
   };
 
+  const clearTags = () => {
+    setSelectedTags([]);
+  };
+
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     setActiveSubTab("all");
@@ -171,6 +175,8 @@ const Discover: React.FC = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  const availableSubfilters = getAvailableSubfilters();
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 min-h-screen">
@@ -197,7 +203,7 @@ const Discover: React.FC = () => {
               selectedSubfilters={selectedSubfilters}
               onSubfilterSelect={handleSubfilterSelect}
               onSubfilterClear={clearSubfilters}
-              availableSubfilters={getAvailableSubfilters()}
+              availableSubfilters={availableSubfilters}
             />
 
             <DiscoverFilters
@@ -210,7 +216,32 @@ const Discover: React.FC = () => {
               sidebarOpen={sidebarOpen}
               toggleSidebar={toggleSidebar}
               getTabLabel={getTabLabel}
+              showFilters={showFilters}
+              setShowFilters={setShowFilters}
             />
+
+            {showFilters && !isMobile && (
+              <UnifiedFilters 
+                allTags={allTags}
+                selectedTags={selectedTags}
+                onTagSelect={handleTagSelect}
+                onTagClear={clearTags}
+                userType={userType}
+                onUserTypeChange={handleUserTypeChange}
+                resourceType={resourceType}
+                onResourceTypeChange={handleResourceTypeChange}
+                artistStyle={artistStyle}
+                onArtistStyleChange={handleArtistStyleChange}
+                disciplinaryType={disciplinaryType}
+                onDisciplinaryTypeChange={handleDisciplinaryTypeChange}
+                activeTab={activeTab}
+                selectedSubfilters={selectedSubfilters}
+                onSubfilterSelect={handleSubfilterSelect}
+                onSubfilterClear={clearSubfilters}
+                availableSubfilters={availableSubfilters}
+                onClose={() => setShowFilters(false)}
+              />
+            )}
 
             <CategoryItemsGrid items={items} isLoading={isLoading} />
           </div>
@@ -225,11 +256,27 @@ const Discover: React.FC = () => {
           </div>
         </div>
         
-        {/* Mobile bottom drawer for sidebar */}
+        {/* Mobile bottom drawer for sidebar and filters */}
         <DiscoverMobileDrawer 
           items={items} 
           activeTab={activeTab} 
-          isMobile={isMobile} 
+          isMobile={isMobile}
+          selectedTags={selectedTags}
+          handleTagSelect={handleTagSelect}
+          clearTags={clearTags}
+          userType={userType}
+          setUserType={handleUserTypeChange}
+          resourceType={resourceType}
+          onResourceTypeChange={handleResourceTypeChange}
+          artistStyle={artistStyle}
+          onArtistStyleChange={handleArtistStyleChange}
+          disciplinaryType={disciplinaryType}
+          onDisciplinaryTypeChange={handleDisciplinaryTypeChange}
+          selectedSubfilters={selectedSubfilters}
+          onSubfilterSelect={handleSubfilterSelect}
+          onSubfilterClear={clearSubfilters}
+          availableSubfilters={availableSubfilters}
+          allTags={allTags}
         />
       </div>
     </Layout>
