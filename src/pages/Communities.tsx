@@ -1,5 +1,6 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,13 +10,59 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import CreateCommunityModal from '@/components/communities/CreateCommunityModal';
+import { useToast } from '@/hooks/use-toast';
 
 const Communities = () => {
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
-  // Sample data - in a real app this would come from an API
-  const communities = [
+  const { data: communitiesData, isLoading, error, refetch } = useQuery({
+    queryKey: ['communities'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('communities')
+        .select(`
+          id,
+          name,
+          description,
+          category,
+          image_url,
+          created_at
+        `)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  useEffect(() => {
+    if (error) {
+      console.error('Error fetching communities:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load communities. Please try again later.',
+        variant: 'destructive',
+      });
+    }
+  }, [error, toast]);
+
+  const transformedCommunities = communitiesData?.map(community => ({
+    id: community.id,
+    name: community.name,
+    description: community.description || 'No description available',
+    members: 0,
+    posts: 0,
+    image: community.image_url || '/placeholder.svg',
+    joined: false,
+    new: new Date(community.created_at).getTime() > (Date.now() - 7 * 24 * 60 * 60 * 1000),
+    lastActivity: 'Recently',
+    category: community.category || 'General'
+  })) || [];
+
+  const communities = transformedCommunities.length > 0 ? transformedCommunities : [
     {
       id: 1,
       name: "Digital Artists Collective",
@@ -106,7 +153,6 @@ const Communities = () => {
     <Layout>
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Left sidebar with navigation */}
           <div className="md:col-span-1">
             <Card>
               <CardHeader>
@@ -148,10 +194,7 @@ const Communities = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button className="w-full">
-                  <Users className="mr-2 h-4 w-4" />
-                  Create Community
-                </Button>
+                <CreateCommunityModal onSuccess={refetch} />
               </CardFooter>
             </Card>
             
@@ -173,7 +216,6 @@ const Communities = () => {
             </Card>
           </div>
           
-          {/* Main content area */}
           <div className="md:col-span-2">
             <Tabs defaultValue="featured">
               <div className="flex justify-between items-center mb-4">
@@ -202,47 +244,119 @@ const Communities = () => {
                 </div>
               </div>
               
-              <TabsContent value="featured">
-                <h2 className="text-2xl font-bold mb-4">Featured Communities</h2>
-                <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'space-y-4'}`}>
-                  {featuredCommunities.map(community => (
-                    viewMode === 'grid' 
-                      ? <CommunityCard key={community.id} community={community} /> 
-                      : <CommunityListItem key={community.id} community={community} />
-                  ))}
+              <div className="flex flex-col mb-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-2xl font-bold">All Communities</h2>
+                  <CreateCommunityModal 
+                    trigger={
+                      <Button>
+                        <Users className="mr-2 h-4 w-4" />
+                        Create Community
+                      </Button>
+                    } 
+                    onSuccess={refetch} 
+                  />
                 </div>
                 
-                <h2 className="text-2xl font-bold my-6">Suggested For You</h2>
-                <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'space-y-4'}`}>
-                  {suggestedCommunities.map(community => (
-                    viewMode === 'grid' 
-                      ? <CommunityCard key={community.id} community={community} /> 
-                      : <CommunityListItem key={community.id} community={community} />
-                  ))}
-                </div>
-              </TabsContent>
+                {isLoading ? (
+                  <div className="flex justify-center p-12">
+                    <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+                  </div>
+                ) : (
+                  <>
+                    <TabsContent value="featured">
+                      <h2 className="text-2xl font-bold mb-4">Featured Communities</h2>
+                      {featuredCommunities.length > 0 ? (
+                        <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'space-y-4'}`}>
+                          {featuredCommunities.map(community => (
+                            viewMode === 'grid' 
+                              ? <CommunityCard key={community.id} community={community} /> 
+                              : <CommunityListItem key={community.id} community={community} />
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground text-center py-8">No featured communities yet. Create one!</p>
+                      )}
+                      
+                      <h2 className="text-2xl font-bold my-6">Suggested For You</h2>
+                      {suggestedCommunities.length > 0 ? (
+                        <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'space-y-4'}`}>
+                          {suggestedCommunities.map(community => (
+                            viewMode === 'grid' 
+                              ? <CommunityCard key={community.id} community={community} /> 
+                              : <CommunityListItem key={community.id} community={community} />
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground text-center py-8">No suggested communities available.</p>
+                      )}
+                    </TabsContent>
+                    
+                    <TabsContent value="my-communities">
+                      <h2 className="text-2xl font-bold mb-4">My Communities</h2>
+                      {joinedCommunities.length > 0 ? (
+                        <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'space-y-4'}`}>
+                          {joinedCommunities.map(community => (
+                            viewMode === 'grid' 
+                              ? <CommunityCard key={community.id} community={community} /> 
+                              : <CommunityListItem key={community.id} community={community} />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-12">
+                          <Users className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
+                          <h3 className="text-xl font-medium mb-2">You haven't joined any communities yet</h3>
+                          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                            Join communities to connect with people who share your interests, or create your own!
+                          </p>
+                          <CreateCommunityModal
+                            trigger={<Button size="lg">Create Your First Community</Button>}
+                            onSuccess={refetch}
+                          />
+                        </div>
+                      )}
+                    </TabsContent>
+                    
+                    <TabsContent value="discover">
+                      <h2 className="text-2xl font-bold mb-4">Discover Communities</h2>
+                      {filteredCommunities.filter(c => !c.joined).length > 0 ? (
+                        <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'space-y-4'}`}>
+                          {filteredCommunities.filter(c => !c.joined).map(community => (
+                            viewMode === 'grid' 
+                              ? <CommunityCard key={community.id} community={community} /> 
+                              : <CommunityListItem key={community.id} community={community} />
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground text-center py-8">No communities found matching your search criteria.</p>
+                      )}
+                    </TabsContent>
+                  </>
+                )}
+              </div>
               
-              <TabsContent value="my-communities">
-                <h2 className="text-2xl font-bold mb-4">My Communities</h2>
-                <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'space-y-4'}`}>
-                  {joinedCommunities.map(community => (
-                    viewMode === 'grid' 
-                      ? <CommunityCard key={community.id} community={community} /> 
-                      : <CommunityListItem key={community.id} community={community} />
-                  ))}
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="discover">
-                <h2 className="text-2xl font-bold mb-4">Discover Communities</h2>
-                <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'space-y-4'}`}>
-                  {filteredCommunities.filter(c => !c.joined).map(community => (
-                    viewMode === 'grid' 
-                      ? <CommunityCard key={community.id} community={community} /> 
-                      : <CommunityListItem key={community.id} community={community} />
-                  ))}
-                </div>
-              </TabsContent>
+              <div className="border-t pt-6 mt-6">
+                <h2 className="text-xl font-bold mb-4">Start your own community</h2>
+                <Card className="bg-muted/30">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col md:flex-row gap-6 items-center">
+                      <div className="bg-background rounded-full p-6">
+                        <Users className="h-12 w-12 text-primary" />
+                      </div>
+                      <div className="flex-1 text-center md:text-left">
+                        <h3 className="text-lg font-medium mb-2">Create a community today</h3>
+                        <p className="text-muted-foreground mb-4">
+                          Build your own community around your interests, passions, or projects. Connect with like-minded people and start meaningful conversations.
+                        </p>
+                        <CreateCommunityModal
+                          trigger={<Button>Get Started</Button>}
+                          onSuccess={refetch}
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </Tabs>
           </div>
         </div>
