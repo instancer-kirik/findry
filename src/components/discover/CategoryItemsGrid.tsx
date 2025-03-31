@@ -76,7 +76,7 @@ const CategoryItemsGrid: React.FC<CategoryItemsGridProps> = ({ items, isLoading 
       case 'project':
         return <Briefcase className="h-5 w-5" />;
       case 'user':
-        return <User className="h-5 w-5" />;
+        return <Users className="h-5 w-5" />; // Fixed: Changed from User to Users
       default:
         return <Users className="h-5 w-5" />;
     }
