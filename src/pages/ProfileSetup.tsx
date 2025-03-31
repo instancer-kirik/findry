@@ -1,10 +1,9 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import { useToast } from '@/hooks/use-toast';
 import ProfileWizard from '../components/profile/ProfileWizard';
-import { ProfileType } from '../components/auth/ProfileTypeSelector';
 
 const ProfileSetup: React.FC = () => {
   const navigate = useNavigate();

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, ChevronRight, Loader2 } from 'lucide-react';
 import {
@@ -13,14 +13,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { useToast } from '@/hooks/use-toast';
 import AnimatedSection from '../ui-custom/AnimatedSection';
-import ProfileTypeSelector from '../auth/ProfileTypeSelector';
+import ProfileTypeSelector, { ProfileType } from '../auth/ProfileTypeSelector';
 import { supabase } from '@/integrations/supabase/client';
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 interface WizardStep {
   id: string;
   title: string;
   description: string;
+}
+
+interface RoleAttribute {
+  [key: string]: any;
 }
 
 const ProfileWizard: React.FC<{
@@ -33,15 +40,18 @@ const ProfileWizard: React.FC<{
   const [selectedProfileTypes, setSelectedProfileTypes] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [stepsCompleted, setStepsCompleted] = useState<Record<string, boolean>>({});
+  
+  // Define profile data state
   const [profileData, setProfileData] = useState({
     displayName: '',
     bio: '',
     location: '',
     website: '',
-    // Add fields for role-specific attributes
-    roleAttributes: {} as Record<string, any>
+    // Role-specific attributes stored in a map
+    roleAttributes: {} as Record<string, RoleAttribute>
   });
 
+  // Define steps for the wizard
   const steps: WizardStep[] = [
     {
       id: 'profile-types',
@@ -56,7 +66,7 @@ const ProfileWizard: React.FC<{
     {
       id: 'details',
       title: 'Profile Details',
-      description: 'Tell us more about your creative work'
+      description: 'Tell us more about your work and interests'
     },
     {
       id: 'preferences',
@@ -65,6 +75,7 @@ const ProfileWizard: React.FC<{
     }
   ];
 
+  // Move to the next step
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       // Mark current step as completed
@@ -81,6 +92,7 @@ const ProfileWizard: React.FC<{
     }
   };
 
+  // Move to the previous step
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(prev => prev - 1);
@@ -88,6 +100,7 @@ const ProfileWizard: React.FC<{
     }
   };
 
+  // Update basic profile data
   const handleProfileDataChange = (field: string, value: string) => {
     setProfileData({
       ...profileData,
@@ -95,6 +108,7 @@ const ProfileWizard: React.FC<{
     });
   };
 
+  // Update role-specific attributes
   const handleRoleAttributeChange = (role: string, field: string, value: any) => {
     setProfileData({
       ...profileData,
@@ -108,6 +122,7 @@ const ProfileWizard: React.FC<{
     });
   };
 
+  // Submit the profile data
   const handleSubmit = async () => {
     setIsSubmitting(true);
     
@@ -136,7 +151,7 @@ const ProfileWizard: React.FC<{
         full_name: profileData.displayName,
         bio: profileData.bio,
         profile_types: selectedProfileTypes,
-        role_attributes: profileData.roleAttributes, // Store role-specific attributes
+        role_attributes: profileData.roleAttributes,
         updated_at: new Date().toISOString()
       };
       
@@ -160,7 +175,7 @@ const ProfileWizard: React.FC<{
       if (onComplete) {
         onComplete();
       } else {
-        // Navigate to home page
+        // Navigate to profile page
         navigate('/profile');
       }
     } catch (error) {
@@ -182,20 +197,20 @@ const ProfileWizard: React.FC<{
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Art Styles</label>
-              <input 
-                type="text"
-                className="w-full px-3 py-2 border rounded-md"
+              <Label htmlFor={`${role}-art-styles`}>Art Styles</Label>
+              <Input 
+                id={`${role}-art-styles`}
+                className="w-full"
                 placeholder="e.g., Digital, Illustration, Oil Painting"
                 value={(profileData.roleAttributes[role]?.art_styles || '')}
                 onChange={(e) => handleRoleAttributeChange(role, 'art_styles', e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Portfolio Links</label>
-              <input 
-                type="text"
-                className="w-full px-3 py-2 border rounded-md"
+              <Label htmlFor={`${role}-portfolio-links`}>Portfolio Links</Label>
+              <Input 
+                id={`${role}-portfolio-links`}
+                className="w-full"
                 placeholder="e.g., https://behance.net/yourname"
                 value={(profileData.roleAttributes[role]?.portfolio_links || '')}
                 onChange={(e) => handleRoleAttributeChange(role, 'portfolio_links', e.target.value)}
@@ -207,20 +222,20 @@ const ProfileWizard: React.FC<{
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Brand Name</label>
-              <input 
-                type="text"
-                className="w-full px-3 py-2 border rounded-md"
+              <Label htmlFor={`${role}-brand-name`}>Brand Name</Label>
+              <Input 
+                id={`${role}-brand-name`}
+                className="w-full"
                 placeholder="Your brand name"
                 value={(profileData.roleAttributes[role]?.brand_name || '')}
                 onChange={(e) => handleRoleAttributeChange(role, 'brand_name', e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Industry</label>
-              <input 
-                type="text"
-                className="w-full px-3 py-2 border rounded-md"
+              <Label htmlFor={`${role}-industry`}>Industry</Label>
+              <Input 
+                id={`${role}-industry`}
+                className="w-full"
                 placeholder="e.g., Fashion, Music, Technology"
                 value={(profileData.roleAttributes[role]?.industry || '')}
                 onChange={(e) => handleRoleAttributeChange(role, 'industry', e.target.value)}
@@ -232,20 +247,21 @@ const ProfileWizard: React.FC<{
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Venue Name</label>
-              <input 
-                type="text"
-                className="w-full px-3 py-2 border rounded-md"
+              <Label htmlFor={`${role}-venue-name`}>Venue Name</Label>
+              <Input 
+                id={`${role}-venue-name`}
+                className="w-full"
                 placeholder="Your venue name"
                 value={(profileData.roleAttributes[role]?.venue_name || '')}
                 onChange={(e) => handleRoleAttributeChange(role, 'venue_name', e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Capacity</label>
-              <input 
+              <Label htmlFor={`${role}-capacity`}>Capacity</Label>
+              <Input 
+                id={`${role}-capacity`}
                 type="number"
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full"
                 placeholder="Maximum capacity"
                 value={(profileData.roleAttributes[role]?.capacity || '')}
                 onChange={(e) => handleRoleAttributeChange(role, 'capacity', e.target.value)}
@@ -257,23 +273,83 @@ const ProfileWizard: React.FC<{
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Resource Type</label>
-              <input 
-                type="text"
-                className="w-full px-3 py-2 border rounded-md"
+              <Label htmlFor={`${role}-resource-type`}>Resource Type</Label>
+              <Input 
+                id={`${role}-resource-type`}
+                className="w-full"
                 placeholder="e.g., Studio, Equipment, Service"
                 value={(profileData.roleAttributes[role]?.resource_type || '')}
                 onChange={(e) => handleRoleAttributeChange(role, 'resource_type', e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Availability</label>
-              <input 
-                type="text"
-                className="w-full px-3 py-2 border rounded-md"
+              <Label htmlFor={`${role}-availability`}>Availability</Label>
+              <Input 
+                id={`${role}-availability`}
+                className="w-full"
                 placeholder="e.g., Weekdays, Evenings, By appointment"
                 value={(profileData.roleAttributes[role]?.availability || '')}
                 onChange={(e) => handleRoleAttributeChange(role, 'availability', e.target.value)}
+              />
+            </div>
+          </div>
+        );
+      case 'community':
+        return (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor={`${role}-community-focus`}>Community Focus</Label>
+              <Input 
+                id={`${role}-community-focus`}
+                className="w-full"
+                placeholder="e.g., Digital Art, Sustainability, Education"
+                value={(profileData.roleAttributes[role]?.community_focus || '')}
+                onChange={(e) => handleRoleAttributeChange(role, 'community_focus', e.target.value)}
+              />
+            </div>
+          </div>
+        );
+      case 'event':
+        return (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor={`${role}-event-types`}>Event Types</Label>
+              <Input 
+                id={`${role}-event-types`}
+                className="w-full"
+                placeholder="e.g., Exhibitions, Workshops, Performances"
+                value={(profileData.roleAttributes[role]?.event_types || '')}
+                onChange={(e) => handleRoleAttributeChange(role, 'event_types', e.target.value)}
+              />
+            </div>
+          </div>
+        );
+      case 'project':
+        return (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor={`${role}-project-focus`}>Project Focus</Label>
+              <Input 
+                id={`${role}-project-focus`}
+                className="w-full"
+                placeholder="e.g., Film, Publication, Research"
+                value={(profileData.roleAttributes[role]?.project_focus || '')}
+                onChange={(e) => handleRoleAttributeChange(role, 'project_focus', e.target.value)}
+              />
+            </div>
+          </div>
+        );
+      case 'user':
+        return (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor={`${role}-interests`}>Main Interests</Label>
+              <Input 
+                id={`${role}-interests`}
+                className="w-full"
+                placeholder="e.g., Art, Music, Design, Technology"
+                value={(profileData.roleAttributes[role]?.interests || '')}
+                onChange={(e) => handleRoleAttributeChange(role, 'interests', e.target.value)}
               />
             </div>
           </div>
@@ -283,6 +359,7 @@ const ProfileWizard: React.FC<{
     }
   };
 
+  // Render content for each step
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
@@ -301,23 +378,21 @@ const ProfileWizard: React.FC<{
         return (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <label className="text-sm font-medium" htmlFor="displayName">Display Name</label>
-                <input 
+              <div className="space-y-2">
+                <Label htmlFor="displayName">Display Name</Label>
+                <Input 
                   id="displayName"
-                  type="text"
-                  className="w-full px-3 py-2 border rounded-md"
+                  className="w-full"
                   value={profileData.displayName}
                   onChange={(e) => handleProfileDataChange('displayName', e.target.value)}
                   placeholder="Your name or artist name"
                 />
               </div>
-              <div className="space-y-4">
-                <label className="text-sm font-medium" htmlFor="location">Location</label>
-                <input 
+              <div className="space-y-2">
+                <Label htmlFor="location">Location</Label>
+                <Input 
                   id="location"
-                  type="text"
-                  className="w-full px-3 py-2 border rounded-md"
+                  className="w-full"
                   value={profileData.location}
                   onChange={(e) => handleProfileDataChange('location', e.target.value)}
                   placeholder="City, Country"
@@ -325,23 +400,22 @@ const ProfileWizard: React.FC<{
               </div>
             </div>
             
-            <div className="space-y-4">
-              <label className="text-sm font-medium" htmlFor="bio">Bio</label>
-              <textarea 
+            <div className="space-y-2">
+              <Label htmlFor="bio">Bio</Label>
+              <Textarea 
                 id="bio"
-                className="w-full px-3 py-2 border rounded-md h-32"
+                className="w-full min-h-32"
                 value={profileData.bio}
                 onChange={(e) => handleProfileDataChange('bio', e.target.value)}
                 placeholder="Tell us about yourself..."
               />
             </div>
             
-            <div className="space-y-4">
-              <label className="text-sm font-medium" htmlFor="website">Website (optional)</label>
-              <input 
+            <div className="space-y-2">
+              <Label htmlFor="website">Website (optional)</Label>
+              <Input 
                 id="website"
-                type="text"
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full"
                 value={profileData.website}
                 onChange={(e) => handleProfileDataChange('website', e.target.value)}
                 placeholder="https://yourwebsite.com"
@@ -379,11 +453,11 @@ const ProfileWizard: React.FC<{
             <div className="space-y-4">
               <div className="flex items-center space-x-2">
                 <input type="checkbox" id="notifications" className="rounded" />
-                <label htmlFor="notifications">Enable email notifications</label>
+                <Label htmlFor="notifications">Enable email notifications</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <input type="checkbox" id="publicProfile" className="rounded" defaultChecked />
-                <label htmlFor="publicProfile">Make my profile public</label>
+                <Label htmlFor="publicProfile">Make my profile public</Label>
               </div>
             </div>
           </div>
@@ -392,6 +466,51 @@ const ProfileWizard: React.FC<{
         return null;
     }
   };
+
+  // Load existing profile data if available
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+        
+        if (error || !profile) return;
+        
+        // Update state with existing profile data
+        if (profile.full_name) {
+          setProfileData(prev => ({
+            ...prev,
+            displayName: profile.full_name || '',
+            bio: profile.bio || '',
+            // Add other fields as needed
+          }));
+        }
+        
+        // Set selected profile types if available
+        if (profile.profile_types && Array.isArray(profile.profile_types)) {
+          setSelectedProfileTypes(profile.profile_types);
+        }
+        
+        // Load role attributes if available
+        if (profile.role_attributes) {
+          setProfileData(prev => ({
+            ...prev,
+            roleAttributes: profile.role_attributes as Record<string, RoleAttribute>
+          }));
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+      }
+    };
+    
+    loadProfile();
+  }, []);
 
   return (
     <div className="max-w-4xl mx-auto">

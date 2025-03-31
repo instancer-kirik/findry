@@ -267,6 +267,8 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          profile_types: string[] | null
+          role_attributes: Json | null
           updated_at: string
           username: string | null
         }
@@ -276,6 +278,8 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
+          profile_types?: string[] | null
+          role_attributes?: Json | null
           updated_at?: string
           username?: string | null
         }
@@ -285,6 +289,8 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          profile_types?: string[] | null
+          role_attributes?: Json | null
           updated_at?: string
           username?: string | null
         }

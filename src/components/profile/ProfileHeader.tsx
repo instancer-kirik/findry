@@ -13,6 +13,7 @@ interface Profile {
   avatar_url?: string;
   bio?: string;
   profile_types?: string[]; // Support for multiple profile types
+  role_attributes?: Record<string, any>; // Support for role-specific attributes
 }
 
 interface ProfileHeaderProps {
@@ -24,7 +25,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, isOwnProfile }) 
   const navigate = useNavigate();
   const avatarInitials = profile.full_name
     ? profile.full_name.split(' ').map(n => n[0]).join('').toUpperCase()
-    : profile.username.substring(0, 2).toUpperCase();
+    : profile.username ? profile.username.substring(0, 2).toUpperCase() : '??';
 
   const handleEditProfile = () => {
     navigate('/profile-setup');
