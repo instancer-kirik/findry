@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, 
@@ -48,14 +49,26 @@ const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [session, setSession] = useState<any>(null);
 
-  const { data: user, isLoading: isAuthLoading } = useQuery({
-    queryKey: ['auth-user'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      return user;
-    },
-  });
+  // Add useEffect to handle auth state changes
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, currentSession) => {
+        console.log('Auth state changed:', event, currentSession);
+        setSession(currentSession);
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      console.log('Current session:', currentSession);
+      setSession(currentSession);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleNavigation = (href: string) => {
     navigate(href);
@@ -67,16 +80,18 @@ const Navbar: React.FC = () => {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    setSession(null);
     navigate('/login');
   };
 
-  const userProfileLink = user ? `/profile` : '/login';
+  const userProfileLink = session ? `/profile` : '/login';
+  const user = session?.user;
 
   return (
     <div className="bg-background border-b">
       <div className="container flex items-center justify-between py-4">
         <Link to="/" className="font-bold text-xl">
-          CollabSphere
+          Findry
         </Link>
 
         {/* Desktop Navigation */}
@@ -96,13 +111,18 @@ const Navbar: React.FC = () => {
         {/* Auth Buttons */}
         <div className="hidden md:flex items-center space-x-4">
           <ThemeNavbarToggle />
-          {isAuthLoading ? null : user ? (
-            <Link to={userProfileLink}>
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={user.user_metadata?.avatar_url} alt={user.user_metadata?.full_name} />
-                <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
-              </Avatar>
-            </Link>
+          {user ? (
+            <div className="flex items-center gap-2">
+              <Link to={userProfileLink}>
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={user.user_metadata?.avatar_url} alt={user.user_metadata?.full_name} />
+                  <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
+                </Avatar>
+              </Link>
+              <Button variant="ghost" size="sm" onClick={handleLogout}>
+                Log Out
+              </Button>
+            </div>
           ) : (
             <>
               <Button variant="outline" onClick={handleLogin}>
@@ -125,7 +145,7 @@ const Navbar: React.FC = () => {
           <SheetContent side="left" className="w-64 p-6">
             <div className="mb-4">
               <Link to="/" className="font-bold text-xl block">
-                CollabSphere
+                Findry
               </Link>
             </div>
             <div className="flex flex-col space-y-2">
@@ -141,7 +161,7 @@ const Navbar: React.FC = () => {
             </div>
             <div className="mt-4 pt-4 border-t">
               <ThemeNavbarToggle />
-              {isAuthLoading ? null : user ? (
+              {user ? (
                 <>
                   <Link to={userProfileLink} className="flex items-center space-x-2 py-2 text-sm" onClick={() => setOpen(false)}>
                     <Avatar className="h-6 w-6">

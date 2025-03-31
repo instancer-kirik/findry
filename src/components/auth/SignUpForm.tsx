@@ -19,6 +19,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Loader2 } from 'lucide-react';
 import ProfileTypeSelector from './ProfileTypeSelector';
+import { supabase } from '@/integrations/supabase/client';
 
 // Define the form schema with Zod
 const signUpSchema = z.object({
@@ -47,7 +48,7 @@ const SignUpForm: React.FC = () => {
       email: '',
       password: '',
       name: '',
-      profileType: [],
+      profileType: ['user'], // Default to 'user' profile type
       termsAccepted: false,
     },
   });
@@ -57,24 +58,64 @@ const SignUpForm: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      // For now, we'll just simulate a successful signup
       console.log('Signup values:', values);
+      
+      // Sign up with Supabase
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+        options: {
+          data: {
+            full_name: values.name,
+            profile_types: values.profileType,
+          },
+        },
+      });
+      
+      if (authError) {
+        throw authError;
+      }
+
+      // If successful, create profile in profiles table
+      if (authData.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([
+            {
+              id: authData.user.id,
+              username: values.name.toLowerCase().replace(/\s+/g, '_'),
+              full_name: values.name,
+              profile_types: values.profileType,
+              role_attributes: {},
+            },
+          ]);
+        
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+        }
+      }
       
       // Show success toast
       toast({
         title: 'Account created!',
-        description: 'Welcome to the community.',
+        description: 'Welcome to Findry. Please complete your profile setup.',
       });
       
       // Navigate to profile completion page
       setTimeout(() => {
-        navigate('/profile/setup');
+        navigate('/profile-setup?wizard=true');
       }, 1500);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Signup error:', error);
+      
+      let errorMessage = 'Please try again later.';
+      if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: 'Signup failed',
-        description: 'Please try again later.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {

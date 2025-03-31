@@ -9,11 +9,17 @@ import {
   Store, 
   Calendar, 
   Briefcase,
-  UserCircle 
+  UserCircle,
+  Palette,
+  Camera,
+  Mic,
+  BookOpen,
+  Code,
+  MapPin
 } from 'lucide-react';
 
 // Update the ProfileType to include all possible types and a generic "user" type
-export type ProfileType = 'artist' | 'community' | 'venue' | 'resource' | 'brand' | 'event' | 'project' | 'user';
+export type ProfileType = 'creative' | 'venue' | 'organization' | 'service' | 'brand' | 'event' | 'project' | 'user';
 
 interface ProfileOption {
   id: ProfileType;
@@ -31,33 +37,33 @@ const ProfileTypeSelector: React.FC<ProfileTypeSelectorProps> = ({ value, onChan
   const profileOptions: ProfileOption[] = [
     {
       id: 'user',
-      label: 'User',
+      label: 'Individual',
       icon: <UserCircle className="h-5 w-5" />,
-      description: 'Regular user account with basic features'
+      description: 'Personal account for browsing and connecting'
     },
     {
-      id: 'artist',
-      label: 'Artist',
-      icon: <Music className="h-5 w-5" />,
-      description: 'Creator, musician, performer, etc.'
+      id: 'creative',
+      label: 'Creative',
+      icon: <Palette className="h-5 w-5" />,
+      description: 'Artist, musician, photographer, writer, etc.'
     },
     {
       id: 'venue',
       label: 'Venue',
       icon: <Building className="h-5 w-5" />,
-      description: 'Performance or exhibition space'
+      description: 'Gallery, studio, theater, performance space'
     },
     {
-      id: 'resource',
-      label: 'Resource',
+      id: 'service',
+      label: 'Service Provider',
       icon: <Bot className="h-5 w-5" />,
-      description: 'Service provider, educator, or tool'
+      description: 'Offering professional services to creatives'
     },
     {
-      id: 'community',
-      label: 'Community',
+      id: 'organization',
+      label: 'Organization',
       icon: <Users className="h-5 w-5" />,
-      description: 'Group, collective, or organization'
+      description: 'Collective, non-profit, or cultural institution'
     },
     {
       id: 'brand',
@@ -67,15 +73,15 @@ const ProfileTypeSelector: React.FC<ProfileTypeSelectorProps> = ({ value, onChan
     },
     {
       id: 'event',
-      label: 'Event',
+      label: 'Event Organizer',
       icon: <Calendar className="h-5 w-5" />,
-      description: 'Organizer of shows, festivals, or gatherings'
+      description: 'Manage exhibitions, performances, or festivals'
     },
     {
       id: 'project',
       label: 'Project',
       icon: <Briefcase className="h-5 w-5" />,
-      description: 'Creative or collaborative initiative'
+      description: 'Temporary creative initiative or collaboration'
     }
   ];
 

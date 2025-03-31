@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, ChevronRight, Loader2 } from 'lucide-react';
@@ -30,6 +29,18 @@ interface RoleAttribute {
   [key: string]: any;
 }
 
+interface Profile {
+  id: string;
+  username?: string;
+  full_name?: string;
+  avatar_url?: string;
+  bio?: string;
+  created_at: string;
+  updated_at: string;
+  profile_types?: string[];
+  role_attributes?: Record<string, RoleAttribute>;
+}
+
 const ProfileWizard: React.FC<{
   onComplete?: () => void;
   allowMultipleTypes?: boolean;
@@ -41,17 +52,14 @@ const ProfileWizard: React.FC<{
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [stepsCompleted, setStepsCompleted] = useState<Record<string, boolean>>({});
   
-  // Define profile data state
   const [profileData, setProfileData] = useState({
     displayName: '',
     bio: '',
     location: '',
     website: '',
-    // Role-specific attributes stored in a map
     roleAttributes: {} as Record<string, RoleAttribute>
   });
 
-  // Define steps for the wizard
   const steps: WizardStep[] = [
     {
       id: 'profile-types',
@@ -75,24 +83,19 @@ const ProfileWizard: React.FC<{
     }
   ];
 
-  // Move to the next step
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
-      // Mark current step as completed
       setStepsCompleted(prev => ({
         ...prev,
         [steps[currentStep].id]: true
       }));
       
-      // Move to next step
       setCurrentStep(prev => prev + 1);
       
-      // Scroll to top
       window.scrollTo(0, 0);
     }
   };
 
-  // Move to the previous step
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(prev => prev - 1);
@@ -100,7 +103,6 @@ const ProfileWizard: React.FC<{
     }
   };
 
-  // Update basic profile data
   const handleProfileDataChange = (field: string, value: string) => {
     setProfileData({
       ...profileData,
@@ -108,7 +110,6 @@ const ProfileWizard: React.FC<{
     });
   };
 
-  // Update role-specific attributes
   const handleRoleAttributeChange = (role: string, field: string, value: any) => {
     setProfileData({
       ...profileData,
@@ -122,29 +123,24 @@ const ProfileWizard: React.FC<{
     });
   };
 
-  // Submit the profile data
   const handleSubmit = async () => {
     setIsSubmitting(true);
     
     try {
-      // Mark final step as completed
       setStepsCompleted(prev => ({
         ...prev,
         [steps[currentStep].id]: true
       }));
       
-      // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // Check if profile exists
       const { data: existingProfile, error: profileError } = await supabase
         .from('profiles')
         .select('id')
         .eq('id', user.id)
         .single();
 
-      // Prepare profile data
       const submitData = {
         id: user.id,
         username: profileData.displayName.toLowerCase().replace(/\s+/g, '_'),
@@ -155,7 +151,6 @@ const ProfileWizard: React.FC<{
         updated_at: new Date().toISOString()
       };
       
-      // Insert or update profile
       const operation = existingProfile 
         ? supabase.from('profiles').update(submitData).eq('id', user.id)
         : supabase.from('profiles').insert([submitData]);
@@ -171,11 +166,9 @@ const ProfileWizard: React.FC<{
         description: 'Your profile has been successfully set up.',
       });
       
-      // Call onComplete callback if provided
       if (onComplete) {
         onComplete();
       } else {
-        // Navigate to profile page
         navigate('/profile');
       }
     } catch (error) {
@@ -190,7 +183,6 @@ const ProfileWizard: React.FC<{
     }
   };
 
-  // Render role-specific form fields
   const renderRoleFields = (role: string) => {
     switch (role) {
       case 'artist':
@@ -359,7 +351,6 @@ const ProfileWizard: React.FC<{
     }
   };
 
-  // Render content for each step
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
@@ -467,7 +458,6 @@ const ProfileWizard: React.FC<{
     }
   };
 
-  // Load existing profile data if available
   useEffect(() => {
     const loadProfile = async () => {
       try {
@@ -482,22 +472,18 @@ const ProfileWizard: React.FC<{
         
         if (error || !profile) return;
         
-        // Update state with existing profile data
         if (profile.full_name) {
           setProfileData(prev => ({
             ...prev,
             displayName: profile.full_name || '',
             bio: profile.bio || '',
-            // Add other fields as needed
           }));
         }
         
-        // Set selected profile types if available
         if (profile.profile_types && Array.isArray(profile.profile_types)) {
           setSelectedProfileTypes(profile.profile_types);
         }
         
-        // Load role attributes if available
         if (profile.role_attributes) {
           setProfileData(prev => ({
             ...prev,
