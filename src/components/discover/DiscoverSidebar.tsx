@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { PlusCircle, Calendar, Tag, Info, Users, CircleUserRound, Tags } from 'lucide-react';
+import { PlusCircle, Calendar, Tag, Info, Users, CircleUserRound, Tags, Star, MessageSquare, AlertCircle, BookOpen } from 'lucide-react';
 import AnimatedSection from '../ui-custom/AnimatedSection';
 import SavedItemsTracker from '../marketplace/SavedItemsTracker';
 import MarketplaceChat from '../marketplace/MarketplaceChat';
@@ -82,6 +82,68 @@ const UserCircle: React.FC<{ name: string, users: string[], color: string }> = (
   );
 };
 
+const RecentActivity = () => {
+  const activities = [
+    { type: 'collaboration', user: 'Alex Kim', action: 'invited you to collaborate', time: '2 hours ago' },
+    { type: 'message', user: 'Elena Rivera', action: 'sent you a message', time: '5 hours ago' },
+    { type: 'event', user: 'The Acoustic Lounge', action: 'added a new event', time: 'Yesterday' },
+    { type: 'update', user: 'Summit Beats', action: 'updated their profile', time: '2 days ago' }
+  ];
+
+  const getIcon = (type: string) => {
+    switch(type) {
+      case 'collaboration': return <Users className="h-4 w-4 text-blue-500" />;
+      case 'message': return <MessageSquare className="h-4 w-4 text-green-500" />;
+      case 'event': return <Calendar className="h-4 w-4 text-purple-500" />;
+      case 'update': return <AlertCircle className="h-4 w-4 text-amber-500" />;
+      default: return <Info className="h-4 w-4" />;
+    }
+  };
+
+  return (
+    <ScrollArea className="h-[200px] pr-3">
+      <div className="space-y-2">
+        {activities.map((activity, idx) => (
+          <div key={idx} className="flex items-start gap-2 p-2 hover:bg-muted/50 rounded-md transition-colors cursor-pointer">
+            <div className="mt-0.5">{getIcon(activity.type)}</div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium line-clamp-1">
+                <span className="font-semibold">{activity.user}</span> {activity.action}
+              </p>
+              <span className="text-xs text-muted-foreground">{activity.time}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </ScrollArea>
+  );
+};
+
+const LearningResources = () => {
+  const resources = [
+    { title: 'Music Production Basics', type: 'Course', url: '#' },
+    { title: 'Artist Branding Guide', type: 'Article', url: '#' },
+    { title: 'Networking for Musicians', type: 'eBook', url: '#' },
+    { title: 'Studio Recording Tips', type: 'Video', url: '#' }
+  ];
+
+  return (
+    <ScrollArea className="h-[200px] pr-3">
+      <div className="space-y-2">
+        {resources.map((resource, idx) => (
+          <Link to={resource.url} key={idx} className="flex items-start gap-2 p-2 hover:bg-muted/50 rounded-md transition-colors block">
+            <BookOpen className="h-4 w-4 text-primary mt-0.5" />
+            <div>
+              <p className="text-sm font-medium line-clamp-1">{resource.title}</p>
+              <Badge variant="outline" className="text-xs mt-1">{resource.type}</Badge>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </ScrollArea>
+  );
+};
+
 const DiscoverSidebar: React.FC<DiscoverSidebarProps> = ({ 
   activeTabData = [],
   activeTab = 'events'
@@ -148,81 +210,6 @@ const DiscoverSidebar: React.FC<DiscoverSidebarProps> = ({
                     </Link>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          </AnimatedSection>
-        </ResizablePanel>
-
-        <ResizableHandle withHandle />
-
-        <ResizablePanel defaultSize={20} minSize={15}>
-          <AnimatedSection animation="slide-in-left" delay={300}>
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">User Categories</CardTitle>
-                <CardDescription>Organize people for easier collaboration</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <Tabs value={activeCircleTab} onValueChange={setActiveCircleTab} className="w-full">
-                  <TabsList className="w-full grid grid-cols-2 mb-4">
-                    <TabsTrigger value="circles" className="flex items-center gap-1">
-                      <Users className="h-4 w-4" />
-                      <span>Circles</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="tags" className="flex items-center gap-1">
-                      <Tags className="h-4 w-4" />
-                      <span>Tags</span>
-                    </TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="circles" className="pt-1 border rounded-md border-muted p-1">
-                    <ScrollArea className="h-[180px] pr-3">
-                      <div className="space-y-1">
-                        {userCircles.map((circle, idx) => (
-                          <UserCircle 
-                            key={idx} 
-                            name={circle.name} 
-                            users={circle.users} 
-                            color={circle.color} 
-                          />
-                        ))}
-                      </div>
-                    </ScrollArea>
-                    
-                    <div className="pt-3 mt-2 border-t">
-                      <Button variant="outline" size="sm" className="w-full">
-                        <PlusCircle className="h-4 w-4 mr-2" />
-                        Create New Circle
-                      </Button>
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="tags" className="pt-2 border rounded-md border-muted p-3">
-                    <ScrollArea className="h-[180px] pr-3">
-                      <div className="flex flex-wrap gap-2">
-                        <Badge variant="secondary" className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">Producer</Badge>
-                        <Badge variant="secondary" className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">Vocalist</Badge>
-                        <Badge variant="secondary" className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">Instrumental</Badge>
-                        <Badge variant="secondary" className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">Jazz</Badge>
-                        <Badge variant="secondary" className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">Hip-hop</Badge>
-                        <Badge variant="secondary" className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">Mixing</Badge>
-                        <Badge variant="secondary" className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">Mastering</Badge>
-                        <Badge variant="secondary" className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">Studio</Badge>
-                        <Badge variant="secondary" className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">Composition</Badge>
-                        <Badge variant="secondary" className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">Arrangement</Badge>
-                        <Badge variant="secondary" className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">Audio Engineer</Badge>
-                        <Badge variant="secondary" className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">Live Performance</Badge>
-                      </div>
-                    </ScrollArea>
-                    
-                    <div className="pt-3 mt-2 border-t">
-                      <Button variant="outline" size="sm" className="w-full">
-                        <PlusCircle className="h-4 w-4 mr-2" />
-                        Add New Tag
-                      </Button>
-                    </div>
-                  </TabsContent>
-                </Tabs>
               </CardContent>
             </Card>
           </AnimatedSection>
@@ -300,12 +287,129 @@ const DiscoverSidebar: React.FC<DiscoverSidebarProps> = ({
           </AnimatedSection>
         </ResizablePanel>
 
+        <ResizableHandle withHandle />
+
+        <ResizablePanel defaultSize={20} minSize={15}>
+          <AnimatedSection animation="slide-in-left" delay={300}>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">User Categories</CardTitle>
+                <CardDescription>Organize people for easier collaboration</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <Tabs value={activeCircleTab} onValueChange={setActiveCircleTab} className="w-full">
+                  <TabsList className="w-full grid grid-cols-2 mb-4">
+                    <TabsTrigger value="circles" className="flex items-center gap-1">
+                      <Users className="h-4 w-4" />
+                      <span>Circles</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="tags" className="flex items-center gap-1">
+                      <Tags className="h-4 w-4" />
+                      <span>Tags</span>
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="circles" className="pt-1 border rounded-md border-muted p-1">
+                    <ScrollArea className="h-[180px] w-full pr-3 thin-scrollbar hover:pr-1 transition-all duration-300">
+                      <div className="space-y-1">
+                        {userCircles.map((circle, idx) => (
+                          <UserCircle 
+                            key={idx} 
+                            name={circle.name} 
+                            users={circle.users} 
+                            color={circle.color} 
+                          />
+                        ))}
+                      </div>
+                    </ScrollArea>
+                    
+                    <div className="pt-3 mt-2 border-t">
+                      <Button variant="outline" size="sm" className="w-full">
+                        <PlusCircle className="h-4 w-4 mr-2" />
+                        Create New Circle
+                      </Button>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="tags" className="pt-2 border rounded-md border-muted p-3">
+                    <ScrollArea className="h-[180px] w-full pr-3 thin-scrollbar hover:pr-1 transition-all duration-300">
+                      <div className="flex flex-wrap gap-2">
+                        <Badge variant="secondary" className="cursor-pointer tag-badge">Producer</Badge>
+                        <Badge variant="secondary" className="cursor-pointer tag-badge">Vocalist</Badge>
+                        <Badge variant="secondary" className="cursor-pointer tag-badge">Instrumental</Badge>
+                        <Badge variant="secondary" className="cursor-pointer tag-badge">Jazz</Badge>
+                        <Badge variant="secondary" className="cursor-pointer tag-badge">Hip-hop</Badge>
+                        <Badge variant="secondary" className="cursor-pointer tag-badge">Mixing</Badge>
+                        <Badge variant="secondary" className="cursor-pointer tag-badge">Mastering</Badge>
+                        <Badge variant="secondary" className="cursor-pointer tag-badge">Studio</Badge>
+                        <Badge variant="secondary" className="cursor-pointer tag-badge">Composition</Badge>
+                        <Badge variant="secondary" className="cursor-pointer tag-badge">Arrangement</Badge>
+                        <Badge variant="secondary" className="cursor-pointer tag-badge">Audio Engineer</Badge>
+                        <Badge variant="secondary" className="cursor-pointer tag-badge">Live Performance</Badge>
+                      </div>
+                    </ScrollArea>
+                    
+                    <div className="pt-3 mt-2 border-t">
+                      <Button variant="outline" size="sm" className="w-full">
+                        <PlusCircle className="h-4 w-4 mr-2" />
+                        Add New Tag
+                      </Button>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          </AnimatedSection>
+        </ResizablePanel>
+
+        <ResizableHandle withHandle />
+        
+        <ResizablePanel defaultSize={20} minSize={15}>
+          <AnimatedSection animation="slide-in-left" delay={500}>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Star className="h-4 w-4 text-amber-500" />
+                  Recent Activity
+                </CardTitle>
+                <CardDescription>
+                  Stay updated with recent changes
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <RecentActivity />
+              </CardContent>
+            </Card>
+          </AnimatedSection>
+        </ResizablePanel>
+
+        <ResizableHandle withHandle />
+        
+        <ResizablePanel defaultSize={20} minSize={15}>
+          <AnimatedSection animation="slide-in-left" delay={600}>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <BookOpen className="h-4 w-4 text-indigo-500" />
+                  Learning Resources
+                </CardTitle>
+                <CardDescription>
+                  Improve your skills with these resources
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <LearningResources />
+              </CardContent>
+            </Card>
+          </AnimatedSection>
+        </ResizablePanel>
+
         {!isMobile && (
           <>
             <ResizableHandle withHandle />
             
             <ResizablePanel defaultSize={15} minSize={10}>
-              <AnimatedSection animation="slide-in-left" delay={500}>
+              <AnimatedSection animation="slide-in-left" delay={700}>
                 <SavedItemsTracker />
               </AnimatedSection>
             </ResizablePanel>
@@ -313,7 +417,7 @@ const DiscoverSidebar: React.FC<DiscoverSidebarProps> = ({
             <ResizableHandle withHandle />
 
             <ResizablePanel defaultSize={15} minSize={10}>
-              <AnimatedSection animation="slide-in-left" delay={600}>
+              <AnimatedSection animation="slide-in-left" delay={800}>
                 <MarketplaceChat />
               </AnimatedSection>
             </ResizablePanel>

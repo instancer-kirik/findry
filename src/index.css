@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -151,7 +150,10 @@
     @apply bg-muted rounded-full;
   }
   
-  /* New UI enhancement classes */
+  .thin-scrollbar:hover::-webkit-scrollbar-thumb {
+    @apply bg-muted/80;
+  }
+  
   .hover-card {
     @apply transition-all duration-200 hover:shadow-md hover:-translate-y-0.5;
   }
@@ -184,33 +186,47 @@
   .user-circle-item {
     @apply transition-all duration-200 hover:bg-muted/70 rounded-md;
   }
+
+  .activity-item {
+    @apply transition-all duration-200 hover:bg-muted/70 rounded-md relative overflow-hidden;
+  }
+  
+  .activity-item::before {
+    content: '';
+    @apply absolute -inset-1 rounded bg-gradient-to-r from-primary/10 to-transparent opacity-0 transition-opacity duration-300;
+  }
+  
+  .activity-item:hover::before {
+    @apply opacity-100;
+  }
 }
 
-/* Utility animations */
-.animate-delay-100 {
-  animation-delay: 100ms;
-}
+@layer utilities {
+  .animate-delay-100 {
+    animation-delay: 100ms;
+  }
 
-.animate-delay-200 {
-  animation-delay: 200ms;
-}
+  .animate-delay-200 {
+    animation-delay: 200ms;
+  }
 
-.animate-delay-300 {
-  animation-delay: 300ms;
-}
+  .animate-delay-300 {
+    animation-delay: 300ms;
+  }
 
-.animate-delay-400 {
-  animation-delay: 400ms;
-}
+  .animate-delay-400 {
+    animation-delay: 400ms;
+  }
 
-.animate-delay-500 {
-  animation-delay: 500ms;
-}
+  .animate-delay-500 {
+    animation-delay: 500ms;
+  }
 
-.animate-delay-700 {
-  animation-delay: 700ms;
-}
+  .animate-delay-700 {
+    animation-delay: 700ms;
+  }
 
-.animate-delay-1000 {
-  animation-delay: 1000ms;
+  .animate-delay-1000 {
+    animation-delay: 1000ms;
+  }
 }
