@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -22,6 +23,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 const artistProfileSchema = z.object({
   displayName: z.string().min(2, { message: 'Display name must be at least 2 characters' }),
@@ -62,6 +65,7 @@ const musicStyles = [
 
 const ArtistProfileForm: React.FC = () => {
   const [selectedDiscipline, setSelectedDiscipline] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Initialize form with react-hook-form
   const form = useForm<ArtistProfileFormValues>({
@@ -100,9 +104,68 @@ const ArtistProfileForm: React.FC = () => {
 
   const styles = getStylesForDiscipline(selectedDiscipline);
 
+  const onSubmit = async (data: ArtistProfileFormValues) => {
+    setIsSubmitting(true);
+    try {
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !userData.user) {
+        throw new Error('You must be logged in to create a profile');
+      }
+      
+      const userId = userData.user.id;
+      
+      // Check if profile exists
+      const { data: existingProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', userId)
+        .single();
+        
+      if (profileError && profileError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+        throw profileError;
+      }
+      
+      // Prepare profile data
+      const profileData = {
+        id: userId,
+        username: data.displayName.toLowerCase().replace(/\s+/g, '_'),
+        full_name: data.displayName,
+        bio: data.bio,
+        updated_at: new Date().toISOString()
+      };
+      
+      // Insert or update profile
+      const operation = existingProfile 
+        ? supabase.from('profiles').update(profileData).eq('id', userId)
+        : supabase.from('profiles').insert([profileData]);
+        
+      const { error: updateError } = await operation;
+      
+      if (updateError) {
+        throw updateError;
+      }
+      
+      toast({
+        title: "Profile saved",
+        description: "Your artist profile has been updated successfully.",
+      });
+      
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      toast({
+        title: "Error",
+        description: "There was a problem saving your profile. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <Form {...form}>
-      <form className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
@@ -322,6 +385,10 @@ const ArtistProfileForm: React.FC = () => {
             )}
           />
         )}
+        
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Saving...' : 'Save Profile'}
+        </Button>
       </form>
     </Form>
   );
