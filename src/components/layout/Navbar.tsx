@@ -1,27 +1,40 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
-  Search, 
-  Bell, 
-  Menu, 
-  X, 
-  User,
+  Menu,
+  X,
+  Compass,
+  Layers,
+  Globe,
+  UsersRound,
+  Bell,
+  Search,
+  Settings,
   MessageSquare,
   Calendar,
-  Compass,
-  UsersRound,
-  Layers,
-  CalendarClock,
-  CalendarDays,
-  CalendarCheck,
   CalendarHeart,
   MessagesSquare,
   Users,
-  Settings,
+  Star,
   Sparkles
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,476 +43,269 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { 
+  Avatar,
+  AvatarFallback,
+  AvatarImage 
+} from "@/components/ui/avatar";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetClose,
-} from "@/components/ui/sheet";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
-import { cn } from "@/lib/utils";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
+import ThemeNavbarToggle from './ThemeNavbarToggle';
 import { useToast } from "@/hooks/use-toast";
+import { cn } from '@/lib/utils';
+
+const ListItem = React.forwardRef<
+  React.ElementRef<"a">,
+  React.ComponentPropsWithoutRef<"a"> & { title: string }
+>(({ className, title, children, ...props }, ref) => {
+  return (
+    <li>
+      <a
+        ref={ref}
+        className={cn(
+          "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+          className
+        )}
+        {...props}
+      >
+        <div className="text-sm font-medium leading-none">{title}</div>
+        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+          {children}
+        </p>
+      </a>
+    </li>
+  )
+})
+ListItem.displayName = "ListItem"
 
 const Navbar: React.FC = () => {
   const location = useLocation();
-  const [isLoggedIn, setIsLoggedIn] = useState(true); // Set to true for now to show the user menu
-  const [notificationCount, setNotificationCount] = useState(3);
-  const [messageCount, setMessageCount] = useState(5);
-  const [communityCount, setCommunityCount] = useState(2);
+  const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const { toast } = useToast();
 
   const navLinks = [
-    { name: 'Discover', path: '/discover', icon: <Compass className="h-5 w-5" /> }, // Changed back to "Discover" with Compass icon
+    { name: 'Discover', path: '/discover', icon: <Compass className="h-5 w-5" /> },
     // Events is now handled with NavigationMenu dropdown
     { name: 'Collaboration', path: '/collaboration', icon: <UsersRound className="h-5 w-5" /> },
     { name: 'Projects', path: '/projects', icon: <Layers className="h-5 w-5" /> },
-    { name: 'Communities', path: '/communities', icon: <Users className="h-5 w-5" />, count: communityCount },
+    { name: 'Communities', path: '/communities', icon: <Users className="h-5 w-5" /> },
+    { name: 'Messages', path: '/chats', icon: <MessagesSquare className="h-5 w-5" /> },
   ];
 
-  const isActive = (path: string) => {
-    return location.pathname === path || location.pathname.startsWith(`${path}/`);
+  const notifications = [
+    { content: "New message from Alex", time: "2 minutes ago", read: false },
+    { content: "Your event 'Jazz Night' is trending", time: "1 hour ago", read: false },
+    { content: "New collaboration request from Studio 54", time: "3 hours ago", read: false },
+    { content: "Your profile was viewed by 12 people", time: "Yesterday", read: true },
+    { content: "New resources added in your area", time: "2 days ago", read: true },
+  ];
+
+  const openNotifications = () => {
+    setIsNotificationsOpen(true);
   };
 
-  const handleNotificationClick = () => {
+  const handleProfileAction = (action: string) => {
     toast({
-      title: "Notifications",
-      description: "You have " + notificationCount + " unread notifications.",
+      title: "Action triggered",
+      description: `You clicked on ${action}`,
     });
-    // Clear notifications after viewing
-    setNotificationCount(0);
   };
-
-  const handleMessageClick = () => {
-    // Navigate to chats page
-    // Using window.location to avoid needing to create a new component with useNavigate
-    if (!isActive('/chats')) {
-      window.location.href = '/chats';
-    }
-  };
-
-  const AuthButtons = () => (
-    <>
-      <Link to="/login">
-        <Button variant="outline" className="mr-2">Log In</Button>
-      </Link>
-      <Link to="/signup">
-        <Button>Sign Up</Button>
-      </Link>
-    </>
-  );
-
-  const UserMenu = () => (
-    <div className="flex items-center gap-2">
-      <Button 
-        variant="outline" 
-        size="icon" 
-        className="relative"
-        onClick={handleNotificationClick}
-      >
-        <Bell className="h-5 w-5" />
-        {notificationCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-            {notificationCount}
-          </span>
-        )}
-      </Button>
-      
-      <Button 
-        variant="outline" 
-        size="icon" 
-        className="relative"
-        onClick={handleMessageClick}
-      >
-        <MessageSquare className="h-5 w-5" />
-        {messageCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-            {messageCount}
-          </span>
-        )}
-      </Button>
-      
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src="/placeholder.svg" alt="@username" />
-              <AvatarFallback>UN</AvatarFallback>
-            </Avatar>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" align="end" forceMount>
-          <DropdownMenuLabel className="font-normal">
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">Username</p>
-              <p className="text-xs leading-none text-muted-foreground">
-                username@example.com
-              </p>
-            </div>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => {
-            toast({
-              title: "Profile",
-              description: "Your profile page will be available soon.",
-            });
-          }}>
-            <User className="mr-2 h-4 w-4" />
-            <span>Profile</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => {
-            toast({
-              title: "Calendar",
-              description: "Your calendar will be available soon.",
-            });
-          }}>
-            <Calendar className="mr-2 h-4 w-4" />
-            <span>Calendar</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => {
-            toast({
-              title: "Projects",
-              description: "Your projects will be available soon.",
-            });
-          }}>
-            <Layers className="mr-2 h-4 w-4" />
-            <span>Projects</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => {
-            toast({
-              title: "Settings",
-              description: "Settings will be available soon.",
-            });
-          }}>
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Settings</span>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setIsLoggedIn(false)}>
-            Log out
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
-  );
 
   return (
-    <nav className="bg-background py-4 px-6 border-b sticky top-0 z-40">
-      <div className="max-w-7xl mx-auto flex justify-between items-center">
-        {/* Logo */}
-        <div className="flex items-center">
-          <Link to="/" className="flex items-center">
-            <Sparkles className="h-8 w-8 text-primary mr-2" /> {/* Changed from Search to Sparkles icon */}
-            <span className="font-bold text-xl hidden sm:inline">Findry</span> {/* Changed from CreativeConnect to Findry */}
-          </Link>
-        </div>
-
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-1">
-          {navLinks.map((link) => (
-            <Link 
-              key={link.name} 
-              to={link.path}
-              className={`px-3 py-2 rounded-md text-sm font-medium flex items-center ${
-                isActive(link.path) 
-                  ? 'bg-primary/10 text-primary' 
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              {link.name}
-              {link.count && link.count > 0 && (
-                <Badge variant="secondary" className="ml-2 text-xs">
-                  {link.count}
-                </Badge>
-              )}
+    <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <div className="flex items-center">
+            <Link to="/" className="flex items-center">
+              <div className="relative h-8 w-8 mr-2">
+                <Star className="h-8 w-8 text-primary absolute" />
+                <Sparkles className="h-6 w-6 text-primary/80 absolute top-1 left-1" />
+              </div>
+              <span className="font-bold text-xl hidden sm:inline">Findry</span>
             </Link>
-          ))}
-
-          {/* Remove Chats text link from navbar - keep icon only in user menu */}
-
-          {/* Events NavigationMenu with dropdown */}
-          <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <NavigationMenuTrigger className={`${
-                  isActive('/events') 
-                    ? 'bg-primary/10 text-primary' 
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}>
-                  Events
-                </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-                    <li className="row-span-3">
-                      <NavigationMenuLink asChild>
-                        <Link
-                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
-                          to="/events"
-                        >
-                          <Calendar className="h-6 w-6" />
-                          <div className="mb-2 mt-4 text-lg font-medium">
-                            Events
-                          </div>
-                          <p className="text-sm leading-tight text-muted-foreground">
-                            Discover upcoming events and get involved with your community
-                          </p>
-                        </Link>
-                      </NavigationMenuLink>
-                    </li>
-                    <li>
-                      <Link to="/meetings" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                        <div className="flex items-center gap-2">
-                          <CalendarCheck className="h-4 w-4" />
-                          <div className="text-sm font-medium leading-none">My Calendar</div>
-                        </div>
-                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                          View and manage your scheduled events and meetings
-                        </p>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/events?filter=interested" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                        <div className="flex items-center gap-2">
-                          <CalendarHeart className="h-4 w-4" />
-                          <div className="text-sm font-medium leading-none">Interested Events</div>
-                        </div>
-                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                          Events you've shown interest in attending
-                        </p>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/events/create" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                        <div className="flex items-center gap-2">
-                          <CalendarClock className="h-4 w-4" />
-                          <div className="text-sm font-medium leading-none">Create Event</div>
-                        </div>
-                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                          Create and schedule your own events or meetings
-                        </p>
-                      </Link>
-                    </li>
-                  </ul>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
-        </div>
-
-        {/* Search Button */}
-        <div className="hidden sm:flex items-center mx-4 flex-1 max-w-md">
-          <div className="bg-gray-100 rounded-lg w-full flex items-center px-3 py-1.5">
-            <Search className="h-5 w-5 text-gray-500 mr-2" />
-            <input 
-              type="text" 
-              placeholder="Search Findry" /* Changed from CreativeConnect to Findry */
-              className="bg-transparent border-none flex-1 focus:outline-none text-sm"
-            />
           </div>
-        </div>
 
-        {/* Auth / User Menu - Desktop */}
-        <div className="hidden md:flex items-center">
-          {isLoggedIn ? <UserMenu /> : <AuthButtons />}
-        </div>
-
-        {/* Mobile Navigation */}
-        <div className="flex md:hidden items-center space-x-2">
-          <Button 
-            variant="outline" 
-            size="icon" 
-            className="md:hidden"
-            onClick={() => {
-              toast({
-                title: "Search",
-                description: "Search functionality will be available soon.",
-              });
-            }}
-          >
-            <Search className="h-5 w-5" />
-          </Button>
-          
-          {isLoggedIn && (
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="relative md:hidden"
-              onClick={handleNotificationClick}
-            >
-              <Bell className="h-5 w-5" />
-              {notificationCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {notificationCount}
-                </span>
-              )}
-            </Button>
-          )}
-
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="md:hidden">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[250px] sm:w-[300px]">
-              <SheetHeader className="mb-4">
-                <SheetTitle>Menu</SheetTitle>
-                <SheetDescription>
-                  Navigate Findry {/* Changed from CreativeConnect to Findry */}
-                </SheetDescription>
-              </SheetHeader>
-              
-              {isLoggedIn && (
-                <div className="flex items-center space-x-2 mb-6 pb-4 border-b">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src="/placeholder.svg" alt="@username" />
-                    <AvatarFallback>UN</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="text-sm font-medium">Username</p>
-                    <p className="text-xs text-muted-foreground">View profile</p>
-                  </div>
-                </div>
-              )}
-              
-              <div className="space-y-1 py-2">
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-1">
+            {/* Desktop Navigation Menu */}
+            <NavigationMenu>
+              <NavigationMenuList>
                 {navLinks.map((link) => (
-                  <SheetClose asChild key={link.name}>
+                  <NavigationMenuItem key={link.name}>
+                    <Link to={link.path}>
+                      <NavigationMenuLink 
+                        className={cn(
+                          "group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50",
+                          location.pathname === link.path || location.pathname.startsWith(link.path + '/') 
+                            ? "bg-accent/50 text-accent-foreground" 
+                            : "text-foreground/70"
+                        )}
+                      >
+                        {link.icon}
+                        <span className="ml-2">{link.name}</span>
+                      </NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
+                ))}
+                
+                {/* Events Dropdown */}
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger 
+                    className={cn(
+                      location.pathname === '/events' || location.pathname.startsWith('/events/') 
+                        ? "bg-accent/50 text-accent-foreground" 
+                        : "text-foreground/70"
+                    )}
+                  >
+                    <Calendar className="h-5 w-5 mr-2" />
+                    Events
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid w-[200px] gap-3 p-4">
+                      <ListItem href="/events" title="All Events">
+                        Browse all upcoming events
+                      </ListItem>
+                      <ListItem href="/events/interested" title="My Events">
+                        Events you're interested in
+                      </ListItem>
+                      <ListItem href="/events/create" title="Create Event">
+                        Host your own event
+                      </ListItem>
+                      <ListItem href="/meetings" title="Meetings">
+                        Schedule 1:1 meetings
+                      </ListItem>
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+          </div>
+
+          {/* Right section: search, notifications, profile */}
+          <div className="flex items-center">
+            <div className="hidden md:flex items-center mr-4 relative bg-muted/50 rounded-full px-3 py-1.5">
+              <Search className="h-5 w-5 text-gray-500 mr-2" />
+              <input 
+                type="text" 
+                placeholder="Search Findry"
+                className="bg-transparent border-none flex-1 focus:outline-none text-sm"
+              />
+            </div>
+
+            {/* Notifications */}
+            <Popover open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative mr-2" onClick={openNotifications}>
+                  <Bell className="h-5 w-5" />
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
+                    3
+                  </span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-80 p-0">
+                <div className="p-4 border-b">
+                  <h3 className="font-medium">Notifications</h3>
+                </div>
+                <div className="max-h-80 overflow-y-auto">
+                  {notifications.map((notification, index) => (
+                    <div key={index} className="p-3 border-b hover:bg-muted/50 cursor-pointer flex items-start gap-3">
+                      <span className={`h-2 w-2 mt-2 flex-shrink-0 rounded-full ${notification.read ? 'bg-muted' : 'bg-primary'}`} />
+                      <div>
+                        <p className="text-sm">{notification.content}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{notification.time}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="p-2 border-t text-center">
+                  <Button variant="ghost" size="sm" className="w-full text-primary">Mark all as read</Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            {/* Profile Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar>
+                    <AvatarImage src="https://github.com/shadcn.png" alt="User" />
+                    <AvatarFallback>CN</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleProfileAction('profile')}>Profile</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleProfileAction('settings')}>Settings</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleProfileAction('billing')}>Billing</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleProfileAction('logout')}>Log out</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <ThemeNavbarToggle />
+
+            {/* Mobile menu button */}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden ml-2">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right">
+                <SheetHeader className="mb-4">
+                  <SheetTitle>Menu</SheetTitle>
+                  <SheetDescription>
+                    Navigate Findry
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="grid gap-4">
+                  {navLinks.map((link) => (
                     <Link 
+                      key={link.name}
                       to={link.path}
-                      className={`flex items-center py-2 px-3 rounded-md text-sm ${
-                        isActive(link.path) 
-                          ? 'bg-primary/10 text-primary' 
-                          : 'hover:bg-gray-100'
-                      }`}
+                      className={cn(
+                        "flex items-center px-4 py-2 rounded-md transition-colors hover:bg-muted",
+                        location.pathname === link.path || location.pathname.startsWith(link.path + '/') 
+                          ? "bg-muted" 
+                          : ""
+                      )}
                     >
                       {link.icon}
                       <span className="ml-2">{link.name}</span>
-                      {link.count && link.count > 0 && (
-                        <Badge variant="secondary" className="ml-auto">
-                          {link.count}
-                        </Badge>
-                      )}
                     </Link>
-                  </SheetClose>
-                ))}
-
-                {/* Modified Chats Link to match MessageSquare icon in mobile menu */}
-                <SheetClose asChild>
-                  <Link 
-                    to="/chats"
-                    className={`flex items-center py-2 px-3 rounded-md text-sm ${
-                      isActive('/chats') 
-                        ? 'bg-primary/10 text-primary' 
-                        : 'hover:bg-gray-100'
-                    }`}
-                  >
-                    <MessagesSquare className="h-5 w-5" />
-                    <span className="ml-2">Messages</span> {/* Changed from "Chats" to "Messages" */}
-                    {messageCount > 0 && (
-                      <Badge variant="secondary" className="ml-auto">
-                        {messageCount}
-                      </Badge>
-                    )}
-                  </Link>
-                </SheetClose>
-
-                {/* Events section in mobile view */}
-                <div className="pt-2">
-                  <p className="px-3 text-sm font-medium text-muted-foreground">Events</p>
-                  <SheetClose asChild>
-                    <Link 
-                      to="/events"
-                      className={`flex items-center py-2 px-3 rounded-md text-sm ${
-                        isActive('/events') && !location.pathname.includes('create') && !location.pathname.includes('interested')
-                          ? 'bg-primary/10 text-primary' 
-                          : 'hover:bg-gray-100'
-                      }`}
-                    >
-                      <Calendar className="h-5 w-5 mr-2" />
-                      <span>All Events</span>
+                  ))}
+                  
+                  <div className="border-t my-2 pt-4">
+                    <h3 className="px-4 mb-2 text-sm font-medium">Events</h3>
+                    <Link to="/events" className="flex items-center px-4 py-2 rounded-md transition-colors hover:bg-muted text-sm">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      All Events
                     </Link>
-                  </SheetClose>
-                  <SheetClose asChild>
-                    <Link 
-                      to="/meetings"
-                      className={`flex items-center py-2 px-3 rounded-md text-sm ${
-                        isActive('/meetings') 
-                          ? 'bg-primary/10 text-primary' 
-                          : 'hover:bg-gray-100'
-                      }`}
-                    >
-                      <CalendarCheck className="h-5 w-5 mr-2" />
-                      <span>My Calendar</span>
+                    <Link to="/events/interested" className="flex items-center px-4 py-2 rounded-md transition-colors hover:bg-muted text-sm">
+                      <CalendarHeart className="h-4 w-4 mr-2" />
+                      My Events
                     </Link>
-                  </SheetClose>
-                  <SheetClose asChild>
-                    <Link 
-                      to="/events?filter=interested"
-                      className={`flex items-center py-2 px-3 rounded-md text-sm ${
-                        location.pathname.includes('interested')
-                          ? 'bg-primary/10 text-primary' 
-                          : 'hover:bg-gray-100'
-                      }`}
-                    >
-                      <CalendarHeart className="h-5 w-5 mr-2" />
-                      <span>Interested Events</span>
+                    <Link to="/events/create" className="flex items-center px-4 py-2 rounded-md transition-colors hover:bg-muted text-sm">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Create Event
                     </Link>
-                  </SheetClose>
-                  <SheetClose asChild>
-                    <Link 
-                      to="/events/create"
-                      className={`flex items-center py-2 px-3 rounded-md text-sm ${
-                        location.pathname.includes('create')
-                          ? 'bg-primary/10 text-primary' 
-                          : 'hover:bg-gray-100'
-                      }`}
-                    >
-                      <CalendarClock className="h-5 w-5 mr-2" />
-                      <span>Create Event</span>
+                    <Link to="/meetings" className="flex items-center px-4 py-2 rounded-md transition-colors hover:bg-muted text-sm">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Meetings
                     </Link>
-                  </SheetClose>
-                </div>
-              </div>
-              
-              <div className="mt-6 pt-4 border-t">
-                {isLoggedIn ? (
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => setIsLoggedIn(false)}
-                  >
-                    Log out
-                  </Button>
-                ) : (
-                  <div className="flex flex-col space-y-2">
-                    <SheetClose asChild>
-                      <Link to="/login">
-                        <Button variant="outline" className="w-full">Log In</Button>
-                      </Link>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <Link to="/signup">
-                        <Button className="w-full">Sign Up</Button>
-                      </Link>
-                    </SheetClose>
                   </div>
-                )}
-              </div>
-            </SheetContent>
-          </Sheet>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </nav>

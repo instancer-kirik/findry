@@ -92,10 +92,10 @@ const Index: React.FC = () => {
         </AnimatedSection>
 
         <AnimatedSection animation="fade-in-up" delay={200}>
-          <div className="text-center mt-8">
+          <div className="flex justify-center mt-8">
             <Button asChild size="lg">
-              <Link to="/discover">
-                Explore More <ArrowRight className="ml-2" />
+              <Link to="/discover" className="flex items-center">
+                Explore More <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </div>
