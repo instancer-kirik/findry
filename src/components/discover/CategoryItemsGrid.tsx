@@ -51,7 +51,7 @@ const CategoryItemsGrid: React.FC<CategoryItemsGridProps> = ({ items, isLoading 
       case 'projects':
         return 'project';
       default:
-        return 'artist';
+        return 'creative';
     }
   };
 
@@ -59,19 +59,24 @@ const CategoryItemsGrid: React.FC<CategoryItemsGridProps> = ({ items, isLoading 
     const profileType = getProfileType(type);
     switch (profileType) {
       case 'artist':
+      case 'creative':
         return <Music className="h-5 w-5" />;
       case 'brand':
         return <Store className="h-5 w-5" />;
       case 'venue':
         return <Building className="h-5 w-5" />;
       case 'resource':
+      case 'service':
         return <Bot className="h-5 w-5" />;
       case 'community':
+      case 'organization':
         return <Users className="h-5 w-5" />;
       case 'event':
         return <Calendar className="h-5 w-5" />;
       case 'project':
         return <Briefcase className="h-5 w-5" />;
+      case 'user':
+        return <User className="h-5 w-5" />;
       default:
         return <Users className="h-5 w-5" />;
     }
@@ -81,34 +86,52 @@ const CategoryItemsGrid: React.FC<CategoryItemsGridProps> = ({ items, isLoading 
     const profileType = getProfileType(type);
     switch (profileType) {
       case 'artist':
+      case 'creative':
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
       case 'brand':
         return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300';
       case 'venue':
         return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300';
       case 'resource':
+      case 'service':
         return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300';
       case 'community':
+      case 'organization':
         return 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300';
       case 'event':
         return 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300';
       case 'project':
         return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300';
+      case 'user':
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
     }
   };
 
   const handleViewProfile = (item: ContentItemProps) => {
-    // In a real app, navigate to the profile page
+    // Navigate to the appropriate profile page based on the type
     console.log('Navigating to profile:', item.id);
-    // navigate(`/profile/${item.id}`);
     
-    // For now, just show a toast
-    toast({
-      title: `Viewing profile for ${item.name}`,
-      description: `Type: ${item.type}, Location: ${item.location}`,
-    });
+    // Add proper routing based on item type
+    const type = item.type.toLowerCase();
+    if (type === 'artist' || type === 'artists') {
+      navigate(`/artists/${item.id}`);
+    } else if (type === 'venue' || type === 'venues') {
+      navigate(`/venues/${item.id}`);
+    } else if (type === 'event' || type === 'events') {
+      navigate(`/events/${item.id}`);
+    } else if (type === 'project' || type === 'projects') {
+      navigate(`/projects/${item.id}`);
+    } else if (type === 'resource' || type === 'resources') {
+      navigate(`/resources/${item.id}`);
+    } else if (type === 'community' || type === 'communities') {
+      navigate(`/communities/${item.id}`);
+    } else if (type === 'brand' || type === 'brands') {
+      navigate(`/brands/${item.id}`);
+    } else {
+      navigate(`/profile/${item.id}`);
+    }
   };
 
   if (isLoading) {
