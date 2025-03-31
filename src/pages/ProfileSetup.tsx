@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Check } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -21,12 +22,94 @@ import { Loader2 } from 'lucide-react';
 
 const ProfileSetup: React.FC = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<ProfileType>('artist');
   const [useWizard, setUseWizard] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // For the step-by-step wizard approach
+  const [wizardStep, setWizardStep] = useState(1);
+  const totalWizardSteps = 4;
 
   const handleSkip = () => {
+    toast({
+      title: "Profile setup skipped",
+      description: "You can complete your profile anytime from your settings.",
+    });
     navigate('/');
+  };
+
+  const handleStepChange = (direction: 'next' | 'prev') => {
+    if (direction === 'next') {
+      if (wizardStep < totalWizardSteps) {
+        setWizardStep(wizardStep + 1);
+      } else {
+        // Profile completed
+        toast({
+          title: "Profile setup complete!",
+          description: "Your profile has been successfully created.",
+        });
+        navigate('/');
+      }
+    } else {
+      if (wizardStep > 1) {
+        setWizardStep(wizardStep - 1);
+      }
+    }
+  };
+
+  // Wizard step content
+  const renderWizardStep = () => {
+    switch (wizardStep) {
+      case 1:
+        return (
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold">Basic Information</h3>
+            <p className="text-muted-foreground">
+              Let's start with some basic information about your profile.
+            </p>
+            <ArtistProfileForm isWizardStep={true} />
+          </div>
+        );
+      case 2:
+        return (
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold">Portfolio & Skills</h3>
+            <p className="text-muted-foreground">
+              Add your portfolio items and highlight your main skills.
+            </p>
+            <div className="p-8 border rounded-md border-dashed text-center">
+              <p className="text-muted-foreground">Portfolio section content</p>
+            </div>
+          </div>
+        );
+      case 3:
+        return (
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold">Connections & Preferences</h3>
+            <p className="text-muted-foreground">
+              Set up your connection preferences and discovery settings.
+            </p>
+            <div className="p-8 border rounded-md border-dashed text-center">
+              <p className="text-muted-foreground">Connections section content</p>
+            </div>
+          </div>
+        );
+      case 4:
+        return (
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold">Review Your Profile</h3>
+            <p className="text-muted-foreground">
+              Let's review everything before finalizing your profile.
+            </p>
+            <div className="p-8 border rounded-md border-dashed text-center">
+              <p className="text-muted-foreground">Profile review section</p>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
   };
 
   return (
@@ -38,10 +121,12 @@ const ProfileSetup: React.FC = () => {
               <>
                 <div className="flex justify-between items-center mb-6">
                   <h1 className="text-3xl font-bold">Complete Your Profile</h1>
-                  <Button variant="outline" onClick={() => setUseWizard(true)}>
-                    Use Wizard
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => setUseWizard(true)}>
+                      Step-by-Step Wizard
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
                 
                 <Card>
@@ -109,13 +194,83 @@ const ProfileSetup: React.FC = () => {
                 <div className="flex justify-between items-center mb-6">
                   <h1 className="text-3xl font-bold">Profile Wizard</h1>
                   <Button variant="outline" onClick={() => setUseWizard(false)}>
-                    Simple Mode
+                    Standard Mode
                   </Button>
                 </div>
-                <ProfileWizard 
+                
+                <Card>
+                  <CardHeader>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <CardTitle className="text-2xl">Profile Setup</CardTitle>
+                        <CardDescription>
+                          Complete your profile step by step
+                        </CardDescription>
+                      </div>
+                      <div className="text-sm font-medium">
+                        Step {wizardStep} of {totalWizardSteps}
+                      </div>
+                    </div>
+                    
+                    {/* Progress bar */}
+                    <div className="w-full bg-muted h-2 rounded-full mt-4">
+                      <div 
+                        className="bg-primary h-2 rounded-full transition-all duration-300" 
+                        style={{ width: `${(wizardStep / totalWizardSteps) * 100}%` }}
+                      ></div>
+                    </div>
+                  </CardHeader>
+                  
+                  <CardContent className="py-6">
+                    {renderWizardStep()}
+                  </CardContent>
+                  
+                  <CardFooter className="flex justify-between">
+                    <div>
+                      {wizardStep > 1 ? (
+                        <Button 
+                          variant="outline" 
+                          onClick={() => handleStepChange('prev')}
+                        >
+                          <ArrowLeft className="mr-2 h-4 w-4" />
+                          Back
+                        </Button>
+                      ) : (
+                        <Button variant="outline" onClick={handleSkip}>
+                          Skip for now
+                        </Button>
+                      )}
+                    </div>
+                    
+                    <Button 
+                      onClick={() => handleStepChange('next')}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Processing
+                        </>
+                      ) : wizardStep === totalWizardSteps ? (
+                        <>
+                          Complete Profile
+                          <Check className="ml-2 h-4 w-4" />
+                        </>
+                      ) : (
+                        <>
+                          Next Step
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </>
+                      )}
+                    </Button>
+                  </CardFooter>
+                </Card>
+                
+                {/* Alternative full wizard component */}
+                {/* <ProfileWizard 
                   initialProfileType={activeTab} 
                   onComplete={() => navigate('/')}
-                />
+                /> */}
               </>
             )}
           </div>

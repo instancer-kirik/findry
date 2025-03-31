@@ -53,21 +53,6 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
     return () => document.removeEventListener("keydown", down);
   }, []);
 
-  // Group tags by first letter for command menu
-  const groupedTags = React.useMemo(() => {
-    const groups: Record<string, string[]> = {};
-    
-    allTags.forEach(tag => {
-      const firstLetter = tag.charAt(0).toUpperCase();
-      if (!groups[firstLetter]) {
-        groups[firstLetter] = [];
-      }
-      groups[firstLetter].push(tag);
-    });
-    
-    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
-  }, [allTags]);
-
   return (
     <>
       <AnimatedSection animation="fade-in-up">
@@ -160,9 +145,9 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
             </CommandItem>
           </CommandGroup>
           
-          {groupedTags.map(([letter, tags]) => (
-            <CommandGroup key={letter} heading={`Tags - ${letter}`}>
-              {tags.map((tag) => (
+          {allTags.length > 0 && (
+            <CommandGroup heading="Popular Tags">
+              {allTags.slice(0, 10).map((tag) => (
                 <CommandItem
                   key={tag}
                   onSelect={() => {
@@ -176,7 +161,7 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
                 </CommandItem>
               ))}
             </CommandGroup>
-          ))}
+          )}
         </CommandList>
       </CommandDialog>
     </>

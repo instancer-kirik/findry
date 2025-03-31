@@ -2,35 +2,19 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
-import MarketplaceFilters from '../components/marketplace/MarketplaceFilters';
 import { ContentItemProps } from '../components/marketplace/ContentCard';
 import { Button } from '@/components/ui/button';
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, Grip, Check, X } from 'lucide-react';
-import { Checkbox } from '@/components/ui/checkbox';
+import { ChevronLeft, ChevronRight, Grip } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
 
-// New refactored components
+// Components
 import DiscoverHeader from '../components/discover/DiscoverHeader';
 import CategoryTabs from '../components/discover/CategoryTabs';
 import CategoryItemsGrid from '../components/discover/CategoryItemsGrid';
 import DiscoverSidebar from '../components/discover/DiscoverSidebar';
+import UnifiedFilters from '../components/discover/UnifiedFilters';
+import AnimatedSection from '../components/ui-custom/AnimatedSection';
 
 // Import data
 import {
@@ -46,7 +30,6 @@ import {
   availableTabs
 } from '../components/discover/DiscoverData';
 
-import AnimatedSection from '../components/ui-custom/AnimatedSection';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
@@ -179,8 +162,21 @@ const Discover: React.FC = () => {
     setDisciplinaryType(type);
   };
 
-  const handleSubfilterSelect = (values: string[]) => {
-    setSelectedSubfilters(values);
+  const handleSubfilterSelect = (filter: string) => {
+    if (selectedSubfilters.includes(filter)) {
+      setSelectedSubfilters(selectedSubfilters.filter(f => f !== filter));
+    } else {
+      setSelectedSubfilters([...selectedSubfilters, filter]);
+    }
+  };
+
+  const clearSubfilters = () => {
+    setSelectedSubfilters([]);
+    form.reset({ subfilters: [] });
+  };
+
+  const clearTags = () => {
+    setSelectedTags([]);
   };
 
   // Get available subfilters based on active tab
@@ -248,106 +244,6 @@ const Discover: React.FC = () => {
     return labels[tab] || tab.charAt(0).toUpperCase() + tab.slice(1);
   };
 
-  const getSubTabLabel = (tab: string) => {
-    return tab.charAt(0).toUpperCase() + tab.slice(1);
-  };
-
-  const renderSubTabs = (tabKey: string) => {
-    const subcategories = tabSubcategories[tabKey] || [];
-    
-    return (
-      <div className="mb-4">
-        <div className="flex flex-col space-y-4">
-          <Tabs value={activeSubTab} onValueChange={handleSubTabChange}>
-            <TabsList className="w-full overflow-x-auto flex">
-              <TabsTrigger value="all">All</TabsTrigger>
-              {subcategories.map(subTab => (
-                <TabsTrigger key={subTab} value={subTab}>
-                  {getSubTabLabel(subTab)}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-          
-          {/* Multi-select filter */}
-          <div className="flex flex-col md:flex-row gap-3 items-start">
-            <Form {...form}>
-              <FormField
-                control={form.control}
-                name="subfilters"
-                render={({ field }) => (
-                  <FormItem className="w-full md:w-80">
-                    <Select
-                      onValueChange={(value) => {
-                        const values = [...field.value];
-                        if (!values.includes(value)) {
-                          values.push(value);
-                          field.onChange(values);
-                          handleSubfilterSelect(values);
-                        }
-                      }}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={`Add ${getTabLabel(activeTab)} filters...`} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Available Filters</SelectLabel>
-                          {getAvailableSubfilters().map((subfilter) => (
-                            <SelectItem 
-                              key={subfilter.value} 
-                              value={subfilter.value}
-                              disabled={selectedSubfilters.includes(subfilter.value)}
-                            >
-                              {subfilter.label}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )}
-              />
-            </Form>
-            
-            {selectedSubfilters.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {selectedSubfilters.map(filter => (
-                  <Badge 
-                    key={filter} 
-                    variant="secondary"
-                    className="flex items-center gap-1 cursor-pointer hover:bg-destructive/10 transition-colors"
-                    onClick={() => {
-                      const updatedFilters = selectedSubfilters.filter(f => f !== filter);
-                      setSelectedSubfilters(updatedFilters);
-                      form.setValue('subfilters', updatedFilters);
-                    }}
-                  >
-                    {filter}
-                    <X className="h-3 w-3 ml-1" />
-                  </Badge>
-                ))}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedSubfilters([]);
-                    form.setValue('subfilters', []);
-                  }}
-                  className="text-xs"
-                >
-                  Clear all
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
@@ -372,10 +268,11 @@ const Discover: React.FC = () => {
 
             {showFilters && (
               <AnimatedSection animation="fade-in-down" delay={200}>
-                <MarketplaceFilters 
+                <UnifiedFilters 
                   allTags={allTags} 
                   selectedTags={selectedTags} 
                   onTagSelect={handleTagSelect}
+                  onTagClear={clearTags}
                   userType={userType}
                   onUserTypeChange={handleUserTypeChange}
                   resourceType={resourceType}
@@ -385,25 +282,41 @@ const Discover: React.FC = () => {
                   disciplinaryType={disciplinaryType}
                   onDisciplinaryTypeChange={handleDisciplinaryTypeChange}
                   activeTab={activeTab}
+                  selectedSubfilters={selectedSubfilters}
+                  onSubfilterSelect={handleSubfilterSelect}
+                  onSubfilterClear={clearSubfilters}
+                  availableSubfilters={getAvailableSubfilters()}
                   onClose={() => setShowFilters(false)}
                 />
               </AnimatedSection>
             )}
 
-            <CategoryTabs 
-              activeTab={activeTab}
-              handleTabChange={handleTabChange}
-              activeSubTab={activeSubTab}
-              handleSubTabChange={handleSubTabChange}
-              availableTabs={availableTabs}
-              tabSubcategories={tabSubcategories}
-              renderSubTabs={renderSubTabs}
-              getActiveItems={getActiveItems}
-              getTabLabel={getTabLabel}
-              renderTabContent={(items) => (
-                <CategoryItemsGrid items={items} />
-              )}
-            />
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full mb-6">
+              <TabsList className="w-full overflow-x-auto flex">
+                {availableTabs.map((tab) => (
+                  <TabsTrigger key={tab} value={tab}>
+                    {getTabLabel(tab)}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+
+            {activeTab && tabSubcategories[activeTab] && (
+              <div className="mb-6">
+                <Tabs value={activeSubTab} onValueChange={handleSubTabChange}>
+                  <TabsList className="w-full overflow-x-auto flex">
+                    <TabsTrigger value="all">All</TabsTrigger>
+                    {tabSubcategories[activeTab].map(subTab => (
+                      <TabsTrigger key={subTab} value={subTab}>
+                        {subTab.charAt(0).toUpperCase() + subTab.slice(1)}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </Tabs>
+              </div>
+            )}
+
+            <CategoryItemsGrid items={getActiveItems()} />
           </div>
           
           {/* Desktop sidebar toggle button */}
