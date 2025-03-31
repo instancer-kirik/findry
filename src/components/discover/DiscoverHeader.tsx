@@ -2,7 +2,7 @@
 import React from 'react';
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, X, Sparkles, Tag, ListFilter } from 'lucide-react';
+import { Search, Filter, X, Sparkles, Tag, ListFilter, Check } from 'lucide-react';
 import AnimatedSection from '../ui-custom/AnimatedSection';
 import { Button } from '@/components/ui/button';
 import {
