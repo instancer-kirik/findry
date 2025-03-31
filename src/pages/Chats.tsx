@@ -8,7 +8,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Search, Send, Phone, Video, MoreVertical, Users, UserPlus, Bell, FileText } from 'lucide-react';
+import { Send, Phone, Video, MoreVertical, Users, UserPlus, Bell, FileText } from 'lucide-react';
+import { PlusCircle, SearchIcon, MessageSquare } from 'lucide-react';
 
 const Chats = () => {
   const [activeChat, setActiveChat] = useState<number | null>(1);
