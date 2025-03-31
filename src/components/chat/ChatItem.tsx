@@ -18,17 +18,18 @@ interface ChatItemProps {
   };
   active: boolean;
   onClick: () => void;
+  compact?: boolean;
 }
 
-const ChatItem = ({ chat, active, onClick }: ChatItemProps) => {
+const ChatItem = ({ chat, active, onClick, compact = false }: ChatItemProps) => {
   return (
     <div 
-      className={`p-3 cursor-pointer hover:bg-muted/50 ${active ? 'bg-muted' : ''}`}
+      className={`p-3 cursor-pointer hover:bg-muted/50 transition-colors ${active ? 'bg-muted' : ''} ${compact ? 'py-2' : ''}`}
       onClick={onClick}
     >
       <div className="flex items-center gap-3">
         <div className="relative">
-          <Avatar className="h-12 w-12">
+          <Avatar className={compact ? "h-10 w-10" : "h-12 w-12"}>
             <AvatarImage src={chat.avatar} />
             <AvatarFallback>{chat.name.slice(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
@@ -39,20 +40,20 @@ const ChatItem = ({ chat, active, onClick }: ChatItemProps) => {
         
         <div className="flex-1 min-w-0">
           <div className="flex justify-between items-start mb-1">
-            <h4 className="font-medium truncate">{chat.name}</h4>
-            <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">{chat.time}</span>
+            <h4 className={`font-medium truncate ${compact ? 'text-sm' : ''}`}>{chat.name}</h4>
+            <span className={`text-xs text-muted-foreground whitespace-nowrap ml-2 ${compact ? 'text-[10px]' : ''}`}>{chat.time}</span>
           </div>
           
           <div className="flex justify-between items-center">
-            <p className="text-sm text-muted-foreground truncate">{chat.lastMessage}</p>
+            <p className={`text-sm text-muted-foreground truncate ${compact ? 'text-xs' : ''}`}>{chat.lastMessage}</p>
             {chat.unread > 0 && (
-              <Badge className="ml-2 bg-orange-500">{chat.unread}</Badge>
+              <Badge className={`ml-2 bg-primary ${compact ? 'text-[10px] px-1.5 py-0' : ''}`}>{chat.unread}</Badge>
             )}
           </div>
           
           {chat.isGroup && (
-            <div className="flex items-center mt-1 text-xs text-muted-foreground">
-              <Users className="h-3 w-3 mr-1" />
+            <div className={`flex items-center mt-1 text-xs text-muted-foreground ${compact ? 'text-[10px]' : ''}`}>
+              <Users className={`mr-1 ${compact ? 'h-2.5 w-2.5' : 'h-3 w-3'}`} />
               {chat.members} members
             </div>
           )}

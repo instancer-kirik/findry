@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -198,6 +199,36 @@
   
   .activity-item:hover::before {
     @apply opacity-100;
+  }
+  
+  /* Chat module styles */
+  .message-bubble {
+    @apply relative transition-colors duration-200;
+  }
+  
+  .message-bubble.sent {
+    @apply bg-primary text-primary-foreground rounded-tr-none;
+  }
+  
+  .message-bubble.received {
+    @apply bg-muted rounded-tl-none;
+  }
+  
+  .chat-list-item {
+    @apply transition-all duration-200 cursor-pointer hover:bg-muted/50;
+  }
+  
+  .chat-list-item.active {
+    @apply bg-muted;
+  }
+  
+  .pulse-dot {
+    @apply relative;
+  }
+  
+  .pulse-dot::after {
+    content: '';
+    @apply absolute -right-1 -top-1 h-3 w-3 rounded-full bg-primary animate-pulse;
   }
 }
 
