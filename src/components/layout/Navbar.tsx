@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -17,7 +18,8 @@ import {
   CalendarHeart,
   MessagesSquare,
   Users,
-  Settings
+  Settings,
+  Sparkles
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
@@ -60,7 +62,7 @@ const Navbar: React.FC = () => {
   const { toast } = useToast();
 
   const navLinks = [
-    { name: 'Findary', path: '/discover', icon: <Search className="h-5 w-5" /> }, // Renamed from "Discover" to "Findary" with search icon
+    { name: 'Discover', path: '/discover', icon: <Compass className="h-5 w-5" /> }, // Changed back to "Discover" with Compass icon
     // Events is now handled with NavigationMenu dropdown
     { name: 'Collaboration', path: '/collaboration', icon: <UsersRound className="h-5 w-5" /> },
     { name: 'Projects', path: '/projects', icon: <Layers className="h-5 w-5" /> },
@@ -199,8 +201,8 @@ const Navbar: React.FC = () => {
         {/* Logo */}
         <div className="flex items-center">
           <Link to="/" className="flex items-center">
-            <Search className="h-8 w-8 text-primary mr-2" /> {/* Changed from Globe to Search icon */}
-            <span className="font-bold text-xl hidden sm:inline">CreativeConnect</span>
+            <Sparkles className="h-8 w-8 text-primary mr-2" /> {/* Changed from Search to Sparkles icon */}
+            <span className="font-bold text-xl hidden sm:inline">Findry</span> {/* Changed from CreativeConnect to Findry */}
           </Link>
         </div>
 
@@ -302,7 +304,7 @@ const Navbar: React.FC = () => {
             <Search className="h-5 w-5 text-gray-500 mr-2" />
             <input 
               type="text" 
-              placeholder="Search CreativeConnect" 
+              placeholder="Search Findry" /* Changed from CreativeConnect to Findry */
               className="bg-transparent border-none flex-1 focus:outline-none text-sm"
             />
           </div>
@@ -355,7 +357,7 @@ const Navbar: React.FC = () => {
               <SheetHeader className="mb-4">
                 <SheetTitle>Menu</SheetTitle>
                 <SheetDescription>
-                  Navigate CreativeConnect
+                  Navigate Findry {/* Changed from CreativeConnect to Findry */}
                 </SheetDescription>
               </SheetHeader>
               
