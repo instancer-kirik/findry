@@ -24,6 +24,10 @@ interface ProfileWizardStepsProps {
   profileData: ProfileData;
   handleProfileDataChange: (field: string, value: string) => void;
   handleRoleAttributeChange: (role: string, field: string, value: any) => void;
+  onNext: () => void;
+  onPrevious: () => void;
+  onComplete: () => void;
+  isSubmitting: boolean;
 }
 
 const ProfileWizardSteps: React.FC<ProfileWizardStepsProps> = ({
@@ -32,7 +36,11 @@ const ProfileWizardSteps: React.FC<ProfileWizardStepsProps> = ({
   setSelectedProfileTypes,
   profileData,
   handleProfileDataChange,
-  handleRoleAttributeChange
+  handleRoleAttributeChange,
+  onNext,
+  onPrevious,
+  onComplete,
+  isSubmitting
 }) => {
   const renderStepContent = () => {
     switch (currentStep) {
@@ -40,14 +48,19 @@ const ProfileWizardSteps: React.FC<ProfileWizardStepsProps> = ({
         return (
           <ProfileTypesStep 
             selectedProfileTypes={selectedProfileTypes} 
-            setSelectedProfileTypes={setSelectedProfileTypes} 
+            setSelectedProfileTypes={setSelectedProfileTypes}
+            onNext={onNext}
+            isSubmitting={isSubmitting}
           />
         );
       case 1:
         return (
           <BasicInfoStep 
             profileData={profileData} 
-            handleProfileDataChange={handleProfileDataChange} 
+            handleProfileDataChange={handleProfileDataChange}
+            onNext={onNext}
+            onPrevious={onPrevious}
+            isSubmitting={isSubmitting}
           />
         );
       case 2:
@@ -56,10 +69,19 @@ const ProfileWizardSteps: React.FC<ProfileWizardStepsProps> = ({
             selectedProfileTypes={selectedProfileTypes}
             roleAttributes={profileData.roleAttributes}
             handleRoleAttributeChange={handleRoleAttributeChange}
+            onNext={onNext}
+            onPrevious={onPrevious}
+            isSubmitting={isSubmitting}
           />
         );
       case 3:
-        return <PreferencesStep />;
+        return (
+          <PreferencesStep 
+            onPrevious={onPrevious}
+            onComplete={onComplete}
+            isSubmitting={isSubmitting}
+          />
+        );
       default:
         return null;
     }

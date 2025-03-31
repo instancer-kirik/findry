@@ -27,7 +27,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { href: '/', icon: <Home className="h-5 w-5" />, label: 'Home' },
   { href: '/discover', icon: <Search className="h-5 w-5" />, label: 'Discover' },
-  { href: '/messages', icon: <MessageSquare className="h-5 w-5" />, label: 'Messages' },
+  { href: '/chats', icon: <MessageSquare className="h-5 w-5" />, label: 'Chats' },
   { href: '/events', icon: <Calendar className="h-5 w-5" />, label: 'Events' },
 ];
 
