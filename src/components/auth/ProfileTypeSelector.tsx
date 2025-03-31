@@ -18,8 +18,19 @@ import {
   MapPin
 } from 'lucide-react';
 
-// Update the ProfileType to include only relevant types
-export type ProfileType = 'creative' | 'organization' | 'service' | 'brand' | 'event' | 'user';
+// Update the ProfileType to include all the types used in the application
+export type ProfileType = 
+  | 'creative' 
+  | 'organization' 
+  | 'service' 
+  | 'brand' 
+  | 'event' 
+  | 'user'
+  | 'artist'
+  | 'venue'
+  | 'resource'
+  | 'community'
+  | 'project';
 
 interface ProfileOption {
   id: ProfileType;
