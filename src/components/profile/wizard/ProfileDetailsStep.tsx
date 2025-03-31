@@ -3,6 +3,7 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
 
 interface RoleAttribute {
   [key: string]: any;
@@ -12,12 +13,18 @@ interface ProfileDetailsStepProps {
   selectedProfileTypes: string[];
   roleAttributes: Record<string, RoleAttribute>;
   handleRoleAttributeChange: (role: string, field: string, value: any) => void;
+  onNext: () => void;
+  onPrevious: () => void;
+  isSubmitting: boolean;
 }
 
 const ProfileDetailsStep: React.FC<ProfileDetailsStepProps> = ({ 
   selectedProfileTypes,
   roleAttributes,
-  handleRoleAttributeChange
+  handleRoleAttributeChange,
+  onNext,
+  onPrevious,
+  isSubmitting
 }) => {
   const renderRoleFields = (role: string) => {
     switch (role) {
@@ -204,6 +211,23 @@ const ProfileDetailsStep: React.FC<ProfileDetailsStepProps> = ({
           </div>
         ))
       )}
+
+      <div className="flex justify-between pt-4">
+        <Button 
+          variant="outline" 
+          onClick={onPrevious}
+          disabled={isSubmitting}
+        >
+          Back
+        </Button>
+        
+        <Button 
+          onClick={onNext}
+          disabled={isSubmitting}
+        >
+          Next
+        </Button>
+      </div>
     </div>
   );
 };

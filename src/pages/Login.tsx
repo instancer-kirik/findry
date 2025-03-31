@@ -19,6 +19,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowRight, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 // Define the form schema with Zod
 const loginSchema = z.object({
@@ -49,8 +50,17 @@ const Login: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      // For now, we'll just simulate a successful login
       console.log('Login values:', values);
+      
+      // Sign in with Supabase
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
+      });
+      
+      if (error) {
+        throw error;
+      }
       
       // Show success toast
       toast({
@@ -59,14 +69,12 @@ const Login: React.FC = () => {
       });
       
       // Navigate to home page
-      setTimeout(() => {
-        navigate('/');
-      }, 1500);
-    } catch (error) {
+      navigate('/');
+    } catch (error: any) {
       console.error('Login error:', error);
       toast({
         title: 'Login failed',
-        description: 'Invalid email or password.',
+        description: error.message || 'Invalid email or password.',
         variant: 'destructive',
       });
     } finally {

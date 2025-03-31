@@ -3,6 +3,7 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 
 interface ProfileData {
   displayName: string;
@@ -14,11 +15,17 @@ interface ProfileData {
 interface BasicInfoStepProps {
   profileData: ProfileData;
   handleProfileDataChange: (field: string, value: string) => void;
+  onNext: () => void;
+  onPrevious: () => void;
+  isSubmitting: boolean;
 }
 
 const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ 
   profileData, 
-  handleProfileDataChange 
+  handleProfileDataChange,
+  onNext,
+  onPrevious,
+  isSubmitting
 }) => {
   return (
     <div className="space-y-6">
@@ -65,6 +72,23 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
           onChange={(e) => handleProfileDataChange('website', e.target.value)}
           placeholder="https://yourwebsite.com"
         />
+      </div>
+
+      <div className="flex justify-between pt-4">
+        <Button 
+          variant="outline" 
+          onClick={onPrevious}
+          disabled={isSubmitting}
+        >
+          Back
+        </Button>
+        
+        <Button 
+          onClick={onNext}
+          disabled={isSubmitting || !profileData.displayName}
+        >
+          Next
+        </Button>
       </div>
     </div>
   );

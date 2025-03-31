@@ -9,7 +9,8 @@ import {
   Menu, 
   X, 
   User,
-  LogIn
+  LogIn,
+  LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -117,16 +118,21 @@ const Navbar: React.FC = () => {
               </Avatar>
             </Link>
             <Button variant="ghost" size="sm" onClick={handleLogout}>
+              <LogOut className="h-4 w-4 mr-2" />
               Log Out
             </Button>
           </div>
         ) : (
           <>
             <Button variant="outline" onClick={handleLogin}>
+              <LogIn className="h-4 w-4 mr-2" />
               Log In
             </Button>
             <Link to="/signup">
-              <Button>Sign Up</Button>
+              <Button>
+                <User className="h-4 w-4 mr-2" />
+                Sign Up
+              </Button>
             </Link>
           </>
         )}
@@ -171,7 +177,7 @@ const Navbar: React.FC = () => {
                   handleLogout();
                   setOpen(false);
                 }}>
-                  <LogIn className="mr-2 h-4 w-4" />
+                  <LogOut className="mr-2 h-4 w-4" />
                   Log Out
                 </Button>
               </>

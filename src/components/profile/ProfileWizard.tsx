@@ -232,39 +232,12 @@ const ProfileWizard: React.FC<{
               profileData={profileData}
               handleProfileDataChange={handleProfileDataChange}
               handleRoleAttributeChange={handleRoleAttributeChange}
+              onNext={handleNext}
+              onPrevious={handlePrevious}
+              onComplete={handleSubmit}
+              isSubmitting={isSubmitting}
             />
           </CardContent>
-          
-          <CardFooter className="flex justify-between">
-            <Button 
-              variant="outline" 
-              onClick={handlePrevious}
-              disabled={currentStep === 0}
-            >
-              Back
-            </Button>
-            
-            <Button 
-              onClick={currentStep < steps.length - 1 ? handleNext : handleSubmit}
-              disabled={isSubmitting || 
-                (currentStep === 0 && selectedProfileTypes.length === 0) ||
-                (currentStep === 1 && !profileData.displayName)}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : currentStep < steps.length - 1 ? (
-                <>
-                  Next
-                  <ChevronRight className="ml-2 h-4 w-4" />
-                </>
-              ) : (
-                'Complete Setup'
-              )}
-            </Button>
-          </CardFooter>
         </Card>
       </AnimatedSection>
     </div>
