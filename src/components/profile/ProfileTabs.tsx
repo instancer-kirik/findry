@@ -93,8 +93,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({ profile, isOwnProfile }) => {
           </div>
         </TabsContent>
       )}
-    </TabsList>
-  </Tabs>
+    </Tabs>
   );
 };
 
