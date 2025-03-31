@@ -34,6 +34,11 @@ const screenshots = [
     src: "/screenshots/funnel-6.png",
     alt: "Community+Events",
     title: "Community+Events"
+  },
+  {
+    src: "/screenshots/funnel-7.png",
+    alt: "Profile Wizard",
+    title: "Profile Wizard"
   }
 ];
 
@@ -59,13 +64,13 @@ const Hero: React.FC = () => {
           
           <AnimatedSection animation="fade-in-up" delay={200}>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight">
-              Connect Creative Talent with Brands and Venues
+              Connect Creative Talent with Brands, Resources, and Venues
             </h1>
           </AnimatedSection>
           
           <AnimatedSection animation="fade-in-up" delay={300}>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Discover opportunities, build relationships, and grow your creative network with our intuitive platform designed for artists, brands, and venues.
+              Discover and create opportunities, build relationships, and grow your network with our intuitive platform designed for humans.
             </p>
           </AnimatedSection>
           

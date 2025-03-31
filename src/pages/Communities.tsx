@@ -12,18 +12,21 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import CreateCommunityModal from '@/components/communities/CreateCommunityModal';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Clock } from 'lucide-react';
 
 interface Community {
-  id: string | number;
+  id: string;
   name: string;
   description: string;
+  image: string;
   members: number;
   posts: number;
-  image: string;
-  joined: boolean;
-  new: boolean;
-  lastActivity: string;
   category: string;
+  tags: string[];
+  isMember: boolean;
+  lastActivity: string;
 }
 
 const COMMUNITY_CATEGORIES = [
@@ -32,9 +35,12 @@ const COMMUNITY_CATEGORIES = [
 
 const Communities = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedTab, setSelectedTab] = useState('all');
+  const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
   
   const { data: communitiesData, isLoading, error, refetch } = useQuery({
     queryKey: ['communities'],
@@ -77,81 +83,59 @@ const Communities = () => {
     joined: false,
     new: new Date(community.created_at).getTime() > (Date.now() - 7 * 24 * 60 * 60 * 1000),
     lastActivity: 'Recently',
-    category: community.category || 'General'
+    category: community.category || 'General',
+    tags: [],
+    isMember: false
   })) || [];
 
   const sampleCommunities: Community[] = [
     {
-      id: 1,
-      name: "Digital Artists Collective",
-      description: "A community for digital artists to collaborate and share work",
-      members: 234,
-      posts: 567,
-      image: "/placeholder.svg",
-      joined: true,
-      new: true,
-      lastActivity: "2 hours ago",
-      category: "Arts"
-    },
-    {
-      id: 2,
-      name: "Sound Engineers Hub",
-      description: "Production techniques, gear talk, and industry insights",
-      members: 198,
-      posts: 432,
-      image: "/placeholder.svg",
-      joined: true,
-      new: false,
-      lastActivity: "1 day ago",
-      category: "Music"
-    },
-    {
-      id: 3,
-      name: "Performance Artists Network",
-      description: "Connect with performance artists from around the world",
-      members: 156,
-      posts: 310,
-      image: "/placeholder.svg",
-      joined: false,
-      new: false,
-      lastActivity: "3 days ago",
-      category: "Performance"
-    },
-    {
-      id: 4,
-      name: "Film Creators Collective",
-      description: "For filmmakers, cinematographers, and film enthusiasts",
-      members: 321,
-      posts: 650,
-      image: "/placeholder.svg",
-      joined: false,
-      new: true,
-      lastActivity: "5 hours ago",
-      category: "Film"
-    },
-    {
-      id: 5,
-      name: "Urban Dance Crew",
-      description: "Street dance, urban choreography, and dance battles",
-      members: 245,
-      posts: 520,
-      image: "/placeholder.svg",
-      joined: false,
-      new: false,
-      lastActivity: "1 week ago",
-      category: "Dance"
-    },
-    {
-      id: 6,
-      name: "Indie Game Developers",
-      description: "Support network for independent game creators",
-      members: 432,
+      id: '1',
+      name: 'Digital Artists Collective',
+      description: 'A community for digital artists to share their work, get feedback, and collaborate on projects.',
+      image: '/placeholder.svg',
+      members: 1234,
       posts: 789,
-      image: "/placeholder.svg",
-      joined: true,
-      new: false,
-      lastActivity: "12 hours ago",
-      category: "Gaming"
+      category: 'Art & Design',
+      tags: ['Digital Art', 'Illustration', 'Design', 'Collaboration'],
+      isMember: true,
+      lastActivity: '2 hours ago'
+    },
+    {
+      id: '2',
+      name: 'Sound Engineers Hub',
+      description: 'Connect with fellow sound engineers, share techniques, and find collaboration opportunities.',
+      image: '/placeholder.svg',
+      members: 856,
+      posts: 432,
+      category: 'Audio',
+      tags: ['Sound Design', 'Mixing', 'Recording', 'Audio'],
+      isMember: false,
+      lastActivity: '5 hours ago'
+    },
+    {
+      id: '3',
+      name: 'Indie Game Developers',
+      description: 'A space for indie game developers to share resources, get feedback, and find team members.',
+      image: '/placeholder.svg',
+      members: 2341,
+      posts: 1234,
+      category: 'Gaming',
+      tags: ['Game Dev', 'Unity', 'Unreal', 'Indie'],
+      isMember: true,
+      lastActivity: '1 day ago'
+    },
+    {
+      id: '4',
+      name: 'Creative Writers Guild',
+      description: 'Share your stories, get feedback, and connect with other writers in this supportive community.',
+      image: '/placeholder.svg',
+      members: 987,
+      posts: 567,
+      category: 'Writing',
+      tags: ['Writing', 'Fiction', 'Poetry', 'Feedback'],
+      isMember: false,
+      lastActivity: '3 days ago'
     }
   ];
 
@@ -172,7 +156,15 @@ const Communities = () => {
   });
 
   const featuredCommunities = communities.filter(c => c.new);
-  const joinedCommunities = communities.filter(c => c.joined);
+  const joinedCommunities = communities.filter(c => c.isMember);
+
+  const handleCommunityClick = (community: Community) => {
+    setSelectedCommunity(community);
+  };
+
+  const handleViewFullProfile = (communityId: string) => {
+    navigate(`/community/${communityId}`);
+  };
 
   return (
     <Layout>
@@ -239,7 +231,7 @@ const Communities = () => {
           {/* Main Content */}
           <div className="md:col-span-2">
             <div className="flex justify-between items-center mb-6">
-              <Tabs defaultValue="all" className="w-full">
+              <Tabs defaultValue="all" className="w-full" onValueChange={setSelectedTab}>
                 <TabsList>
                   <TabsTrigger value="all">All Communities</TabsTrigger>
                   <TabsTrigger value="featured">Featured</TabsTrigger>
@@ -277,6 +269,61 @@ const Communities = () => {
             </div>
           </div>
         </div>
+
+        {/* Community Preview Modal */}
+        <Dialog open={!!selectedCommunity} onOpenChange={() => setSelectedCommunity(null)}>
+          <DialogContent className="max-w-2xl">
+            {selectedCommunity && (
+              <>
+                <DialogHeader>
+                  <DialogTitle>Community Preview</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <Avatar className="h-16 w-16">
+                      <AvatarImage src={selectedCommunity.image} />
+                      <AvatarFallback>{selectedCommunity.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h2 className="text-2xl font-bold">{selectedCommunity.name}</h2>
+                      <p className="text-muted-foreground">{selectedCommunity.category}</p>
+                    </div>
+                  </div>
+                  <p className="text-muted-foreground">{selectedCommunity.description}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedCommunity.tags.map((tag) => (
+                      <Badge key={tag} variant="secondary">{tag}</Badge>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Members</p>
+                        <p className="text-lg font-semibold">{selectedCommunity.members}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Posts</p>
+                        <p className="text-lg font-semibold">{selectedCommunity.posts}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-4">
+                    <Button variant="outline" onClick={() => setSelectedCommunity(null)}>
+                      Close
+                    </Button>
+                    <Button onClick={() => handleViewFullProfile(selectedCommunity.id)}>
+                      View Full Profile
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </Layout>
   );
@@ -301,10 +348,8 @@ const CommunityCard = ({ community }: CommunityProps) => {
               <CardDescription>{community.category}</CardDescription>
             </div>
           </div>
-          {community.new && (
-            <Badge variant="secondary" className="bg-primary/10 text-primary">
-              New
-            </Badge>
+          {community.isMember && (
+            <Badge variant="secondary">Member</Badge>
           )}
         </div>
       </CardHeader>
@@ -320,17 +365,25 @@ const CommunityCard = ({ community }: CommunityProps) => {
             <span>{community.posts}</span>
           </div>
           <div className="flex items-center gap-1">
-            <CalendarDays className="h-4 w-4" />
+            <Clock className="h-4 w-4" />
             <span>{community.lastActivity}</span>
           </div>
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0">
         <Button 
-          variant={community.joined ? "secondary" : "default"}
+          variant={community.isMember ? "outline" : "default"}
           className="w-full"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (community.isMember) {
+              // Handle leave community
+            } else {
+              // Handle join community
+            }
+          }}
         >
-          {community.joined ? "Joined" : "Join Community"}
+          {community.isMember ? "Leave Community" : "Join Community"}
         </Button>
       </CardFooter>
     </Card>
@@ -349,10 +402,8 @@ const CommunityListItem = ({ community }: CommunityProps) => {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <h3 className="font-semibold truncate">{community.name}</h3>
-              {community.new && (
-                <Badge variant="secondary" className="bg-primary/10 text-primary">
-                  New
-                </Badge>
+              {community.isMember && (
+                <Badge variant="secondary">Member</Badge>
               )}
             </div>
             <p className="text-sm text-muted-foreground truncate">{community.description}</p>
@@ -366,16 +417,24 @@ const CommunityListItem = ({ community }: CommunityProps) => {
                 <span>{community.posts}</span>
               </div>
               <div className="flex items-center gap-1">
-                <CalendarDays className="h-4 w-4" />
+                <Clock className="h-4 w-4" />
                 <span>{community.lastActivity}</span>
               </div>
             </div>
           </div>
           <Button 
-            variant={community.joined ? "secondary" : "default"}
+            variant={community.isMember ? "outline" : "default"}
             className="shrink-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (community.isMember) {
+                // Handle leave community
+              } else {
+                // Handle join community
+              }
+            }}
           >
-            {community.joined ? "Joined" : "Join Community"}
+            {community.isMember ? "Leave Community" : "Join Community"}
           </Button>
         </div>
       </CardContent>

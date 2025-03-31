@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Toaster } from '@/components/ui/toaster'
 import { ThemeProvider } from '@/hooks/use-theme'
@@ -19,6 +18,8 @@ import MeetingScheduler from './pages/MeetingScheduler'
 import Communities from './pages/Communities'
 import Chats from './pages/Chats'
 import ProfilePage from './pages/ProfilePage'
+import CommunityDashboard from '@/pages/CommunityDashboard'
+import CommunityEvents from '@/pages/CommunityEvents'
 
 import './App.css'
 
@@ -40,7 +41,8 @@ function App() {
               <Route path="/events" element={<Discover />} />
               <Route path="/venues" element={<Discover />} />
               <Route path="/communities" element={<Communities />} />
-              <Route path="/communities/:communityId" element={<Communities />} />
+              <Route path="/community/:id" element={<CommunityDashboard />} />
+              <Route path="/community/events" element={<CommunityEvents />} />
               <Route path="/chats" element={<Chats />} />
               <Route path="/chats/new" element={<Chats />} />
               <Route path="/brands" element={<Discover />} />
