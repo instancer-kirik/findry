@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -35,6 +35,18 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate('/');
+      }
+    };
+    
+    checkSession();
+  }, [navigate]);
+
   // Initialize form with react-hook-form
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -50,7 +62,7 @@ const Login: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      console.log('Login values:', values);
+      console.log('Login attempt with:', values.email);
       
       // Sign in with Supabase
       const { data, error } = await supabase.auth.signInWithPassword({

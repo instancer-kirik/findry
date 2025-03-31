@@ -28,17 +28,17 @@ const ProfileDetailsStep: React.FC<ProfileDetailsStepProps> = ({
 }) => {
   const renderRoleFields = (role: string) => {
     switch (role) {
-      case 'artist':
+      case 'creative':
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor={`${role}-art-styles`}>Art Styles</Label>
+              <Label htmlFor={`${role}-creative-types`}>Creative Fields</Label>
               <Input 
-                id={`${role}-art-styles`}
+                id={`${role}-creative-types`}
                 className="w-full"
-                placeholder="e.g., Digital, Illustration, Oil Painting"
-                value={(roleAttributes[role]?.art_styles || '')}
-                onChange={(e) => handleRoleAttributeChange(role, 'art_styles', e.target.value)}
+                placeholder="e.g., Digital Art, Music, Writing"
+                value={(roleAttributes[role]?.creative_types || '')}
+                onChange={(e) => handleRoleAttributeChange(role, 'creative_types', e.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -78,68 +78,52 @@ const ProfileDetailsStep: React.FC<ProfileDetailsStepProps> = ({
             </div>
           </div>
         );
-      case 'venue':
+      case 'organization':
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor={`${role}-venue-name`}>Venue Name</Label>
+              <Label htmlFor={`${role}-org-name`}>Organization Name</Label>
               <Input 
-                id={`${role}-venue-name`}
+                id={`${role}-org-name`}
                 className="w-full"
-                placeholder="Your venue name"
-                value={(roleAttributes[role]?.venue_name || '')}
-                onChange={(e) => handleRoleAttributeChange(role, 'venue_name', e.target.value)}
+                placeholder="Your organization name"
+                value={(roleAttributes[role]?.org_name || '')}
+                onChange={(e) => handleRoleAttributeChange(role, 'org_name', e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor={`${role}-capacity`}>Capacity</Label>
+              <Label htmlFor={`${role}-org-type`}>Organization Type</Label>
               <Input 
-                id={`${role}-capacity`}
-                type="number"
+                id={`${role}-org-type`}
                 className="w-full"
-                placeholder="Maximum capacity"
-                value={(roleAttributes[role]?.capacity || '')}
-                onChange={(e) => handleRoleAttributeChange(role, 'capacity', e.target.value)}
+                placeholder="e.g., Non-profit, Collective, Institution"
+                value={(roleAttributes[role]?.org_type || '')}
+                onChange={(e) => handleRoleAttributeChange(role, 'org_type', e.target.value)}
               />
             </div>
           </div>
         );
-      case 'resource':
+      case 'service':
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor={`${role}-resource-type`}>Resource Type</Label>
+              <Label htmlFor={`${role}-service-type`}>Service Type</Label>
               <Input 
-                id={`${role}-resource-type`}
+                id={`${role}-service-type`}
                 className="w-full"
-                placeholder="e.g., Studio, Equipment, Service"
-                value={(roleAttributes[role]?.resource_type || '')}
-                onChange={(e) => handleRoleAttributeChange(role, 'resource_type', e.target.value)}
+                placeholder="e.g., Consulting, Design, Marketing"
+                value={(roleAttributes[role]?.service_type || '')}
+                onChange={(e) => handleRoleAttributeChange(role, 'service_type', e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor={`${role}-availability`}>Availability</Label>
+              <Label htmlFor={`${role}-expertise`}>Areas of Expertise</Label>
               <Input 
-                id={`${role}-availability`}
+                id={`${role}-expertise`}
                 className="w-full"
-                placeholder="e.g., Weekdays, Evenings, By appointment"
-                value={(roleAttributes[role]?.availability || '')}
-                onChange={(e) => handleRoleAttributeChange(role, 'availability', e.target.value)}
-              />
-            </div>
-          </div>
-        );
-      case 'community':
-        return (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor={`${role}-community-focus`}>Community Focus</Label>
-              <Input 
-                id={`${role}-community-focus`}
-                className="w-full"
-                placeholder="e.g., Digital Art, Sustainability, Education"
-                value={(roleAttributes[role]?.community_focus || '')}
-                onChange={(e) => handleRoleAttributeChange(role, 'community_focus', e.target.value)}
+                placeholder="e.g., Branding, Strategy, Production"
+                value={(roleAttributes[role]?.expertise || '')}
+                onChange={(e) => handleRoleAttributeChange(role, 'expertise', e.target.value)}
               />
             </div>
           </div>
@@ -155,21 +139,6 @@ const ProfileDetailsStep: React.FC<ProfileDetailsStepProps> = ({
                 placeholder="e.g., Exhibitions, Workshops, Performances"
                 value={(roleAttributes[role]?.event_types || '')}
                 onChange={(e) => handleRoleAttributeChange(role, 'event_types', e.target.value)}
-              />
-            </div>
-          </div>
-        );
-      case 'project':
-        return (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor={`${role}-project-focus`}>Project Focus</Label>
-              <Input 
-                id={`${role}-project-focus`}
-                className="w-full"
-                placeholder="e.g., Film, Publication, Research"
-                value={(roleAttributes[role]?.project_focus || '')}
-                onChange={(e) => handleRoleAttributeChange(role, 'project_focus', e.target.value)}
               />
             </div>
           </div>

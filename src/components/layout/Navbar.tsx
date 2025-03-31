@@ -16,7 +16,6 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ThemeNavbarToggle from './ThemeNavbarToggle';
-import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 interface NavItem {
@@ -69,14 +68,6 @@ const Navbar: React.FC = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleNavigation = (href: string) => {
-    navigate(href);
-  };
-
-  const handleLogin = () => {
-    navigate('/login');
-  };
-
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setSession(null);
@@ -124,10 +115,12 @@ const Navbar: React.FC = () => {
           </div>
         ) : (
           <>
-            <Button variant="outline" onClick={handleLogin}>
-              <LogIn className="h-4 w-4 mr-2" />
-              Log In
-            </Button>
+            <Link to="/login">
+              <Button variant="outline">
+                <LogIn className="h-4 w-4 mr-2" />
+                Log In
+              </Button>
+            </Link>
             <Link to="/signup">
               <Button>
                 <User className="h-4 w-4 mr-2" />

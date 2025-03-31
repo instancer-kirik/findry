@@ -18,8 +18,8 @@ import {
   MapPin
 } from 'lucide-react';
 
-// Update the ProfileType to include all the types used in the codebase
-export type ProfileType = 'creative' | 'venue' | 'organization' | 'service' | 'brand' | 'event' | 'project' | 'user' | 'artist' | 'resource' | 'community';
+// Update the ProfileType to include only relevant types
+export type ProfileType = 'creative' | 'organization' | 'service' | 'brand' | 'event' | 'user';
 
 interface ProfileOption {
   id: ProfileType;
@@ -48,40 +48,16 @@ const ProfileTypeSelector: React.FC<ProfileTypeSelectorProps> = ({ value, onChan
       description: 'Artist, musician, photographer, writer, etc.'
     },
     {
-      id: 'artist',
-      label: 'Artist',
-      icon: <Palette className="h-5 w-5" />,
-      description: 'Visual artist, illustrator, painter, sculptor'
-    },
-    {
-      id: 'venue',
-      label: 'Venue',
-      icon: <Building className="h-5 w-5" />,
-      description: 'Gallery, studio, theater, performance space'
-    },
-    {
-      id: 'service',
-      label: 'Service Provider',
-      icon: <Bot className="h-5 w-5" />,
-      description: 'Offering professional services to creatives'
-    },
-    {
-      id: 'resource',
-      label: 'Resource',
-      icon: <Bot className="h-5 w-5" />,
-      description: 'Equipment, facilities, educational materials'
-    },
-    {
       id: 'organization',
       label: 'Organization',
       icon: <Users className="h-5 w-5" />,
       description: 'Collective, non-profit, or cultural institution'
     },
     {
-      id: 'community',
-      label: 'Community',
-      icon: <Users className="h-5 w-5" />,
-      description: 'Groups, forums, and collaborative spaces'
+      id: 'service',
+      label: 'Service Provider',
+      icon: <Bot className="h-5 w-5" />,
+      description: 'Offering professional services to creatives'
     },
     {
       id: 'brand',
@@ -94,12 +70,6 @@ const ProfileTypeSelector: React.FC<ProfileTypeSelectorProps> = ({ value, onChan
       label: 'Event Organizer',
       icon: <Calendar className="h-5 w-5" />,
       description: 'Manage exhibitions, performances, or festivals'
-    },
-    {
-      id: 'project',
-      label: 'Project',
-      icon: <Briefcase className="h-5 w-5" />,
-      description: 'Temporary creative initiative or collaboration'
     }
   ];
 
