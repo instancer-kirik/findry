@@ -1,7 +1,6 @@
 
 import React, { useEffect } from 'react';
 import Navbar from './Navbar';
-import ThemeNavbarToggle from './ThemeNavbarToggle';
 
 interface LayoutProps {
   children: React.ReactNode;

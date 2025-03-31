@@ -56,14 +56,12 @@ const Navbar: React.FC = () => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
-        console.log('Auth state changed:', event, currentSession);
         setSession(currentSession);
       }
     );
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      console.log('Current session:', currentSession);
       setSession(currentSession);
     });
 
@@ -143,7 +141,7 @@ const Navbar: React.FC = () => {
         </SheetTrigger>
         <SheetContent side="left" className="w-64 p-6">
           <div className="mb-4">
-            <Link to="/" className="font-bold text-xl block">
+            <Link to="/" className="font-bold text-xl block" onClick={() => setOpen(false)}>
               Findry
             </Link>
           </div>
@@ -169,7 +167,10 @@ const Navbar: React.FC = () => {
                   </Avatar>
                   <span>Profile</span>
                 </Link>
-                <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
+                <Button variant="ghost" className="w-full justify-start" onClick={() => {
+                  handleLogout();
+                  setOpen(false);
+                }}>
                   <LogIn className="mr-2 h-4 w-4" />
                   Log Out
                 </Button>
