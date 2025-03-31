@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Menu,
   X,
@@ -16,7 +17,8 @@ import {
   MessagesSquare,
   Users,
   Star,
-  Sparkles
+  Sparkles,
+  UserRound
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
@@ -84,6 +86,7 @@ ListItem.displayName = "ListItem"
 
 const Navbar: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const { toast } = useToast();
@@ -110,10 +113,14 @@ const Navbar: React.FC = () => {
   };
 
   const handleProfileAction = (action: string) => {
-    toast({
-      title: "Action triggered",
-      description: `You clicked on ${action}`,
-    });
+    if (action === 'profile') {
+      navigate('/profile');
+    } else {
+      toast({
+        title: "Action triggered",
+        description: `You clicked on ${action}`,
+      });
+    }
   };
 
   return (
@@ -242,11 +249,21 @@ const Navbar: React.FC = () => {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleProfileAction('profile')}>Profile</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleProfileAction('settings')}>Settings</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleProfileAction('billing')}>Billing</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleProfileAction('profile')}>
+                  <UserRound className="h-4 w-4 mr-2" />
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleProfileAction('settings')}>
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleProfileAction('billing')}>
+                  Billing
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleProfileAction('logout')}>Log out</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleProfileAction('logout')}>
+                  Log out
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 

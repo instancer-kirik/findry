@@ -18,6 +18,7 @@ import ProjectDetail from './pages/ProjectDetail'
 import MeetingScheduler from './pages/MeetingScheduler'
 import Communities from './pages/Communities'
 import Chats from './pages/Chats'
+import ProfilePage from './pages/ProfilePage'
 
 import './App.css'
 
@@ -54,6 +55,8 @@ function App() {
               <Route path="/meetings" element={<MeetingScheduler />} />
               <Route path="/meetings/schedule" element={<MeetingScheduler />} />
               <Route path="/meetings/:meetingId" element={<MeetingScheduler />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/profile/:username" element={<ProfilePage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />
