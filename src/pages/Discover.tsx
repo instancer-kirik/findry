@@ -6,6 +6,8 @@ import { ContentItemProps } from '../components/marketplace/ContentCard';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Grip } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 // Components
 import DiscoverHeader from '../components/discover/DiscoverHeader';
@@ -14,18 +16,13 @@ import CategoryItemsGrid from '../components/discover/CategoryItemsGrid';
 import DiscoverSidebar from '../components/discover/DiscoverSidebar';
 import AnimatedSection from '../components/ui-custom/AnimatedSection';
 
-// Import data
+// Import data - we'll use this as fallback
 import {
-  artists,
-  resources,
-  projects,
-  events,
-  venues,
-  communities,
-  brands,
   allTags,
   tabSubcategories,
-  availableTabs
+  availableTabs,
+  artistStyleFilters,
+  disciplinaryFilters
 } from '../components/discover/DiscoverData';
 
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -43,6 +40,7 @@ import {
 const Discover: React.FC = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
+  const { toast } = useToast();
   
   // Determine the initial active tab based on the current URL path
   const getInitialActiveTab = () => {
@@ -64,6 +62,8 @@ const Discover: React.FC = () => {
   const [disciplinaryType, setDisciplinaryType] = useState<string>("all");
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
   const [selectedSubfilters, setSelectedSubfilters] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [items, setItems] = useState<ContentItemProps[]>([]);
   
   // Create a form for multi-select filtering
   const form = useForm({
@@ -82,49 +82,94 @@ const Discover: React.FC = () => {
     // Reset subfilters when tab changes
     setSelectedSubfilters([]);
     form.reset({ subfilters: [] });
+    
+    // Fetch data when the active tab changes
+    fetchData();
   }, [activeTab, form]);
 
-  const filterItems = (items: ContentItemProps[]) => {
-    return items.filter(item => {
-      const matchesSearch = searchQuery === "" || 
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.tags.some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+  // Fetch data when search or filters change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchData();
+    }, 300); // Debounce for search input
+    
+    return () => clearTimeout(timer);
+  }, [searchQuery, selectedTags, resourceType, artistStyle, disciplinaryType, activeSubTab]);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.rpc('search_discover_content', {
+        content_type: activeTab,
+        search_query: searchQuery,
+        tag_filters: selectedTags.length > 0 ? selectedTags : null
+      });
       
-      const matchesTags = selectedTags.length === 0 || 
-        selectedTags.some(tag => item.tags.includes(tag));
-      
-      const matchesResourceType = activeTab !== "resources" || 
-        resourceType === "all" || 
-        item.type === resourceType;
-      
-      const matchesSubTab = activeSubTab === "all" || 
-        (item.subtype && item.subtype.toLowerCase() === activeSubTab) ||
-        item.type.toLowerCase() === activeSubTab;
-      
-      // Artist style filtering
-      const matchesArtistStyle = artistStyle === "all" || 
-        (item.styles && item.styles.includes(artistStyle.charAt(0).toUpperCase() + artistStyle.slice(1)));
-      
-      // Disciplinary type filtering
-      const matchesDisciplinaryType = disciplinaryType === "all" || 
-        (disciplinaryType === "multi" && item.multidisciplinary) ||
-        (disciplinaryType === "single" && !item.multidisciplinary);
-      
-      // Multi-select subfilters
-      const matchesSubfilters = selectedSubfilters.length === 0 || 
-        selectedSubfilters.some(filter => {
-          if (item.tags.includes(filter)) return true;
-          if (item.type === filter) return true;
-          if (item.subtype === filter) return true;
-          if (item.styles && item.styles.includes(filter)) return true;
-          return false;
+      if (error) {
+        console.error('Error fetching data:', error);
+        toast({
+          title: "Error loading data",
+          description: "There was a problem fetching the content",
+          variant: "destructive"
         });
-      
-      return matchesSearch && matchesTags && matchesResourceType && 
-             matchesSubTab && matchesArtistStyle && matchesDisciplinaryType && 
-             matchesSubfilters;
-    });
+        setItems([]);
+      } else {
+        let filteredItems = data || [];
+        
+        // Apply additional filters that are not handled by the database function
+        if (activeTab === 'resources' && resourceType !== 'all') {
+          filteredItems = filteredItems.filter(item => item.type === resourceType);
+        }
+        
+        if (activeTab === 'artists') {
+          if (artistStyle !== 'all') {
+            filteredItems = filteredItems.filter(item => 
+              item.styles && item.styles.includes(artistStyle.charAt(0).toUpperCase() + artistStyle.slice(1))
+            );
+          }
+          
+          if (disciplinaryType !== 'all') {
+            filteredItems = filteredItems.filter(item => 
+              (disciplinaryType === 'multi' && item.multidisciplinary) || 
+              (disciplinaryType === 'single' && !item.multidisciplinary)
+            );
+          }
+        }
+        
+        // Apply subtab filtering
+        if (activeSubTab !== 'all') {
+          filteredItems = filteredItems.filter(item => 
+            (item.subtype && item.subtype.toLowerCase() === activeSubTab) || 
+            item.type.toLowerCase() === activeSubTab
+          );
+        }
+        
+        // Apply multi-select subfilters
+        if (selectedSubfilters.length > 0) {
+          filteredItems = filteredItems.filter(item => 
+            selectedSubfilters.some(filter => {
+              if (item.tags.includes(filter)) return true;
+              if (item.type === filter) return true;
+              if (item.subtype === filter) return true;
+              if (item.styles && item.styles.includes(filter)) return true;
+              return false;
+            })
+          );
+        }
+        
+        setItems(filteredItems);
+      }
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      toast({
+        title: "Error loading data",
+        description: "An unexpected error occurred",
+        variant: "destructive"
+      });
+      setItems([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleTagSelect = (tag: string) => {
@@ -204,27 +249,6 @@ const Discover: React.FC = () => {
     return subfilters;
   };
 
-  const getActiveItems = () => {
-    switch (activeTab) {
-      case "artists":
-        return filterItems(artists);
-      case "resources":
-        return filterItems(resources);
-      case "projects":
-        return filterItems(projects);
-      case "events":
-        return filterItems(events);
-      case "venues":
-        return filterItems(venues);
-      case "communities":
-        return filterItems(communities);
-      case "brands":
-        return filterItems(brands);
-      default:
-        return [];
-    }
-  };
-
   const getTabLabel = (tab: string) => {
     const labels: Record<string, string> = {
       artists: "Artists",
@@ -296,7 +320,7 @@ const Discover: React.FC = () => {
               </div>
             )}
 
-            <CategoryItemsGrid items={getActiveItems()} />
+            <CategoryItemsGrid items={items} isLoading={isLoading} />
           </div>
           
           {/* Desktop sidebar toggle button */}
@@ -315,7 +339,7 @@ const Discover: React.FC = () => {
           <div className={`w-full md:w-4/12 transition-all duration-300 ease-in-out ${sidebarOpen ? 'block' : 'hidden md:block md:w-1/12'}`}>
             {sidebarOpen && (
               <div className="h-[600px] overflow-y-auto">
-                <DiscoverSidebar activeTabData={getActiveItems()} activeTab={activeTab} />
+                <DiscoverSidebar activeTabData={items} activeTab={activeTab} />
               </div>
             )}
           </div>
@@ -338,7 +362,7 @@ const Discover: React.FC = () => {
                 <DrawerTitle>Categories & Circles</DrawerTitle>
               </DrawerHeader>
               <div className="px-4 pb-4 overflow-y-auto">
-                <DiscoverSidebar activeTabData={getActiveItems()} activeTab={activeTab} />
+                <DiscoverSidebar activeTabData={items} activeTab={activeTab} />
               </div>
               <DrawerFooter>
                 <DrawerClose asChild>

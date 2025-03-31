@@ -9,6 +9,87 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      artists: {
+        Row: {
+          created_at: string
+          disciplines: string[] | null
+          id: string
+          image_url: string | null
+          location: string | null
+          multidisciplinary: boolean | null
+          name: string
+          styles: string[] | null
+          subtype: string | null
+          tags: string[] | null
+          type: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          disciplines?: string[] | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          multidisciplinary?: boolean | null
+          name: string
+          styles?: string[] | null
+          subtype?: string | null
+          tags?: string[] | null
+          type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          disciplines?: string[] | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          multidisciplinary?: boolean | null
+          name?: string
+          styles?: string[] | null
+          subtype?: string | null
+          tags?: string[] | null
+          type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      brands: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          location: string | null
+          name: string
+          tags: string[] | null
+          type: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          name: string
+          tags?: string[] | null
+          type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          name?: string
+          tags?: string[] | null
+          type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       communities: {
         Row: {
           category: string | null
@@ -131,6 +212,54 @@ export type Database = {
           },
         ]
       }
+      events: {
+        Row: {
+          capacity: number | null
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          image_url: string | null
+          location: string | null
+          name: string
+          start_date: string | null
+          subtype: string | null
+          tags: string[] | null
+          type: string | null
+          updated_at: string
+        }
+        Insert: {
+          capacity?: number | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          name: string
+          start_date?: string | null
+          subtype?: string | null
+          tags?: string[] | null
+          type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          name?: string
+          start_date?: string | null
+          subtype?: string | null
+          tags?: string[] | null
+          type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -161,6 +290,135 @@ export type Database = {
         }
         Relationships: []
       }
+      projects: {
+        Row: {
+          budget: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          location: string | null
+          name: string
+          tags: string[] | null
+          timeline: string | null
+          type: string | null
+          updated_at: string
+        }
+        Insert: {
+          budget?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          name: string
+          tags?: string[] | null
+          timeline?: string | null
+          type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          budget?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          name?: string
+          tags?: string[] | null
+          timeline?: string | null
+          type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      resources: {
+        Row: {
+          availability: Json | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          location: string | null
+          name: string
+          size_sqft: number | null
+          subtype: string | null
+          tags: string[] | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          availability?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          name: string
+          size_sqft?: number | null
+          subtype?: string | null
+          tags?: string[] | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          availability?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          name?: string
+          size_sqft?: number | null
+          subtype?: string | null
+          tags?: string[] | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      venues: {
+        Row: {
+          amenities: string[] | null
+          capacity: number | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          location: string | null
+          name: string
+          tags: string[] | null
+          type: string | null
+          updated_at: string
+        }
+        Insert: {
+          amenities?: string[] | null
+          capacity?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          name: string
+          tags?: string[] | null
+          type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amenities?: string[] | null
+          capacity?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          name?: string
+          tags?: string[] | null
+          type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -177,6 +435,14 @@ export type Database = {
           community_id: string
         }
         Returns: number
+      }
+      search_discover_content: {
+        Args: {
+          content_type: string
+          search_query?: string
+          tag_filters?: string[]
+        }
+        Returns: Json
       }
     }
     Enums: {
