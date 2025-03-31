@@ -1,19 +1,19 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { SearchIcon, MessageSquare, Send, PlusCircle } from 'lucide-react';
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Search, Send, Phone, Video, MoreVertical, Users, UserPlus, Bell, FileText } from 'lucide-react';
 
 const Chats = () => {
   const [activeChat, setActiveChat] = useState<number | null>(1);
   const [message, setMessage] = useState('');
 
-  // Sample data - in a real app this would come from an API
   const chatList = [
     {
       id: 1,
@@ -67,7 +67,6 @@ const Chats = () => {
 
   const handleSendMessage = () => {
     if (message.trim()) {
-      // In a real app, this would send the message to an API
       console.log("Sending message:", message);
       setMessage('');
     }
@@ -77,7 +76,6 @@ const Chats = () => {
     <Layout>
       <div className="container mx-auto px-4 py-6 h-[calc(100vh-4rem)]">
         <div className="flex h-full rounded-lg overflow-hidden border">
-          {/* Sidebar with chat list */}
           <div className="w-1/3 border-r flex flex-col">
             <div className="p-4 border-b">
               <div className="flex justify-between items-center mb-4">
@@ -138,10 +136,8 @@ const Chats = () => {
             </Tabs>
           </div>
 
-          {/* Main chat area */}
           {activeChat ? (
             <div className="w-2/3 flex flex-col">
-              {/* Chat header */}
               <div className="p-4 border-b flex items-center justify-between">
                 <div className="flex items-center">
                   <Avatar className="h-10 w-10 mr-3">
@@ -166,7 +162,6 @@ const Chats = () => {
                 </div>
               </div>
 
-              {/* Messages area */}
               <div className="flex-1 p-4 overflow-y-auto">
                 <div className="space-y-4">
                   {messages.map(msg => (
@@ -201,7 +196,6 @@ const Chats = () => {
                 </div>
               </div>
 
-              {/* Message input */}
               <div className="p-4 border-t">
                 <div className="flex items-center gap-2">
                   <Input 
