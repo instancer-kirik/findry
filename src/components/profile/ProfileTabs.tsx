@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ProfileCard } from '@/components/home/ProfileCard';
+import ProfileCard from '@/components/home/ProfileCard';
 import { ProfileType } from '../auth/ProfileTypeSelector';
 
 interface Profile {
