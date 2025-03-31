@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -93,7 +92,6 @@ const Navbar: React.FC = () => {
 
   const navLinks = [
     { name: 'Discover', path: '/discover', icon: <Compass className="h-5 w-5" /> },
-    // Events is now handled with NavigationMenu dropdown
     { name: 'Collaboration', path: '/collaboration', icon: <UsersRound className="h-5 w-5" /> },
     { name: 'Projects', path: '/projects', icon: <Layers className="h-5 w-5" /> },
     { name: 'Communities', path: '/communities', icon: <Users className="h-5 w-5" /> },
@@ -119,6 +117,15 @@ const Navbar: React.FC = () => {
       toast({
         title: "Settings",
         description: "Settings page will be available soon",
+      });
+    } else if (action === 'logout') {
+      // Handle logout
+      supabase.auth.signOut().then(() => {
+        toast({
+          title: "Logged out",
+          description: "You have been successfully logged out",
+        });
+        navigate('/login');
       });
     } else {
       toast({

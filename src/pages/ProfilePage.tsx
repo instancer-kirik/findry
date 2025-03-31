@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Layout from '../components/layout/Layout';
 import ProfileHeader from '../components/profile/ProfileHeader';
@@ -15,6 +16,7 @@ interface Profile {
   full_name: string;
   avatar_url?: string;
   bio?: string;
+  profile_types?: string[]; // Add support for multiple profile types
 }
 
 // For handling the case where a profile is not found
@@ -83,7 +85,7 @@ const ProfilePage: React.FC = () => {
 
   const handleCreateProfile = () => {
     console.log('Navigate to profile setup');
-    navigate('/profile-setup');
+    navigate('/profile-setup?wizard=true'); // Always use wizard mode
   };
 
   if (isLoading) {
@@ -209,11 +211,11 @@ const ProfilePage: React.FC = () => {
     <Layout>
       <div className="container mx-auto px-4 py-8">
         <ProfileHeader 
-          profile={profileData} 
+          profile={profileData as Profile} 
           isOwnProfile={isOwnProfile} 
         />
         <ProfileTabs 
-          profile={profileData} 
+          profile={profileData as Profile} 
           isOwnProfile={isOwnProfile} 
         />
       </div>

@@ -13,6 +13,7 @@ interface Profile {
   full_name: string;
   avatar_url?: string;
   bio?: string;
+  profile_types?: string[]; // Add support for multiple profile types
 }
 
 interface ProfileHeaderProps {
@@ -41,6 +42,16 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, isOwnProfile }) 
         <div className="flex-1">
           <h1 className="text-2xl font-bold mb-1">{profile.full_name}</h1>
           <p className="text-muted-foreground mb-2">@{profile.username}</p>
+          
+          {profile.profile_types && profile.profile_types.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {profile.profile_types.map((type) => (
+                <span key={type} className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">
+                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                </span>
+              ))}
+            </div>
+          )}
           
           {profile.bio && (
             <p className="text-foreground/80 mt-2 max-w-2xl">{profile.bio}</p>

@@ -15,6 +15,9 @@ import { useToast } from '@/hooks/use-toast';
 import AnimatedSection from '../ui-custom/AnimatedSection';
 import { ProfileType } from '../auth/ProfileTypeSelector';
 import ArtistProfileForm from './ArtistProfileForm';
+import ProfileTypeSelector from '../auth/ProfileTypeSelector';
+import { supabase } from '@/integrations/supabase/client';
+import { Separator } from '@/components/ui/separator';
 
 interface WizardStep {
   id: string;
@@ -25,15 +28,27 @@ interface WizardStep {
 const ProfileWizard: React.FC<{
   initialProfileType?: ProfileType;
   onComplete?: () => void;
-}> = ({ initialProfileType = 'artist', onComplete }) => {
+  allowMultipleTypes?: boolean;
+}> = ({ initialProfileType = 'artist', onComplete, allowMultipleTypes = false }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
-  const [profileType, setProfileType] = useState<ProfileType>(initialProfileType);
+  const [selectedProfileTypes, setSelectedProfileTypes] = useState<string[]>([initialProfileType]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [stepsCompleted, setStepsCompleted] = useState<Record<string, boolean>>({});
+  const [profileData, setProfileData] = useState({
+    displayName: '',
+    bio: '',
+    location: '',
+    website: ''
+  });
 
   const steps: WizardStep[] = [
+    {
+      id: 'profile-types',
+      title: 'Profile Types',
+      description: 'Select the types of profiles you want to create'
+    },
     {
       id: 'basics',
       title: 'Basic Information',
@@ -48,11 +63,6 @@ const ProfileWizard: React.FC<{
       id: 'preferences',
       title: 'Preferences',
       description: 'Set your preferences and customize your experience'
-    },
-    {
-      id: 'connections',
-      title: 'Connect & Discover',
-      description: 'Find and connect with others in your field'
     }
   ];
 
@@ -79,6 +89,13 @@ const ProfileWizard: React.FC<{
     }
   };
 
+  const handleProfileDataChange = (field: string, value: string) => {
+    setProfileData({
+      ...profileData,
+      [field]: value
+    });
+  };
+
   const handleSubmit = async () => {
     setIsSubmitting(true);
     
@@ -89,8 +106,37 @@ const ProfileWizard: React.FC<{
         [steps[currentStep].id]: true
       }));
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      // Check if profile exists
+      const { data: existingProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+
+      // Prepare profile data
+      const submitData = {
+        id: user.id,
+        username: profileData.displayName.toLowerCase().replace(/\s+/g, '_'),
+        full_name: profileData.displayName,
+        bio: profileData.bio,
+        profile_types: selectedProfileTypes,
+        updated_at: new Date().toISOString()
+      };
+      
+      // Insert or update profile
+      const operation = existingProfile 
+        ? supabase.from('profiles').update(submitData).eq('id', user.id)
+        : supabase.from('profiles').insert([submitData]);
+        
+      const { error: updateError } = await operation;
+      
+      if (updateError) {
+        throw updateError;
+      }
       
       toast({
         title: 'Profile setup complete!',
@@ -102,7 +148,7 @@ const ProfileWizard: React.FC<{
         onComplete();
       } else {
         // Navigate to home page
-        navigate('/');
+        navigate('/profile');
       }
     } catch (error) {
       console.error('Error completing profile setup:', error);
@@ -119,30 +165,114 @@ const ProfileWizard: React.FC<{
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
-        return <ArtistProfileForm />;
-      case 1:
-        // Would implement specific forms for each step
         return (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">
-              This step would contain detailed profile fields specific to {profileType}s.
+          <div className="space-y-6">
+            <p className="text-muted-foreground mb-4">
+              Select the types of profiles you want to create. You can select multiple types if needed.
             </p>
+            <ProfileTypeSelector 
+              value={selectedProfileTypes} 
+              onChange={setSelectedProfileTypes} 
+            />
+          </div>
+        );
+      case 1:
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <label className="text-sm font-medium" htmlFor="displayName">Display Name</label>
+                <input 
+                  id="displayName"
+                  type="text"
+                  className="w-full px-3 py-2 border rounded-md"
+                  value={profileData.displayName}
+                  onChange={(e) => handleProfileDataChange('displayName', e.target.value)}
+                  placeholder="Your name or artist name"
+                />
+              </div>
+              <div className="space-y-4">
+                <label className="text-sm font-medium" htmlFor="location">Location</label>
+                <input 
+                  id="location"
+                  type="text"
+                  className="w-full px-3 py-2 border rounded-md"
+                  value={profileData.location}
+                  onChange={(e) => handleProfileDataChange('location', e.target.value)}
+                  placeholder="City, Country"
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <label className="text-sm font-medium" htmlFor="bio">Bio</label>
+              <textarea 
+                id="bio"
+                className="w-full px-3 py-2 border rounded-md h-32"
+                value={profileData.bio}
+                onChange={(e) => handleProfileDataChange('bio', e.target.value)}
+                placeholder="Tell us about yourself..."
+              />
+            </div>
+            
+            <div className="space-y-4">
+              <label className="text-sm font-medium" htmlFor="website">Website (optional)</label>
+              <input 
+                id="website"
+                type="text"
+                className="w-full px-3 py-2 border rounded-md"
+                value={profileData.website}
+                onChange={(e) => handleProfileDataChange('website', e.target.value)}
+                placeholder="https://yourwebsite.com"
+              />
+            </div>
           </div>
         );
       case 2:
         return (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">
-              This step would contain preference settings and notification options.
-            </p>
+          <div className="space-y-6">
+            <h3 className="text-lg font-medium">Profile Details for Selected Types</h3>
+            
+            {selectedProfileTypes.map((type, index) => (
+              <div key={type} className="space-y-4">
+                {index > 0 && <Separator className="my-6" />}
+                <h4 className="text-md font-medium capitalize">{type} Profile Details</h4>
+                {type === 'artist' && (
+                  <p className="text-muted-foreground">
+                    Here you would add details specific to your artistic work.
+                  </p>
+                )}
+                {type === 'venue' && (
+                  <p className="text-muted-foreground">
+                    Here you would add details about your venue or space.
+                  </p>
+                )}
+                {type === 'brand' && (
+                  <p className="text-muted-foreground">
+                    Here you would add details about your brand or business.
+                  </p>
+                )}
+                {type === 'community' && (
+                  <p className="text-muted-foreground">
+                    Here you would add details about your community or group.
+                  </p>
+                )}
+                {/* Type-specific form inputs would go here */}
+              </div>
+            ))}
           </div>
         );
       case 3:
         return (
-          <div className="text-center py-8">
+          <div className="space-y-6">
+            <h3 className="text-lg font-medium">Preferences</h3>
             <p className="text-muted-foreground">
-              This step would help you connect with others and find communities.
+              Set your notification preferences and privacy settings.
             </p>
+            {/* Preference settings would go here */}
+            <div className="p-8 border rounded-md border-dashed text-center">
+              <p className="text-muted-foreground">Preference settings section</p>
+            </div>
           </div>
         );
       default:
@@ -218,7 +348,7 @@ const ProfileWizard: React.FC<{
             
             <Button 
               onClick={currentStep < steps.length - 1 ? handleNext : handleSubmit}
-              disabled={isSubmitting}
+              disabled={isSubmitting || (currentStep === 0 && selectedProfileTypes.length === 0)}
             >
               {isSubmitting ? (
                 <>
