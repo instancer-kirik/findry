@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,6 +13,20 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import CreateCommunityModal from '@/components/communities/CreateCommunityModal';
 import { useToast } from '@/hooks/use-toast';
+
+// Define a consistent community type
+interface Community {
+  id: string | number; // Accept both string (from Supabase) and number (from mock data)
+  name: string;
+  description: string;
+  members: number;
+  posts: number;
+  image: string;
+  joined: boolean;
+  new: boolean;
+  lastActivity: string;
+  category: string;
+}
 
 const Communities = () => {
   const { toast } = useToast();
@@ -49,7 +64,7 @@ const Communities = () => {
     }
   }, [error, toast]);
 
-  const transformedCommunities = communitiesData?.map(community => ({
+  const transformedCommunities: Community[] = communitiesData?.map(community => ({
     id: community.id,
     name: community.name,
     description: community.description || 'No description available',
@@ -62,7 +77,7 @@ const Communities = () => {
     category: community.category || 'General'
   })) || [];
 
-  const communities = transformedCommunities.length > 0 ? transformedCommunities : [
+  const sampleCommunities: Community[] = [
     {
       id: 1,
       name: "Digital Artists Collective",
@@ -136,6 +151,8 @@ const Communities = () => {
       category: "Gaming"
     }
   ];
+
+  const communities: Community[] = transformedCommunities.length > 0 ? transformedCommunities : sampleCommunities;
 
   const filteredCommunities = searchQuery 
     ? communities.filter(community => 
@@ -366,18 +383,7 @@ const Communities = () => {
 };
 
 interface CommunityProps {
-  community: {
-    id: number;
-    name: string;
-    description: string;
-    members: number;
-    posts: number;
-    image: string;
-    joined: boolean;
-    new: boolean;
-    lastActivity: string;
-    category: string;
-  }
+  community: Community;
 }
 
 const CommunityCard = ({ community }: CommunityProps) => {
