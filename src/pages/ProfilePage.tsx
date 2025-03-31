@@ -58,7 +58,7 @@ const ProfilePage: React.FC = () => {
           console.log('Profile fetch error:', error.code, error.message);
           if (error.code === 'PGRST116') {
             // Profile not found for this user
-            console.log('Profile not found for current user');
+            console.log('Profile not found for current user, returning ProfileNotFound object');
             return { id: user.id, notFound: true } as ProfileNotFound;
           }
           throw error;
@@ -82,6 +82,7 @@ const ProfilePage: React.FC = () => {
   });
 
   const handleCreateProfile = () => {
+    console.log('Navigate to profile setup');
     navigate('/profile-setup');
   };
 
@@ -97,6 +98,7 @@ const ProfilePage: React.FC = () => {
 
   // Handle case where current user doesn't have a profile yet
   if (isOwnProfile && profileData && isProfileNotFound(profileData)) {
+    console.log('Rendering create profile view');
     return (
       <Layout>
         <div className="container mx-auto px-4 py-12">
@@ -128,7 +130,33 @@ const ProfilePage: React.FC = () => {
     );
   }
 
-  if (error || !profileData || isProfileNotFound(profileData)) {
+  if (error) {
+    console.log('Error fetching profile:', error);
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-12">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">Error loading profile</h1>
+            <p className="text-muted-foreground">
+              There was an error loading the profile. Please try again later.
+            </p>
+            {isOwnProfile && (
+              <Button 
+                onClick={handleCreateProfile}
+                className="mt-6 flex items-center gap-2"
+              >
+                <UserPlus className="h-5 w-5" />
+                Create Your Profile
+              </Button>
+            )}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!profileData) {
+    console.log('No profile data');
     return (
       <Layout>
         <div className="container mx-auto px-4 py-12">
@@ -137,6 +165,40 @@ const ProfilePage: React.FC = () => {
             <p className="text-muted-foreground">
               The profile you're looking for doesn't exist or you don't have permission to view it.
             </p>
+            {isOwnProfile && (
+              <Button 
+                onClick={handleCreateProfile}
+                className="mt-6 flex items-center gap-2"
+              >
+                <UserPlus className="h-5 w-5" />
+                Create Your Profile
+              </Button>
+            )}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (isProfileNotFound(profileData)) {
+    console.log('Profile not found');
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-12">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">Profile not found</h1>
+            <p className="text-muted-foreground">
+              The profile you're looking for doesn't exist or you don't have permission to view it.
+            </p>
+            {isOwnProfile && (
+              <Button 
+                onClick={handleCreateProfile}
+                className="mt-6 flex items-center gap-2"
+              >
+                <UserPlus className="h-5 w-5" />
+                Create Your Profile
+              </Button>
+            )}
           </div>
         </div>
       </Layout>
