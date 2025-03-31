@@ -22,6 +22,7 @@ interface DiscoverHeaderProps {
   showFilters: boolean;
   setShowFilters: (show: boolean) => void;
   userType: string;
+  setUserType: (type: string) => void;
   handleTagSelect: (tag: string) => void;
   allTags?: string[];
 }
@@ -34,6 +35,7 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
   showFilters,
   setShowFilters,
   userType,
+  setUserType,
   handleTagSelect,
   allTags = []
 }) => {

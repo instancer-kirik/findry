@@ -1,10 +1,30 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import MarketplaceFilters from '../components/marketplace/MarketplaceFilters';
 import { ContentItemProps } from '../components/marketplace/ContentCard';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Grip } from 'lucide-react';
+import { Badge } from "@/components/ui/badge";
+import { ChevronLeft, ChevronRight, Grip, Check, X } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useForm } from 'react-hook-form';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
 
 // New refactored components
 import DiscoverHeader from '../components/discover/DiscoverHeader';
@@ -62,11 +82,26 @@ const Discover: React.FC = () => {
   const [artistStyle, setArtistStyle] = useState<string>("all");
   const [disciplinaryType, setDisciplinaryType] = useState<string>("all");
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
+  const [selectedSubfilters, setSelectedSubfilters] = useState<string[]>([]);
+  
+  // Create a form for multi-select filtering
+  const form = useForm({
+    defaultValues: {
+      subfilters: [] as string[],
+    },
+  });
   
   // Update sidebar visibility when screen size changes
   useEffect(() => {
     setSidebarOpen(!isMobile);
   }, [isMobile]);
+
+  // Update available subfilters when active tab changes
+  useEffect(() => {
+    // Reset subfilters when tab changes
+    setSelectedSubfilters([]);
+    form.reset({ subfilters: [] });
+  }, [activeTab, form]);
 
   const filterItems = (items: ContentItemProps[]) => {
     return items.filter(item => {
@@ -95,8 +130,19 @@ const Discover: React.FC = () => {
         (disciplinaryType === "multi" && item.multidisciplinary) ||
         (disciplinaryType === "single" && !item.multidisciplinary);
       
+      // Multi-select subfilters
+      const matchesSubfilters = selectedSubfilters.length === 0 || 
+        selectedSubfilters.some(filter => {
+          if (item.tags.includes(filter)) return true;
+          if (item.type === filter) return true;
+          if (item.subtype === filter) return true;
+          if (item.styles && item.styles.includes(filter)) return true;
+          return false;
+        });
+      
       return matchesSearch && matchesTags && matchesResourceType && 
-             matchesSubTab && matchesArtistStyle && matchesDisciplinaryType;
+             matchesSubTab && matchesArtistStyle && matchesDisciplinaryType && 
+             matchesSubfilters;
     });
   };
 
@@ -131,6 +177,41 @@ const Discover: React.FC = () => {
 
   const handleDisciplinaryTypeChange = (type: string) => {
     setDisciplinaryType(type);
+  };
+
+  const handleSubfilterSelect = (values: string[]) => {
+    setSelectedSubfilters(values);
+  };
+
+  // Get available subfilters based on active tab
+  const getAvailableSubfilters = () => {
+    const subfilters: { value: string; label: string }[] = [];
+    
+    // Add subcategories
+    if (tabSubcategories[activeTab]) {
+      tabSubcategories[activeTab].forEach(subcat => {
+        subfilters.push({
+          value: subcat,
+          label: subcat.charAt(0).toUpperCase() + subcat.slice(1)
+        });
+      });
+    }
+    
+    // Add relevant tags for this tab
+    const relevantTags = allTags.filter(tag => {
+      // Logic to filter tags based on active tab
+      if (activeTab === "artists" && ['Vocalist', 'Guitar', 'Producer', 'Minimalist', 'Contemporary'].includes(tag)) return true;
+      if (activeTab === "resources" && ['Studio', 'Gallery', 'Practice Room', 'Soundproofed'].includes(tag)) return true;
+      if (activeTab === "venues" && ['Concert Hall', 'Club', 'Theater'].includes(tag)) return true;
+      // Add more cases as needed
+      return false;
+    });
+    
+    relevantTags.forEach(tag => {
+      subfilters.push({ value: tag, label: tag });
+    });
+    
+    return subfilters;
   };
 
   const getActiveItems = () => {
@@ -176,16 +257,93 @@ const Discover: React.FC = () => {
     
     return (
       <div className="mb-4">
-        <Tabs value={activeSubTab} onValueChange={handleSubTabChange}>
-          <TabsList className="w-full overflow-x-auto flex">
-            <TabsTrigger value="all">All</TabsTrigger>
-            {subcategories.map(subTab => (
-              <TabsTrigger key={subTab} value={subTab}>
-                {getSubTabLabel(subTab)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+        <div className="flex flex-col space-y-4">
+          <Tabs value={activeSubTab} onValueChange={handleSubTabChange}>
+            <TabsList className="w-full overflow-x-auto flex">
+              <TabsTrigger value="all">All</TabsTrigger>
+              {subcategories.map(subTab => (
+                <TabsTrigger key={subTab} value={subTab}>
+                  {getSubTabLabel(subTab)}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+          
+          {/* Multi-select filter */}
+          <div className="flex flex-col md:flex-row gap-3 items-start">
+            <Form {...form}>
+              <FormField
+                control={form.control}
+                name="subfilters"
+                render={({ field }) => (
+                  <FormItem className="w-full md:w-80">
+                    <Select
+                      onValueChange={(value) => {
+                        const values = [...field.value];
+                        if (!values.includes(value)) {
+                          values.push(value);
+                          field.onChange(values);
+                          handleSubfilterSelect(values);
+                        }
+                      }}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={`Add ${getTabLabel(activeTab)} filters...`} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Available Filters</SelectLabel>
+                          {getAvailableSubfilters().map((subfilter) => (
+                            <SelectItem 
+                              key={subfilter.value} 
+                              value={subfilter.value}
+                              disabled={selectedSubfilters.includes(subfilter.value)}
+                            >
+                              {subfilter.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+            </Form>
+            
+            {selectedSubfilters.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {selectedSubfilters.map(filter => (
+                  <Badge 
+                    key={filter} 
+                    variant="secondary"
+                    className="flex items-center gap-1 cursor-pointer hover:bg-destructive/10 transition-colors"
+                    onClick={() => {
+                      const updatedFilters = selectedSubfilters.filter(f => f !== filter);
+                      setSelectedSubfilters(updatedFilters);
+                      form.setValue('subfilters', updatedFilters);
+                    }}
+                  >
+                    {filter}
+                    <X className="h-3 w-3 ml-1" />
+                  </Badge>
+                ))}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedSubfilters([]);
+                    form.setValue('subfilters', []);
+                  }}
+                  className="text-xs"
+                >
+                  Clear all
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     );
   };
@@ -207,6 +365,7 @@ const Discover: React.FC = () => {
               showFilters={showFilters}
               setShowFilters={setShowFilters}
               userType={userType}
+              setUserType={setUserType}
               handleTagSelect={handleTagSelect}
               allTags={allTags}
             />
