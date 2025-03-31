@@ -114,7 +114,12 @@ const Navbar: React.FC = () => {
 
   const handleProfileAction = (action: string) => {
     if (action === 'profile') {
-      navigate('/profile');
+      navigate('/profile');  // Use /profile without a username to view own profile
+    } else if (action === 'settings') {
+      toast({
+        title: "Settings",
+        description: "Settings page will be available soon",
+      });
     } else {
       toast({
         title: "Action triggered",

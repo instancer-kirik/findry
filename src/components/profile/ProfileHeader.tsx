@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
 import { Edit, Settings } from 'lucide-react';
 import { ProfileType } from '../auth/ProfileTypeSelector';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface Profile {
   id: string;
@@ -21,9 +21,14 @@ interface ProfileHeaderProps {
 }
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, isOwnProfile }) => {
+  const navigate = useNavigate();
   const avatarInitials = profile.full_name
     ? profile.full_name.split(' ').map(n => n[0]).join('').toUpperCase()
     : profile.username.substring(0, 2).toUpperCase();
+
+  const handleEditProfile = () => {
+    navigate('/profile-setup');
+  };
 
   return (
     <Card className="p-6 mb-8">
@@ -44,12 +49,15 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, isOwnProfile }) 
         
         {isOwnProfile ? (
           <div className="flex gap-2 self-end md:self-start mt-4 md:mt-0">
-            <Link to="/profile-setup">
-              <Button variant="outline" size="sm" className="flex items-center gap-1">
-                <Edit className="h-4 w-4" />
-                Edit Profile
-              </Button>
-            </Link>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center gap-1"
+              onClick={handleEditProfile}
+            >
+              <Edit className="h-4 w-4" />
+              Edit Profile
+            </Button>
             <Button variant="ghost" size="sm" className="flex items-center gap-1">
               <Settings className="h-4 w-4" />
               Settings

@@ -1,12 +1,11 @@
-
 import React, { useState } from 'react';
 import Layout from '../components/layout/Layout';
 import ProfileHeader from '../components/profile/ProfileHeader';
 import ProfileTabs from '../components/profile/ProfileTabs';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -33,7 +32,10 @@ function isProfileNotFound(profile: ProfileResult): profile is ProfileNotFound {
 
 const ProfilePage: React.FC = () => {
   const { username } = useParams<{ username?: string }>();
+  const navigate = useNavigate();
   const isOwnProfile = !username; // If no username is provided, show the user's own profile
+
+  console.log('ProfilePage rendered, isOwnProfile:', isOwnProfile, 'username:', username);
 
   // Fetch profile data from Supabase
   const { data: profileData, isLoading, error } = useQuery({
@@ -44,6 +46,8 @@ const ProfilePage: React.FC = () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('Not authenticated');
         
+        console.log('Fetching profile for current user:', user.id);
+        
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
@@ -51,15 +55,19 @@ const ProfilePage: React.FC = () => {
           .single();
           
         if (error) {
+          console.log('Profile fetch error:', error.code, error.message);
           if (error.code === 'PGRST116') {
             // Profile not found for this user
+            console.log('Profile not found for current user');
             return { id: user.id, notFound: true } as ProfileNotFound;
           }
           throw error;
         }
+        console.log('Profile found:', data);
         return data as Profile;
       } else {
         // Otherwise fetch the requested profile by username
+        console.log('Fetching profile for username:', username);
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
@@ -72,6 +80,10 @@ const ProfilePage: React.FC = () => {
     },
     enabled: true,
   });
+
+  const handleCreateProfile = () => {
+    navigate('/profile-setup');
+  };
 
   if (isLoading) {
     return (
@@ -102,11 +114,14 @@ const ProfilePage: React.FC = () => {
               Set up your profile to showcase your work, connect with other creative professionals, 
               and find collaboration opportunities.
             </p>
-            <Link to="/profile-setup">
-              <Button size="lg">
-                Create Your Profile
-              </Button>
-            </Link>
+            <Button 
+              size="lg"
+              onClick={handleCreateProfile}
+              className="flex items-center gap-2"
+            >
+              <UserPlus className="h-5 w-5" />
+              Create Your Profile
+            </Button>
           </div>
         </div>
       </Layout>
