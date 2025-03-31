@@ -33,10 +33,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <div className="flex items-center">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <Navbar />
-        <ThemeNavbarToggle />
-      </div>
+      </header>
       <main className="flex-grow">
         {children}
       </main>

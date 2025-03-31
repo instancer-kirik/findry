@@ -19,20 +19,20 @@ const Hero: React.FC = () => {
           <AnimatedSection animation="fade-in-up" delay={100}>
             <div className="inline-block mb-4 px-3 py-1 bg-secondary rounded-full">
               <span className="text-xs font-medium text-foreground/80">
-                Introducing the Brand & Venue Interface
+                Creative Collaboration Platform
               </span>
             </div>
           </AnimatedSection>
           
           <AnimatedSection animation="fade-in-up" delay={200}>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight">
-              Connect Artists, Brands, and Venues Seamlessly
+              Connect Creative Talent with Brands and Venues
             </h1>
           </AnimatedSection>
           
           <AnimatedSection animation="fade-in-up" delay={300}>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              A sophisticated marketplace bringing together creative talent, brands, and venues in one elegant platform designed for discovery and collaboration.
+              Discover opportunities, build relationships, and grow your creative network with our intuitive platform designed for artists, brands, and venues.
             </p>
           </AnimatedSection>
           
