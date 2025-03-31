@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,18 +5,16 @@ import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Users, MessageSquare, Globe, CalendarDays, Search, UserPlus, Shield, Sparkles } from 'lucide-react';
+import { Users, MessageSquare, CalendarDays, Search, UserPlus, Shield, Sparkles, Grid, List } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import CreateCommunityModal from '@/components/communities/CreateCommunityModal';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
 
-// Define a consistent community type
 interface Community {
-  id: string | number; // Accept both string (from Supabase) and number (from mock data)
+  id: string | number;
   name: string;
   description: string;
   members: number;
@@ -29,16 +26,15 @@ interface Community {
   category: string;
 }
 
+const COMMUNITY_CATEGORIES = [
+  'Arts', 'Music', 'Film', 'Dance', 'Theater', 'Writing', 'Gaming'
+] as const;
+
 const Communities = () => {
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  
-  // Redirect to Discover page when clicking on "Discover" button
-  const handleDiscoverClick = () => {
-    navigate('/discover');
-  };
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
   const { data: communitiesData, isLoading, error, refetch } = useQuery({
     queryKey: ['communities'],
@@ -161,30 +157,34 @@ const Communities = () => {
 
   const communities: Community[] = transformedCommunities.length > 0 ? transformedCommunities : sampleCommunities;
 
-  const filteredCommunities = searchQuery 
-    ? communities.filter(community => 
-        community.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  const filteredCommunities = communities.filter(community => {
+    const matchesSearch = searchQuery 
+      ? community.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         community.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         community.category.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : communities;
+      : true;
+    
+    const matchesCategory = selectedCategory
+      ? community.category === selectedCategory
+      : true;
+    
+    return matchesSearch && matchesCategory;
+  });
 
   const featuredCommunities = communities.filter(c => c.new);
   const joinedCommunities = communities.filter(c => c.joined);
-  const suggestedCommunities = communities.filter(c => !c.joined).slice(0, 3);
 
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Sidebar */}
           <div className="md:col-span-1">
             <Card>
               <CardHeader>
                 <CardTitle className="flex justify-between items-center">
                   <span>Communities</span>
-                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                    <UserPlus className="h-4 w-4" />
-                  </Button>
+                  <CreateCommunityModal onSuccess={refetch} />
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-3">
@@ -199,14 +199,6 @@ const Communities = () => {
                 </div>
                 
                 <div className="space-y-1">
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start"
-                    onClick={handleDiscoverClick} // Add click handler
-                  >
-                    <Globe className="mr-2 h-4 w-4" />
-                    Discover
-                  </Button>
                   <Button variant="ghost" className="w-full justify-start">
                     <Users className="mr-2 h-4 w-4" />
                     My Communities
@@ -221,9 +213,6 @@ const Communities = () => {
                   </Button>
                 </div>
               </CardContent>
-              <CardFooter>
-                <CreateCommunityModal onSuccess={refetch} />
-              </CardFooter>
             </Card>
             
             <Card className="mt-4">
@@ -232,160 +221,60 @@ const Communities = () => {
               </CardHeader>
               <CardContent className="p-3">
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline" className="cursor-pointer hover:bg-primary hover:text-primary-foreground">Arts</Badge>
-                  <Badge variant="outline" className="cursor-pointer hover:bg-primary hover:text-primary-foreground">Music</Badge>
-                  <Badge variant="outline" className="cursor-pointer hover:bg-primary hover:text-primary-foreground">Film</Badge>
-                  <Badge variant="outline" className="cursor-pointer hover:bg-primary hover:text-primary-foreground">Dance</Badge>
-                  <Badge variant="outline" className="cursor-pointer hover:bg-primary hover:text-primary-foreground">Theater</Badge>
-                  <Badge variant="outline" className="cursor-pointer hover:bg-primary hover:text-primary-foreground">Writing</Badge>
-                  <Badge variant="outline" className="cursor-pointer hover:bg-primary hover:text-primary-foreground">Gaming</Badge>
+                  {COMMUNITY_CATEGORIES.map((category) => (
+                    <Badge
+                      key={category}
+                      variant={selectedCategory === category ? "default" : "outline"}
+                      className="cursor-pointer"
+                      onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
+                    >
+                      {category}
+                    </Badge>
+                  ))}
                 </div>
               </CardContent>
             </Card>
           </div>
           
+          {/* Main Content */}
           <div className="md:col-span-2">
-            <Tabs defaultValue="featured">
-              <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-6">
+              <Tabs defaultValue="all" className="w-full">
                 <TabsList>
+                  <TabsTrigger value="all">All Communities</TabsTrigger>
                   <TabsTrigger value="featured">Featured</TabsTrigger>
-                  <TabsTrigger value="my-communities">My Communities</TabsTrigger>
-                  <TabsTrigger value="discover">Discover</TabsTrigger>
+                  <TabsTrigger value="joined">Joined</TabsTrigger>
                 </TabsList>
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className={viewMode === 'grid' ? 'bg-muted' : ''} 
-                    onClick={() => setViewMode('grid')}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-grid-2x2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 12h18"/><path d="M12 3v18"/></svg>
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className={viewMode === 'list' ? 'bg-muted' : ''} 
-                    onClick={() => setViewMode('list')}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-list"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
-                  </Button>
-                </div>
+              </Tabs>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setViewMode('grid')}
+                  className={viewMode === 'grid' ? 'bg-muted' : ''}
+                >
+                  <Grid className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setViewMode('list')}
+                  className={viewMode === 'list' ? 'bg-muted' : ''}
+                >
+                  <List className="h-4 w-4" />
+                </Button>
               </div>
-              
-              <div className="flex flex-col mb-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-2xl font-bold">All Communities</h2>
-                  <CreateCommunityModal 
-                    trigger={
-                      <Button>
-                        <Users className="mr-2 h-4 w-4" />
-                        Create Community
-                      </Button>
-                    } 
-                    onSuccess={refetch} 
-                  />
-                </div>
-                
-                {isLoading ? (
-                  <div className="flex justify-center p-12">
-                    <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-                  </div>
+            </div>
+
+            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'space-y-4'}>
+              {filteredCommunities.map((community) => (
+                viewMode === 'grid' ? (
+                  <CommunityCard key={community.id} community={community} />
                 ) : (
-                  <>
-                    <TabsContent value="featured">
-                      <h2 className="text-2xl font-bold mb-4">Featured Communities</h2>
-                      {featuredCommunities.length > 0 ? (
-                        <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'space-y-4'}`}>
-                          {featuredCommunities.map(community => (
-                            viewMode === 'grid' 
-                              ? <CommunityCard key={community.id} community={community} /> 
-                              : <CommunityListItem key={community.id} community={community} />
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-muted-foreground text-center py-8">No featured communities yet. Create one!</p>
-                      )}
-                      
-                      <h2 className="text-2xl font-bold my-6">Suggested For You</h2>
-                      {suggestedCommunities.length > 0 ? (
-                        <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'space-y-4'}`}>
-                          {suggestedCommunities.map(community => (
-                            viewMode === 'grid' 
-                              ? <CommunityCard key={community.id} community={community} /> 
-                              : <CommunityListItem key={community.id} community={community} />
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-muted-foreground text-center py-8">No suggested communities available.</p>
-                      )}
-                    </TabsContent>
-                    
-                    <TabsContent value="my-communities">
-                      <h2 className="text-2xl font-bold mb-4">My Communities</h2>
-                      {joinedCommunities.length > 0 ? (
-                        <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'space-y-4'}`}>
-                          {joinedCommunities.map(community => (
-                            viewMode === 'grid' 
-                              ? <CommunityCard key={community.id} community={community} /> 
-                              : <CommunityListItem key={community.id} community={community} />
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center py-12">
-                          <Users className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
-                          <h3 className="text-xl font-medium mb-2">You haven't joined any communities yet</h3>
-                          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                            Join communities to connect with people who share your interests, or create your own!
-                          </p>
-                          <CreateCommunityModal
-                            trigger={<Button size="lg">Create Your First Community</Button>}
-                            onSuccess={refetch}
-                          />
-                        </div>
-                      )}
-                    </TabsContent>
-                    
-                    <TabsContent value="discover">
-                      <h2 className="text-2xl font-bold mb-4">Discover Communities</h2>
-                      {filteredCommunities.filter(c => !c.joined).length > 0 ? (
-                        <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'space-y-4'}`}>
-                          {filteredCommunities.filter(c => !c.joined).map(community => (
-                            viewMode === 'grid' 
-                              ? <CommunityCard key={community.id} community={community} /> 
-                              : <CommunityListItem key={community.id} community={community} />
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-muted-foreground text-center py-8">No communities found matching your search criteria.</p>
-                      )}
-                    </TabsContent>
-                  </>
-                )}
-              </div>
-              
-              <div className="border-t pt-6 mt-6">
-                <h2 className="text-xl font-bold mb-4">Start your own community</h2>
-                <Card className="bg-muted/30">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row gap-6 items-center">
-                      <div className="bg-background rounded-full p-6">
-                        <Users className="h-12 w-12 text-primary" />
-                      </div>
-                      <div className="flex-1 text-center md:text-left">
-                        <h3 className="text-lg font-medium mb-2">Create a community today</h3>
-                        <p className="text-muted-foreground mb-4">
-                          Build your own community around your interests, passions, or projects. Connect with like-minded people and start meaningful conversations.
-                        </p>
-                        <CreateCommunityModal
-                          trigger={<Button>Get Started</Button>}
-                          onSuccess={refetch}
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </Tabs>
+                  <CommunityListItem key={community.id} community={community} />
+                )
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -399,43 +288,49 @@ interface CommunityProps {
 
 const CommunityCard = ({ community }: CommunityProps) => {
   return (
-    <Card className="overflow-hidden h-full">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
+    <Card className="group hover:shadow-lg transition-shadow">
+      <CardHeader className="p-4">
+        <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src={community.image} alt={community.name} />
-              <AvatarFallback>{community.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+            <Avatar className="h-12 w-12">
+              <AvatarImage src={community.image} />
+              <AvatarFallback>{community.name[0]}</AvatarFallback>
             </Avatar>
             <div>
-              <CardTitle className="text-lg flex items-center gap-2">
-                {community.name}
-                {community.new && <Badge className="bg-orange-500 text-white">New</Badge>}
-              </CardTitle>
-              <Badge variant="outline">{community.category}</Badge>
+              <CardTitle className="text-lg">{community.name}</CardTitle>
+              <CardDescription>{community.category}</CardDescription>
             </div>
           </div>
+          {community.new && (
+            <Badge variant="secondary" className="bg-primary/10 text-primary">
+              New
+            </Badge>
+          )}
         </div>
       </CardHeader>
-      <CardContent>
-        <CardDescription className="mb-4">{community.description}</CardDescription>
-        <div className="flex justify-between text-sm text-muted-foreground">
-          <div className="flex items-center">
-            <Users className="h-4 w-4 mr-1" />
-            {community.members} members
+      <CardContent className="p-4 pt-0">
+        <p className="text-sm text-muted-foreground line-clamp-2">{community.description}</p>
+        <div className="flex items-center gap-4 mt-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <Users className="h-4 w-4" />
+            <span>{community.members}</span>
           </div>
-          <div className="flex items-center">
-            <MessageSquare className="h-4 w-4 mr-1" />
-            {community.posts} posts
+          <div className="flex items-center gap-1">
+            <MessageSquare className="h-4 w-4" />
+            <span>{community.posts}</span>
           </div>
-        </div>
-        <div className="text-xs text-muted-foreground mt-2">
-          Last active: {community.lastActivity}
+          <div className="flex items-center gap-1">
+            <CalendarDays className="h-4 w-4" />
+            <span>{community.lastActivity}</span>
+          </div>
         </div>
       </CardContent>
-      <CardFooter className="bg-muted/50 pt-2">
-        <Button variant={community.joined ? "outline" : "default"} className="w-full">
-          {community.joined ? "View Community" : "Join Community"}
+      <CardFooter className="p-4 pt-0">
+        <Button 
+          variant={community.joined ? "secondary" : "default"}
+          className="w-full"
+        >
+          {community.joined ? "Joined" : "Join Community"}
         </Button>
       </CardFooter>
     </Card>
@@ -444,37 +339,46 @@ const CommunityCard = ({ community }: CommunityProps) => {
 
 const CommunityListItem = ({ community }: CommunityProps) => {
   return (
-    <Card>
-      <div className="flex items-center p-4">
-        <Avatar className="h-12 w-12 mr-4">
-          <AvatarImage src={community.image} alt={community.name} />
-          <AvatarFallback>{community.name.slice(0, 2).toUpperCase()}</AvatarFallback>
-        </Avatar>
-        
-        <div className="flex-grow">
-          <div className="flex items-center gap-2">
-            <h3 className="font-medium">{community.name}</h3>
-            {community.new && <Badge className="bg-orange-500 text-white">New</Badge>}
-            <Badge variant="outline">{community.category}</Badge>
+    <Card className="group hover:shadow-lg transition-shadow">
+      <CardContent className="p-4">
+        <div className="flex items-center gap-4">
+          <Avatar className="h-12 w-12">
+            <AvatarImage src={community.image} />
+            <AvatarFallback>{community.name[0]}</AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold truncate">{community.name}</h3>
+              {community.new && (
+                <Badge variant="secondary" className="bg-primary/10 text-primary">
+                  New
+                </Badge>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground truncate">{community.description}</p>
+            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Users className="h-4 w-4" />
+                <span>{community.members}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <MessageSquare className="h-4 w-4" />
+                <span>{community.posts}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <CalendarDays className="h-4 w-4" />
+                <span>{community.lastActivity}</span>
+              </div>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground line-clamp-1">{community.description}</p>
-          <div className="flex gap-4 text-xs text-muted-foreground mt-1">
-            <span className="flex items-center">
-              <Users className="h-3 w-3 mr-1" />
-              {community.members}
-            </span>
-            <span className="flex items-center">
-              <MessageSquare className="h-3 w-3 mr-1" />
-              {community.posts}
-            </span>
-            <span>Last active: {community.lastActivity}</span>
-          </div>
+          <Button 
+            variant={community.joined ? "secondary" : "default"}
+            className="shrink-0"
+          >
+            {community.joined ? "Joined" : "Join Community"}
+          </Button>
         </div>
-        
-        <Button variant={community.joined ? "outline" : "default"} className="ml-4" size="sm">
-          {community.joined ? "View" : "Join"}
-        </Button>
-      </div>
+      </CardContent>
     </Card>
   );
 };
