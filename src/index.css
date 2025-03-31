@@ -150,6 +150,40 @@
   .thin-scrollbar::-webkit-scrollbar-thumb {
     @apply bg-muted rounded-full;
   }
+  
+  /* New UI enhancement classes */
+  .hover-card {
+    @apply transition-all duration-200 hover:shadow-md hover:-translate-y-0.5;
+  }
+  
+  .category-tab {
+    @apply relative overflow-hidden transition-all duration-300;
+  }
+  
+  .category-tab::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300;
+  }
+  
+  .category-tab:hover::after {
+    @apply w-full;
+  }
+  
+  .category-tab.active::after {
+    @apply w-full;
+  }
+  
+  .tag-badge {
+    @apply transition-all duration-200 cursor-pointer;
+  }
+  
+  .tag-badge:hover {
+    @apply bg-primary text-primary-foreground scale-105;
+  }
+  
+  .user-circle-item {
+    @apply transition-all duration-200 hover:bg-muted/70 rounded-md;
+  }
 }
 
 /* Utility animations */
