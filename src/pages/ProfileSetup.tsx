@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
@@ -68,7 +67,7 @@ const ProfileSetup: React.FC = () => {
             <p className="text-muted-foreground">
               Let's start with some basic information about your profile.
             </p>
-            <ArtistProfileForm isWizardStep={true} />
+            <ArtistProfileForm />
           </div>
         );
       case 2:

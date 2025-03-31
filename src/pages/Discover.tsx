@@ -4,7 +4,6 @@ import { useLocation } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import { ContentItemProps } from '../components/marketplace/ContentCard';
 import { Button } from '@/components/ui/button';
-import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, Grip } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
@@ -13,7 +12,6 @@ import DiscoverHeader from '../components/discover/DiscoverHeader';
 import CategoryTabs from '../components/discover/CategoryTabs';
 import CategoryItemsGrid from '../components/discover/CategoryItemsGrid';
 import DiscoverSidebar from '../components/discover/DiscoverSidebar';
-import UnifiedFilters from '../components/discover/UnifiedFilters';
 import AnimatedSection from '../components/ui-custom/AnimatedSection';
 
 // Import data
@@ -175,10 +173,6 @@ const Discover: React.FC = () => {
     form.reset({ subfilters: [] });
   };
 
-  const clearTags = () => {
-    setSelectedTags([]);
-  };
-
   // Get available subfilters based on active tab
   const getAvailableSubfilters = () => {
     const subfilters: { value: string; label: string }[] = [];
@@ -264,32 +258,18 @@ const Discover: React.FC = () => {
               setUserType={setUserType}
               handleTagSelect={handleTagSelect}
               allTags={allTags}
+              resourceType={resourceType}
+              onResourceTypeChange={handleResourceTypeChange}
+              artistStyle={artistStyle}
+              onArtistStyleChange={handleArtistStyleChange}
+              disciplinaryType={disciplinaryType}
+              onDisciplinaryTypeChange={handleDisciplinaryTypeChange}
+              activeTab={activeTab}
+              selectedSubfilters={selectedSubfilters}
+              onSubfilterSelect={handleSubfilterSelect}
+              onSubfilterClear={clearSubfilters}
+              availableSubfilters={getAvailableSubfilters()}
             />
-
-            {showFilters && (
-              <AnimatedSection animation="fade-in-down" delay={200}>
-                <UnifiedFilters 
-                  allTags={allTags} 
-                  selectedTags={selectedTags} 
-                  onTagSelect={handleTagSelect}
-                  onTagClear={clearTags}
-                  userType={userType}
-                  onUserTypeChange={handleUserTypeChange}
-                  resourceType={resourceType}
-                  onResourceTypeChange={handleResourceTypeChange}
-                  artistStyle={artistStyle}
-                  onArtistStyleChange={handleArtistStyleChange}
-                  disciplinaryType={disciplinaryType}
-                  onDisciplinaryTypeChange={handleDisciplinaryTypeChange}
-                  activeTab={activeTab}
-                  selectedSubfilters={selectedSubfilters}
-                  onSubfilterSelect={handleSubfilterSelect}
-                  onSubfilterClear={clearSubfilters}
-                  availableSubfilters={getAvailableSubfilters()}
-                  onClose={() => setShowFilters(false)}
-                />
-              </AnimatedSection>
-            )}
 
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full mb-6">
               <TabsList className="w-full overflow-x-auto flex">
