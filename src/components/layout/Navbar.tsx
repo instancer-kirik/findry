@@ -18,7 +18,8 @@ import {
   CalendarCheck,
   CalendarHeart,
   MessagesSquare,
-  Users
+  Users,
+  Settings
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
@@ -50,6 +51,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 
 const Navbar: React.FC = () => {
   const location = useLocation();
@@ -57,6 +59,7 @@ const Navbar: React.FC = () => {
   const [notificationCount, setNotificationCount] = useState(3);
   const [messageCount, setMessageCount] = useState(5);
   const [communityCount, setCommunityCount] = useState(2);
+  const { toast } = useToast();
 
   const navLinks = [
     { name: 'Discover', path: '/discover', icon: <Compass className="h-5 w-5" /> },
@@ -64,11 +67,27 @@ const Navbar: React.FC = () => {
     { name: 'Collaboration', path: '/collaboration', icon: <UsersRound className="h-5 w-5" /> },
     { name: 'Projects', path: '/projects', icon: <Layers className="h-5 w-5" /> },
     { name: 'Communities', path: '/communities', icon: <Users className="h-5 w-5" />, count: communityCount },
-    { name: 'Chats', path: '/chats', icon: <MessagesSquare className="h-5 w-5" />, count: messageCount },
   ];
 
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
+  };
+
+  const handleNotificationClick = () => {
+    toast({
+      title: "Notifications",
+      description: "You have " + notificationCount + " unread notifications.",
+    });
+    // Clear notifications after viewing
+    setNotificationCount(0);
+  };
+
+  const handleMessageClick = () => {
+    // Navigate to chats page
+    // Using window.location to avoid needing to create a new component with useNavigate
+    if (!isActive('/chats')) {
+      window.location.href = '/chats';
+    }
   };
 
   const AuthButtons = () => (
@@ -84,7 +103,12 @@ const Navbar: React.FC = () => {
 
   const UserMenu = () => (
     <div className="flex items-center gap-2">
-      <Button variant="outline" size="icon" className="relative">
+      <Button 
+        variant="outline" 
+        size="icon" 
+        className="relative"
+        onClick={handleNotificationClick}
+      >
         <Bell className="h-5 w-5" />
         {notificationCount > 0 && (
           <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
@@ -93,7 +117,12 @@ const Navbar: React.FC = () => {
         )}
       </Button>
       
-      <Button variant="outline" size="icon" className="relative">
+      <Button 
+        variant="outline" 
+        size="icon" 
+        className="relative"
+        onClick={handleMessageClick}
+      >
         <MessageSquare className="h-5 w-5" />
         {messageCount > 0 && (
           <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
@@ -121,17 +150,41 @@ const Navbar: React.FC = () => {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => {
+            toast({
+              title: "Profile",
+              description: "Your profile page will be available soon.",
+            });
+          }}>
             <User className="mr-2 h-4 w-4" />
             <span>Profile</span>
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => {
+            toast({
+              title: "Calendar",
+              description: "Your calendar will be available soon.",
+            });
+          }}>
             <Calendar className="mr-2 h-4 w-4" />
             <span>Calendar</span>
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => {
+            toast({
+              title: "Projects",
+              description: "Your projects will be available soon.",
+            });
+          }}>
             <Layers className="mr-2 h-4 w-4" />
             <span>Projects</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => {
+            toast({
+              title: "Settings",
+              description: "Settings will be available soon.",
+            });
+          }}>
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Settings</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => setIsLoggedIn(false)}>
@@ -159,15 +212,37 @@ const Navbar: React.FC = () => {
             <Link 
               key={link.name} 
               to={link.path}
-              className={`px-3 py-2 rounded-md text-sm font-medium ${
+              className={`px-3 py-2 rounded-md text-sm font-medium flex items-center ${
                 isActive(link.path) 
                   ? 'bg-primary/10 text-primary' 
                   : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
               {link.name}
+              {link.count && link.count > 0 && (
+                <Badge variant="secondary" className="ml-2 text-xs">
+                  {link.count}
+                </Badge>
+              )}
             </Link>
           ))}
+
+          {/* Chats Link - Only display in the navbar but functionality also in icon */}
+          <Link 
+            to="/chats"
+            className={`px-3 py-2 rounded-md text-sm font-medium flex items-center ${
+              isActive('/chats') 
+                ? 'bg-primary/10 text-primary' 
+                : 'text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            Chats
+            {messageCount > 0 && (
+              <Badge variant="secondary" className="ml-2 text-xs">
+                {messageCount}
+              </Badge>
+            )}
+          </Link>
 
           {/* Events NavigationMenu with dropdown */}
           <NavigationMenu>
@@ -257,12 +332,27 @@ const Navbar: React.FC = () => {
 
         {/* Mobile Navigation */}
         <div className="flex md:hidden items-center space-x-2">
-          <Button variant="outline" size="icon" className="md:hidden">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="md:hidden"
+            onClick={() => {
+              toast({
+                title: "Search",
+                description: "Search functionality will be available soon.",
+              });
+            }}
+          >
             <Search className="h-5 w-5" />
           </Button>
           
           {isLoggedIn && (
-            <Button variant="outline" size="icon" className="relative md:hidden">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="relative md:hidden"
+              onClick={handleNotificationClick}
+            >
               <Bell className="h-5 w-5" />
               {notificationCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
@@ -312,9 +402,34 @@ const Navbar: React.FC = () => {
                     >
                       {link.icon}
                       <span className="ml-2">{link.name}</span>
+                      {link.count && link.count > 0 && (
+                        <Badge variant="secondary" className="ml-auto">
+                          {link.count}
+                        </Badge>
+                      )}
                     </Link>
                   </SheetClose>
                 ))}
+
+                {/* Chats Link */}
+                <SheetClose asChild>
+                  <Link 
+                    to="/chats"
+                    className={`flex items-center py-2 px-3 rounded-md text-sm ${
+                      isActive('/chats') 
+                        ? 'bg-primary/10 text-primary' 
+                        : 'hover:bg-gray-100'
+                    }`}
+                  >
+                    <MessagesSquare className="h-5 w-5" />
+                    <span className="ml-2">Chats</span>
+                    {messageCount > 0 && (
+                      <Badge variant="secondary" className="ml-auto">
+                        {messageCount}
+                      </Badge>
+                    )}
+                  </Link>
+                </SheetClose>
 
                 {/* Events section in mobile view */}
                 <div className="pt-2">
