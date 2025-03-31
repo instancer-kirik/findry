@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
@@ -28,7 +27,6 @@ import {
 } from '../components/discover/DiscoverData';
 
 import AnimatedSection from '../components/ui-custom/AnimatedSection';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
@@ -210,6 +208,7 @@ const Discover: React.FC = () => {
               setShowFilters={setShowFilters}
               userType={userType}
               handleTagSelect={handleTagSelect}
+              allTags={allTags}
             />
 
             {showFilters && (

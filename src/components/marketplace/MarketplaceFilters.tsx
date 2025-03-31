@@ -1,10 +1,12 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { X } from 'lucide-react';
+import { X, Tag, Sliders, ListFilter, Check, Music, Palette, Briefcase, MapPin } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -12,6 +14,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { artistStyleFilters, disciplinaryFilters } from '../discover/DiscoverData';
 
 interface MarketplaceFiltersProps {
@@ -30,6 +39,24 @@ interface MarketplaceFiltersProps {
   onClose: () => void;
 }
 
+// Define tag categories with icons for better visual organization
+const tagCategoryIcons = {
+  'Artist Types': <Music className="h-4 w-4 text-blue-500" />,
+  'Genres': <Music className="h-4 w-4 text-indigo-500" />,
+  'Styles': <Palette className="h-4 w-4 text-purple-500" />,
+  'Multidisciplinary': <Palette className="h-4 w-4 text-pink-500" />,
+  'Disciplines': <Briefcase className="h-4 w-4 text-amber-500" />,
+  'Resource Types': <Tag className="h-4 w-4 text-emerald-500" />,
+  'Resource Features': <Sliders className="h-4 w-4 text-green-500" />,
+  'Space Size': <MapPin className="h-4 w-4 text-lime-500" />,
+  'Project Types': <Briefcase className="h-4 w-4 text-cyan-500" />,
+  'Timeline': <Tag className="h-4 w-4 text-sky-500" />,
+  'Budget': <Tag className="h-4 w-4 text-teal-500" />,
+  'Events': <Tag className="h-4 w-4 text-rose-500" />,
+  'Brand Types': <Tag className="h-4 w-4 text-red-500" />,
+  'Venue Types': <Tag className="h-4 w-4 text-orange-500" />
+};
+
 const MarketplaceFilters: React.FC<MarketplaceFiltersProps> = ({
   allTags,
   selectedTags,
@@ -45,6 +72,8 @@ const MarketplaceFilters: React.FC<MarketplaceFiltersProps> = ({
   activeTab = "",
   onClose
 }) => {
+  const [filterTab, setFilterTab] = useState<string>("types");
+  
   // Group tags by categories for better organization
   const tagCategories = {
     'Artist Types': ['Vocalist', 'Guitar', 'Producer', 'Rapper', 'Performance Artist', 'Visual Artist'],
@@ -99,128 +128,195 @@ const MarketplaceFilters: React.FC<MarketplaceFiltersProps> = ({
   const relevantCategories = getRelevantCategories();
 
   return (
-    <Card className="mb-6">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-xl">Filters</CardTitle>
-        <button 
+    <Card className="mb-6 overflow-hidden">
+      <CardHeader className="flex flex-row items-center justify-between pb-0 space-y-0">
+        <CardTitle className="text-xl flex items-center">
+          <ListFilter className="mr-2 h-5 w-5 text-primary" />
+          Filters & Tags
+        </CardTitle>
+        <Button 
+          variant="ghost" 
+          size="icon"
           onClick={onClose}
-          className="text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground rounded-full h-8 w-8"
         >
           <X className="h-5 w-5" />
-        </button>
+        </Button>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-6">
-          {/* User Type Selection */}
-          <div>
-            <h4 className="text-sm font-medium mb-3">I am a...</h4>
-            <RadioGroup 
-              value={userType} 
-              onValueChange={onUserTypeChange}
-              className="flex flex-wrap gap-4"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="regular" id="regular" />
-                <Label htmlFor="regular">Regular User</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="artist" id="artist" />
-                <Label htmlFor="artist">Artist</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="brand" id="brand" />
-                <Label htmlFor="brand">Brand</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="venue" id="venue" />
-                <Label htmlFor="venue">Venue</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="resource" id="resource" />
-                <Label htmlFor="resource">Resource Provider</Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          {/* Artist Style Selector - only show when on Artists tab */}
-          {activeTab === "artists" && (
-            <div>
-              <h4 className="text-sm font-medium mb-3">Artist Style</h4>
-              <Select value={artistStyle} onValueChange={onArtistStyleChange}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select artist style" />
-                </SelectTrigger>
-                <SelectContent>
-                  {artistStyleFilters.map((style) => (
-                    <SelectItem key={style.value} value={style.value}>
-                      {style.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {/* Disciplinary Type Selector - only show when on Artists tab */}
-          {activeTab === "artists" && (
-            <div>
-              <h4 className="text-sm font-medium mb-3">Disciplinary Type</h4>
-              <Select value={disciplinaryType} onValueChange={onDisciplinaryTypeChange}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select disciplinary type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {disciplinaryFilters.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {/* Resource Type Selector - only show when on Resources tab */}
-          {activeTab === "resources" && (
-            <div>
-              <h4 className="text-sm font-medium mb-3">Resource Type</h4>
-              <Select value={resourceType} onValueChange={onResourceTypeChange}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select resource type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {resourceTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {/* Tags by Category */}
-          <div className="space-y-4">
-            {relevantCategories.map((category) => (
-              <div key={category}>
-                <h4 className="text-sm font-medium mb-2">{category}</h4>
-                <div className="flex flex-wrap gap-2">
-                  {tagCategories[category].filter(tag => allTags.includes(tag)).map(tag => (
-                    <Badge 
-                      key={tag}
-                      variant={selectedTags.includes(tag) ? "default" : "outline"}
-                      className="cursor-pointer"
-                      onClick={() => onTagSelect(tag)}
+      
+      <Tabs value={filterTab} onValueChange={setFilterTab} className="w-full">
+        <div className="px-6 pt-2">
+          <TabsList className="w-full grid grid-cols-3">
+            <TabsTrigger value="types" className="text-xs sm:text-sm">User Types</TabsTrigger>
+            <TabsTrigger value="filters" className="text-xs sm:text-sm">Filters</TabsTrigger>
+            <TabsTrigger value="tags" className="text-xs sm:text-sm">Tags</TabsTrigger>
+          </TabsList>
+        </div>
+        
+        <CardContent className="p-0">
+          <TabsContent value="types" className="m-0 p-6 border-0">
+            <div className="space-y-6">
+              <div>
+                <h4 className="text-sm font-medium mb-3 flex items-center">
+                  <Tag className="mr-2 h-4 w-4 text-primary" />
+                  I am a...
+                </h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {['regular', 'artist', 'brand', 'venue', 'resource'].map((type) => (
+                    <Button 
+                      key={type}
+                      variant={userType === type ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => onUserTypeChange(type)}
+                      className="justify-start h-9"
                     >
-                      {tag}
-                    </Badge>
+                      {userType === type && <Check className="mr-2 h-3 w-3" />}
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </Button>
                   ))}
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </CardContent>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="filters" className="m-0 p-6 border-0">
+            <div className="space-y-6">
+              {/* Artist Style Selector - only show when on Artists tab */}
+              {activeTab === "artists" && (
+                <div>
+                  <h4 className="text-sm font-medium mb-3 flex items-center">
+                    <Palette className="mr-2 h-4 w-4 text-primary" />
+                    Artist Style
+                  </h4>
+                  <Select value={artistStyle} onValueChange={onArtistStyleChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select artist style" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {artistStyleFilters.map((style) => (
+                        <SelectItem key={style.value} value={style.value}>
+                          {style.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Disciplinary Type Selector - only show when on Artists tab */}
+              {activeTab === "artists" && (
+                <div>
+                  <h4 className="text-sm font-medium mb-3 flex items-center">
+                    <Briefcase className="mr-2 h-4 w-4 text-primary" />
+                    Disciplinary Type
+                  </h4>
+                  <Select value={disciplinaryType} onValueChange={onDisciplinaryTypeChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select disciplinary type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {disciplinaryFilters.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Resource Type Selector - only show when on Resources tab */}
+              {activeTab === "resources" && (
+                <div>
+                  <h4 className="text-sm font-medium mb-3 flex items-center">
+                    <Tag className="mr-2 h-4 w-4 text-primary" />
+                    Resource Type
+                  </h4>
+                  <Select value={resourceType} onValueChange={onResourceTypeChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select resource type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {resourceTypes.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              
+              {selectedTags.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium mb-3 flex items-center">
+                    <Tag className="mr-2 h-4 w-4 text-primary" />
+                    Active Tags
+                  </h4>
+                  <div className="flex flex-wrap gap-2 p-3 bg-muted/20 rounded-md">
+                    {selectedTags.map(tag => (
+                      <Badge 
+                        key={tag}
+                        variant="secondary"
+                        className="cursor-pointer hover:bg-destructive/10 transition-colors"
+                        onClick={() => onTagSelect(tag)}
+                      >
+                        {tag}
+                        <X className="ml-1 h-3 w-3" />
+                      </Badge>
+                    ))}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onTagSelect("")}
+                      className="text-xs h-7"
+                    >
+                      Clear all
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="tags" className="m-0 border-0 max-h-[500px]">
+            <ScrollArea className="h-[500px]">
+              <div className="p-6 space-y-4">
+                <Accordion type="multiple" className="w-full">
+                  {relevantCategories.map((category) => (
+                    <AccordionItem key={category} value={category}>
+                      <AccordionTrigger className="py-2">
+                        <div className="flex items-center text-sm font-medium">
+                          {tagCategoryIcons[category]}
+                          <span className="ml-2">{category}</span>
+                          <Badge variant="outline" className="ml-2 text-xs">
+                            {tagCategories[category].filter(tag => allTags.includes(tag)).length}
+                          </Badge>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="flex flex-wrap gap-2 pt-2 pb-4">
+                          {tagCategories[category].filter(tag => allTags.includes(tag)).map(tag => (
+                            <Badge 
+                              key={tag}
+                              variant={selectedTags.includes(tag) ? "default" : "outline"}
+                              className="cursor-pointer"
+                              onClick={() => onTagSelect(tag)}
+                            >
+                              {tag}
+                              {selectedTags.includes(tag) && <X className="ml-1 h-3 w-3" />}
+                            </Badge>
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </div>
+            </ScrollArea>
+          </TabsContent>
+        </CardContent>
+      </Tabs>
     </Card>
   );
 };
