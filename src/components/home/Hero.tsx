@@ -145,6 +145,31 @@ const Hero: React.FC = () => {
           </div>
         </div>
       </AnimatedSection>
+
+      {/* Funding and Contact Section */}
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-2xl mx-auto text-center space-y-6">
+          <h2 className="text-2xl font-bold">Support the Project</h2>
+          <p className="text-muted-foreground">
+            Help us continue building and improving Findry by supporting the project.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button variant="outline" className="w-full sm:w-auto">
+              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="currentColor"/>
+                <path d="M12 6C8.69 6 6 8.69 6 12C6 15.31 8.69 18 12 18C15.31 18 18 15.31 18 12C18 8.69 15.31 6 12 6ZM12 16C9.79 16 8 14.21 8 12C8 9.79 9.79 8 12 8C14.21 8 16 9.79 16 12C16 14.21 14.21 16 12 16Z" fill="currentColor"/>
+              </svg>
+              Cash App: $Instancer
+            </Button>
+            <Button variant="outline" className="w-full sm:w-auto">
+              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z" fill="currentColor"/>
+              </svg>
+              instance.select@gmail.com
+            </Button>
+          </div>
+        </div>
+      </div>
     </section>
   );
 };
