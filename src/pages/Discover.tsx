@@ -37,6 +37,11 @@ import {
   DrawerTrigger 
 } from '@/components/ui/drawer';
 
+// Define the JSON type for Supabase data
+interface Json {
+  [key: string]: any;
+}
+
 const Discover: React.FC = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -114,47 +119,73 @@ const Discover: React.FC = () => {
         });
         setItems([]);
       } else {
-        let filteredItems = data || [];
+        let filteredItems: ContentItemProps[] = [];
         
-        // Apply additional filters that are not handled by the database function
-        if (activeTab === 'resources' && resourceType !== 'all') {
-          filteredItems = filteredItems.filter(item => item.type === resourceType);
-        }
-        
-        if (activeTab === 'artists') {
-          if (artistStyle !== 'all') {
+        if (data && Array.isArray(data)) {
+          // Properly map the data to ContentItemProps format
+          filteredItems = data.map(item => ({
+            id: item.id,
+            title: item.name,
+            subtitle: item.subtype || item.type || '',
+            location: item.location || 'Location not specified',
+            tags: Array.isArray(item.tags) ? item.tags : [],
+            type: item.type || '',
+            imageUrl: item.image_url || '/placeholder.svg',
+          }));
+          
+          // Apply additional filters that are not handled by the database function
+          if (activeTab === 'resources' && resourceType !== 'all') {
             filteredItems = filteredItems.filter(item => 
-              item.styles && item.styles.includes(artistStyle.charAt(0).toUpperCase() + artistStyle.slice(1))
+              item.type.toLowerCase() === resourceType.toLowerCase()
             );
           }
           
-          if (disciplinaryType !== 'all') {
-            filteredItems = filteredItems.filter(item => 
-              (disciplinaryType === 'multi' && item.multidisciplinary) || 
-              (disciplinaryType === 'single' && !item.multidisciplinary)
-            );
+          if (activeTab === 'artists') {
+            if (artistStyle !== 'all' && Array.isArray(item.styles)) {
+              filteredItems = filteredItems.filter(item => {
+                const itemData = data.find(d => d.id === item.id);
+                return itemData && 
+                       Array.isArray(itemData.styles) && 
+                       itemData.styles.some((style: string) => 
+                         style.toLowerCase() === artistStyle.toLowerCase()
+                       );
+              });
+            }
+            
+            if (disciplinaryType !== 'all') {
+              filteredItems = filteredItems.filter(item => {
+                const itemData = data.find(d => d.id === item.id);
+                return itemData && 
+                       (disciplinaryType === 'multi' && itemData.multidisciplinary) || 
+                       (disciplinaryType === 'single' && !itemData.multidisciplinary);
+              });
+            }
           }
-        }
-        
-        // Apply subtab filtering
-        if (activeSubTab !== 'all') {
-          filteredItems = filteredItems.filter(item => 
-            (item.subtype && item.subtype.toLowerCase() === activeSubTab) || 
-            item.type.toLowerCase() === activeSubTab
-          );
-        }
-        
-        // Apply multi-select subfilters
-        if (selectedSubfilters.length > 0) {
-          filteredItems = filteredItems.filter(item => 
-            selectedSubfilters.some(filter => {
-              if (item.tags.includes(filter)) return true;
-              if (item.type === filter) return true;
-              if (item.subtype === filter) return true;
-              if (item.styles && item.styles.includes(filter)) return true;
-              return false;
-            })
-          );
+          
+          // Apply subtab filtering
+          if (activeSubTab !== 'all') {
+            filteredItems = filteredItems.filter(item => {
+              const itemData = data.find(d => d.id === item.id);
+              return itemData && 
+                     ((itemData.subtype && itemData.subtype.toLowerCase() === activeSubTab.toLowerCase()) || 
+                      (itemData.type && itemData.type.toLowerCase() === activeSubTab.toLowerCase()));
+            });
+          }
+          
+          // Apply multi-select subfilters
+          if (selectedSubfilters.length > 0) {
+            filteredItems = filteredItems.filter(item => {
+              const itemData = data.find(d => d.id === item.id);
+              return selectedSubfilters.some(filter => {
+                if (item.tags.includes(filter)) return true;
+                if (item.type.toLowerCase() === filter.toLowerCase()) return true;
+                if (itemData && itemData.subtype && itemData.subtype.toLowerCase() === filter.toLowerCase()) return true;
+                if (itemData && Array.isArray(itemData.styles) && 
+                    itemData.styles.some((style: string) => style.toLowerCase() === filter.toLowerCase())) return true;
+                return false;
+              });
+            });
+          }
         }
         
         setItems(filteredItems);
