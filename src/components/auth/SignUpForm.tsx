@@ -16,8 +16,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Loader2 } from 'lucide-react';
-import ProfileTypeSelector from './ProfileTypeSelector';
+import { Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 // Define the form schema with Zod
@@ -27,7 +26,6 @@ const signUpSchema = z.object({
     .string()
     .min(8, { message: 'Password must be at least 8 characters' }),
   name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
-  profileType: z.array(z.string()).min(1, { message: 'Select at least one profile type' }),
   termsAccepted: z.boolean().refine((val) => val === true, {
     message: 'You must accept the terms and conditions',
   }),
@@ -47,7 +45,6 @@ const SignUpForm: React.FC = () => {
       email: '',
       password: '',
       name: '',
-      profileType: ['user'], // Default to 'user' profile type
       termsAccepted: false,
     },
   });
@@ -57,8 +54,6 @@ const SignUpForm: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      console.log('Signup values:', values);
-      
       // Sign up with Supabase
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: values.email,
@@ -66,7 +61,6 @@ const SignUpForm: React.FC = () => {
         options: {
           data: {
             full_name: values.name,
-            profile_types: values.profileType,
           },
         },
       });
@@ -109,8 +103,6 @@ const SignUpForm: React.FC = () => {
             id: authData.user.id,
             username,
             full_name: values.name,
-            profile_types: values.profileType,
-            role_attributes: {},
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           },
@@ -209,23 +201,6 @@ const SignUpForm: React.FC = () => {
 
         <FormField
           control={form.control}
-          name="profileType"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>I am (select all that apply)</FormLabel>
-              <FormControl>
-                <ProfileTypeSelector 
-                  value={field.value} 
-                  onChange={field.onChange} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
           name="termsAccepted"
           render={({ field }) => (
             <FormItem className="flex flex-row items-start space-x-3 space-y-0">
@@ -249,22 +224,19 @@ const SignUpForm: React.FC = () => {
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creating Account...
+              Creating account...
             </>
           ) : (
-            <>
-              Create Account
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </>
+            'Create Account'
           )}
         </Button>
 
-        <div className="text-center text-sm">
+        <p className="text-center text-sm text-muted-foreground">
           Already have an account?{' '}
-          <Link to="/login" className="text-primary font-medium">
+          <Link to="/login" className="text-primary hover:underline">
             Log in
           </Link>
-        </div>
+        </p>
       </form>
     </Form>
   );

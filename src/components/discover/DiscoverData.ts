@@ -7,28 +7,28 @@ export interface StyleType {
 }
 
 export const artistStyles: StyleType[] = [
-  { id: "s1", name: "Minimalist", description: "Simple, uncluttered aesthetics with a focus on essential elements" },
-  { id: "s2", name: "Abstract", description: "Non-representational approach focusing on shapes, colors, and textures" },
-  { id: "s3", name: "Contemporary", description: "Current, innovative approaches that push boundaries" },
-  { id: "s4", name: "Traditional", description: "Time-honored techniques and aesthetic principles" },
-  { id: "s5", name: "Experimental", description: "Innovative approaches that challenge conventional methods" },
-  { id: "s6", name: "Surrealist", description: "Dreamlike imagery and unexpected juxtapositions" },
-  { id: "s7", name: "Urban", description: "Street-influenced aesthetics with cultural commentary" },
-  { id: "s8", name: "Folk", description: "Cultural traditions and community-based practices" }
+  { id: "550e8400-e29b-41d4-a716-446655440000", name: "Minimalist", description: "Simple, uncluttered aesthetics with a focus on essential elements" },
+  { id: "550e8400-e29b-41d4-a716-446655440001", name: "Abstract", description: "Non-representational approach focusing on shapes, colors, and textures" },
+  { id: "550e8400-e29b-41d4-a716-446655440002", name: "Contemporary", description: "Current, innovative approaches that push boundaries" },
+  { id: "550e8400-e29b-41d4-a716-446655440003", name: "Traditional", description: "Time-honored techniques and aesthetic principles" },
+  { id: "550e8400-e29b-41d4-a716-446655440004", name: "Experimental", description: "Innovative approaches that challenge conventional methods" },
+  { id: "550e8400-e29b-41d4-a716-446655440005", name: "Surrealist", description: "Dreamlike imagery and unexpected juxtapositions" },
+  { id: "550e8400-e29b-41d4-a716-446655440006", name: "Urban", description: "Street-influenced aesthetics with cultural commentary" },
+  { id: "550e8400-e29b-41d4-a716-446655440007", name: "Folk", description: "Cultural traditions and community-based practices" }
 ];
 
 export const multidisciplinaryTypes: StyleType[] = [
-  { id: "m1", name: "Sound & Visual", description: "Combining auditory and visual elements" },
-  { id: "m2", name: "Performance & Media", description: "Live performance integrated with digital media" },
-  { id: "m3", name: "Installation & Sculpture", description: "Three-dimensional works in relationship to space" },
-  { id: "m4", name: "Digital & Physical", description: "Bridging digital technologies with physical materials" },
-  { id: "m5", name: "Text & Image", description: "Integration of written language with visual elements" },
-  { id: "m6", name: "Movement & Sound", description: "Choreography and sonic elements in harmony" }
+  { id: "550e8400-e29b-41d4-a716-446655440008", name: "Sound & Visual", description: "Combining auditory and visual elements" },
+  { id: "550e8400-e29b-41d4-a716-446655440009", name: "Performance & Media", description: "Live performance integrated with digital media" },
+  { id: "550e8400-e29b-41d4-a716-446655440010", name: "Installation & Sculpture", description: "Three-dimensional works in relationship to space" },
+  { id: "550e8400-e29b-41d4-a716-446655440011", name: "Digital & Physical", description: "Bridging digital technologies with physical materials" },
+  { id: "550e8400-e29b-41d4-a716-446655440012", name: "Text & Image", description: "Integration of written language with visual elements" },
+  { id: "550e8400-e29b-41d4-a716-446655440013", name: "Movement & Sound", description: "Choreography and sonic elements in harmony" }
 ];
 
 export const artists: ContentItemProps[] = [
   {
-    id: "1",
+    id: "550e8400-e29b-41d4-a716-446655440014",
     name: "Elena Rivera",
     type: "artist",
     location: "Los Angeles, CA",
@@ -39,7 +39,7 @@ export const artists: ContentItemProps[] = [
     disciplines: ["Music", "Video Production"]
   },
   {
-    id: "2",
+    id: "550e8400-e29b-41d4-a716-446655440015",
     name: "James Wilson",
     type: "artist",
     location: "Chicago, IL",
@@ -50,7 +50,7 @@ export const artists: ContentItemProps[] = [
     disciplines: ["Music"]
   },
   {
-    id: "3",
+    id: "550e8400-e29b-41d4-a716-446655440016",
     name: "Mia Chen",
     type: "artist",
     location: "New York, NY",
@@ -61,7 +61,7 @@ export const artists: ContentItemProps[] = [
     disciplines: ["Music Production", "Digital Art"]
   },
   {
-    id: "4",
+    id: "550e8400-e29b-41d4-a716-446655440017",
     name: "Marcus Johnson",
     type: "artist",
     location: "Atlanta, GA",
@@ -72,7 +72,7 @@ export const artists: ContentItemProps[] = [
     disciplines: ["Music"]
   },
   {
-    id: "5",
+    id: "550e8400-e29b-41d4-a716-446655440018",
     name: "Sophia Rodriguez",
     type: "artist",
     location: "Miami, FL",
@@ -83,7 +83,7 @@ export const artists: ContentItemProps[] = [
     disciplines: ["Dance", "Visual Art", "Music"]
   },
   {
-    id: "6",
+    id: "550e8400-e29b-41d4-a716-446655440019",
     name: "David Kim",
     type: "artist",
     location: "Seattle, WA",
@@ -97,7 +97,7 @@ export const artists: ContentItemProps[] = [
 
 export const resources: ContentItemProps[] = [
   {
-    id: "s1",
+    id: "550e8400-e29b-41d4-a716-446655440020",
     name: "Downtown Recording Studio",
     type: "space",
     location: "New York, NY",
@@ -105,7 +105,7 @@ export const resources: ContentItemProps[] = [
     subtype: "Space"
   },
   {
-    id: "s2",
+    id: "550e8400-e29b-41d4-a716-446655440021",
     name: "Artist Collective Gallery",
     type: "space",
     location: "Portland, OR",
@@ -113,7 +113,7 @@ export const resources: ContentItemProps[] = [
     subtype: "Space"
   },
   {
-    id: "s3",
+    id: "550e8400-e29b-41d4-a716-446655440022",
     name: "Musician's Practice Space",
     type: "space",
     location: "Austin, TX",
@@ -121,7 +121,7 @@ export const resources: ContentItemProps[] = [
     subtype: "Space"
   },
   {
-    id: "t1",
+    id: "550e8400-e29b-41d4-a716-446655440023",
     name: "Professional Lighting Kit",
     type: "tool",
     location: "Chicago, IL",
@@ -129,7 +129,7 @@ export const resources: ContentItemProps[] = [
     subtype: "Tool/Equipment"
   },
   {
-    id: "t2",
+    id: "550e8400-e29b-41d4-a716-446655440024",
     name: "Mobile Recording Equipment",
     type: "tool",
     location: "Nashville, TN",
@@ -137,7 +137,7 @@ export const resources: ContentItemProps[] = [
     subtype: "Tool/Equipment"
   },
   {
-    id: "o1",
+    id: "550e8400-e29b-41d4-a716-446655440025",
     name: "Sound Engineer Services",
     type: "offerer",
     location: "Los Angeles, CA",
@@ -145,7 +145,7 @@ export const resources: ContentItemProps[] = [
     subtype: "Service Provider"
   },
   {
-    id: "o2",
+    id: "550e8400-e29b-41d4-a716-446655440026",
     name: "Session Musicians Network",
     type: "offerer",
     location: "Nashville, TN",
@@ -156,7 +156,7 @@ export const resources: ContentItemProps[] = [
 
 export const projects: ContentItemProps[] = [
   {
-    id: "1",
+    id: "550e8400-e29b-41d4-a716-446655440027",
     name: "Indie Album Recording",
     type: "project",
     location: "Nashville, TN",
@@ -164,7 +164,7 @@ export const projects: ContentItemProps[] = [
     subtype: "Music"
   },
   {
-    id: "2",
+    id: "550e8400-e29b-41d4-a716-446655440028",
     name: "Fashion Photography Series",
     type: "project",
     location: "Los Angeles, CA",
@@ -172,7 +172,7 @@ export const projects: ContentItemProps[] = [
     subtype: "Fashion"
   },
   {
-    id: "3",
+    id: "550e8400-e29b-41d4-a716-446655440029",
     name: "Documentary Film Editing",
     type: "project",
     location: "Chicago, IL",
@@ -183,7 +183,7 @@ export const projects: ContentItemProps[] = [
 
 export const events: ContentItemProps[] = [
   {
-    id: "1",
+    id: "550e8400-e29b-41d4-a716-446655440030",
     name: "Summer Music Festival",
     type: "event",
     location: "Austin, TX",
@@ -191,7 +191,7 @@ export const events: ContentItemProps[] = [
     subtype: "Festival"
   },
   {
-    id: "2",
+    id: "550e8400-e29b-41d4-a716-446655440031",
     name: "Art Gallery Opening",
     type: "event",
     location: "New York, NY",
@@ -199,7 +199,7 @@ export const events: ContentItemProps[] = [
     subtype: "Exhibition"
   },
   {
-    id: "3",
+    id: "550e8400-e29b-41d4-a716-446655440032",
     name: "Music Industry Workshop",
     type: "event",
     location: "Los Angeles, CA",
@@ -210,7 +210,7 @@ export const events: ContentItemProps[] = [
 
 export const venues: ContentItemProps[] = [
   {
-    id: "1",
+    id: "550e8400-e29b-41d4-a716-446655440033",
     name: "The Electric Room",
     type: "venue",
     location: "Brooklyn, NY",
@@ -218,7 +218,7 @@ export const venues: ContentItemProps[] = [
     subtype: "Club"
   },
   {
-    id: "2",
+    id: "550e8400-e29b-41d4-a716-446655440034",
     name: "Harmony Concert Hall",
     type: "venue",
     location: "Chicago, IL",
@@ -226,7 +226,7 @@ export const venues: ContentItemProps[] = [
     subtype: "Concert Hall"
   },
   {
-    id: "3",
+    id: "550e8400-e29b-41d4-a716-446655440035",
     name: "Outdoor Amphitheater",
     type: "venue",
     location: "Denver, CO",
@@ -237,7 +237,7 @@ export const venues: ContentItemProps[] = [
 
 export const communities: ContentItemProps[] = [
   {
-    id: "1",
+    id: "550e8400-e29b-41d4-a716-446655440036",
     name: "Beat Makers Alliance",
     type: "community",
     location: "Worldwide (Online)",
@@ -245,47 +245,31 @@ export const communities: ContentItemProps[] = [
     subtype: "Music"
   },
   {
-    id: "2",
+    id: "550e8400-e29b-41d4-a716-446655440037",
     name: "Art Collective NYC",
     type: "community",
     location: "New York, NY",
-    tags: ["Visual Arts", "Exhibitions", "50+ Members"],
-    subtype: "Art"
-  },
-  {
-    id: "3",
-    name: "Tech Musicians Network",
-    type: "community",
-    location: "San Francisco, CA",
-    tags: ["Music Tech", "Networking", "100+ Members"],
-    subtype: "Tech"
+    tags: ["Visual Art", "Exhibition", "50+ Members"],
+    subtype: "Visual Art"
   }
 ];
 
 export const brands: ContentItemProps[] = [
   {
-    id: "1",
-    name: "Melody Records",
+    id: "550e8400-e29b-41d4-a716-446655440038",
+    name: "SoundPro Audio",
     type: "brand",
     location: "Los Angeles, CA",
-    tags: ["Record Label", "Indie", "Distribution"],
-    subtype: "Label"
+    tags: ["Audio Equipment", "Professional Grade", "Sponsorship Available"],
+    subtype: "Audio Equipment"
   },
   {
-    id: "2",
-    name: "Soundwave Audio",
+    id: "550e8400-e29b-41d4-a716-446655440039",
+    name: "Artisan Instruments",
     type: "brand",
     location: "Nashville, TN",
-    tags: ["Audio Equipment", "Professional", "Industry"],
-    subtype: "Equipment"
-  },
-  {
-    id: "3",
-    name: "UrbanWear",
-    type: "brand",
-    location: "New York, NY",
-    tags: ["Fashion", "Streetwear", "Collaborations"],
-    subtype: "Fashion"
+    tags: ["Musical Instruments", "Handcrafted", "Limited Edition"],
+    subtype: "Musical Instruments"
   }
 ];
 
