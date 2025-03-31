@@ -10,6 +10,27 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
+interface Profile {
+  id: string;
+  username: string;
+  full_name: string;
+  avatar_url?: string;
+  bio?: string;
+}
+
+// For handling the case where a profile is not found
+interface ProfileNotFound {
+  id: string;
+  notFound: boolean;
+}
+
+type ProfileResult = Profile | ProfileNotFound;
+
+// Type guard to check if the profile result is a ProfileNotFound
+function isProfileNotFound(profile: ProfileResult): profile is ProfileNotFound {
+  return (profile as ProfileNotFound).notFound === true;
+}
+
 const ProfilePage: React.FC = () => {
   const { username } = useParams<{ username?: string }>();
   const isOwnProfile = !username; // If no username is provided, show the user's own profile
@@ -32,11 +53,11 @@ const ProfilePage: React.FC = () => {
         if (error) {
           if (error.code === 'PGRST116') {
             // Profile not found for this user
-            return { id: user.id, notFound: true };
+            return { id: user.id, notFound: true } as ProfileNotFound;
           }
           throw error;
         }
-        return data;
+        return data as Profile;
       } else {
         // Otherwise fetch the requested profile by username
         const { data, error } = await supabase
@@ -46,7 +67,7 @@ const ProfilePage: React.FC = () => {
           .single();
           
         if (error) throw error;
-        return data;
+        return data as Profile;
       }
     },
     enabled: true,
@@ -63,7 +84,7 @@ const ProfilePage: React.FC = () => {
   }
 
   // Handle case where current user doesn't have a profile yet
-  if (isOwnProfile && profileData?.notFound) {
+  if (isOwnProfile && profileData && isProfileNotFound(profileData)) {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-12">
@@ -92,7 +113,7 @@ const ProfilePage: React.FC = () => {
     );
   }
 
-  if (error || !profileData) {
+  if (error || !profileData || isProfileNotFound(profileData)) {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-12">
