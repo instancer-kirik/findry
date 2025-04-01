@@ -30,31 +30,31 @@ interface ProfileData {
 const featuredProfiles: ProfileData[] = [
   {
     id: "1",
-    name: "Elena Rivera",
+    name: "Me",
     type: "artist",
-    location: "Los Angeles, CA",
+    location: "Sykesville, MD",
     image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3276&q=80",
-    tags: ["Vocalist", "R&B", "Soul"]
+    tags: ["Vocalist", "poet", "designer", "developer"]
   },
   {
     id: "2",
-    name: "Downtown Recording Studio",
+    name: "Recording Studio",
     type: "resource",
-    location: "New York, NY",
+    location: "Moon",
     image: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2940&q=80",
     tags: ["Studio", "Equipment Rental", "Professional"]
   },
   {
     id: "3",
-    name: "The Electric Room",
+    name: "The Stage",
     type: "venue",
-    location: "Brooklyn, NY",
+    location: "outside",
     image: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3270&q=80",
     tags: ["Live Music", "200 Capacity", "Indie"]
   },
   {
     id: "4",
-    name: "Beat Makers Alliance",
+    name: "Beginner's Community",
     type: "community",
     location: "Worldwide (Online)",
     image: "https://images.unsplash.com/photo-1516057747705-0609711c769b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3270&q=80",
