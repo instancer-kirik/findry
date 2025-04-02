@@ -1,3 +1,4 @@
+
 # Findry Project Roadmap
 
 ## Project Overview
@@ -8,21 +9,23 @@ Findry is a holistic event discovery and organization platform that bridges the 
 - Core dependencies are installed
 - Initial pages and components are created
 - Supabase integration is in place
+- Profile calendar with event thumbnails implemented
+- Artist profile viewing functionality added
 
 ## Phase 1: Core Platform (T1)
 
 ### User Experience
 - [ ] User Profiles & Authentication
-  - [ ] Signup flow with role selection (Consumer/Artist/Organizer)
+  - [x] Signup flow with role selection (Consumer/Artist/Organizer)
   - [ ] Profile customization
   - [ ] Privacy settings
   - [ ] Social connections
 
 ### Event Management
-- [ ] Calendar Integration
-  - [ ] Event discovery
-  - [ ] Personal calendar management
-  - [ ] Event scheduling
+- [x] Calendar Integration
+  - [x] Event discovery
+  - [x] Personal calendar management
+  - [x] Event scheduling
   - [ ] Import/Export capabilities
 
 ### Social Features
@@ -98,8 +101,8 @@ Findry is a holistic event discovery and organization platform that bridges the 
   - [ ] Contract management
 
 ### Artist & Creative Features
-- [ ] Artist Tools
-  - [ ] Portfolio calendar
+- [x] Artist Tools
+  - [x] Portfolio calendar
   - [ ] Availability management
   - [ ] Gig discovery
   - [ ] Artist networking

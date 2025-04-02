@@ -2,7 +2,9 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ProfileCard from '@/components/home/ProfileCard';
+import ProfileCalendar from './ProfileCalendar';
 import { ProfileType } from '../auth/ProfileTypeSelector';
+import { addDays, subDays } from 'date-fns';
 
 interface Profile {
   id: string;
@@ -10,6 +12,7 @@ interface Profile {
   full_name: string;
   avatar_url?: string;
   bio?: string;
+  profile_types?: string[];
 }
 
 interface ProfileTabsProps {
@@ -36,10 +39,47 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({ profile, isOwnProfile }) => {
     }
   ];
 
+  // Sample event data - in a real app, you would fetch this from the backend
+  const sampleEvents = [
+    {
+      id: "1",
+      title: "Jazz Concert",
+      date: new Date(),
+      imageUrl: "https://images.unsplash.com/photo-1511192336575-5a79af67a629?q=80&w=2070&auto=format&fit=crop",
+      location: "Downtown Jazz Club",
+      type: "Performance"
+    },
+    {
+      id: "2",
+      title: "Art Gallery Opening",
+      date: addDays(new Date(), 3),
+      imageUrl: "https://images.unsplash.com/photo-1594971475674-6a59c4389ee1?q=80&w=2069&auto=format&fit=crop",
+      location: "Modern Art Space",
+      type: "Exhibition"
+    },
+    {
+      id: "3",
+      title: "Photography Workshop",
+      date: addDays(new Date(), 7),
+      imageUrl: "https://images.unsplash.com/photo-1452587925148-ce544e77e70d?q=80&w=2069&auto=format&fit=crop",
+      location: "Creative Studio",
+      type: "Workshop"
+    },
+    {
+      id: "4",
+      title: "Music Production Session",
+      date: subDays(new Date(), 2),
+      imageUrl: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=2070&auto=format&fit=crop",
+      location: "Recording Studio",
+      type: "Session"
+    }
+  ];
+
   return (
     <Tabs defaultValue="portfolio" className="w-full">
       <TabsList className="mb-6">
         <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+        <TabsTrigger value="calendar">Calendar</TabsTrigger>
         <TabsTrigger value="collaborations">Collaborations</TabsTrigger>
         <TabsTrigger value="events">Events</TabsTrigger>
         {isOwnProfile && <TabsTrigger value="saved">Saved</TabsTrigger>}
@@ -72,6 +112,10 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({ profile, isOwnProfile }) => {
             )}
           </div>
         )}
+      </TabsContent>
+
+      <TabsContent value="calendar">
+        <ProfileCalendar events={sampleEvents} isOwnProfile={isOwnProfile} />
       </TabsContent>
 
       <TabsContent value="collaborations">
