@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import AnimatedSection from '../ui-custom/AnimatedSection';
 import { FileText, Users } from 'lucide-react';
 import ScreenshotGallery from './ScreenshotGallery';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
 
 const screenshots = [
   {
@@ -44,6 +45,25 @@ const screenshots = [
 ];
 
 const Hero: React.FC = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  
+  useEffect(() => {
+    // Check if user is authenticated
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getSession();
+      setIsAuthenticated(data.session !== null);
+    };
+    
+    checkAuth();
+    
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(session !== null);
+    });
+    
+    return () => subscription.unsubscribe();
+  }, []);
+  
   return (
     <section className="relative pt-32 pb-20 md:pt-40 md:pb-32 overflow-hidden">
       {/* Background gradient */}
@@ -65,27 +85,32 @@ const Hero: React.FC = () => {
           
           <AnimatedSection animation="fade-in-up" delay={200}>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight">
-              Findry: Connect, Create, Collaborate
+              {isAuthenticated ? "Welcome to Your Creative Hub" : "Findry: Connect, Create, Collaborate"}
             </h1>
           </AnimatedSection>
           
           <AnimatedSection animation="fade-in-up" delay={300}>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Discover and create opportunities, build relationships, and grow your network with our intuitive platform designed for humans.
+              {isAuthenticated 
+                ? "Manage your items, track offers, and grow your creative network all in one place."
+                : "Discover and create opportunities, build relationships, and grow your network with our intuitive platform designed for humans."
+              }
             </p>
           </AnimatedSection>
         </div>
       </div>
       
-      {/* Screenshot Gallery */}
-      <AnimatedSection animation="fade-in-up" delay={600} className="mt-16 md:mt-20 max-w-6xl mx-auto px-4">
-        <div className="relative">
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-blue-50/50 to-purple-50/50 dark:from-blue-900/20 dark:to-purple-900/20 backdrop-blur-lg -z-10"></div>
-          <div className="p-6 bg-white/80 dark:bg-black/80 rounded-2xl shadow-xl border border-white/30 dark:border-white/10">
-            <ScreenshotGallery screenshots={screenshots} />
+      {/* Screenshot Gallery - only show when not authenticated */}
+      {!isAuthenticated && (
+        <AnimatedSection animation="fade-in-up" delay={600} className="mt-16 md:mt-20 max-w-6xl mx-auto px-4">
+          <div className="relative">
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-blue-50/50 to-purple-50/50 dark:from-blue-900/20 dark:to-purple-900/20 backdrop-blur-lg -z-10"></div>
+            <div className="p-6 bg-white/80 dark:bg-black/80 rounded-2xl shadow-xl border border-white/30 dark:border-white/10">
+              <ScreenshotGallery screenshots={screenshots} />
+            </div>
           </div>
-        </div>
-      </AnimatedSection>
+        </AnimatedSection>
+      )}
 
       {/* DivvyQueue Section */}
       <AnimatedSection animation="fade-in-up" delay={800} className="mt-20 max-w-4xl mx-auto px-4">
