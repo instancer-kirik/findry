@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Toaster } from '@/components/ui/toaster'
-import { ThemeProvider } from '@/hooks/use-theme'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // Pages
@@ -29,42 +28,40 @@ const queryClient = new QueryClient()
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="system" storageKey="tandemx-theme">
-        <Router>
-          <div className="min-h-screen w-full overflow-x-hidden">
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/discover" element={<Discover />} />
-              <Route path="/artists" element={<Discover />} />
-              <Route path="/resources" element={<Discover />} />
-              <Route path="/projects" element={<Discover />} />
-              <Route path="/events" element={<Discover />} />
-              <Route path="/venues" element={<Discover />} />
-              <Route path="/communities" element={<Communities />} />
-              <Route path="/community/:id" element={<CommunityDashboard />} />
-              <Route path="/community/events" element={<CommunityEvents />} />
-              <Route path="/chats" element={<Chats />} />
-              <Route path="/chats/new" element={<Chats />} />
-              <Route path="/brands" element={<Discover />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/profile-setup" element={<ProfileSetup />} />
-              <Route path="/events/create" element={<CreateEvent />} />
-              <Route path="/events/:eventId" element={<EventDetail />} />
-              <Route path="/events/interested" element={<Discover />} />
-              <Route path="/collaboration" element={<Collaboration />} />
-              <Route path="/projects/:projectId" element={<ProjectDetail />} />
-              <Route path="/meetings" element={<MeetingScheduler />} />
-              <Route path="/meetings/schedule" element={<MeetingScheduler />} />
-              <Route path="/meetings/:meetingId" element={<MeetingScheduler />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/profile/:username" element={<ProfilePage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <Toaster />
-          </div>
-        </Router>
-      </ThemeProvider>
+      <Router>
+        <div className="min-h-screen w-full overflow-x-hidden">
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/discover" element={<Discover />} />
+            <Route path="/artists" element={<Discover />} />
+            <Route path="/resources" element={<Discover />} />
+            <Route path="/projects" element={<Discover />} />
+            <Route path="/events" element={<Discover />} />
+            <Route path="/venues" element={<Discover />} />
+            <Route path="/communities" element={<Communities />} />
+            <Route path="/community/:id" element={<CommunityDashboard />} />
+            <Route path="/community/events" element={<CommunityEvents />} />
+            <Route path="/chats" element={<Chats />} />
+            <Route path="/chats/new" element={<Chats />} />
+            <Route path="/brands" element={<Discover />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/profile-setup" element={<ProfileSetup />} />
+            <Route path="/events/create" element={<CreateEvent />} />
+            <Route path="/events/:eventId" element={<EventDetail />} />
+            <Route path="/events/interested" element={<Discover />} />
+            <Route path="/collaboration" element={<Collaboration />} />
+            <Route path="/projects/:projectId" element={<ProjectDetail />} />
+            <Route path="/meetings" element={<MeetingScheduler />} />
+            <Route path="/meetings/schedule" element={<MeetingScheduler />} />
+            <Route path="/meetings/:meetingId" element={<MeetingScheduler />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/profile/:username" element={<ProfilePage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Toaster />
+        </div>
+      </Router>
     </QueryClientProvider>
   )
 }
