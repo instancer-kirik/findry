@@ -13,6 +13,10 @@ CREATE TABLE IF NOT EXISTS profiles (
 
 -- Enable RLS
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+DROP POLICY "Users can insert their own profile" ON profiles;
+DROP POLICY "Users can view all profiles" ON profiles;
+DROP POLICY "Users can update their own profile" ON profiles;
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON profiles;
 
 -- Create policies
 CREATE POLICY "Users can view all profiles"
