@@ -59,7 +59,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { href: '/', icon: <Home className="h-5 w-5" />, label: 'Home' },
+  { href: '/', icon: <Sparkles className="h-5 w-5" />, label: 'Home' },
   { href: '/discover', icon: <Search className="h-5 w-5" />, label: 'Discover' },
   { href: '/communities', icon: <Users className="h-5 w-5" />, label: 'Communities' },
   { href: '/chats', icon: <MessageSquare className="h-5 w-5" />, label: 'Chats', badge: 3 },

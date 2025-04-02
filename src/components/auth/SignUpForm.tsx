@@ -73,80 +73,73 @@ const SignUpForm: React.FC = () => {
         throw new Error('Failed to create user account');
       }
 
-      // Generate a unique username
-      const baseUsername = values.name.toLowerCase().replace(/\s+/g, '_');
-      let username = baseUsername;
-      let counter = 1;
-      let isUnique = false;
+      // Wait a short moment for the database trigger to create the profile
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Try to find a unique username
-      while (!isUnique) {
-        const { data: existingUser } = await supabase
-          .from('profiles')
-          .select('username')
-          .eq('username', username)
-          .single();
+      // Check if profile was created by the trigger
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', authData.user.id)
+        .single();
 
-        if (existingUser) {
-          username = `${baseUsername}_${counter}`;
-          counter++;
-        } else {
-          isUnique = true;
-        }
+      if (profileError && profileError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+        throw profileError;
       }
 
-      // Create profile in profiles table
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert([
-          {
+      // If profile doesn't exist, create it manually
+      if (!profile) {
+        // Generate a unique username
+        const baseUsername = values.name.toLowerCase().replace(/\s+/g, '_');
+        let username = baseUsername;
+        let counter = 1;
+        let isUnique = false;
+
+        // Try to find a unique username
+        while (!isUnique) {
+          const { data: existingUser } = await supabase
+            .from('profiles')
+            .select('username')
+            .eq('username', username)
+            .single();
+
+          if (existingUser) {
+            username = `${baseUsername}_${counter}`;
+            counter++;
+          } else {
+            isUnique = true;
+          }
+        }
+
+        // Create profile in profiles table
+        const { error: createError } = await supabase
+          .from('profiles')
+          .insert({
             id: authData.user.id,
             username,
             full_name: values.name,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-          },
-        ]);
-      
-      if (profileError) {
-        console.error('Profile creation error:', profileError);
-        throw new Error('Failed to create user profile');
-      }
-      
-      // Check if email verification is required
-      if (authData.user.identities?.length === 0) {
-        toast({
-          title: 'Verification email sent!',
-          description: 'Please check your email to verify your account before logging in.',
-        });
-        navigate('/login');
-      } else {
-        // Show success toast
-        toast({
-          title: 'Account created!',
-          description: 'Welcome to Findry. Please complete your profile setup.',
-        });
-        
-        // Navigate to profile completion page
-        navigate('/profile-setup?wizard=true');
-      }
-    } catch (error: any) {
-      console.error('Signup error:', error);
-      
-      let errorMessage = 'Please try again later.';
-      if (error.message) {
-        if (error.message.includes('email already registered')) {
-          errorMessage = 'This email is already registered. Please log in instead.';
-        } else if (error.message.includes('password')) {
-          errorMessage = 'Password must be at least 8 characters long.';
-        } else {
-          errorMessage = error.message;
+          });
+
+        if (createError) {
+          console.error('Profile creation error:', createError);
+          throw new Error('Failed to create user profile');
         }
       }
-      
+
       toast({
-        title: 'Signup failed',
-        description: errorMessage,
+        title: 'Account created!',
+        description: 'Please check your email to verify your account.',
+      });
+
+      // Navigate to profile setup
+      navigate('/profile-setup');
+    } catch (error) {
+      console.error('Sign up error:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to create account',
         variant: 'destructive',
       });
     } finally {
@@ -159,26 +152,16 @@ const SignUpForm: React.FC = () => {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Full Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter your name" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
           name="email"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="you@example.com" {...field} />
+                <Input
+                  type="email"
+                  placeholder="Enter your email"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -192,7 +175,29 @@ const SignUpForm: React.FC = () => {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="Create a password" {...field} />
+                <Input
+                  type="password"
+                  placeholder="Create a password"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Full Name</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="Enter your full name"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -211,8 +216,14 @@ const SignUpForm: React.FC = () => {
                 />
               </FormControl>
               <div className="space-y-1 leading-none">
-                <FormLabel className="text-sm font-normal">
-                  I accept the <Link to="/terms" className="text-primary underline">terms and conditions</Link>
+                <FormLabel>
+                  I accept the{' '}
+                  <Link
+                    to="/terms"
+                    className="text-primary hover:underline"
+                  >
+                    terms and conditions
+                  </Link>
                 </FormLabel>
                 <FormMessage />
               </div>
@@ -220,7 +231,11 @@ const SignUpForm: React.FC = () => {
           )}
         />
 
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={isSubmitting}
+        >
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -233,8 +248,11 @@ const SignUpForm: React.FC = () => {
 
         <p className="text-center text-sm text-muted-foreground">
           Already have an account?{' '}
-          <Link to="/login" className="text-primary hover:underline">
-            Log in
+          <Link
+            to="/login"
+            className="text-primary hover:underline"
+          >
+            Sign in
           </Link>
         </p>
       </form>
