@@ -1,8 +1,9 @@
+
 import React from 'react';
-import Button from '../ui-custom/Button';
 import AnimatedSection from '../ui-custom/AnimatedSection';
-import { ArrowRight, FileText, Users } from 'lucide-react';
+import { FileText, Users } from 'lucide-react';
 import ScreenshotGallery from './ScreenshotGallery';
+import { Button } from '@/components/ui/button';
 
 const screenshots = [
   {
@@ -64,7 +65,7 @@ const Hero: React.FC = () => {
           
           <AnimatedSection animation="fade-in-up" delay={200}>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight">
-              Connect Creative Talent with Brands, Resources, and Venues
+              Findry: Connect, Create, Collaborate
             </h1>
           </AnimatedSection>
           
@@ -72,24 +73,6 @@ const Hero: React.FC = () => {
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
               Discover and create opportunities, build relationships, and grow your network with our intuitive platform designed for humans.
             </p>
-          </AnimatedSection>
-          
-          <AnimatedSection animation="fade-in-up" delay={400}>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button 
-                size="lg" 
-                icon={<ArrowRight className="w-4 h-4" />}
-                iconPosition="right"
-              >
-                Get Started
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg"
-              >
-                Learn More
-              </Button>
-            </div>
           </AnimatedSection>
         </div>
       </div>
@@ -124,9 +107,6 @@ const Hero: React.FC = () => {
             <p className="text-muted-foreground mb-4">
               Streamline your multiparty contracts with our intuitive contract management tool. Split payments, track milestones, and manage deliverables all in one place.
             </p>
-            <Button variant="outline" size="sm" className="w-full">
-              Learn More
-            </Button>
           </div>
           
           <div className="p-6 rounded-xl bg-white/80 dark:bg-black/80 shadow-xl border border-white/30 dark:border-white/10">
@@ -139,9 +119,6 @@ const Hero: React.FC = () => {
             <p className="text-muted-foreground mb-4">
               Connect with your team, share resources, and manage projects efficiently with our built-in collaboration tools.
             </p>
-            <Button variant="outline" size="sm" className="w-full">
-              Learn More
-            </Button>
           </div>
         </div>
       </AnimatedSection>
