@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/layout/Layout';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -155,9 +154,7 @@ const OffersPage: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // This would be replaced with actual Supabase data fetch in a real implementation
   useEffect(() => {
-    // Simulating data loading
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
@@ -191,11 +188,10 @@ const OffersPage: React.FC = () => {
       return;
     }
 
-    // In a real implementation, this would be a Supabase insert
     const createdAt = new Date().toISOString();
     const newOfferItem: Offer = {
       id: `offer_${Date.now()}`,
-      title: newOffer.title!,
+      title: newOffer.title,
       description: newOffer.description,
       status: 'pending',
       amount: newOffer.amount,
@@ -229,7 +225,7 @@ const OffersPage: React.FC = () => {
       if (offer.id === id) {
         return {
           ...offer,
-          status: action === 'accept' ? 'accepted' : 'declined',
+          status: action === 'accept' ? 'accepted' : 'declined' as 'accepted' | 'declined',
           updated_at: new Date().toISOString(),
         };
       }
@@ -246,12 +242,18 @@ const OffersPage: React.FC = () => {
     });
   };
 
-  const calculateTimeRemaining = (expiresAt: string) => {
+  interface TimeRemaining {
+    expired: boolean;
+    text: string;
+    percentage: number;
+  }
+
+  const calculateTimeRemaining = (expiresAt: string): TimeRemaining => {
     const now = new Date();
     const expiry = new Date(expiresAt);
     const timeLeft = expiry.getTime() - now.getTime();
     
-    if (timeLeft <= 0) return { expired: true, text: 'Expired' };
+    if (timeLeft <= 0) return { expired: true, text: 'Expired', percentage: 0 };
     
     const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
     const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -339,7 +341,6 @@ const OffersPage: React.FC = () => {
                     </Select>
                   </div>
                 </div>
-                {/* Recipient selection would go here in a full implementation */}
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsCreateOfferOpen(false)}>

@@ -27,6 +27,7 @@ interface Community {
   tags: string[];
   isMember: boolean;
   lastActivity: string;
+  isNew?: boolean;
 }
 
 const COMMUNITY_CATEGORIES = [
@@ -81,7 +82,7 @@ const Communities = () => {
     posts: 0,
     image: community.image_url || '/placeholder.svg',
     joined: false,
-    new: new Date(community.created_at).getTime() > (Date.now() - 7 * 24 * 60 * 60 * 1000),
+    isNew: new Date(community.created_at).getTime() > (Date.now() - 7 * 24 * 60 * 60 * 1000),
     lastActivity: 'Recently',
     category: community.category || 'General',
     tags: [],
@@ -155,7 +156,7 @@ const Communities = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const featuredCommunities = communities.filter(c => c.new);
+  const featuredCommunities = communities.filter(c => c.isNew);
   const joinedCommunities = communities.filter(c => c.isMember);
 
   const handleCommunityClick = (community: Community) => {
@@ -170,7 +171,6 @@ const Communities = () => {
     <Layout>
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Sidebar */}
           <div className="md:col-span-1">
             <Card>
               <CardHeader>
@@ -228,7 +228,6 @@ const Communities = () => {
             </Card>
           </div>
           
-          {/* Main Content */}
           <div className="md:col-span-2">
             <div className="flex justify-between items-center mb-6">
               <Tabs defaultValue="all" className="w-full" onValueChange={setSelectedTab}>
@@ -270,7 +269,6 @@ const Communities = () => {
           </div>
         </div>
 
-        {/* Community Preview Modal */}
         <Dialog open={!!selectedCommunity} onOpenChange={() => setSelectedCommunity(null)}>
           <DialogContent className="max-w-2xl">
             {selectedCommunity && (
