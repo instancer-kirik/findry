@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -74,67 +75,15 @@ const SignUpForm: React.FC = () => {
       }
 
       // Wait a short moment for the database trigger to create the profile
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Check if profile was created by the trigger
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', authData.user.id)
-        .single();
-
-      if (profileError && profileError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
-        throw profileError;
-      }
-
-      // If profile doesn't exist, create it manually
-      if (!profile) {
-        // Generate a unique username
-        const baseUsername = values.name.toLowerCase().replace(/\s+/g, '_');
-        let username = baseUsername;
-        let counter = 1;
-        let isUnique = false;
-
-        // Try to find a unique username
-        while (!isUnique) {
-          const { data: existingUser } = await supabase
-            .from('profiles')
-            .select('username')
-            .eq('username', username)
-            .single();
-
-          if (existingUser) {
-            username = `${baseUsername}_${counter}`;
-            counter++;
-          } else {
-            isUnique = true;
-          }
-        }
-
-        // Create profile in profiles table
-        const { error: createError } = await supabase
-          .from('profiles')
-          .insert({
-            id: authData.user.id,
-            username,
-            full_name: values.name,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          });
-
-        if (createError) {
-          console.error('Profile creation error:', createError);
-          throw new Error('Failed to create user profile');
-        }
-      }
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       toast({
         title: 'Account created!',
         description: 'Please check your email to verify your account.',
       });
 
-      // Navigate to profile setup
-      navigate('/profile-setup');
+      // Navigate to login page
+      navigate('/login');
     } catch (error) {
       console.error('Sign up error:', error);
       toast({

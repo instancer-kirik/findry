@@ -212,6 +212,33 @@ export type Database = {
           },
         ]
       }
+      content_ownership: {
+        Row: {
+          content_id: string
+          content_type: Database["public"]["Enums"]["content_type"]
+          created_at: string
+          id: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          content_id: string
+          content_type: Database["public"]["Enums"]["content_type"]
+          created_at?: string
+          id?: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          content_id?: string
+          content_type?: Database["public"]["Enums"]["content_type"]
+          created_at?: string
+          id?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           capacity: number | null
@@ -383,6 +410,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       venues: {
         Row: {
           amenities: string[] | null
@@ -442,6 +493,21 @@ export type Database = {
         }
         Returns: number
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["user_role"]
+          _user_id?: string
+        }
+        Returns: boolean
+      }
+      is_content_owner: {
+        Args: {
+          _content_id: string
+          _content_type: Database["public"]["Enums"]["content_type"]
+          _user_id?: string
+        }
+        Returns: boolean
+      }
       search_discover_content: {
         Args: {
           content_type: string
@@ -452,7 +518,15 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      content_type:
+        | "project"
+        | "event"
+        | "resource"
+        | "community"
+        | "artist"
+        | "venue"
+        | "brand"
+      user_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
