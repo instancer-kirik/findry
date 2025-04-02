@@ -22,6 +22,10 @@ const ArtistProfile: React.FC = () => {
     queryFn: async () => {
       console.log('Fetching artist data for ID:', artistId);
       
+      if (!artistId) {
+        throw new Error('Artist ID is required');
+      }
+      
       // First try to fetch from artists table
       const { data: artistData, error: artistError } = await supabase
         .from('artists')
@@ -30,15 +34,15 @@ const ArtistProfile: React.FC = () => {
         .single();
         
       if (artistError) {
-        console.log('Artist fetch error:', artistError);
+        console.error('Artist fetch error:', artistError);
         throw artistError;
       }
       
-      // If we have artist data, fetch the associated profile
+      // If we have artist data, create a profile object from it
       if (artistData) {
-        // For demo purposes, we're just using a mock profile
-        // In a real app, you'd fetch the associated profile or map the artist data to a profile structure
-        const mockProfile = {
+        // For presentation purposes, we're mapping artist data to a profile structure
+        // In a real app with user accounts, you might join with a profiles table
+        const profileData = {
           id: artistData.id,
           username: artistData.name.toLowerCase().replace(/\s+/g, '.'),
           full_name: artistData.name,
@@ -49,7 +53,7 @@ const ArtistProfile: React.FC = () => {
         
         return {
           artist: artistData,
-          profile: mockProfile
+          profile: profileData
         };
       }
       
