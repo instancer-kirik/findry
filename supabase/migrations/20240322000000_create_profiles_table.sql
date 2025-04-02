@@ -62,7 +62,18 @@ DECLARE
   username TEXT;
   counter INTEGER;
   is_unique BOOLEAN;
+  existing_profile BOOLEAN;
 BEGIN
+  -- Check if profile already exists
+  SELECT EXISTS (
+    SELECT 1 FROM profiles WHERE id = NEW.id
+  ) INTO existing_profile;
+
+  -- If profile exists, do nothing
+  IF existing_profile THEN
+    RETURN NEW;
+  END IF;
+
   -- Generate base username from email or full_name
   base_username := COALESCE(
     NEW.raw_user_meta_data->>'username',

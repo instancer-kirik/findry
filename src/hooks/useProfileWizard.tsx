@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -113,29 +112,67 @@ export const useProfileWizard = (onComplete?: () => void) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // First check if profile exists
       const { data: existingProfile, error: profileError } = await supabase
         .from('profiles')
-        .select('id')
+        .select('*')
         .eq('id', user.id)
         .single();
 
+      if (profileError && profileError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+        console.error('Error checking existing profile:', profileError);
+        throw profileError;
+      }
+
+      // Generate a unique username from display name or email
+      const baseUsername = profileData.displayName 
+        ? profileData.displayName.toLowerCase().replace(/[^a-z0-9]/g, '_')
+        : user.email?.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '_') || 'user';
+
+      let username = baseUsername;
+      let counter = 1;
+      
+      // Check if username exists and append number if needed
+      while (true) {
+        const { data: existingUser } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('username', username)
+          .single();
+          
+        if (!existingUser) break;
+        username = `${baseUsername}${counter}`;
+        counter++;
+      }
+
       const submitData = {
         id: user.id,
-        username: profileData.displayName.toLowerCase().replace(/\s+/g, '_'),
+        username,
         full_name: profileData.displayName,
         bio: profileData.bio,
-        profile_types: selectedProfileTypes,
+        profile_types: selectedProfileTypes.length > 0 ? selectedProfileTypes : ['regular'],
         role_attributes: profileData.roleAttributes,
         updated_at: new Date().toISOString()
       };
       
-      const operation = existingProfile 
-        ? supabase.from('profiles').update(submitData).eq('id', user.id)
-        : supabase.from('profiles').insert([submitData]);
+      let operation;
+      if (existingProfile) {
+        // Update existing profile
+        operation = supabase
+          .from('profiles')
+          .update(submitData)
+          .eq('id', user.id);
+      } else {
+        // Insert new profile
+        operation = supabase
+          .from('profiles')
+          .insert([submitData]);
+      }
         
       const { error: updateError } = await operation;
       
       if (updateError) {
+        console.error('Error updating profile:', updateError);
         throw updateError;
       }
       

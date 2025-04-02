@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -17,20 +16,13 @@ import {
   Code,
   MapPin
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 // Update the ProfileType to include all the types used in the application
 export type ProfileType = 
-  | 'creative' 
-  | 'organization' 
-  | 'service' 
-  | 'brand' 
-  | 'event' 
-  | 'user'
-  | 'artist'
-  | 'venue'
-  | 'resource'
-  | 'community'
-  | 'project';
+  | 'artist' 
+  | 'brand'
+  | 'regular';
 
 interface ProfileOption {
   id: ProfileType;
@@ -40,55 +32,37 @@ interface ProfileOption {
 }
 
 interface ProfileTypeSelectorProps {
-  value: string[];
-  onChange: (value: string[]) => void;
+  value: ProfileType[];
+  onChange: (value: ProfileType[]) => void;
 }
 
 const ProfileTypeSelector: React.FC<ProfileTypeSelectorProps> = ({ value, onChange }) => {
   const profileOptions: ProfileOption[] = [
     {
-      id: 'user',
-      label: 'Individual',
+      id: 'regular',
+      label: 'Regular User',
       icon: <UserCircle className="h-5 w-5" />,
-      description: 'Personal account for browsing and connecting'
+      description: 'Just exploring and connecting with the community'
     },
     {
-      id: 'creative',
-      label: 'Creative',
+      id: 'artist',
+      label: 'Artist',
       icon: <Palette className="h-5 w-5" />,
-      description: 'Artist, musician, photographer, writer, etc.'
-    },
-    {
-      id: 'organization',
-      label: 'Organization',
-      icon: <Users className="h-5 w-5" />,
-      description: 'Collective, non-profit, or cultural institution'
-    },
-    {
-      id: 'service',
-      label: 'Service Provider',
-      icon: <Bot className="h-5 w-5" />,
-      description: 'Offering professional services to creatives'
+      description: 'Creative professional, musician, photographer, writer, etc.'
     },
     {
       id: 'brand',
       label: 'Brand',
       icon: <Store className="h-5 w-5" />,
-      description: 'Company, business, or commercial entity'
-    },
-    {
-      id: 'event',
-      label: 'Event Organizer',
-      icon: <Calendar className="h-5 w-5" />,
-      description: 'Manage exhibitions, performances, or festivals'
+      description: 'Company, record label, or creative business looking to connect with artists'
     }
   ];
 
   const toggleOption = (id: string) => {
-    if (value.includes(id)) {
-      onChange(value.filter(v => v !== id));
+    if (value.includes(id as ProfileType)) {
+      onChange(value.filter(v => v !== id as ProfileType));
     } else {
-      onChange([...value, id]);
+      onChange([...value, id as ProfileType]);
     }
   };
 
@@ -99,7 +73,16 @@ const ProfileTypeSelector: React.FC<ProfileTypeSelectorProps> = ({ value, onChan
           key={option.id}
           type="button"
           variant={value.includes(option.id) ? "default" : "outline"}
-          className="flex flex-col h-auto py-3 justify-start items-start text-left"
+          className={cn(
+            "flex flex-col h-auto py-3 justify-start items-start text-left transition-colors",
+            value.includes(option.id) 
+              ? option.id === 'regular' 
+                ? "bg-slate-100/50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800" 
+                : option.id === 'artist'
+                ? "bg-blue-50/50 hover:bg-blue-50 dark:bg-blue-900/20 dark:hover:bg-blue-900/30"
+                : "bg-purple-50/50 hover:bg-purple-50 dark:bg-purple-900/20 dark:hover:bg-purple-900/30"
+              : "hover:bg-muted"
+          )}
           onClick={() => toggleOption(option.id)}
         >
           <div className="flex items-center mb-1">

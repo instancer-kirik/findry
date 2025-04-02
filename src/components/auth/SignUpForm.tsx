@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -74,16 +73,29 @@ const SignUpForm: React.FC = () => {
         throw new Error('Failed to create user account');
       }
 
-      // Wait a short moment for the database trigger to create the profile
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Create profile directly
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert([{
+          id: authData.user.id,
+          username: values.name.toLowerCase().replace(/[^a-z0-9]/g, '_'),
+          full_name: values.name,
+          profile_types: ['regular'],
+          updated_at: new Date().toISOString()
+        }]);
+
+      if (profileError) {
+        console.error('Error creating profile:', profileError);
+        throw profileError;
+      }
 
       toast({
         title: 'Account created!',
-        description: 'Please check your email to verify your account.',
+        description: 'Please check your email to verify your account. You can continue using the app while waiting for verification.',
       });
 
-      // Navigate to login page
-      navigate('/login');
+      // Navigate to profile setup
+      navigate('/profile-setup');
     } catch (error) {
       console.error('Sign up error:', error);
       toast({

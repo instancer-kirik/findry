@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import ProfileTypeSelector from '../../auth/ProfileTypeSelector';
+import ProfileTypeSelector, { ProfileType } from '../../auth/ProfileTypeSelector';
 
 interface ProfileTypesStepProps {
-  selectedProfileTypes: string[];
-  setSelectedProfileTypes: (types: string[]) => void;
+  selectedProfileTypes: ProfileType[];
+  setSelectedProfileTypes: (types: ProfileType[]) => void;
   onNext: () => void;
   isSubmitting?: boolean;
 }
@@ -30,7 +29,7 @@ const ProfileTypesStep: React.FC<ProfileTypesStepProps> = ({
       <div className="flex justify-end mt-6">
         <Button 
           onClick={onNext}
-          disabled={selectedProfileTypes.length === 0 || isSubmitting}
+          disabled={isSubmitting}
         >
           Next
         </Button>

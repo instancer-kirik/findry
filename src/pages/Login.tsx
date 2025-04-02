@@ -73,25 +73,12 @@ const Login: React.FC = () => {
         throw error;
       }
 
-      // Check if email is verified
-      if (!data.user?.email_confirmed_at) {
-        // Sign out the user if email is not verified
-        await supabase.auth.signOut();
-        
-        toast({
-          title: 'Email not verified',
-          description: 'Please check your email for a verification link before logging in.',
-          variant: 'destructive',
-        });
-        
-        // Optionally, you could add a resend verification email button here
-        return;
-      }
-      
       // Show success toast
       toast({
         title: 'Login successful!',
-        description: 'Welcome back.',
+        description: data.user?.email_confirmed_at 
+          ? 'Welcome back.'
+          : 'Please check your email to verify your account. You can continue using the app while waiting for verification.',
       });
       
       // Navigate to home page
