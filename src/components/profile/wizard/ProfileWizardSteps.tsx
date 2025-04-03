@@ -1,6 +1,5 @@
 
 import React from 'react';
-import ProfileTypesStep from './ProfileTypesStep';
 import BasicInfoStep from './BasicInfoStep';
 import ProfileDetailsStep from './ProfileDetailsStep';
 import PreferencesStep from './PreferencesStep';

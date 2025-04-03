@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '../components/layout/Layout';
 import ProfileHeader from '../components/profile/ProfileHeader';
@@ -47,7 +46,7 @@ const ArtistProfile: React.FC = () => {
           username: artistData.name.toLowerCase().replace(/\s+/g, '.'),
           full_name: artistData.name,
           avatar_url: artistData.image_url,
-          bio: artistData.description || "Artist on Findry",
+          bio: artistData.subtype || "Artist on Findry",
           profile_types: ["artist"],
         };
         

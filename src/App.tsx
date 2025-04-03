@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Toaster } from '@/components/ui/toaster'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -21,6 +20,7 @@ import ProfilePage from './pages/ProfilePage'
 import CommunityDashboard from '@/pages/CommunityDashboard'
 import CommunityEvents from '@/pages/CommunityEvents'
 import ArtistProfile from './pages/ArtistProfile'
+import ResourceIndexPage from './pages/ResourceIndexPage'
 
 import './App.css'
 
@@ -38,6 +38,7 @@ function App() {
             <Route path="/artists" element={<Discover />} />
             <Route path="/artists/:artistId" element={<ArtistProfile />} />
             <Route path="/resources" element={<Discover />} />
+            <Route path="/resources/index" element={<ResourceIndexPage />} />
             <Route path="/projects" element={<Discover />} />
             <Route path="/events" element={<Discover />} />
             <Route path="/venues" element={<Discover />} />

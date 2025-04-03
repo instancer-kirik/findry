@@ -5,12 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Palette, Users, Music, Building, Store, Bot, ArrowRight, Star, Calendar, Briefcase } from 'lucide-react';
-import { ProfileType } from '../auth/ProfileTypeSelector';
+import { Profile } from '@/integrations/supabase/types';
 
 export interface ContentItemProps {
   id: string;
   name: string;
-  type: ProfileType | string; // Allow for additional types beyond ProfileType
+  type: string;
   subtype?: string;
   location: string;
   tags: string[];
@@ -18,6 +18,7 @@ export interface ContentItemProps {
   multidisciplinary?: boolean;
   styles?: string[];
   disciplines?: string[];
+  author: Profile;
 }
 
 interface ContentCardProps {
@@ -94,6 +95,15 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
 
   return (
     <Card className="h-full flex flex-col">
+      {item.image_url && (
+        <div className="aspect-video relative">
+          <img
+            src={item.image_url}
+            alt={item.name}
+            className="object-cover w-full h-full"
+          />
+        </div>
+      )}
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start mb-2">
           <Badge className={getTypeColor()}>
