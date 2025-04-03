@@ -407,6 +407,29 @@ export interface Database {
           updated_at?: string
         }
       }
+      user_roles: {
+        Row: {
+          id: string
+          user_id: string
+          role: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          role: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          role?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
       venues: {
         Row: {
           id: string
@@ -510,6 +533,26 @@ export interface Database {
           category?: string | null
           created_at?: string
           updated_at?: string
+        }
+      }
+      waitlist: {
+        Row: {
+          id: string
+          email: string
+          source: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          source?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          source?: string | null
+          created_at?: string
         }
       }
     }

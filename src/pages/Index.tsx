@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import Hero from '@/components/home/Hero';
@@ -34,7 +35,9 @@ const Index: React.FC = () => {
       </div>
       <FeatureSection />
       <MarketplaceSection />
-      <ScreenshotGallery screenshots={screenshots} />
+      <div className="container mx-auto px-4 py-12">
+        <ScreenshotGallery screenshots={screenshots} />
+      </div>
     </Layout>
   );
 };

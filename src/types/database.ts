@@ -1,3 +1,4 @@
+
 export type ContentType = 'project' | 'event' | 'resource' | 'community' | 'shop';
 
 export interface ContentOwnership {

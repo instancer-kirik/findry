@@ -562,22 +562,22 @@ export type Database = {
       }
       waitlist: {
         Row: {
-          id: string;
-          email: string;
-          source: string | null;
-          created_at: string;
+          created_at: string | null
+          email: string
+          id: number
+          source: string | null
         }
         Insert: {
-          id?: string;
-          email: string;
-          source?: string | null;
-          created_at?: string;
+          created_at?: string | null
+          email: string
+          id?: never
+          source?: string | null
         }
         Update: {
-          id?: string;
-          email?: string;
-          source?: string | null;
-          created_at?: string;
+          created_at?: string | null
+          email?: string
+          id?: never
+          source?: string | null
         }
         Relationships: []
       }
