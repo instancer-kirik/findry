@@ -86,8 +86,7 @@ export const ProfileWizard: React.FC<ProfileWizardProps> = ({
       case 0:
         return (
           <BasicInfoStep
-            username={formValues.username}
-            fullName={formValues.full_name}
+            value={{ username: formValues.username, fullName: formValues.full_name }}
             onChange={(values) => updateFormValues({
               username: values.username,
               full_name: values.fullName
@@ -109,8 +108,7 @@ export const ProfileWizard: React.FC<ProfileWizardProps> = ({
       case 2:
         return (
           <ProfileDetailsStep
-            bio={formValues.bio}
-            avatarUrl={formValues.avatar_url}
+            value={{ bio: formValues.bio, avatarUrl: formValues.avatar_url }}
             onChange={(values) => updateFormValues({
               bio: values.bio,
               avatar_url: values.avatarUrl
@@ -120,7 +118,7 @@ export const ProfileWizard: React.FC<ProfileWizardProps> = ({
       case 3:
         return (
           <PreferencesStep
-            preferences={formValues.role_attributes || {}}
+            value={formValues.role_attributes || {}}
             onChange={(preferences) => updateFormValues({
               role_attributes: preferences
             })}
@@ -142,7 +140,7 @@ export const ProfileWizard: React.FC<ProfileWizardProps> = ({
           <StepIndicator
             steps={steps}
             currentStep={currentStep}
-            onStepClick={(index) => setCurrentStep(index)}
+            onChange={(index) => setCurrentStep(index)}
           />
         </div>
         {renderStepContent()}
