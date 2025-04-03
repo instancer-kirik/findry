@@ -4,8 +4,23 @@ import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { format, isSameDay } from 'date-fns';
-import { ChevronLeft, ChevronRight, CalendarIcon, Clock } from 'lucide-react';
+import { format, isSameDay, parseISO } from 'date-fns';
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  CalendarIcon, 
+  Clock, 
+  Music, 
+  Paintbrush, 
+  Camera, 
+  Film, 
+  Mic, 
+  Users, 
+  Building, 
+  Coffee,
+  PartyPopper,
+  Ticket
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -13,36 +28,42 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 export interface CalendarEvent {
   id: string;
   title: string;
-  date: Date;
+  date: Date | string;
   imageUrl?: string;
   location?: string;
   type?: string;
+  category?: string;
 }
 
 interface ProfileCalendarProps {
   events: CalendarEvent[];
   isOwnProfile?: boolean;
+  profileType?: string;
 }
 
-const ProfileCalendar: React.FC<ProfileCalendarProps> = ({ events = [], isOwnProfile = false }) => {
+const ProfileCalendar: React.FC<ProfileCalendarProps> = ({ 
+  events = [], 
+  isOwnProfile = false,
+  profileType = "artist" 
+}) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   
+  // Parse event dates if they are strings
+  const normalizedEvents = events.map(event => ({
+    ...event,
+    date: event.date instanceof Date ? event.date : parseISO(event.date as string)
+  }));
+  
   // Filtering events for the selected date
   const selectedDateEvents = selectedDate 
-    ? events.filter(event => isSameDay(new Date(event.date), selectedDate))
+    ? normalizedEvents.filter(event => isSameDay(event.date, selectedDate))
     : [];
-
-  // Filtering events for the current month (for dots on calendar)
-  const currentMonthEvents = events.filter(event => 
-    new Date(event.date).getMonth() === currentMonth.getMonth() &&
-    new Date(event.date).getFullYear() === currentMonth.getFullYear()
-  );
 
   // Custom day rendering to show dots for events
   const renderDay = (day: Date) => {
     // Find events for this day
-    const dayEvents = events.filter(event => isSameDay(new Date(event.date), day));
+    const dayEvents = normalizedEvents.filter(event => isSameDay(event.date, day));
     
     return (
       <div className="flex flex-col items-center">
@@ -81,17 +102,81 @@ const ProfileCalendar: React.FC<ProfileCalendarProps> = ({ events = [], isOwnPro
     setCurrentMonth(date);
   };
 
+  // Get the appropriate icon based on event type or category
+  const getEventIcon = (event: CalendarEvent) => {
+    const type = event.type?.toLowerCase() || event.category?.toLowerCase() || '';
+    
+    if (type.includes('music') || type.includes('concert')) return <Music className="h-4 w-4" />;
+    if (type.includes('art') || type.includes('exhibition')) return <Paintbrush className="h-4 w-4" />;
+    if (type.includes('photo')) return <Camera className="h-4 w-4" />;
+    if (type.includes('film') || type.includes('video')) return <Film className="h-4 w-4" />;
+    if (type.includes('talk') || type.includes('performance')) return <Mic className="h-4 w-4" />;
+    if (type.includes('workshop') || type.includes('class')) return <Users className="h-4 w-4" />;
+    if (type.includes('venue') || type.includes('space')) return <Building className="h-4 w-4" />;
+    if (type.includes('meetup') || type.includes('networking')) return <Coffee className="h-4 w-4" />;
+    if (type.includes('party') || type.includes('festival')) return <PartyPopper className="h-4 w-4" />;
+    
+    // Default icon
+    return <Ticket className="h-4 w-4" />;
+  };
+
+  // Get the appropriate page route based on profile type
+  const getAddEventRoute = () => {
+    switch (profileType) {
+      case 'venue':
+        return '/venue/availability/create';
+      case 'resource':
+        return '/resource/availability/create';
+      default:
+        return '/events/create';
+    }
+  };
+
+  // Get the appropriate title based on profile type
+  const getCalendarTitle = () => {
+    switch (profileType) {
+      case 'venue':
+        return 'Venue Calendar';
+      case 'resource':
+        return 'Resource Availability';
+      default:
+        return 'Event Calendar';
+    }
+  };
+
+  const getAddButtonText = () => {
+    switch (profileType) {
+      case 'venue':
+        return 'Add Availability';
+      case 'resource':
+        return 'Add Availability';
+      default:
+        return 'Add Event';
+    }
+  };
+
+  const getEmptyStateText = () => {
+    switch (profileType) {
+      case 'venue':
+        return 'No venue availability for this date';
+      case 'resource':
+        return 'No resource availability for this date';
+      default:
+        return 'No events scheduled for this date';
+    }
+  };
+
   return (
     <Card className="w-full shadow-md">
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold flex items-center">
             <CalendarIcon className="mr-2 h-6 w-6 text-primary" />
-            Event Calendar
+            {getCalendarTitle()}
           </h2>
           {isOwnProfile && (
             <Button variant="outline" size="sm" asChild>
-              <Link to="/events/create">Add Event</Link>
+              <Link to={getAddEventRoute()}>{getAddButtonText()}</Link>
             </Button>
           )}
         </div>
@@ -150,7 +235,7 @@ const ProfileCalendar: React.FC<ProfileCalendarProps> = ({ events = [], isOwnPro
                             />
                           ) : (
                             <div className="flex h-full items-center justify-center bg-secondary">
-                              <CalendarIcon className="h-10 w-10 text-secondary-foreground/40" />
+                              {getEventIcon(event)}
                             </div>
                           )}
                         </div>
@@ -158,8 +243,8 @@ const ProfileCalendar: React.FC<ProfileCalendarProps> = ({ events = [], isOwnPro
                         <div>
                           <div className="flex justify-between items-start">
                             <h4 className="font-medium">{event.title}</h4>
-                            {event.type && (
-                              <Badge variant="outline">{event.type}</Badge>
+                            {(event.type || event.category) && (
+                              <Badge variant="outline">{event.type || event.category}</Badge>
                             )}
                           </div>
                           
@@ -169,7 +254,7 @@ const ProfileCalendar: React.FC<ProfileCalendarProps> = ({ events = [], isOwnPro
                           
                           <div className="flex items-center text-xs text-muted-foreground mt-2">
                             <Clock className="h-3 w-3 mr-1" />
-                            {format(new Date(event.date), 'h:mm a')}
+                            {format(event.date, 'h:mm a')}
                           </div>
                         </div>
                       </div>
@@ -180,10 +265,10 @@ const ProfileCalendar: React.FC<ProfileCalendarProps> = ({ events = [], isOwnPro
             ) : (
               <div className="flex flex-col items-center justify-center h-[400px] text-center">
                 <CalendarIcon className="h-10 w-10 text-muted-foreground/40 mb-2" />
-                <p className="text-muted-foreground">No events scheduled for this date</p>
+                <p className="text-muted-foreground">{getEmptyStateText()}</p>
                 {isOwnProfile && (
                   <Button variant="link" size="sm" asChild className="mt-2">
-                    <Link to="/events/create">Add an event</Link>
+                    <Link to={getAddEventRoute()}>{getAddButtonText()}</Link>
                   </Button>
                 )}
               </div>

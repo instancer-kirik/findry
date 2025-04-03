@@ -1,7 +1,9 @@
+
 import React from 'react';
 import Layout from '../components/layout/Layout';
 import ProfileHeader from '../components/profile/ProfileHeader';
 import ProfileTabs from '../components/profile/ProfileTabs';
+import ProfileTabsContent from '../components/profile/ProfileTabsContent';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -106,7 +108,12 @@ const ArtistProfile: React.FC = () => {
         <ProfileTabs 
           profile={artistData.profile} 
           isOwnProfile={false} 
-        />
+        >
+          <ProfileTabsContent 
+            profile={artistData.profile} 
+            isOwnProfile={false} 
+          />
+        </ProfileTabs>
       </div>
     </Layout>
   );
