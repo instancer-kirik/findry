@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Toaster } from '@/components/ui/toaster'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -26,6 +27,9 @@ import Shops from './pages/Shops'
 import CreateShop from './pages/CreateShop'
 import ProductDetail from './pages/ProductDetail'
 import TandemXShop from './pages/TandemXShop'
+import VenueDetail from './pages/VenueDetail'
+import ResourceDetail from './pages/ResourceDetail'
+import BrandDetail from './pages/BrandDetail'
 
 import './App.css'
 
@@ -44,15 +48,18 @@ function App() {
             <Route path="/artists/:artistId" element={<ArtistProfile />} />
             <Route path="/resources" element={<Discover />} />
             <Route path="/resources/index" element={<ResourceIndexPage />} />
+            <Route path="/resources/:resourceId" element={<ResourceDetail />} />
             <Route path="/projects" element={<Discover />} />
             <Route path="/events" element={<Discover />} />
             <Route path="/venues" element={<Discover />} />
+            <Route path="/venues/:venueId" element={<VenueDetail />} />
             <Route path="/communities" element={<Communities />} />
             <Route path="/community/:id" element={<CommunityDashboard />} />
             <Route path="/community/events" element={<CommunityEvents />} />
             <Route path="/chats" element={<Chats />} />
             <Route path="/chats/new" element={<Chats />} />
             <Route path="/brands" element={<Discover />} />
+            <Route path="/brands/:brandId" element={<BrandDetail />} />
             <Route path="/shops" element={<Shops />} />
             <Route path="/shops/create" element={<CreateShop />} />
             <Route path="/shops/:id" element={<ShopDetail />} />
