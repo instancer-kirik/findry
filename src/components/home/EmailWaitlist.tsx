@@ -22,38 +22,39 @@ const EmailWaitlist: React.FC = () => {
     }
     
     setIsLoading(true);
-    console.log('Attempting to add to waitlist:', email);
     
     try {
-      // Now we can use the waitlist table directly since it's defined in the types
-      const { data, error } = await supabase
+      // Insert the email into Supabase
+      const { error } = await supabase
         .from('waitlist')
-        .insert([{ email, source: 'landing_page' }]);
+        .insert([{ 
+          email, 
+          source: 'landing_page' 
+        }]);
       
-      console.log('Supabase response:', { data, error });
-      
-      if (error) throw error;
-      
-      toast({
-        title: 'Thank you!',
-        description: 'You have been added to our waitlist',
-      });
-      
-      setEmail('');
+      if (error) {
+        // Handle duplicate emails gracefully
+        if (error.code === '23505') { // Unique violation code
+          toast({
+            title: 'Already subscribed',
+            description: 'This email is already on our waitlist',
+          });
+        } else {
+          throw error;
+        }
+      } else {
+        toast({
+          title: 'Thank you!',
+          description: 'You have been added to our waitlist',
+        });
+        setEmail('');
+      }
     } catch (error: any) {
-      console.error('Error adding to waitlist:', error);
-      
-      // More detailed error logging
-      if (error.code) {
-        console.error('Error code:', error.code);
-      }
-      if (error.details) {
-        console.error('Error details:', error.details);
-      }
+      console.error('Error saving to waitlist:', error);
       
       toast({
         title: 'Something went wrong',
-        description: error.message || 'Failed to join waitlist',
+        description: error.message || 'Failed to join waitlist. Please try again.',
         variant: 'destructive',
       });
     } finally {

@@ -1,0 +1,3 @@
+{
+  "query": "-- Create waitlist table\nCREATE TABLE IF NOT EXISTS public.waitlist (\n  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),\n  email TEXT NOT NULL UNIQUE,\n  source TEXT,\n  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL\n);\n\n-- Add RLS policies for waitlist table\nALTER TABLE waitlist ENABLE ROW LEVEL SECURITY;\n\n-- Everyone can add their email to the waitlist\nCREATE POLICY \"Anyone can add to waitlist\" \n  ON waitlist \n  FOR INSERT \n  WITH CHECK (true);\n\n-- Only authenticated users with admin role can view waitlist\nCREATE POLICY \"Only admins can view waitlist\" \n  ON waitlist \n  FOR SELECT \n  USING (auth.uid() IN (\n    SELECT user_id FROM user_roles WHERE role = 'admin'\n  ));"
+} 

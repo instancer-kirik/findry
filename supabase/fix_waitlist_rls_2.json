@@ -1,0 +1,3 @@
+{
+  "query": "-- Disable row level security completely for waitlist table\nALTER TABLE waitlist DISABLE ROW LEVEL SECURITY;"
+} 

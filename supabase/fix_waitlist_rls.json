@@ -1,0 +1,3 @@
+{
+  "query": "-- Drop the existing policy if it exists\nDROP POLICY IF EXISTS \"Anyone can add to waitlist\" ON waitlist;\n\n-- Create a new policy that allows inserts without authentication\nCREATE POLICY \"Anyone can add to waitlist\"\n  ON waitlist\n  FOR INSERT\n  TO anon\n  WITH CHECK (true);\n\n-- Verify RLS is enabled\nALTER TABLE waitlist ENABLE ROW LEVEL SECURITY;"
+} 
