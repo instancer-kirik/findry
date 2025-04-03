@@ -1,25 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useSearch } from '@/hooks/use-search';
-import { ProfileCard } from '@/components/profile/ProfileCard';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { format } from 'date-fns';
-import { Search, Filter } from 'lucide-react';
+import Layout from '@/components/layout/Layout';
 import DiscoverHeader from '@/components/discover/DiscoverHeader';
 import DiscoverSidebar from '@/components/discover/DiscoverSidebar';
 import DiscoverFilters from '@/components/discover/DiscoverFilters';
 import CategoryItemsGrid from '@/components/discover/CategoryItemsGrid';
 import { cn } from '@/lib/utils';
-import { artistStyleFilters, disciplinaryFilters, resourceTypes } from '@/components/discover/DiscoverData';
+import { artistStyleFilters, disciplinaryFilters, resourceTypes, allTags } from '@/components/discover/DiscoverData';
+import { useDiscoverData } from '@/hooks/use-discover-data';
 
 const Discover = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
-  const type = searchParams.get('type') || 'all';
+  const typeParam = searchParams.get('type') || '';
 
   // State for DiscoverHeader
   const [headerSearchQuery, setHeaderSearchQuery] = useState(query);
@@ -32,40 +27,26 @@ const Discover = () => {
   const [selectedSubfilters, setSelectedSubfilters] = useState<string[]>([]);
 
   // State for DiscoverFilters
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState(typeParam || 'artists');
   const [activeSubTab, setActiveSubTab] = useState('all');
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const { 
-    query: searchQuery, 
-    setQuery, 
-    type: searchType, 
-    setType, 
-    results, 
-    loading, 
-    search 
-  } = useSearch({ 
-    initialQuery: query, 
-    initialType: type 
-  });
+  // Use the custom hook for data fetching
+  const { items, isLoading } = useDiscoverData(
+    activeTab,
+    headerSearchQuery,
+    selectedTags,
+    resourceType,
+    artistStyle,
+    disciplinaryType,
+    activeSubTab,
+    selectedSubfilters
+  );
 
   useEffect(() => {
-    if (query || type !== 'all') {
-      search();
-    }
-  }, []);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSearchParams({ q: searchQuery, type: searchType });
-    search();
-  };
-
-  const handleTypeChange = (value: string) => {
-    setType(value);
-    setSearchParams({ q: searchQuery, type: value });
-    search();
-  };
+    // Update search params when activeTab changes
+    setSearchParams({ type: activeTab, q: headerSearchQuery });
+  }, [activeTab, headerSearchQuery]);
 
   const handleTagSelect = (tag: string) => {
     setSelectedTags(prev => 
@@ -87,7 +68,7 @@ const Discover = () => {
     setSelectedSubfilters([]);
   };
 
-  const availableTabs = ['all', 'artists', 'brands', 'events', 'content', 'resources', 'venues', 'communities'];
+  const availableTabs = ['artists', 'resources', 'projects', 'events', 'venues', 'communities', 'brands'];
   const tabSubcategories = {
     artists: ['music', 'visual', 'performance', 'digital'],
     brands: ['record-label', 'fashion', 'tech', 'food-beverage'],
@@ -103,89 +84,80 @@ const Discover = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <DiscoverHeader
-        searchQuery={headerSearchQuery}
-        setSearchQuery={setHeaderSearchQuery}
-        selectedTags={selectedTags}
-        setSelectedTags={setSelectedTags}
-        showFilters={showFilters}
-        setShowFilters={setShowFilters}
-        userType={userType}
-        setUserType={setUserType}
-        handleTagSelect={handleTagSelect}
-        resourceType={resourceType}
-        onResourceTypeChange={setResourceType}
-        artistStyle={artistStyle}
-        onArtistStyleChange={setArtistStyle}
-        disciplinaryType={disciplinaryType}
-        onDisciplinaryTypeChange={setDisciplinaryType}
-        activeTab={activeTab}
-        selectedSubfilters={selectedSubfilters}
-        onSubfilterSelect={handleSubfilterSelect}
-        onSubfilterClear={handleSubfilterClear}
-      />
-      
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar */}
-          <div className={cn(
-            "lg:w-64 flex-shrink-0",
-            !sidebarOpen && "hidden"
-          )}>
-            <DiscoverSidebar />
-          </div>
+    <Layout>
+      <div className="min-h-screen bg-background">
+        <DiscoverHeader
+          searchQuery={headerSearchQuery}
+          setSearchQuery={setHeaderSearchQuery}
+          selectedTags={selectedTags}
+          setSelectedTags={setSelectedTags}
+          showFilters={showFilters}
+          setShowFilters={setShowFilters}
+          userType={userType}
+          setUserType={setUserType}
+          handleTagSelect={handleTagSelect}
+          resourceType={resourceType}
+          onResourceTypeChange={setResourceType}
+          artistStyle={artistStyle}
+          onArtistStyleChange={setArtistStyle}
+          disciplinaryType={disciplinaryType}
+          onDisciplinaryTypeChange={setDisciplinaryType}
+          activeTab={activeTab}
+          selectedSubfilters={selectedSubfilters}
+          onSubfilterSelect={handleSubfilterSelect}
+          onSubfilterClear={handleSubfilterClear}
+          allTags={allTags}
+        />
+        
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Sidebar - Left side */}
+            <div className={cn(
+              "lg:w-64 flex-shrink-0",
+              !sidebarOpen && "hidden"
+            )}>
+              <DiscoverSidebar activeTabData={items.slice(0, 3)} activeTab={activeTab} />
+            </div>
 
-          {/* Main Content */}
-          <div className="flex-1">
-            <DiscoverFilters
-              activeTab={activeTab}
-              handleTabChange={setActiveTab}
-              activeSubTab={activeSubTab}
-              handleSubTabChange={setActiveSubTab}
-              availableTabs={availableTabs}
-              tabSubcategories={tabSubcategories}
-              sidebarOpen={sidebarOpen}
-              toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-              getTabLabel={getTabLabel}
-              showFilters={showFilters}
-              setShowFilters={setShowFilters}
-            />
+            {/* Main Content */}
+            <div className="flex-1">
+              <DiscoverFilters
+                activeTab={activeTab}
+                handleTabChange={setActiveTab}
+                activeSubTab={activeSubTab}
+                handleSubTabChange={setActiveSubTab}
+                availableTabs={availableTabs}
+                tabSubcategories={tabSubcategories}
+                sidebarOpen={sidebarOpen}
+                toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+                getTabLabel={getTabLabel}
+                showFilters={showFilters}
+                setShowFilters={setShowFilters}
+              />
 
-            <Tabs value={searchType} onValueChange={handleTypeChange}>
-              <TabsList className="grid grid-cols-5 mb-8">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="artist">Artists</TabsTrigger>
-                <TabsTrigger value="brand">Brands</TabsTrigger>
-                <TabsTrigger value="event">Events</TabsTrigger>
-                <TabsTrigger value="content">Content</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value={searchType}>
-                {loading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[...Array(6)].map((_, i) => (
-                      <Skeleton key={i} className="h-64 rounded-lg" />
-                    ))}
-                  </div>
-                ) : results.length > 0 ? (
-                  <CategoryItemsGrid
-                    items={results}
-                    title={searchQuery ? `Results for "${searchQuery}"` : 'Discover'}
-                  />
-                ) : (
-                  <div className="text-center py-12">
-                    <p className="text-muted-foreground">
-                      {searchQuery ? 'No results found' : 'Start searching to discover'}
-                    </p>
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[...Array(6)].map((_, i) => (
+                    <Skeleton key={i} className="h-64 rounded-lg" />
+                  ))}
+                </div>
+              ) : items.length > 0 ? (
+                <CategoryItemsGrid
+                  items={items}
+                  title={headerSearchQuery ? `Results for "${headerSearchQuery}"` : `Discover ${getTabLabel(activeTab)}`}
+                />
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">
+                    {headerSearchQuery ? 'No results found' : 'No items found for the selected filters'}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 

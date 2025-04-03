@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, ChevronDown, Filter, Menu } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, Menu } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Dialog,
@@ -69,46 +68,58 @@ const DiscoverFilters: React.FC<DiscoverFiltersProps> = ({
     <>
       {/* Desktop view with main tabs and overflow in dialog */}
       <div className="hidden md:block mb-6">
-        <div className="flex items-center mb-4">
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="flex-grow">
-            <TabsList className="inline-flex mr-2 space-x-1 overflow-x-auto">
-              {visibleTabs.map((tab) => (
-                <TabsTrigger key={tab} value={tab}>
-                  {getTabLabel(tab)}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-          
-          {dropdownTabs.length > 0 && (
-            <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                  More Categories <ChevronDown className="ml-1 h-4 w-4" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Select Category</DialogTitle>
-                  <DialogDescription>
-                    Choose a category to explore content
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid grid-cols-2 gap-4 py-4">
-                  {dropdownTabs.map(tab => (
-                    <Button
-                      key={tab}
-                      variant={activeTab === tab ? "default" : "outline"}
-                      onClick={() => onTabSelect(tab)}
-                      className="justify-start"
-                    >
-                      {getTabLabel(tab)}
-                    </Button>
-                  ))}
-                </div>
-              </DialogContent>
-            </Dialog>
-          )}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4">
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="flex-grow">
+              <TabsList className="inline-flex mr-2 space-x-1 overflow-x-auto">
+                {visibleTabs.map((tab) => (
+                  <TabsTrigger key={tab} value={tab}>
+                    {getTabLabel(tab)}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+            
+            {dropdownTabs.length > 0 && (
+              <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    More Categories <ChevronDown className="ml-1 h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Select Category</DialogTitle>
+                    <DialogDescription>
+                      Choose a category to explore content
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid grid-cols-2 gap-4 py-4">
+                    {dropdownTabs.map(tab => (
+                      <Button
+                        key={tab}
+                        variant={activeTab === tab ? "default" : "outline"}
+                        onClick={() => onTabSelect(tab)}
+                        className="justify-start"
+                      >
+                        {getTabLabel(tab)}
+                      </Button>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
+
+          {/* Desktop sidebar toggle button */}
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="h-8 w-8 rounded-full border-border shadow-sm bg-background"
+            onClick={toggleSidebar}
+          >
+            {sidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          </Button>
         </div>
         
         {activeTab && tabSubcategories[activeTab] && (
@@ -143,12 +154,12 @@ const DiscoverFilters: React.FC<DiscoverFiltersProps> = ({
           </Button>
           
           <Button 
-            variant={showFilters ? "default" : "outline"}
-            size="icon"
-            onClick={() => setShowFilters(!showFilters)}
-            className="h-9 w-9"
+            variant="outline" 
+            size="icon" 
+            className="h-8 w-8 rounded-full border-border shadow-sm bg-background"
+            onClick={toggleSidebar}
           >
-            <Filter className="h-4 w-4" />
+            {sidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
           </Button>
         </div>
         
@@ -194,18 +205,6 @@ const DiscoverFilters: React.FC<DiscoverFiltersProps> = ({
             </DrawerFooter>
           </DrawerContent>
         </Drawer>
-      </div>
-      
-      {/* Desktop sidebar toggle button */}
-      <div className={`fixed top-1/2 ${sidebarOpen ? 'right-[calc(33.333%-1rem)]' : 'right-4'} transform -translate-y-1/2 z-10 md:block hidden`}>
-        <Button 
-          variant="outline" 
-          size="icon" 
-          className="h-8 w-8 rounded-full border-border shadow-sm bg-background"
-          onClick={toggleSidebar}
-        >
-          {sidebarOpen ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-        </Button>
       </div>
     </>
   );

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { artistStyleFilters, disciplinaryFilters } from './DiscoverData';
+import { artistStyleFilters, disciplinaryFilters, allTags as defaultTags, resourceTypes } from './DiscoverData';
 
 interface DiscoverHeaderProps {
   searchQuery: string;
@@ -68,7 +67,7 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
   userType,
   setUserType,
   handleTagSelect,
-  allTags = [],
+  allTags = defaultTags,
   resourceType = "all",
   onResourceTypeChange = () => {},
   artistStyle = "all",
