@@ -25,6 +25,8 @@ const EmailWaitlist: React.FC = () => {
     setIsLoading(true);
     
     try {
+      console.log('Submitting email to waitlist:', email);
+      
       // Insert the email into Supabase
       const { error } = await supabase
         .from('waitlist')
@@ -34,6 +36,8 @@ const EmailWaitlist: React.FC = () => {
         });
       
       if (error) {
+        console.error('Error saving to waitlist:', error);
+        
         // Handle duplicate emails gracefully
         if (error.code === '23505') { // Unique violation code
           toast({
