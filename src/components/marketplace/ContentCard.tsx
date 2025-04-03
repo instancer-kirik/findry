@@ -1,10 +1,9 @@
-
 import React from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { BookmarkPlus, MapPin, ExternalLink } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { MapPin, Tag, Check, Calendar, Plus } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Profile } from '@/types/profile';
 
 export interface ContentItemProps {
@@ -21,107 +20,114 @@ export interface ContentItemProps {
   author?: Profile;
 }
 
-interface ContentCardProps {
-  item: ContentItemProps;
-  onSave?: () => void;
-  onSelect?: () => void;
-  showSaveButton?: boolean;
-  showSelectButton?: boolean;
-  className?: string;
-  linkTo?: string;
+export interface ContentCardProps extends ContentItemProps {
+  onClick?: () => void;
+  isSelected?: boolean;
+  selectionMode?: boolean;
 }
 
-const ContentCard: React.FC<ContentCardProps> = ({
-  item,
-  onSave,
-  onSelect,
-  showSaveButton = false,
-  showSelectButton = false,
-  className = '',
-  linkTo
+const ContentCard: React.FC<ContentCardProps> = ({ 
+  id,
+  name, 
+  type, 
+  location, 
+  tags = [], 
+  subtype,
+  image_url,
+  multidisciplinary,
+  styles = [],
+  disciplines = [],
+  author,
+  onClick,
+  isSelected = false,
+  selectionMode = false
 }) => {
-  const cardContent = (
-    <>
-      <CardHeader className="p-4 pb-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <Badge variant="outline" className="mb-2">
-              {item.subtype || item.type}
-            </Badge>
-            <CardTitle className="text-xl">{item.name}</CardTitle>
-            {item.location && (
-              <CardDescription className="flex items-center mt-1">
-                <MapPin className="h-3.5 w-3.5 mr-1" />
-                {item.location}
-              </CardDescription>
+  const defaultImage = 'https://images.unsplash.com/photo-1506157786151-b8491531f063?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80';
+  
+  return (
+    <Card 
+      className={cn(
+        "overflow-hidden transition-all hover:shadow-md cursor-pointer",
+        isSelected && "ring-2 ring-primary",
+        selectionMode && "hover:scale-[1.02]"
+      )}
+      onClick={onClick}
+    >
+      <div className="aspect-video relative overflow-hidden">
+        <img
+          src={image_url || defaultImage}
+          alt={name}
+          className="object-cover w-full h-full transition-transform duration-300 hover:scale-105"
+        />
+        
+        {selectionMode && (
+          <div className={cn(
+            "absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center transition-all",
+            isSelected 
+              ? "bg-primary text-primary-foreground" 
+              : "bg-background/80 text-foreground border"
+          )}>
+            {isSelected && <Check className="h-3 w-3" />}
+          </div>
+        )}
+        
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+          <div className="flex items-center justify-between">
+            <div className="flex gap-2">
+              <Badge variant="secondary" className="capitalize">{type}</Badge>
+              {subtype && subtype !== type && (
+                <Badge variant="outline" className="bg-background/30 capitalize">{subtype}</Badge>
+              )}
+            </div>
+            
+            {selectionMode && !isSelected && (
+              <Button size="sm" variant="secondary" className="h-7 w-7 p-0" onClick={(e) => {
+                e.stopPropagation();
+                onClick && onClick();
+              }}>
+                <Plus className="h-3.5 w-3.5" />
+              </Button>
             )}
           </div>
-          {showSaveButton && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onSave && onSave();
-              }}
-            >
-              <BookmarkPlus className="h-5 w-5" />
-            </Button>
-          )}
         </div>
+      </div>
+      
+      <CardHeader className="pb-2">
+        <h3 className="font-semibold line-clamp-1">{name}</h3>
       </CardHeader>
       
-      <CardContent className="p-4 pt-0">
-        {item.tags && item.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {item.tags.slice(0, 3).map((tag) => (
-              <Badge key={tag} variant="secondary" className="text-xs">
+      <CardContent className="pb-3">
+        <div className="flex items-center text-sm text-muted-foreground mb-3">
+          <MapPin className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
+          <span className="truncate">{location}</span>
+        </div>
+        
+        {tags && tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {tags.slice(0, 3).map((tag) => (
+              <Badge key={tag} variant="outline" className="text-xs px-2 py-0 h-5">
                 {tag}
               </Badge>
             ))}
-            {item.tags.length > 3 && (
-              <Badge variant="outline" className="text-xs">
-                +{item.tags.length - 3} more
+            {tags.length > 3 && (
+              <Badge variant="outline" className="text-xs px-2 py-0 h-5">
+                +{tags.length - 3}
               </Badge>
             )}
           </div>
         )}
       </CardContent>
       
-      {(onSelect || showSelectButton) && (
-        <CardFooter className="p-4 pt-0">
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full text-xs"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onSelect && onSelect();
-            }}
-          >
-            Select
-          </Button>
-        </CardFooter>
-      )}
-    </>
-  );
-
-  if (linkTo) {
-    return (
-      <Card className={`overflow-hidden cursor-pointer transition-all hover:shadow-md ${className}`}>
-        <Link to={linkTo} className="block">
-          {cardContent}
-        </Link>
-      </Card>
-    );
-  }
-
-  return (
-    <Card className={`overflow-hidden ${className}`}>
-      {cardContent}
+      <CardFooter className="pt-0">
+        {!selectionMode && (
+          <div className="w-full flex justify-end">
+            <Button variant="ghost" size="sm" className="text-xs gap-1">
+              <Calendar className="h-3.5 w-3.5" />
+              Select
+            </Button>
+          </div>
+        )}
+      </CardFooter>
     </Card>
   );
 };

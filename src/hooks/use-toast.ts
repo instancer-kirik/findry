@@ -5,6 +5,8 @@ import type {
   ToastProps,
 } from "@/components/ui/toast"
 
+import { toast } from 'sonner';
+
 const TOAST_LIMIT = 10
 const TOAST_REMOVE_DELAY = 1000
 
@@ -190,6 +192,26 @@ function useToast() {
     ...state,
     toast,
     dismiss: (toastId?: string) => dispatch({ type: actionTypes.DISMISS_TOAST, toastId }),
+    success: (title: string, description?: string) => {
+      toast.success(title, {
+        description,
+      });
+    },
+    error: (title: string, description?: string) => {
+      toast.error(title, {
+        description,
+      });
+    },
+    warning: (title: string, description?: string) => {
+      toast.warning(title, {
+        description,
+      });
+    },
+    info: (title: string, description?: string) => {
+      toast.info(title, {
+        description,
+      });
+    },
   }
 }
 

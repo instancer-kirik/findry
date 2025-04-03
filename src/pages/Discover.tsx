@@ -7,14 +7,21 @@ import DiscoverHeader from '@/components/discover/DiscoverHeader';
 import DiscoverSidebar from '@/components/discover/DiscoverSidebar';
 import DiscoverFilters from '@/components/discover/DiscoverFilters';
 import CategoryItemsGrid from '@/components/discover/CategoryItemsGrid';
+import SelectionPanel from '@/components/marketplace/SelectionPanel';
 import { cn } from '@/lib/utils';
 import { artistStyleFilters, disciplinaryFilters, resourceTypes, allTags } from '@/components/discover/DiscoverData';
 import { useDiscoverData } from '@/hooks/use-discover-data';
+import { ContentItemProps } from '@/components/marketplace/ContentCard';
+import { Check, Grid, List } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const Discover = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
   const typeParam = searchParams.get('type') || '';
+  const selectionMode = searchParams.get('select') === 'true';
+  const selectionTarget = searchParams.get('target') || 'event';
+  const selectionType = searchParams.get('select_type') || 'all';
 
   // State for DiscoverHeader
   const [headerSearchQuery, setHeaderSearchQuery] = useState(query);
@@ -31,6 +38,10 @@ const Discover = () => {
   const [activeSubTab, setActiveSubTab] = useState('all');
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
+  // State for selection panel
+  const [selectedItems, setSelectedItems] = useState<ContentItemProps[]>([]);
+  const [isSelectionMinimized, setIsSelectionMinimized] = useState(!selectionMode);
+
   // Use the custom hook for data fetching
   const { items, isLoading } = useDiscoverData(
     activeTab,
@@ -45,7 +56,10 @@ const Discover = () => {
 
   useEffect(() => {
     // Update search params when activeTab changes
-    setSearchParams({ type: activeTab, q: headerSearchQuery });
+    const params = new URLSearchParams(searchParams);
+    params.set('type', activeTab);
+    params.set('q', headerSearchQuery);
+    setSearchParams(params);
   }, [activeTab, headerSearchQuery]);
 
   const handleTagSelect = (tag: string) => {
@@ -68,6 +82,29 @@ const Discover = () => {
     setSelectedSubfilters([]);
   };
 
+  const handleSelectItem = (item: ContentItemProps) => {
+    // Check if the item is already selected
+    if (selectedItems.some(selectedItem => selectedItem.id === item.id)) {
+      return;
+    }
+    
+    // Add the item to the selected items
+    setSelectedItems(prev => [...prev, item]);
+    
+    // If the selection panel is minimized, show it
+    if (isSelectionMinimized) {
+      setIsSelectionMinimized(false);
+    }
+  };
+
+  const handleRemoveItem = (itemId: string) => {
+    setSelectedItems(prev => prev.filter(item => item.id !== itemId));
+  };
+
+  const toggleSelectionPanel = () => {
+    setIsSelectionMinimized(prev => !prev);
+  };
+
   const availableTabs = ['artists', 'resources', 'projects', 'events', 'venues', 'communities', 'brands'];
   const tabSubcategories = {
     artists: ['music', 'visual', 'performance', 'digital'],
@@ -81,6 +118,20 @@ const Discover = () => {
 
   const getTabLabel = (tab: string) => {
     return tab === 'all' ? 'All' : tab.charAt(0).toUpperCase() + tab.slice(1);
+  };
+
+  // Get appropriate selection type based on active tab
+  const getSelectionType = () => {
+    switch (activeTab) {
+      case 'artists':
+        return 'artists';
+      case 'venues':
+        return 'venues';
+      case 'resources':
+        return 'resources';
+      default:
+        return 'all';
+    }
   };
 
   return (
@@ -135,6 +186,43 @@ const Discover = () => {
                 setShowFilters={setShowFilters}
               />
 
+              {/* Selection Mode Indicator (when in selection mode) */}
+              {selectionMode && (
+                <div className="flex items-center justify-between bg-muted/40 p-3 mb-4 rounded-md">
+                  <div className="flex items-center">
+                    <Check className="h-5 w-5 text-primary mr-2" />
+                    <span className="text-sm font-medium">
+                      Selection Mode: {selectionTarget === 'event' ? 'Creating Event' : 'Building Collection'}
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={toggleSelectionPanel}
+                    >
+                      {isSelectionMinimized ? 'Show Selection' : 'Hide Selection'}
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="destructive"
+                      onClick={() => {
+                        // Remove selection mode from URL
+                        const params = new URLSearchParams(searchParams);
+                        params.delete('select');
+                        params.delete('target');
+                        params.delete('select_type');
+                        setSearchParams(params);
+                        // Clear selected items
+                        setSelectedItems([]);
+                      }}
+                    >
+                      Exit Selection Mode
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {[...Array(6)].map((_, i) => (
@@ -145,6 +233,8 @@ const Discover = () => {
                 <CategoryItemsGrid
                   items={items}
                   title={headerSearchQuery ? `Results for "${headerSearchQuery}"` : `Discover ${getTabLabel(activeTab)}`}
+                  onSelectItem={selectionMode ? handleSelectItem : undefined}
+                  selectedItems={selectionMode ? selectedItems : undefined}
                 />
               ) : (
                 <div className="text-center py-12">
@@ -154,9 +244,36 @@ const Discover = () => {
                 </div>
               )}
             </div>
+
+            {/* Selection Panel - Right side (when in selection mode) */}
+            {selectionMode && !isSelectionMinimized && (
+              <div className="lg:w-80 flex-shrink-0">
+                <SelectionPanel 
+                  selectedItems={selectedItems}
+                  onAddItem={handleSelectItem}
+                  onRemoveItem={handleRemoveItem}
+                  selectionContext={selectionTarget as 'event' | 'collection' | 'circle'}
+                  selectionType={getSelectionType() as 'artists' | 'venues' | 'resources' | 'all'}
+                  isMinimized={false}
+                  onToggleMinimize={toggleSelectionPanel}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Minimized Selection Panel */}
+      {selectionMode && isSelectionMinimized && (
+        <SelectionPanel 
+          selectedItems={selectedItems}
+          onRemoveItem={handleRemoveItem}
+          selectionContext={selectionTarget as 'event' | 'collection' | 'circle'} 
+          selectionType={getSelectionType() as 'artists' | 'venues' | 'resources' | 'all'}
+          isMinimized={true}
+          onToggleMinimize={toggleSelectionPanel}
+        />
+      )}
     </Layout>
   );
 };

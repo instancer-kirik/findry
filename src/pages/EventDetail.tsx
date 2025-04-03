@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
   Calendar, 
@@ -40,8 +40,62 @@ import {
 import { toast } from 'sonner';
 
 import MeetingsCard from '../components/meetings/MeetingsCard';
+import { EventSlot, Event } from '@/types/event';
+import EventSlotManager from '@/components/events/EventSlotManager';
 
-const eventMockData = {
+const eventSlotsMock: EventSlot[] = [
+  {
+    id: "1",
+    title: "Setup",
+    description: "Equipment setup and sound check",
+    startTime: "10:00",
+    endTime: "12:00",
+    status: "confirmed",
+    slotType: "setup",
+    notes: "Bring all equipment through the back entrance"
+  },
+  {
+    id: "2",
+    title: "DJ Marcus",
+    description: "Opening DJ set",
+    startTime: "12:00",
+    endTime: "14:00",
+    status: "confirmed",
+    slotType: "performance",
+    artistId: "550e8400-e29b-41d4-a716-446655440017",
+    notes: "DJ booth and mixer required"
+  },
+  {
+    id: "3",
+    title: "Main Stage Performance",
+    description: "Headliner act",
+    startTime: "15:00",
+    endTime: "17:00",
+    status: "confirmed",
+    slotType: "performance",
+    artistId: "550e8400-e29b-41d4-a716-446655440014",
+    notes: "Full band setup with special lighting requirements"
+  },
+  {
+    id: "4",
+    title: "Break",
+    startTime: "14:00",
+    endTime: "15:00",
+    status: "confirmed",
+    slotType: "break"
+  },
+  {
+    id: "5",
+    title: "Breakdown",
+    description: "Equipment breakdown and cleanup",
+    startTime: "17:00",
+    endTime: "19:00",
+    status: "confirmed",
+    slotType: "breakdown"
+  }
+];
+
+const eventMockData: Event = {
   id: '1',
   title: 'Summer Music Festival',
   description: 'Join us for a weekend of amazing music featuring local and international artists. This family-friendly event includes food vendors, art installations, and activities for all ages.',
@@ -59,7 +113,11 @@ const eventMockData = {
   tags: ['Music', 'Outdoor', 'Festival', 'Family-Friendly'],
   type: 'Festival',
   attending: false,
-  interested: true
+  interested: true,
+  slots: [...eventSlotsMock],
+  isPublic: true,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString()
 };
 
 const relatedMeetingsMock = [
@@ -130,11 +188,32 @@ const reviewsMockData = [
 
 const EventDetail: React.FC = () => {
   const { eventId } = useParams<{ eventId: string }>();
-  const [event] = useState(eventMockData);
+  const [event, setEvent] = useState<Event>(eventMockData);
   const [isAttending, setIsAttending] = useState(event.attending);
   const [isInterested, setIsInterested] = useState(event.interested);
   const [activeTab, setActiveTab] = useState('details');
   const [showMeetingDialog, setShowMeetingDialog] = useState(false);
+  const [eventSlots, setEventSlots] = useState<EventSlot[]>(event.slots || []);
+  
+  useEffect(() => {
+    // Fetch artist information for each slot
+    const slotsWithInfo = eventSlots.map(slot => {
+      if (slot.artistId) {
+        const artist = artists.find(a => a.id === slot.artistId);
+        if (artist) {
+          return { ...slot, artist };
+        }
+      }
+      return slot;
+    });
+    
+    setEvent(prev => ({ ...prev, slots: slotsWithInfo }));
+  }, []);
+  
+  const handleSlotsChange = (newSlots: EventSlot[]) => {
+    setEventSlots(newSlots);
+    setEvent(prev => ({ ...prev, slots: newSlots }));
+  };
   
   const handleAttend = () => {
     setIsAttending(!isAttending);
@@ -592,6 +671,42 @@ const EventDetail: React.FC = () => {
             </div>
           </div>
         </AnimatedSection>
+        
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="schedule">Schedule</TabsTrigger>
+            <TabsTrigger value="reviews">Reviews</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="details" className="mt-6">
+            {/* ... existing details content ... */}
+          </TabsContent>
+          
+          <TabsContent value="schedule" className="mt-6">
+            <AnimatedSection animation="fade-in-up">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Event Schedule</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <EventSlotManager 
+                    slots={event.slots || []}
+                    onSlotsChange={handleSlotsChange}
+                    eventStartTime={event.startTime}
+                    eventEndTime={event.endTime}
+                    eventDate={event.date}
+                    readOnly={true}
+                  />
+                </CardContent>
+              </Card>
+            </AnimatedSection>
+          </TabsContent>
+          
+          <TabsContent value="reviews" className="mt-6">
+            {/* ... existing reviews content ... */}
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );
