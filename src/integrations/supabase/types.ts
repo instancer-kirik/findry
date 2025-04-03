@@ -560,89 +560,6 @@ export type Database = {
         }
         Relationships: []
       }
-      shops: {
-        Row: {
-          id: string
-          name: string
-          description: string | null
-          location: string | null
-          website_url: string | null
-          banner_image_url: string | null
-          logo_url: string | null
-          tags: string[] | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          description?: string | null
-          location?: string | null
-          website_url?: string | null
-          banner_image_url?: string | null
-          logo_url?: string | null
-          tags?: string[] | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          description?: string | null
-          location?: string | null
-          website_url?: string | null
-          banner_image_url?: string | null
-          logo_url?: string | null
-          tags?: string[] | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      products: {
-        Row: {
-          id: string
-          shop_id: string
-          name: string
-          description: string | null
-          price: number
-          image_url: string | null
-          category: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          shop_id: string
-          name: string
-          description?: string | null
-          price: number
-          image_url?: string | null
-          category?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          shop_id?: string
-          name?: string
-          description?: string | null
-          price?: number
-          image_url?: string | null
-          category?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "products_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
     }
     Views: {
       [_ in never]: never
@@ -693,7 +610,6 @@ export type Database = {
         | "artist"
         | "venue"
         | "brand"
-        | "shop"
       user_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {

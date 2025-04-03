@@ -1,66 +1,85 @@
-import { supabase } from '@/integrations/supabase/client';
+
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { User } from '@supabase/supabase-js';
 import { Profile } from '@/types/profile';
 
-interface UseAuthReturn {
-  user: User | null;
-  profile: Profile | null;
-  loading: boolean;
-  error: Error | null;
-}
-
-export const useAuth = (): UseAuthReturn => {
+export function useAuth() {
+  const [session, setSession] = useState(null);
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error) {
-        setError(error);
-        setLoading(false);
-        return;
-      }
+    // Set up auth state listener first
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, newSession) => {
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
 
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-
-      if (session?.user) {
-        // Fetch user profile
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-
-        if (profileError) {
-          setError(profileError);
-          return;
+        // If session changes, update profile data
+        if (newSession?.user) {
+          setTimeout(() => {
+            fetchProfile(newSession.user.id);
+          }, 0);
+        } else {
+          setProfile(null);
         }
+      }
+    );
 
-        setProfile(profile);
+    // Then check for existing session
+    supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
+      setSession(existingSession);
+      setUser(existingSession?.user ?? null);
+      
+      if (existingSession?.user) {
+        fetchProfile(existingSession.user.id);
       } else {
-        setProfile(null);
+        setLoading(false);
       }
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+      } else if (data) {
+        // Convert role_attributes from Json to Record<string, any>
+        const profileData = {
+          ...data,
+          role_attributes: typeof data.role_attributes === 'string' 
+            ? JSON.parse(data.role_attributes) 
+            : data.role_attributes || {}
+        };
+        setProfile(profileData as Profile);
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
+    session,
     user,
     profile,
     loading,
-    error
+    signIn: (email: string, password: string) => 
+      supabase.auth.signInWithPassword({ email, password }),
+    signUp: (email: string, password: string) => 
+      supabase.auth.signUp({ email, password }),
+    signOut: () => supabase.auth.signOut(),
+    isAdmin: () => profile?.role_attributes?.role === 'admin',
   };
-};
+}

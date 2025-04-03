@@ -1,76 +1,122 @@
 
 import React from 'react';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Check } from "lucide-react";
+import { Check, X } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Toggle } from '@/components/ui/toggle';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
-interface ProfileTypesStepProps {
-  selectedProfileTypes: string[];
-  setSelectedProfileTypes: (types: string[]) => void;
-  onNext: () => void;
-  isSubmitting: boolean;
+interface ProfileTypeOption {
+  id: string;
+  label: string;
+  description: string;
+  icon?: React.ReactNode;
 }
 
-const ProfileTypesStep: React.FC<ProfileTypesStepProps> = ({
-  selectedProfileTypes,
-  setSelectedProfileTypes,
-  onNext,
-  isSubmitting
+interface ProfileTypesStepProps {
+  selectedTypes: string[];
+  onSelectType: (type: string) => void;
+}
+
+const profileTypeOptions: ProfileTypeOption[] = [
+  {
+    id: 'artist',
+    label: 'Artist',
+    description: 'Create a profile for your artistic work and identity',
+  },
+  {
+    id: 'venue',
+    label: 'Venue',
+    description: 'Manage a performance or exhibition space',
+  },
+  {
+    id: 'organizer',
+    label: 'Organizer',
+    description: 'Create and manage events and community activities',
+  },
+  {
+    id: 'brand',
+    label: 'Brand',
+    description: 'Manage your brand or company presence in the community',
+  },
+  {
+    id: 'collector',
+    label: 'Collector',
+    description: 'Build a collection of art and creative works',
+  },
+];
+
+export const ProfileTypesStep: React.FC<ProfileTypesStepProps> = ({
+  selectedTypes,
+  onSelectType,
 }) => {
-  const profileTypes = [
-    { id: 'artist', name: 'Artist', description: 'Create and showcase your art' },
-    { id: 'venue', name: 'Venue', description: 'Manage a space for events and exhibitions' },
-    { id: 'curator', name: 'Curator', description: 'Organize exhibitions and events' },
-    { id: 'collector', name: 'Collector', description: 'Collect and showcase artwork' },
-    { id: 'organization', name: 'Organization', description: 'Represent an arts organization' }
-  ];
-
-  const toggleProfileType = (typeId: string) => {
-    if (selectedProfileTypes.includes(typeId)) {
-      setSelectedProfileTypes(selectedProfileTypes.filter(id => id !== typeId));
-    } else {
-      setSelectedProfileTypes([...selectedProfileTypes, typeId]);
-    }
-  };
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      <div className="mb-4">
+        <h3 className="text-lg font-medium">Choose Your Profile Types</h3>
+        <p className="text-muted-foreground">
+          Select one or more roles that represent you in the community
+        </p>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {profileTypes.map((type) => (
-          <Card 
-            key={type.id}
+        {profileTypeOptions.map((option) => (
+          <Card
+            key={option.id}
             className={`cursor-pointer transition-all ${
-              selectedProfileTypes.includes(type.id) 
-                ? 'border-primary shadow-md' 
-                : 'border-muted'
+              selectedTypes.includes(option.id)
+                ? 'border-primary bg-primary/5'
+                : 'hover:border-primary/50'
             }`}
-            onClick={() => toggleProfileType(type.id)}
+            onClick={() => onSelectType(option.id)}
           >
-            <CardContent className="p-4 flex items-start gap-3">
-              <div className={`w-5 h-5 rounded-full flex items-center justify-center mt-1 ${
-                selectedProfileTypes.includes(type.id) 
-                  ? 'bg-primary text-primary-foreground' 
-                  : 'border border-muted-foreground'
-              }`}>
-                {selectedProfileTypes.includes(type.id) && <Check className="h-3 w-3" />}
+            <CardContent className="p-4 flex justify-between items-center">
+              <div className="space-y-1">
+                <div className="font-medium">{option.label}</div>
+                <div className="text-sm text-muted-foreground">
+                  {option.description}
+                </div>
               </div>
               <div>
-                <h3 className="font-medium">{type.name}</h3>
-                <p className="text-sm text-muted-foreground">{type.description}</p>
+                {selectedTypes.includes(option.id) ? (
+                  <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center">
+                    <Check className="h-4 w-4 text-primary-foreground" />
+                  </div>
+                ) : (
+                  <div className="h-6 w-6 rounded-full border border-muted" />
+                )}
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <div className="flex justify-end">
-        <Button 
-          onClick={onNext} 
-          disabled={selectedProfileTypes.length === 0 || isSubmitting}
-        >
-          Next
-        </Button>
-      </div>
+      {selectedTypes.length > 0 && (
+        <div className="mt-4">
+          <p className="text-sm font-medium mb-2">Selected Profiles:</p>
+          <div className="flex flex-wrap gap-2">
+            {selectedTypes.map((type) => {
+              const option = profileTypeOptions.find((o) => o.id === type);
+              return (
+                <Badge key={type} variant="secondary">
+                  {option?.label || type}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-4 w-4 p-0 ml-1"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectType(type);
+                    }}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </Badge>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

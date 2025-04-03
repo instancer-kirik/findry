@@ -32,7 +32,7 @@ import {
 } from '@/components/ui/drawer';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
@@ -59,7 +59,7 @@ const SelectionPanel: React.FC<SelectionPanelProps> = ({
   onToggleMinimize,
   onCreateEventWithSelection,
 }) => {
-  const toast = useToast();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
@@ -172,15 +172,17 @@ const SelectionPanel: React.FC<SelectionPanelProps> = ({
     }
   };
 
+  // Define these before using them
+  const MobileDialogHeader = isMobile ? DrawerHeader : DialogHeader;
+  const MobileDialogTitle = isMobile ? DrawerTitle : DialogTitle;
+  const MobileDialogDescription = isMobile ? DrawerDescription : DialogDescription;
+  const MobileDialogContent = isMobile ? DrawerContent : DialogContent;
+  const MobileDialogFooter = isMobile ? DrawerFooter : DialogFooter;
+  const MobileDialogClose = isMobile ? DrawerClose : "button";
+  const MobileDialogTrigger = isMobile ? DrawerTrigger : DialogTrigger;
+
   // Mobile drawer vs desktop dialog
   const SelectionDialog = isMobile ? Drawer : Dialog;
-  const DialogHeader = isMobile ? DrawerHeader : DialogHeader;
-  const DialogTitle = isMobile ? DrawerTitle : DialogTitle;
-  const DialogDescription = isMobile ? DrawerDescription : DialogDescription;
-  const DialogContent = isMobile ? DrawerContent : DialogContent;
-  const DialogFooter = isMobile ? DrawerFooter : DialogFooter;
-  const DialogClose = isMobile ? DrawerClose : DialogClose;
-  const DialogTrigger = isMobile ? DrawerTrigger : DialogTrigger;
 
   // Mock sample data for search results
   const mockSearchResults = [
@@ -214,8 +216,8 @@ const SelectionPanel: React.FC<SelectionPanelProps> = ({
     (selectionType === 'all' || item.type === selectionType) &&
     (!searchQuery || 
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
+      item.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
   );
 
   // For the selection panel preview
@@ -471,9 +473,13 @@ const SelectionPanel: React.FC<SelectionPanelProps> = ({
                 </Tabs>
 
                 <DialogFooter className="flex gap-2 pt-4">
-                  <DialogClose asChild>
-                    <Button variant="outline">Cancel</Button>
-                  </DialogClose>
+                  {isMobile ? (
+                    <DrawerClose asChild>
+                      <Button variant="outline">Cancel</Button>
+                    </DrawerClose>
+                  ) : (
+                    <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
+                  )}
                   <Button
                     onClick={() => {
                       setIsOpen(false);
@@ -524,4 +530,4 @@ const SelectionPanel: React.FC<SelectionPanelProps> = ({
   );
 };
 
-export default SelectionPanel; 
+export default SelectionPanel;
