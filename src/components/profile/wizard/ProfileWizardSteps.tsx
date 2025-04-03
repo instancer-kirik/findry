@@ -1,92 +1,58 @@
 
 import React from 'react';
-import BasicInfoStep from './BasicInfoStep';
-import ProfileDetailsStep from './ProfileDetailsStep';
-import PreferencesStep from './PreferencesStep';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 
-interface RoleAttribute {
-  [key: string]: any;
+export interface WizardStep {
+  id: string;
+  title: string;
+  description: string;
+  component: React.ComponentType<any>;
 }
 
-interface ProfileData {
-  displayName: string;
-  bio: string;
-  location: string;
-  website: string;
-  roleAttributes: Record<string, RoleAttribute>;
-}
-
-interface ProfileWizardStepsProps {
-  currentStep: number;
-  selectedProfileTypes: string[];
-  setSelectedProfileTypes: (types: string[]) => void;
-  profileData: ProfileData;
-  handleProfileDataChange: (field: string, value: string) => void;
-  handleRoleAttributeChange: (role: string, field: string, value: any) => void;
+interface StepProps {
+  step: WizardStep;
+  isLastStep: boolean;
   onNext: () => void;
-  onPrevious: () => void;
-  onComplete: () => void;
-  isSubmitting: boolean;
+  onBack: () => void;
+  isFirstStep: boolean;
+  stepProps: any;
 }
 
-const ProfileWizardSteps: React.FC<ProfileWizardStepsProps> = ({
-  currentStep,
-  selectedProfileTypes,
-  setSelectedProfileTypes,
-  profileData,
-  handleProfileDataChange,
-  handleRoleAttributeChange,
+export const ProfileWizardSteps: React.FC<StepProps> = ({
+  step,
+  isLastStep,
   onNext,
-  onPrevious,
-  onComplete,
-  isSubmitting
+  onBack,
+  isFirstStep,
+  stepProps,
 }) => {
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 0:
-        return (
-          <ProfileTypesStep 
-            selectedProfileTypes={selectedProfileTypes} 
-            setSelectedProfileTypes={setSelectedProfileTypes}
-            onNext={onNext}
-            isSubmitting={isSubmitting}
-          />
-        );
-      case 1:
-        return (
-          <BasicInfoStep 
-            profileData={profileData} 
-            handleProfileDataChange={handleProfileDataChange}
-            onNext={onNext}
-            onPrevious={onPrevious}
-            isSubmitting={isSubmitting}
-          />
-        );
-      case 2:
-        return (
-          <ProfileDetailsStep 
-            selectedProfileTypes={selectedProfileTypes}
-            roleAttributes={profileData.roleAttributes}
-            handleRoleAttributeChange={handleRoleAttributeChange}
-            onNext={onNext}
-            onPrevious={onPrevious}
-            isSubmitting={isSubmitting}
-          />
-        );
-      case 3:
-        return (
-          <PreferencesStep 
-            onPrevious={onPrevious}
-            onComplete={onComplete}
-            isSubmitting={isSubmitting}
-          />
-        );
-      default:
-        return null;
-    }
-  };
+  const StepComponent = step.component;
 
-  return renderStepContent();
+  return (
+    <Card className="w-full max-w-3xl mx-auto">
+      <CardContent className="pt-6">
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-lg font-medium">{step.title}</h3>
+            <p className="text-sm text-muted-foreground">{step.description}</p>
+          </div>
+          <StepComponent {...stepProps} />
+        </div>
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        <Button
+          variant="outline"
+          onClick={onBack}
+          disabled={isFirstStep}
+          type="button"
+        >
+          Back
+        </Button>
+        <Button onClick={onNext} type="button">
+          {isLastStep ? 'Finish' : 'Next'}
+        </Button>
+      </CardFooter>
+    </Card>
+  );
 };
-
-export default ProfileWizardSteps;

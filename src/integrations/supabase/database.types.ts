@@ -19,6 +19,8 @@ export interface Database {
           capabilities: string[]
           created_at: string
           updated_at: string
+          role_attributes: Json | null
+          profile_types: string[] | null
         }
         Insert: {
           id: string
@@ -29,6 +31,8 @@ export interface Database {
           capabilities?: string[]
           created_at?: string
           updated_at?: string
+          role_attributes?: Json | null
+          profile_types?: string[] | null
         }
         Update: {
           id?: string
@@ -39,6 +43,8 @@ export interface Database {
           capabilities?: string[]
           created_at?: string
           updated_at?: string
+          role_attributes?: Json | null
+          profile_types?: string[] | null
         }
       }
       artists: {
@@ -433,6 +439,79 @@ export interface Database {
           updated_at?: string
         }
       }
+      shops: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          location: string | null
+          website_url: string | null
+          banner_image_url: string | null
+          logo_url: string | null
+          tags: string[] | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          location?: string | null
+          website_url?: string | null
+          banner_image_url?: string | null
+          logo_url?: string | null
+          tags?: string[] | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          location?: string | null
+          website_url?: string | null
+          banner_image_url?: string | null
+          logo_url?: string | null
+          tags?: string[] | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      products: {
+        Row: {
+          id: string
+          shop_id: string
+          name: string
+          description: string | null
+          price: number
+          image_url: string | null
+          category: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          shop_id: string
+          name: string
+          description?: string | null
+          price: number
+          image_url?: string | null
+          category?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          shop_id?: string
+          name?: string
+          description?: string | null
+          price?: number
+          image_url?: string | null
+          category?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }
@@ -440,4 +519,5 @@ export interface Database {
 export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row']
 export type Enums = {
   // ... existing enums ...
-} 
+  content_type: 'project' | 'event' | 'resource' | 'community' | 'shop'
+}
