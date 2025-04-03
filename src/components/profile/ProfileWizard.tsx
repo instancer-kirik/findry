@@ -9,12 +9,12 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
-import { BasicInfoStep } from './wizard/BasicInfoStep';
-import { ProfileDetailsStep } from './wizard/ProfileDetailsStep';
-import { ProfileTypesStep } from './wizard/ProfileTypesStep';
-import { PreferencesStep } from './wizard/PreferencesStep';
-import { StepIndicator } from './wizard/StepIndicator';
-import { ProfileFormValues } from '@/types/profile';
+import BasicInfoStep from './wizard/BasicInfoStep';
+import ProfileDetailsStep from './wizard/ProfileDetailsStep';
+import ProfileTypesStep from './wizard/ProfileTypesStep';
+import PreferencesStep from './wizard/PreferencesStep';
+import StepIndicator from './wizard/StepIndicator';
+import { ProfileFormValues, WizardStep } from '@/types/profile';
 
 interface ProfileWizardProps {
   initialValues?: Partial<ProfileFormValues>;
@@ -22,13 +22,7 @@ interface ProfileWizardProps {
   isSubmitting?: boolean;
 }
 
-interface Step {
-  id: string;
-  title: string;
-  description: string;
-}
-
-const steps: Step[] = [
+const steps: WizardStep[] = [
   {
     id: "basic-info",
     title: "Basic Info",

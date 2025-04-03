@@ -35,9 +35,7 @@ export function useProfile() {
         // Convert role_attributes from Json to Record<string, any>
         const profileData = {
           ...data,
-          role_attributes: typeof data.role_attributes === 'string' 
-            ? JSON.parse(data.role_attributes) 
-            : data.role_attributes || {}
+          role_attributes: data.role_attributes || {}
         };
         setProfile(profileData as Profile);
       }
@@ -65,13 +63,12 @@ export function useProfile() {
         // Convert role_attributes from Json to Record<string, any>
         const profileData = {
           ...data,
-          role_attributes: typeof data.role_attributes === 'string' 
-            ? JSON.parse(data.role_attributes) 
-            : data.role_attributes || {}
+          role_attributes: data.role_attributes || {}
         };
         setProfile(profileData as Profile);
         return { data: profileData };
       }
+      return { error: new Error('Failed to update profile') };
     } catch (error) {
       return { error };
     }

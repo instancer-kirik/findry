@@ -1,37 +1,51 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useProfile } from '@/hooks/use-profile';
-import { useAuth } from '@/hooks/use-auth.ts';
+import { useAuth } from '@/hooks/use-auth';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileTabs from '@/components/profile/ProfileTabs';
 import ProfileTabsContent from '@/components/profile/ProfileTabsContent';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
+import { Profile } from '@/types/profile';
 
 const ProfilePage: React.FC = () => {
   const { username } = useParams<{ username: string }>();
   const { user } = useAuth();
-  const [userId, setUserId] = React.useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchUserId = async () => {
       if (!username) return;
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('username', username)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('username', username)
+          .single();
 
-      if (!error && data) {
-        setUserId(data.id);
+        if (error) {
+          console.error("Error fetching user ID:", error);
+          setFetchError("Could not find user with that username");
+          return;
+        }
+
+        if (data) {
+          setUserId(data.id);
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        setFetchError("An unexpected error occurred");
       }
     };
 
     fetchUserId();
   }, [username]);
 
-  const { profile, loading, error } = useProfile(userId || user?.id);
+  const { profile, loading, refreshProfile } = useProfile();
 
   if (loading) {
     return (
@@ -49,13 +63,13 @@ const ProfilePage: React.FC = () => {
     );
   }
 
-  if (error || !profile) {
+  if (fetchError || !profile) {
     return (
       <div className="container mx-auto py-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-red-500">Error</h1>
           <p className="text-muted-foreground">
-            {error?.message || 'Failed to load profile'}
+            {fetchError || 'Failed to load profile'}
           </p>
         </div>
       </div>

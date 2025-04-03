@@ -2,54 +2,19 @@
 import React from 'react';
 import { Check, X } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Toggle } from '@/components/ui/toggle';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-
-interface ProfileTypeOption {
-  id: string;
-  label: string;
-  description: string;
-  icon?: React.ReactNode;
-}
+import { Button } from '@/components/ui/button';
+import { PROFILE_TYPE_OPTIONS } from '@/types/profile';
 
 interface ProfileTypesStepProps {
   selectedTypes: string[];
   onSelectType: (type: string) => void;
 }
 
-const profileTypeOptions: ProfileTypeOption[] = [
-  {
-    id: 'artist',
-    label: 'Artist',
-    description: 'Create a profile for your artistic work and identity',
-  },
-  {
-    id: 'venue',
-    label: 'Venue',
-    description: 'Manage a performance or exhibition space',
-  },
-  {
-    id: 'organizer',
-    label: 'Organizer',
-    description: 'Create and manage events and community activities',
-  },
-  {
-    id: 'brand',
-    label: 'Brand',
-    description: 'Manage your brand or company presence in the community',
-  },
-  {
-    id: 'collector',
-    label: 'Collector',
-    description: 'Build a collection of art and creative works',
-  },
-];
-
-export const ProfileTypesStep: React.FC<ProfileTypesStepProps> = ({
+const ProfileTypesStep = ({
   selectedTypes,
   onSelectType,
-}) => {
+}: ProfileTypesStepProps) => {
   return (
     <div className="space-y-4">
       <div className="mb-4">
@@ -60,7 +25,7 @@ export const ProfileTypesStep: React.FC<ProfileTypesStepProps> = ({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {profileTypeOptions.map((option) => (
+        {PROFILE_TYPE_OPTIONS.map((option) => (
           <Card
             key={option.id}
             className={`cursor-pointer transition-all ${
@@ -96,7 +61,7 @@ export const ProfileTypesStep: React.FC<ProfileTypesStepProps> = ({
           <p className="text-sm font-medium mb-2">Selected Profiles:</p>
           <div className="flex flex-wrap gap-2">
             {selectedTypes.map((type) => {
-              const option = profileTypeOptions.find((o) => o.id === type);
+              const option = PROFILE_TYPE_OPTIONS.find((o) => o.id === type);
               return (
                 <Badge key={type} variant="secondary">
                   {option?.label || type}

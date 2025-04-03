@@ -4,19 +4,38 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import { useToast } from '@/hooks/use-toast';
 import ProfileWizard from '../components/profile/ProfileWizard';
+import { ProfileFormValues } from '@/types/profile';
+import { useProfile } from '@/hooks/use-profile';
 
 const ProfileSetup: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
-  const useWizard = searchParams.get('wizard') !== 'false'; // Default to wizard mode
+  const { updateProfile } = useProfile();
   
-  const handleCompleteProfile = () => {
-    toast({
-      title: "Profile setup complete",
-      description: "Your profile has been successfully created.",
-    });
-    navigate('/profile');
+  const handleCompleteProfile = async (values: ProfileFormValues) => {
+    try {
+      await updateProfile({
+        username: values.username,
+        full_name: values.full_name,
+        avatar_url: values.avatar_url,
+        bio: values.bio,
+        profile_types: values.profile_types,
+        role_attributes: values.role_attributes
+      });
+      
+      toast({
+        title: "Profile setup complete",
+        description: "Your profile has been successfully created.",
+      });
+      navigate('/profile');
+    } catch (error) {
+      toast({
+        title: "Error saving profile",
+        description: "There was an error saving your profile. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -29,7 +48,6 @@ const ProfileSetup: React.FC = () => {
           
           <ProfileWizard 
             onComplete={handleCompleteProfile}
-            allowMultipleTypes={true} // Enable selection of multiple profile types
           />
         </div>
       </div>
