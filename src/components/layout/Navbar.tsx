@@ -258,7 +258,7 @@ const Navbar: React.FC = () => {
 
       {/* Mobile Navigation */}
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger className="md:hidden">
+        <SheetTrigger asChild className="md:hidden">
           <Button variant="ghost" size="icon">
             <Menu className="h-5 w-5" />
           </Button>

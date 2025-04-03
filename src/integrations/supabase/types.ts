@@ -560,6 +560,27 @@ export type Database = {
         }
         Relationships: []
       }
+      waitlist: {
+        Row: {
+          id: string;
+          email: string;
+          source: string | null;
+          created_at: string;
+        }
+        Insert: {
+          id?: string;
+          email: string;
+          source?: string | null;
+          created_at?: string;
+        }
+        Update: {
+          id?: string;
+          email?: string;
+          source?: string | null;
+          created_at?: string;
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

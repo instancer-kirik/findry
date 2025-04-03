@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,12 +22,15 @@ const EmailWaitlist: React.FC = () => {
     }
     
     setIsLoading(true);
+    console.log('Attempting to add to waitlist:', email);
     
     try {
-      // Store email in waitlist table
-      const { error } = await supabase
+      // Now we can use the waitlist table directly since it's defined in the types
+      const { data, error } = await supabase
         .from('waitlist')
         .insert([{ email, source: 'landing_page' }]);
+      
+      console.log('Supabase response:', { data, error });
       
       if (error) throw error;
       
@@ -40,6 +42,15 @@ const EmailWaitlist: React.FC = () => {
       setEmail('');
     } catch (error: any) {
       console.error('Error adding to waitlist:', error);
+      
+      // More detailed error logging
+      if (error.code) {
+        console.error('Error code:', error.code);
+      }
+      if (error.details) {
+        console.error('Error details:', error.details);
+      }
+      
       toast({
         title: 'Something went wrong',
         description: error.message || 'Failed to join waitlist',

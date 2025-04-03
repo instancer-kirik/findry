@@ -86,34 +86,64 @@ export const mockTandemXShopInfo: TandemXShopInfo = {
 
 export const mockTandemXProducts: TandemXProduct[] = [
   {
-    id: '1',
-    name: 'Digital Art Canvas Pro',
-    description: 'Professional-grade digital canvas for artists',
-    price: 129.99,
-    image_url: 'https://via.placeholder.com/400',
-    category: 'Art Tools',
-    tags: ['digital', 'canvas', 'art'],
-    created_at: new Date().toISOString()
+    id: '01GXY23Z4K5P6Q7R8S9T',
+    name: 'Professional Canvas Set',
+    description: 'High-quality canvas set for professional artists, includes 5 premium canvases in various sizes.',
+    price: 89.99,
+    image_url: 'https://via.placeholder.com/500x400',
+    category: 'Art Supplies',
+    tags: ['canvas', 'professional', 'painting'],
+    created_at: '2023-04-15T10:30:00Z'
   },
   {
-    id: '2',
-    name: 'Audio Production Suite',
-    description: 'Complete toolkit for audio producers and musicians',
-    price: 199.99,
-    image_url: 'https://via.placeholder.com/400',
-    category: 'Music Tools',
-    tags: ['audio', 'production', 'music'],
-    created_at: new Date().toISOString()
+    id: '02GXY23Z4K5P6Q7R8S9U',
+    name: 'Digital Drawing Tablet',
+    description: 'Precision drawing tablet with pressure sensitivity and wireless connectivity.',
+    price: 149.99,
+    image_url: 'https://via.placeholder.com/500x400',
+    category: 'Digital Art',
+    tags: ['tablet', 'digital', 'drawing'],
+    created_at: '2023-04-18T14:20:00Z'
   },
   {
-    id: '3',
-    name: 'Creative Inspiration Cards',
-    description: 'Deck of 50 cards with creative prompts for artists',
-    price: 24.99,
-    image_url: 'https://via.placeholder.com/400',
-    category: 'Creative Tools',
-    tags: ['inspiration', 'cards', 'creativity'],
-    created_at: new Date().toISOString()
+    id: '03GXY23Z4K5P6Q7R8S9V',
+    name: 'Ceramic Sculpting Kit',
+    description: 'Complete kit for ceramic sculpting, includes tools, clay and step-by-step guide.',
+    price: 65.50,
+    image_url: 'https://via.placeholder.com/500x400',
+    category: 'Sculpture',
+    tags: ['ceramic', 'sculpting', 'tools'],
+    created_at: '2023-04-20T09:15:00Z'
+  },
+  {
+    id: '04GXY23Z4K5P6Q7R8S9W',
+    name: 'Premium Acrylic Paint Set',
+    description: 'Set of 24 premium acrylic paints with vibrant colors and long-lasting finish.',
+    price: 45.99,
+    image_url: 'https://via.placeholder.com/500x400',
+    category: 'Art Supplies',
+    tags: ['acrylic', 'paint', 'colors'],
+    created_at: '2023-04-22T16:40:00Z'
+  },
+  {
+    id: '05GXY23Z4K5P6Q7R8S9X',
+    name: 'Professional Photography Backdrop',
+    description: 'Studio-quality backdrop for professional photography, wrinkle-resistant material.',
+    price: 79.99,
+    image_url: 'https://via.placeholder.com/500x400',
+    category: 'Photography',
+    tags: ['backdrop', 'studio', 'photography'],
+    created_at: '2023-04-25T11:50:00Z'
+  },
+  {
+    id: '06GXY23Z4K5P6Q7R8S9Y',
+    name: 'Calligraphy Starter Set',
+    description: 'Everything you need to start with calligraphy, includes pens, nibs, ink and guide book.',
+    price: 38.50,
+    image_url: 'https://via.placeholder.com/500x400',
+    category: 'Calligraphy',
+    tags: ['calligraphy', 'pens', 'starter'],
+    created_at: '2023-04-28T13:25:00Z'
   }
 ];
 

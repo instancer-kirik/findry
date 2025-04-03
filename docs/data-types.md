@@ -7,15 +7,27 @@
 interface ContentItemProps {
   id: string;
   name: string;
-  type: string;          // 'artist', 'space', 'tool', 'offerer', 'project', 'event', 'venue', 'community', 'brand'
+  type: string;          // 'artist', 'space', 'tool', 'offerer', 'project', 'event', 'venue', 'community', 'brand', 'shop'
   subtype: string;       // More specific categorization
-  location: string;
-  tags: string[];
+  description?: string;
+  location?: string;
+  tags?: string[];
   image_url?: string;
+  price?: number;
+  date?: string;
+  time?: string;
+  website_url?: string;      // Used by shops
+  banner_image_url?: string; // Used by shops
+  logo_url?: string;         // Used by shops
+  category?: string;         // Used by products
+  shop_id?: string;          // Used by products
   multidisciplinary?: boolean;
   styles?: string[];
   disciplines?: string[];
-  author?: string;
+  author?: {
+    name: string;
+    avatar?: string;
+  };
 }
 ```
 
@@ -25,6 +37,39 @@ interface StyleType {
   id: string;
   name: string;
   description: string;
+}
+```
+
+## Shop and Product Types
+
+### Shop
+```typescript
+interface Shop {
+  id: string;
+  name: string;
+  description: string | null;
+  location: string | null;
+  website_url: string | null;
+  banner_image_url: string | null;
+  logo_url: string | null;
+  tags: string[] | null;
+  created_at: string;
+  updated_at: string;
+}
+```
+
+### ShopProduct
+```typescript
+interface ShopProduct {
+  id: string;
+  shop_id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  image_url: string | null;
+  category: string | null;
+  created_at: string;
+  updated_at: string;
 }
 ```
 
@@ -95,7 +140,8 @@ const availableTabs = [
   "events",
   "venues",
   "communities",
-  "brands"
+  "brands",
+  "shops"
 ];
 ```
 
@@ -108,7 +154,8 @@ const tabSubcategories: Record<string, string[]> = {
   events: ["all", "concerts", "exhibitions", "workshops", "festivals", "networking"],
   venues: ["all", "clubs", "concert halls", "theaters", "outdoor", "cafes", "galleries"],
   communities: ["all", "music", "art", "tech", "social", "professional", "interest"],
-  brands: ["all", "labels", "equipment", "fashion", "food", "tech", "media"]
+  brands: ["all", "labels", "equipment", "fashion", "food", "tech", "media"],
+  shops: ["all", "merch", "art", "music", "clothing", "accessories", "digital", "other"]
 };
 ```
 
