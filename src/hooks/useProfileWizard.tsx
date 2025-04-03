@@ -1,12 +1,11 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Profile } from '@/integrations/supabase/types';
+import { useToast } from '@/hooks/use-toast';
+import { Profile } from '@/types/profile';
 
-interface WizardStep {
-  id: string;
+interface Step {
   title: string;
   description: string;
 }
@@ -26,42 +25,34 @@ interface ProfileData {
 export const useProfileWizard = (onComplete?: () => void) => {
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  // Steps for the wizard
-  const steps: WizardStep[] = [
+  
+  // Define steps
+  const steps: Step[] = [
     {
-      id: 'profile-type',
-      title: 'What do you want to use Findry for?',
-      description: 'Select one or more profile types to get started.'
+      title: "What do you do?",
+      description: "Select the roles that best describe you"
     },
     {
-      id: 'basic-info',
-      title: 'Basic Information',
-      description: 'Tell us a bit about yourself.'
+      title: "Basic Information",
+      description: "Tell us about yourself"
     },
     {
-      id: 'profile-details',
-      title: 'Profile Details',
-      description: 'Add more specific information based on your profile type.'
+      title: "Role-specific Details",
+      description: "Add details relevant to your selected roles"
     },
     {
-      id: 'preferences',
-      title: 'Preferences',
-      description: 'Almost done! Let us know your preferences to tailor your experience.'
+      title: "Almost Done",
+      description: "Set your preferences and finish setup"
     }
   ];
-
-  // State for tracking wizard progress
-  const [currentStep, setCurrentStep] = useState(0);
-  const [stepsCompleted, setStepsCompleted] = useState<Record<string, boolean>>({
-    'profile-type': false,
-    'basic-info': false,
-    'profile-details': false,
-    'preferences': false
-  });
   
-  // Profile data
+  // Setup state
+  const [currentStep, setCurrentStep] = useState(0);
+  const [stepsCompleted, setStepsCompleted] = useState<number[]>([]);
   const [selectedProfileTypes, setSelectedProfileTypes] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Profile data state with default values
   const [profileData, setProfileData] = useState<ProfileData>({
     displayName: '',
     bio: '',
@@ -70,79 +61,21 @@ export const useProfileWizard = (onComplete?: () => void) => {
     roleAttributes: {}
   });
   
-  // Loading state
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Effect to create initial role attributes based on selected profile types
-  useEffect(() => {
-    const newRoleAttributes = { ...profileData.roleAttributes };
-    
-    selectedProfileTypes.forEach(type => {
-      if (!newRoleAttributes[type]) {
-        // Initialize with default empty values based on profile type
-        switch (type) {
-          case 'artist':
-            newRoleAttributes[type] = {
-              genres: [],
-              skills: []
-            };
-            break;
-          case 'venue':
-            newRoleAttributes[type] = {
-              capacity: '',
-              amenities: []
-            };
-            break;
-          case 'brand':
-            newRoleAttributes[type] = {
-              industry: '',
-              products: []
-            };
-            break;
-          default:
-            newRoleAttributes[type] = {};
-        }
-      }
-    });
-    
-    // Remove attributes for unselected profile types
-    Object.keys(newRoleAttributes).forEach(key => {
-      if (!selectedProfileTypes.includes(key)) {
-        delete newRoleAttributes[key];
-      }
-    });
-    
-    setProfileData(prev => ({
-      ...prev,
-      roleAttributes: newRoleAttributes
-    }));
-  }, [selectedProfileTypes]);
-  
-  // Update completion status when moving between steps
-  useEffect(() => {
-    if (currentStep > 0) {
-      setStepsCompleted(prev => ({
-        ...prev,
-        [steps[currentStep - 1].id]: true
-      }));
-    }
-  }, [currentStep, steps]);
-  
-  // Handle moving to next step
+  // Navigation functions
   const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(prev => prev + 1);
+    const newCompletedSteps = [...stepsCompleted];
+    if (!newCompletedSteps.includes(currentStep)) {
+      newCompletedSteps.push(currentStep);
     }
+    setStepsCompleted(newCompletedSteps);
+    setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
   };
   
-  // Handle moving to previous step
   const handlePrevious = () => {
-    if (currentStep > 0) {
-      setCurrentStep(prev => prev - 1);
-    }
+    setCurrentStep(prev => Math.max(prev - 1, 0));
   };
   
-  // Handle profile data changes
+  // Data handling functions
   const handleProfileDataChange = (field: string, value: string) => {
     setProfileData(prev => ({
       ...prev,
@@ -150,45 +83,60 @@ export const useProfileWizard = (onComplete?: () => void) => {
     }));
   };
   
-  // Handle role-specific attribute changes
   const handleRoleAttributeChange = (role: string, field: string, value: any) => {
     setProfileData(prev => ({
       ...prev,
       roleAttributes: {
         ...prev.roleAttributes,
         [role]: {
-          ...prev.roleAttributes[role],
+          ...(prev.roleAttributes[role] || {}),
           [field]: value
         }
       }
     }));
   };
   
-  // Handle form submission
+  // Submit function
   const handleSubmit = async () => {
     setIsSubmitting(true);
     
     try {
-      // Simulate API call to save profile data
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
       
-      // Show success toast
+      if (!user) {
+        throw new Error('No authenticated user found');
+      }
+      
+      // Update profile in Supabase
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: profileData.displayName,
+          bio: profileData.bio,
+          profile_types: selectedProfileTypes,
+          role_attributes: profileData.roleAttributes
+        })
+        .eq('id', user.id);
+      
+      if (error) throw error;
+      
       toast({
-        title: "Profile created successfully",
-        description: "Your profile has been set up and is ready to use."
+        title: "Profile updated",
+        description: "Your profile has been successfully updated.",
       });
       
-      // Call onComplete callback if provided
+      // Call completion handler if provided
       if (onComplete) {
         onComplete();
+      } else {
+        navigate('/profile');
       }
     } catch (error) {
-      console.error('Error creating profile:', error);
-      
       toast({
-        title: "Error creating profile",
-        description: "There was a problem setting up your profile. Please try again.",
-        variant: "destructive"
+        title: "Error updating profile",
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
@@ -200,13 +148,13 @@ export const useProfileWizard = (onComplete?: () => void) => {
     steps,
     stepsCompleted,
     selectedProfileTypes,
+    setSelectedProfileTypes,
     profileData,
     isSubmitting,
     handleNext,
     handlePrevious,
     handleProfileDataChange,
     handleRoleAttributeChange,
-    handleSubmit,
-    setSelectedProfileTypes
+    handleSubmit
   };
 };

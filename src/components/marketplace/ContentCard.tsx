@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BookmarkPlus, MapPin, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Profile } from '@/integrations/supabase/types';
+import { Profile } from '@/types/profile';
 
 export interface ContentItemProps {
   id: string;

@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Profile } from '@/integrations/supabase/types';
+import { useState, useEffect } from 'react';
+import { Profile } from '@/types/profile';
 
 export const useProfile = (userId: string | null | undefined) => {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -34,4 +34,4 @@ export const useProfile = (userId: string | null | undefined) => {
   }, [userId]);
 
   return { profile, loading, error };
-}; 
+};

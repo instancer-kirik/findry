@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Profile } from '@/integrations/supabase/types';
+import { Profile } from '@/types/profile';
 
 interface ProfileTabsProps {
   profile: Profile;

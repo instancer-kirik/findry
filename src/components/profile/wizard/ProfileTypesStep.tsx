@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Check, Music, Pencil, Building, Store, MapPin, Users } from 'lucide-react';
+import { Check } from "lucide-react";
 
 interface ProfileTypesStepProps {
   selectedProfileTypes: string[];
@@ -18,14 +18,13 @@ const ProfileTypesStep: React.FC<ProfileTypesStepProps> = ({
   isSubmitting
 }) => {
   const profileTypes = [
-    { id: 'artist', name: 'Artist', icon: <Music className="h-5 w-5 mr-2" />, description: 'Showcase your work and connect with venues and opportunities' },
-    { id: 'creator', name: 'Creator', icon: <Pencil className="h-5 w-5 mr-2" />, description: 'Share content and build a following around your creative work' },
-    { id: 'venue', name: 'Venue', icon: <Building className="h-5 w-5 mr-2" />, description: 'List your space and connect with artists for events' },
-    { id: 'brand', name: 'Brand', icon: <Store className="h-5 w-5 mr-2" />, description: 'Discover creators for collaborations and partnerships' },
-    { id: 'resource', name: 'Resource Provider', icon: <MapPin className="h-5 w-5 mr-2" />, description: 'Offer space, equipment, or services to the creative community' },
-    { id: 'community', name: 'Community', icon: <Users className="h-5 w-5 mr-2" />, description: 'Connect with like-minded people around shared interests' }
+    { id: 'artist', name: 'Artist', description: 'Create and showcase your art' },
+    { id: 'venue', name: 'Venue', description: 'Manage a space for events and exhibitions' },
+    { id: 'curator', name: 'Curator', description: 'Organize exhibitions and events' },
+    { id: 'collector', name: 'Collector', description: 'Collect and showcase artwork' },
+    { id: 'organization', name: 'Organization', description: 'Represent an arts organization' }
   ];
-  
+
   const toggleProfileType = (typeId: string) => {
     if (selectedProfileTypes.includes(typeId)) {
       setSelectedProfileTypes(selectedProfileTypes.filter(id => id !== typeId));
@@ -33,49 +32,43 @@ const ProfileTypesStep: React.FC<ProfileTypesStepProps> = ({
       setSelectedProfileTypes([...selectedProfileTypes, typeId]);
     }
   };
-  
-  const canContinue = selectedProfileTypes.length > 0;
-  
+
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {profileTypes.map((type) => (
           <Card 
             key={type.id}
-            className={`cursor-pointer transition-all hover:shadow-md ${
-              selectedProfileTypes.includes(type.id) ? 'ring-2 ring-primary' : ''
+            className={`cursor-pointer transition-all ${
+              selectedProfileTypes.includes(type.id) 
+                ? 'border-primary shadow-md' 
+                : 'border-muted'
             }`}
             onClick={() => toggleProfileType(type.id)}
           >
-            <CardContent className="p-4">
-              <div className="flex items-start">
-                <div className="flex-1">
-                  <div className="flex items-center">
-                    {type.icon}
-                    <h3 className="font-medium">{type.name}</h3>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    {type.description}
-                  </p>
-                </div>
-                {selectedProfileTypes.includes(type.id) && (
-                  <div className="bg-primary text-primary-foreground rounded-full p-1">
-                    <Check className="h-4 w-4" />
-                  </div>
-                )}
+            <CardContent className="p-4 flex items-start gap-3">
+              <div className={`w-5 h-5 rounded-full flex items-center justify-center mt-1 ${
+                selectedProfileTypes.includes(type.id) 
+                  ? 'bg-primary text-primary-foreground' 
+                  : 'border border-muted-foreground'
+              }`}>
+                {selectedProfileTypes.includes(type.id) && <Check className="h-3 w-3" />}
+              </div>
+              <div>
+                <h3 className="font-medium">{type.name}</h3>
+                <p className="text-sm text-muted-foreground">{type.description}</p>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
-      
+
       <div className="flex justify-end">
         <Button 
           onClick={onNext} 
-          disabled={!canContinue || isSubmitting}
-          className="w-full md:w-auto"
+          disabled={selectedProfileTypes.length === 0 || isSubmitting}
         >
-          {isSubmitting ? 'Processing...' : 'Continue'}
+          Next
         </Button>
       </div>
     </div>

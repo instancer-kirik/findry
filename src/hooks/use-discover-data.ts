@@ -110,10 +110,10 @@ export const useDiscoverData = (
     let itemsData = data.map((item: LocalJson) => ({
       id: item.id,
       name: item.name,
-      subtitle: item.subtype || item.type || '',
+      type: item.type || '',
+      subtype: item.subtype || item.type || '',  // Add subtype property to ContentItemProps
       location: item.location || 'Location not specified',
       tags: Array.isArray(item.tags) ? item.tags : [],
-      type: item.type || '',
       image_url: item.image_url || '/placeholder.svg',
       multidisciplinary: item.multidisciplinary || false,
       styles: item.styles || [],
@@ -149,7 +149,7 @@ export const useDiscoverData = (
     // Apply subtab filtering
     if (activeSubTab !== 'all') {
       itemsData = itemsData.filter(item => 
-        (item.subtitle && item.subtitle.toLowerCase() === activeSubTab.toLowerCase()) || 
+        (item.subtype && item.subtype.toLowerCase() === activeSubTab.toLowerCase()) || 
         (item.type && item.type.toLowerCase() === activeSubTab.toLowerCase())
       );
     }
@@ -160,7 +160,7 @@ export const useDiscoverData = (
         selectedSubfilters.some(filter => {
           if (item.tags?.includes(filter)) return true;
           if (item.type?.toLowerCase() === filter.toLowerCase()) return true;
-          if (item.subtitle?.toLowerCase() === filter.toLowerCase()) return true;
+          if (item.subtype?.toLowerCase() === filter.toLowerCase()) return true;
           if (item.styles && item.styles.some((style: string) => 
             style.toLowerCase() === filter.toLowerCase()
           )) return true;

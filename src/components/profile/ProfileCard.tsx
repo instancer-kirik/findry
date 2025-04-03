@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Profile } from '@/integrations/supabase/types';
+import { Profile } from '@/types/profile';
 import { Link } from 'react-router-dom';
 
 interface ProfileCardProps {
@@ -44,4 +44,4 @@ export const ProfileCard = ({ profile, type }: ProfileCardProps) => {
       </Card>
     </Link>
   );
-}; 
+};

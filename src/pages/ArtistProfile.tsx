@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Profile } from '@/types/profile';
 
 const ArtistProfile: React.FC = () => {
   const { artistId } = useParams<{ artistId: string }>();
@@ -43,14 +44,13 @@ const ArtistProfile: React.FC = () => {
       if (artistData) {
         // For presentation purposes, we're mapping artist data to a profile structure
         // In a real app with user accounts, you might join with a profiles table
-        const profileData = {
+        const profileData: Profile = {
           id: artistData.id,
           username: artistData.name.toLowerCase().replace(/\s+/g, '.'),
           full_name: artistData.name,
           avatar_url: artistData.image_url,
           bio: artistData.subtype || "Artist on Findry",
           profile_types: ["artist"],
-          capabilities: [] as string[],
           created_at: artistData.created_at,
           updated_at: artistData.updated_at
         };

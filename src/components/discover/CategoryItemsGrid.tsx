@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Profile } from '@/integrations/supabase/types';
+import { Profile } from '@/types/profile';
 
 interface CategoryItem {
   id: string;

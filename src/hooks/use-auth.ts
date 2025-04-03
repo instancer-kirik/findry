@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { User } from '@supabase/supabase-js';
-import { Profile } from '@/integrations/supabase/types';
+import { useState, useEffect } from 'react';
+import { Profile } from '@/types/profile';
 
 interface UseAuthReturn {
   user: User | null;
@@ -64,4 +63,4 @@ export const useAuth = (): UseAuthReturn => {
     loading,
     error
   };
-}; 
+};

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Profile } from '@/integrations/supabase/types';
+import { Profile } from '@/types/profile';
 
 interface ProfileHeaderProps {
   profile: Profile;

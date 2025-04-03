@@ -1,6 +1,6 @@
 import React from 'react';
 import { TabsContent } from '@/components/ui/tabs';
-import { Profile } from '@/integrations/supabase/types';
+import { Profile } from '@/types/profile';
 import ProfileCalendar from './ProfileCalendar';
 
 interface ProfileTabsContentProps {
@@ -60,4 +60,4 @@ const ProfileTabsContent: React.FC<ProfileTabsContentProps> = ({
   );
 };
 
-export default ProfileTabsContent; 
+export default ProfileTabsContent;
