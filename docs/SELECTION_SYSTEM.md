@@ -14,11 +14,32 @@ The primary entry point for selecting items is the Discover page:
 2. User filters content by category (artists, venues, resources, etc.)
 3. User finds desired items in the results grid
 4. **Selection Actions:**
-   - Click on an item card to view details
-   - Use "Select" button to add item to current context (event, collection)
-   - Use "Quick Add" button in the item card for immediate selection
+   - Click on an item card to view its profile page
+   - Use the Actions dropdown for quick actions (save, add to collections, create event)
+   - Use "Quick Add" button in the item card for immediate selection when in selection mode
 
-### 2. Selection Dialog
+### 2. Content Card Actions
+
+Each content card in the discover grid provides multiple interaction options:
+
+1. **Primary Actions**
+   - Click on card to navigate to the item's profile page
+   - "Like/Save" button in the top-right corner for quick saving
+   - "View Profile" link for explicit navigation to profile
+   - Actions dropdown menu for additional options
+
+2. **Actions Dropdown Menu**
+   - Save/Unsave item
+   - Add to collections (Favorites, Collaborators, etc.)
+   - Create event with the item (artist, venue, resource)
+   - Select for event
+   - Share item link
+
+3. **Selection Mode Actions**
+   - Selection checkmark for selecting/deselecting
+   - Quick add button for immediate selection
+
+### 3. Selection Dialog
 
 When selecting items for events or collections, a dedicated selection dialog appears:
 
@@ -54,7 +75,7 @@ When selecting items for events or collections, a dedicated selection dialog app
 </Dialog>
 ```
 
-### 3. Direct Selection from Artist/Resource Profile
+### 4. Direct Selection from Artist/Resource Profile
 
 Users can select items directly from profile pages:
 
@@ -63,7 +84,7 @@ Users can select items directly from profile pages:
 3. Choose existing event or create new event
 4. Confirm selection
 
-### 4. Batch Selection
+### 5. Batch Selection
 
 For adding multiple items at once:
 
@@ -92,6 +113,12 @@ Users can create and manage collections of:
 - Curated resource lists
 - Thematic groupings across categories
 
+Users can add items to collections in several ways:
+- Via the Like/Save button directly on content cards
+- Through the Actions dropdown menu
+- From profile pages
+- Within dedicated collection management interfaces
+
 ### 3. User Circles
 
 Organizing people into logical groups:
@@ -100,6 +127,25 @@ Organizing people into logical groups:
 - Regular venues/clients
 - Session musicians
 - Production team members
+
+## Navigation and Selection Integration
+
+The system combines navigation and selection in an intuitive way:
+
+1. **Default Behavior**:
+   - Clicking on content cards navigates to the item's profile page
+   - Profile pages display detailed information about the item
+
+2. **Selection Mode**:
+   - When in selection mode, clicking selects/deselects the item
+   - Visual indicators (checkmarks, highlights) show selected items
+   - Selection panel displays current selections
+
+3. **Context-Aware Actions**:
+   - Different action options based on content type
+   - Artist cards show options for booking and event creation
+   - Venue cards show availability and booking options
+   - Resource cards show reservation options
 
 ## Integration with Other Systems
 
@@ -129,17 +175,18 @@ Item selection respects user permissions:
 | Feature | Status | Notes |
 |---------|--------|-------|
 | Basic item selection | ✅ Complete | Selection from item cards and profiles |
-| Selection dialog | 🟡 In Progress | Basic dialog implemented, needs refinement |
-| Multi-select capability | 🟡 In Progress | UI elements added, functionality in development |
-| Saved selections | 🔴 Planned | Will be part of user collections feature |
+| Selection dialog | ✅ Complete | Dialog with tabs for recent, saved, and search |
+| Content card actions | ✅ Complete | Profile navigation, save, and actions dropdown |
+| Multi-select capability | ✅ Complete | UI elements with visual indicators |
+| Saved collections | 🟡 In Progress | Basic save functionality working, collections in development |
 | Drag-and-drop organization | 🔴 Planned | For visual organization of selections |
 
 ## Next Steps
 
-1. **Selection Dialog Enhancement**
-   - Add recently used items section
-   - Implement selection history
-   - Add quick filters within dialog
+1. **Collection Management Enhancement**
+   - Create dedicated collection management interface
+   - Implement persistent collections in database
+   - Add collection sharing capabilities
 
 2. **Persistent Selection**
    - Store selections in local storage for session persistence
