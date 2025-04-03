@@ -1,183 +1,127 @@
+
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Palette, Users, Music, Building, Store, Bot, ArrowRight, Star, Calendar, Briefcase } from 'lucide-react';
+import { BookmarkPlus, MapPin, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Profile } from '@/integrations/supabase/types';
 
 export interface ContentItemProps {
   id: string;
   name: string;
   type: string;
-  subtype?: string;
   location: string;
-  tags: string[];
+  tags?: string[];
+  subtype?: string;
   image_url?: string;
   multidisciplinary?: boolean;
   styles?: string[];
   disciplines?: string[];
-  author: Profile;
+  author?: Profile;
 }
 
 interface ContentCardProps {
   item: ContentItemProps;
+  onSave?: () => void;
+  onSelect?: () => void;
+  showSaveButton?: boolean;
+  showSelectButton?: boolean;
+  className?: string;
+  linkTo?: string;
 }
 
-const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
-  const getIcon = () => {
-    switch (item.type) {
-      case 'artist':
-        return <Music className="h-5 w-5" />;
-      case 'brand':
-        return <Store className="h-5 w-5" />;
-      case 'venue':
-        return <Building className="h-5 w-5" />;
-      case 'resource':
-      case 'space':
-      case 'tool':
-      case 'offerer':
-        return <Bot className="h-5 w-5" />;
-      case 'community':
-        return <Users className="h-5 w-5" />;
-      case 'event':
-        return <Calendar className="h-5 w-5" />;
-      case 'project':
-        return <Briefcase className="h-5 w-5" />;
-      default:
-        return <Star className="h-5 w-5" />;
-    }
-  };
-
-  const getTypeLabel = () => {
-    // Capitalize the first letter of the type
-    const type = item.type.charAt(0).toUpperCase() + item.type.slice(1);
-    return item.subtype ? `${type} - ${item.subtype}` : type;
-  };
-
-  const getTypeColor = () => {
-    switch (item.type) {
-      case 'artist':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
-      case 'brand':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300';
-      case 'venue':
-        return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300';
-      case 'resource':
-      case 'space':
-      case 'tool':
-      case 'offerer':
-        return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300';
-      case 'community':
-        return 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300';
-      case 'project':
-        return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300';
-      case 'event':
-        return 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
-    }
-  };
-
-  const getDetailPath = () => {
-    switch (item.type) {
-      case 'event':
-        return `/events/${item.id}`;
-      case 'artist':
-        return `/artists/${item.id}`;
-      case 'venue':
-        return `/venues/${item.id}`;
-      default:
-        return `/${item.type}s/${item.id}`;
-    }
-  };
-
-  return (
-    <Card className="h-full flex flex-col">
-      {item.image_url && (
-        <div className="aspect-video relative">
-          <img
-            src={item.image_url}
-            alt={item.name}
-            className="object-cover w-full h-full"
-          />
-        </div>
-      )}
-      <CardHeader className="pb-3">
-        <div className="flex justify-between items-start mb-2">
-          <Badge className={getTypeColor()}>
-            <div className="flex items-center gap-1">
-              {getIcon()}
-              <span>{getTypeLabel()}</span>
-            </div>
-          </Badge>
-          
-          {item.multidisciplinary && (
-            <Badge variant="outline" className="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 border-0">
-              <div className="flex items-center gap-1">
-                <Palette className="h-3 w-3" />
-                <span>Multi</span>
-              </div>
+const ContentCard: React.FC<ContentCardProps> = ({
+  item,
+  onSave,
+  onSelect,
+  showSaveButton = false,
+  showSelectButton = false,
+  className = '',
+  linkTo
+}) => {
+  const cardContent = (
+    <>
+      <CardHeader className="p-4 pb-2">
+        <div className="flex justify-between items-start">
+          <div>
+            <Badge variant="outline" className="mb-2">
+              {item.subtype || item.type}
             </Badge>
-          )}
-        </div>
-        <CardTitle className="text-xl">{item.name}</CardTitle>
-        <CardDescription>{item.location}</CardDescription>
-      </CardHeader>
-      <CardContent className="flex-grow">
-        <div className="flex flex-wrap gap-1 mb-2">
-          {item.tags.slice(0, 3).map((tag, index) => (
-            <Badge key={index} variant="secondary" className="text-xs">
-              {tag}
-            </Badge>
-          ))}
-          {item.tags.length > 3 && (
-            <Badge variant="outline" className="text-xs">
-              +{item.tags.length - 3} more
-            </Badge>
-          )}
-        </div>
-        
-        {item.styles && item.styles.length > 0 && (
-          <div className="mt-3">
-            <div className="text-sm text-muted-foreground mb-1">Styles:</div>
-            <div className="flex flex-wrap gap-1">
-              {item.styles.slice(0, 2).map((style, index) => (
-                <Badge key={index} variant="outline" className="text-xs bg-blue-50 dark:bg-blue-900/10">
-                  {style}
-                </Badge>
-              ))}
-              {item.styles.length > 2 && (
-                <Badge variant="outline" className="text-xs">
-                  +{item.styles.length - 2} more
-                </Badge>
-              )}
-            </div>
+            <CardTitle className="text-xl">{item.name}</CardTitle>
+            {item.location && (
+              <CardDescription className="flex items-center mt-1">
+                <MapPin className="h-3.5 w-3.5 mr-1" />
+                {item.location}
+              </CardDescription>
+            )}
           </div>
-        )}
-        
-        {item.disciplines && item.disciplines.length > 0 && (
-          <div className="mt-3">
-            <div className="text-sm text-muted-foreground mb-1">Disciplines:</div>
-            <div className="flex flex-wrap gap-1">
-              {item.disciplines.map((discipline, index) => (
-                <Badge key={index} variant="outline" className="text-xs bg-purple-50 dark:bg-purple-900/10">
-                  {discipline}
-                </Badge>
-              ))}
-            </div>
+          {showSaveButton && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onSave && onSave();
+              }}
+            >
+              <BookmarkPlus className="h-5 w-5" />
+            </Button>
+          )}
+        </div>
+      </CardHeader>
+      
+      <CardContent className="p-4 pt-0">
+        {item.tags && item.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {item.tags.slice(0, 3).map((tag) => (
+              <Badge key={tag} variant="secondary" className="text-xs">
+                {tag}
+              </Badge>
+            ))}
+            {item.tags.length > 3 && (
+              <Badge variant="outline" className="text-xs">
+                +{item.tags.length - 3} more
+              </Badge>
+            )}
           </div>
         )}
       </CardContent>
-      <CardFooter>
-        <Button asChild variant="ghost" className="w-full justify-between hover:bg-transparent hover:text-primary">
-          <Link to={getDetailPath()}>
-            View Details
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
-        </Button>
-      </CardFooter>
+      
+      {(onSelect || showSelectButton) && (
+        <CardFooter className="p-4 pt-0">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full text-xs"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onSelect && onSelect();
+            }}
+          >
+            Select
+          </Button>
+        </CardFooter>
+      )}
+    </>
+  );
+
+  if (linkTo) {
+    return (
+      <Card className={`overflow-hidden cursor-pointer transition-all hover:shadow-md ${className}`}>
+        <Link to={linkTo} className="block">
+          {cardContent}
+        </Link>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className={`overflow-hidden ${className}`}>
+      {cardContent}
     </Card>
   );
 };

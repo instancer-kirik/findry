@@ -117,8 +117,10 @@ export const useDiscoverData = (
       image_url: item.image_url || '/placeholder.svg',
       multidisciplinary: item.multidisciplinary || false,
       styles: item.styles || [],
-      disciplines: item.disciplines || []
-    }));
+      disciplines: item.disciplines || [],
+      // Add empty author that can be populated later if needed
+      author: item.author
+    })) as ContentItemProps[];
     
     // Apply additional filters
     if (activeTab === 'resources' && resourceType !== 'all') {
@@ -156,7 +158,7 @@ export const useDiscoverData = (
     if (selectedSubfilters.length > 0) {
       itemsData = itemsData.filter(item => 
         selectedSubfilters.some(filter => {
-          if (item.tags.includes(filter)) return true;
+          if (item.tags?.includes(filter)) return true;
           if (item.type?.toLowerCase() === filter.toLowerCase()) return true;
           if (item.subtitle?.toLowerCase() === filter.toLowerCase()) return true;
           if (item.styles && item.styles.some((style: string) => 

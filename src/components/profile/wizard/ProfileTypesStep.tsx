@@ -1,15 +1,8 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Artist, Building, Camera, Calendar, Users, Briefcase, User, Mic2 } from 'lucide-react';
-
-interface ProfileTypeOption {
-  id: string;
-  label: string;
-  description: string;
-  icon: React.ReactNode;
-}
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Check, Music, Pencil, Building, Store, MapPin, Users } from 'lucide-react';
 
 interface ProfileTypesStepProps {
   selectedProfileTypes: string[];
@@ -24,57 +17,15 @@ const ProfileTypesStep: React.FC<ProfileTypesStepProps> = ({
   onNext,
   isSubmitting
 }) => {
-  const profileTypes: ProfileTypeOption[] = [
-    {
-      id: 'artist',
-      label: 'Artist',
-      description: 'Creative professionals such as musicians, painters, actors, etc.',
-      icon: <Artist className="h-8 w-8" />
-    },
-    {
-      id: 'venue',
-      label: 'Venue',
-      description: 'Performance spaces, galleries, or other hosting locations',
-      icon: <Building className="h-8 w-8" />
-    },
-    {
-      id: 'brand',
-      label: 'Brand',
-      description: 'Companies, labels, or commercial entities',
-      icon: <Briefcase className="h-8 w-8" />
-    },
-    {
-      id: 'creative',
-      label: 'Creative',
-      description: 'Individual creators and innovators',
-      icon: <Camera className="h-8 w-8" />
-    },
-    {
-      id: 'event',
-      label: 'Event Organizer',
-      description: 'Individuals or groups that organize events',
-      icon: <Calendar className="h-8 w-8" />
-    },
-    {
-      id: 'community',
-      label: 'Community',
-      description: 'Groups, collectives, or organizations',
-      icon: <Users className="h-8 w-8" />
-    },
-    {
-      id: 'resource',
-      label: 'Resource Provider',
-      description: 'Offering equipment, spaces, or services',
-      icon: <Mic2 className="h-8 w-8" />
-    },
-    {
-      id: 'user',
-      label: 'User',
-      description: 'Regular user account for fans and attendees',
-      icon: <User className="h-8 w-8" />
-    }
+  const profileTypes = [
+    { id: 'artist', name: 'Artist', icon: <Music className="h-5 w-5 mr-2" />, description: 'Showcase your work and connect with venues and opportunities' },
+    { id: 'creator', name: 'Creator', icon: <Pencil className="h-5 w-5 mr-2" />, description: 'Share content and build a following around your creative work' },
+    { id: 'venue', name: 'Venue', icon: <Building className="h-5 w-5 mr-2" />, description: 'List your space and connect with artists for events' },
+    { id: 'brand', name: 'Brand', icon: <Store className="h-5 w-5 mr-2" />, description: 'Discover creators for collaborations and partnerships' },
+    { id: 'resource', name: 'Resource Provider', icon: <MapPin className="h-5 w-5 mr-2" />, description: 'Offer space, equipment, or services to the creative community' },
+    { id: 'community', name: 'Community', icon: <Users className="h-5 w-5 mr-2" />, description: 'Connect with like-minded people around shared interests' }
   ];
-
+  
   const toggleProfileType = (typeId: string) => {
     if (selectedProfileTypes.includes(typeId)) {
       setSelectedProfileTypes(selectedProfileTypes.filter(id => id !== typeId));
@@ -82,47 +33,49 @@ const ProfileTypesStep: React.FC<ProfileTypesStepProps> = ({
       setSelectedProfileTypes([...selectedProfileTypes, typeId]);
     }
   };
-
+  
+  const canContinue = selectedProfileTypes.length > 0;
+  
   return (
     <div className="space-y-6">
-      <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold">What best describes you?</h2>
-        <p className="text-muted-foreground">
-          Select all that apply. You can change this later.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {profileTypes.map((type) => (
           <Card 
             key={type.id}
-            className={`cursor-pointer transition-all hover:border-primary ${
-              selectedProfileTypes.includes(type.id) 
-                ? 'border-2 border-primary bg-primary/5' 
-                : ''
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              selectedProfileTypes.includes(type.id) ? 'ring-2 ring-primary' : ''
             }`}
             onClick={() => toggleProfileType(type.id)}
           >
-            <CardContent className="p-4 flex items-start space-x-4">
-              <div className="mt-1 text-primary">
-                {type.icon}
-              </div>
-              <div>
-                <h3 className="font-medium">{type.label}</h3>
-                <p className="text-sm text-muted-foreground">{type.description}</p>
+            <CardContent className="p-4">
+              <div className="flex items-start">
+                <div className="flex-1">
+                  <div className="flex items-center">
+                    {type.icon}
+                    <h3 className="font-medium">{type.name}</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {type.description}
+                  </p>
+                </div>
+                {selectedProfileTypes.includes(type.id) && (
+                  <div className="bg-primary text-primary-foreground rounded-full p-1">
+                    <Check className="h-4 w-4" />
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
-
+      
       <div className="flex justify-end">
         <Button 
           onClick={onNext} 
-          disabled={selectedProfileTypes.length === 0 || isSubmitting}
+          disabled={!canContinue || isSubmitting}
           className="w-full md:w-auto"
         >
-          {isSubmitting ? 'Saving...' : 'Continue'}
+          {isSubmitting ? 'Processing...' : 'Continue'}
         </Button>
       </div>
     </div>

@@ -50,6 +50,9 @@ const ArtistProfile: React.FC = () => {
           avatar_url: artistData.image_url,
           bio: artistData.subtype || "Artist on Findry",
           profile_types: ["artist"],
+          capabilities: [] as string[],
+          created_at: artistData.created_at,
+          updated_at: artistData.updated_at
         };
         
         return {
