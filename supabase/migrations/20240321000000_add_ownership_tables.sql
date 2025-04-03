@@ -3,7 +3,8 @@ CREATE TYPE content_type AS ENUM (
   'project',
   'event',
   'resource',
-  'community'
+  'community',
+  'shop'
 );
 
 -- Create content_ownership table
@@ -70,6 +71,7 @@ ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE resources ENABLE ROW LEVEL SECURITY;
 ALTER TABLE communities ENABLE ROW LEVEL SECURITY;
+ALTER TABLE shops ENABLE ROW LEVEL SECURITY;
 
 -- Projects policies
 CREATE POLICY "Users can view all projects"
@@ -211,6 +213,42 @@ CREATE POLICY "Users can delete their own communities"
       SELECT 1 FROM content_ownership
       WHERE content_id = communities.id
       AND content_type = 'community'
+      AND owner_id = auth.uid()
+    )
+  );
+
+-- Shops policies
+CREATE POLICY "Users can view all shops"
+  ON shops FOR SELECT
+  TO authenticated
+  USING (true);
+
+CREATE POLICY "Users can create shops"
+  ON shops FOR INSERT
+  TO authenticated
+  WITH CHECK (true);
+
+CREATE POLICY "Users can update their own shops"
+  ON shops FOR UPDATE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM content_ownership
+      WHERE content_id = shops.id
+      AND content_type = 'shop'
+      AND owner_id = auth.uid()
+    )
+  )
+  WITH CHECK (true);
+
+CREATE POLICY "Users can delete their own shops"
+  ON shops FOR DELETE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM content_ownership
+      WHERE content_id = shops.id
+      AND content_type = 'shop'
       AND owner_id = auth.uid()
     )
   ); 

@@ -21,6 +21,11 @@ import CommunityDashboard from '@/pages/CommunityDashboard'
 import CommunityEvents from '@/pages/CommunityEvents'
 import ArtistProfile from './pages/ArtistProfile'
 import ResourceIndexPage from './pages/ResourceIndexPage'
+import ShopDetail from './pages/ShopDetail'
+import Shops from './pages/Shops'
+import CreateShop from './pages/CreateShop'
+import ProductDetail from './pages/ProductDetail'
+import TandemXShop from './pages/TandemXShop'
 
 import './App.css'
 
@@ -48,6 +53,11 @@ function App() {
             <Route path="/chats" element={<Chats />} />
             <Route path="/chats/new" element={<Chats />} />
             <Route path="/brands" element={<Discover />} />
+            <Route path="/shops" element={<Shops />} />
+            <Route path="/shops/create" element={<CreateShop />} />
+            <Route path="/shops/:id" element={<ShopDetail />} />
+            <Route path="/shops/:shopId/products/:productId" element={<ProductDetail />} />
+            <Route path="/integrations/tandemx" element={<TandemXShop />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
