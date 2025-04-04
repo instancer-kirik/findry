@@ -96,7 +96,6 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
     return () => document.removeEventListener("keydown", down);
   }, []);
 
-  // Group tags by categories for better organization in the dialog
   const getContextTags = () => {
     const contextMap: Record<string, string[]> = {
       'artists': ['Vocalist', 'Guitar', 'Producer', 'Rapper', 'Performance Artist', 'Visual Artist', 'R&B', 'Soul', 'Blues', 'Jazz'],
@@ -111,7 +110,6 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
     return ((contextMap[activeTab] || []) as string[]).filter(tag => allTags.includes(tag));
   };
 
-  // Resource type options
   const resourceTypes = [
     { value: "all", label: "All Resources" },
     { value: "space", label: "Spaces" },
@@ -182,7 +180,6 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
                 </TabsList>
                 
                 <TabsContent value="main" className="space-y-4">
-                  {/* Category-specific filters */}
                   {activeTab === "artists" && (
                     <>
                       <div>
@@ -237,7 +234,6 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
                     </div>
                   )}
                   
-                  {/* Selected Subfilters Display */}
                   {selectedSubfilters.length > 0 && (
                     <div>
                       <div className="flex justify-between mb-2">
@@ -267,7 +263,6 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
                     </div>
                   )}
                   
-                  {/* Available Subfilters List */}
                   <div>
                     <label className="text-sm font-medium mb-2 block">Available Filters</label>
                     <ScrollArea className="h-[200px] w-full border rounded-md p-4">
@@ -289,7 +284,6 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
                 </TabsContent>
                 
                 <TabsContent value="tags" className="space-y-4">
-                  {/* Context-specific Tags */}
                   <div>
                     <label className="text-sm font-medium mb-2 block">Popular Tags for {activeTab}</label>
                     <ScrollArea className="h-[200px] w-full border rounded-md p-4">
@@ -312,7 +306,6 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
                     </ScrollArea>
                   </div>
                   
-                  {/* Selected Tags Display */}
                   {selectedTags.length > 0 && (
                     <div>
                       <label className="text-sm font-medium mb-2 block">Active Tags</label>

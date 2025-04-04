@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -37,6 +36,16 @@ const Discover = () => {
   const [disciplinaryType, setDisciplinaryType] = useState('all');
   const [resourceType, setResourceType] = useState('all');
   const [selectedSubfilters, setSelectedSubfilters] = useState<string[]>([]);
+  
+  // Define availableSubfilters here - this was missing and causing the error
+  const [availableSubfilters, setAvailableSubfilters] = useState<{ value: string; label: string }[]>([
+    { value: 'music', label: 'Music' },
+    { value: 'visual', label: 'Visual Arts' },
+    { value: 'performance', label: 'Performance' },
+    { value: 'digital', label: 'Digital' },
+    { value: 'traditional', label: 'Traditional' },
+    { value: 'contemporary', label: 'Contemporary' }
+  ]);
 
   // State for DiscoverFilters
   const [activeTab, setActiveTab] = useState(typeParam || 'artists');
@@ -138,6 +147,45 @@ const Discover = () => {
         return 'all';
     }
   };
+  
+  // Update available subfilters based on the active tab
+  useEffect(() => {
+    // Set available subfilters based on the active tab
+    if (activeTab === 'artists') {
+      setAvailableSubfilters([
+        { value: 'vocalist', label: 'Vocalist' },
+        { value: 'instrumentalist', label: 'Instrumentalist' },
+        { value: 'producer', label: 'Producer' },
+        { value: 'rapper', label: 'Rapper' },
+        { value: 'dj', label: 'DJ' },
+        { value: 'visual-artist', label: 'Visual Artist' },
+        { value: 'performance-artist', label: 'Performance Artist' }
+      ]);
+    } else if (activeTab === 'resources') {
+      setAvailableSubfilters([
+        { value: 'studio', label: 'Studio' },
+        { value: 'gallery', label: 'Gallery' },
+        { value: 'practice-room', label: 'Practice Room' },
+        { value: 'equipment', label: 'Equipment' },
+        { value: 'service', label: 'Service' }
+      ]);
+    } else if (activeTab === 'venues') {
+      setAvailableSubfilters([
+        { value: 'concert-hall', label: 'Concert Hall' },
+        { value: 'club', label: 'Club' },
+        { value: 'theater', label: 'Theater' },
+        { value: 'outdoor', label: 'Outdoor' },
+        { value: 'gallery', label: 'Gallery' }
+      ]);
+    } else {
+      // Default subfilters for other tabs
+      setAvailableSubfilters([
+        { value: 'trending', label: 'Trending' },
+        { value: 'new', label: 'New' },
+        { value: 'popular', label: 'Popular' }
+      ]);
+    }
+  }, [activeTab]);
 
   return (
     <Layout>
@@ -162,6 +210,7 @@ const Discover = () => {
           selectedSubfilters={selectedSubfilters}
           onSubfilterSelect={handleSubfilterSelect}
           onSubfilterClear={handleSubfilterClear}
+          availableSubfilters={availableSubfilters}
           allTags={allTags}
         />
         
@@ -285,7 +334,7 @@ const Discover = () => {
           selectedSubfilters={selectedSubfilters}
           onSubfilterSelect={handleSubfilterSelect}
           onSubfilterClear={handleSubfilterClear}
-          availableSubfilters={availableSubfilters || []}
+          availableSubfilters={availableSubfilters}
           allTags={allTags}
         />
       </div>

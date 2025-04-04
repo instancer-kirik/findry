@@ -135,7 +135,7 @@ const DiscoverMobileDrawer: React.FC<DiscoverMobileDrawerProps> = ({
 
       {/* Additional 3x2 Grid Button */}
       <Button 
-        variant="primary" 
+        variant="default" 
         size="icon" 
         className="fixed bottom-4 right-4 h-12 w-12 rounded-full shadow-lg z-50 flex md:hidden"
       >
