@@ -10,7 +10,9 @@ import {
   MessageSquare, 
   Star,
   ChevronLeft,
-  Video
+  Video,
+  List,
+  CalendarDays
 } from 'lucide-react';
 import { format } from 'date-fns';
 import Layout from '../components/layout/Layout';
@@ -43,6 +45,7 @@ import MeetingsCard from '../components/meetings/MeetingsCard';
 import { EventSlot, Event } from '@/types/event';
 import EventSlotManager from '@/components/events/EventSlotManager';
 import { artists } from '@/components/discover/DiscoverData';
+import ProfileCalendar, { CalendarEvent } from '@/components/profile/ProfileCalendar';
 
 const eventSlotsMock: EventSlot[] = [
   {
@@ -246,6 +249,20 @@ const EventDetail: React.FC = () => {
   const today = new Date();
   const eventDate = new Date(event.date);
   const daysRemaining = Math.floor((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  
+  // Prepare event data for ProfileCalendar
+  const calendarEvents: CalendarEvent[] = [{
+    id: event.id,
+    title: event.title,
+    date: event.date,
+    imageUrl: event.imageUrl,
+    location: event.location,
+    type: event.type,
+    startTime: event.startTime,
+    endTime: event.endTime,
+    description: event.description,
+    // Map other necessary fields if CalendarEvent was extended further
+  }];
   
   return (
     <Layout>
@@ -673,151 +690,56 @@ const EventDetail: React.FC = () => {
           </div>
         </AnimatedSection>
         
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="details">Details</TabsTrigger>
-            <TabsTrigger value="schedule">Schedule</TabsTrigger>
-            <TabsTrigger value="reviews">Reviews</TabsTrigger>
+        <Tabs value="schedule" className="mt-8">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="schedule">
+              <List className="h-4 w-4 mr-2" /> Schedule
+            </TabsTrigger>
+            <TabsTrigger value="calendar">
+              <CalendarDays className="h-4 w-4 mr-2" /> Calendar View
+            </TabsTrigger>
           </TabsList>
-          
-          <TabsContent value="details" className="mt-6">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>About This Event</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="whitespace-pre-line">{event.longDescription}</p>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                          <div className="flex items-start gap-3">
-                            <Calendar className="h-5 w-5 text-primary mt-0.5" />
-                            <div>
-                              <h3 className="font-medium">Date & Time</h3>
-                              <p className="text-sm text-muted-foreground">
-                                {format(event.date, 'EEEE, MMMM d, yyyy')}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                {event.startTime} - {event.endTime}
-                              </p>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-start gap-3">
-                            <MapPin className="h-5 w-5 text-primary mt-0.5" />
-                            <div>
-                              <h3 className="font-medium">Location</h3>
-                              <p className="text-sm text-muted-foreground">{event.location}</p>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-start gap-3">
-                            <Users className="h-5 w-5 text-primary mt-0.5" />
-                            <div>
-                              <h3 className="font-medium">Capacity</h3>
-                              <p className="text-sm text-muted-foreground">
-                                {event.attendees} / {event.capacity} attending
-                              </p>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-start gap-3">
-                            <Clock className="h-5 w-5 text-primary mt-0.5" />
-                            <div>
-                              <h3 className="font-medium">Duration</h3>
-                              <p className="text-sm text-muted-foreground">
-                                {parseInt(event.endTime) - parseInt(event.startTime)} hours
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Tags</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-wrap gap-2">
-                          {event.tags.map(tag => (
-                            <Badge key={tag} variant="secondary">{tag}</Badge>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-          </TabsContent>
-          
-          <TabsContent value="schedule" className="mt-6">
-            <AnimatedSection animation="fade-in-up">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Event Schedule</CardTitle>
-                </CardHeader>
-                <CardContent>
+
+          <TabsContent value="schedule">
+            <Card>
+              <CardHeader>
+                <CardTitle>Event Schedule</CardTitle>
+                <CardDescription>Timeline of activities and performances.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {eventSlots.length > 0 ? (
                   <EventSlotManager 
-                    slots={event.slots || []}
+                    slots={eventSlots}
                     onSlotsChange={handleSlotsChange}
                     eventStartTime={event.startTime}
                     eventEndTime={event.endTime}
                     eventDate={event.date}
-                    readOnly={true}
+                    readOnly={!isOwnEvent(event.organizerId)}
                   />
-                </CardContent>
-              </Card>
-            </AnimatedSection>
+                ) : (
+                  <p className="text-muted-foreground">No schedule details available yet.</p>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
-          
-          <TabsContent value="reviews">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Reviews</CardTitle>
-                        <CardDescription>
-                          See what others thought about this event
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-6">
-                          {reviewsMockData.map((review) => (
-                            <div key={review.id}>
-                              <div className="flex items-start gap-3">
-                                <Avatar>
-                                  <AvatarImage src={review.userAvatar} />
-                                  <AvatarFallback>{review.userName[0]}</AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1">
-                                  <div className="flex justify-between items-start">
-                                    <div>
-                                      <p className="font-medium">{review.userName}</p>
-                                      <div className="flex text-amber-500 mt-0.5">
-                                        {Array.from({ length: 5 }).map((_, i) => (
-                                          <Star key={i} className={`h-4 w-4 ${i < review.rating ? 'fill-amber-500' : ''}`} />
-                                        ))}
-                                      </div>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground">
-                                      {format(review.date, 'MMM d, yyyy')}
-                                    </p>
-                                  </div>
-                                  <p className="mt-2 text-sm">{review.comment}</p>
-                                </div>
-                              </div>
-                              <Separator className="mt-4" />
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                      <CardFooter className="flex justify-between">
-                        <Button variant="outline">
-                          <MessageSquare className="mr-2 h-4 w-4" /> Add Review
-                        </Button>
-                        <Button variant="outline">View All</Button>
-                      </CardFooter>
-                    </Card>
+
+          <TabsContent value="calendar">
+             <ProfileCalendar 
+               events={calendarEvents} 
+               focusedEvent={calendarEvents[0]}
+               isOwnProfile={isOwnEvent(event.organizerId)}
+               profileType="event"
+             />
           </TabsContent>
         </Tabs>
       </div>
     </Layout>
   );
+};
+
+const isOwnEvent = (organizerId: string) => {
+  console.log("Checking ownership for organizer:", organizerId);
+  return organizerId === '123';
 };
 
 export default EventDetail;

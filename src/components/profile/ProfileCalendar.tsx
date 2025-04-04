@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,7 +18,8 @@ import {
   Building, 
   Coffee,
   PartyPopper,
-  Ticket
+  Ticket,
+  MapPin
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -33,21 +33,30 @@ export interface CalendarEvent {
   location?: string;
   type?: string;
   category?: string;
+  startTime?: string;
+  endTime?: string;
+  description?: string;
 }
 
 interface ProfileCalendarProps {
   events: CalendarEvent[];
   isOwnProfile?: boolean;
   profileType?: string;
+  focusedEvent?: CalendarEvent;
 }
 
 const ProfileCalendar: React.FC<ProfileCalendarProps> = ({ 
   events = [], 
   isOwnProfile = false,
-  profileType = "artist" 
+  profileType = "artist",
+  focusedEvent
 }) => {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const initialDate = focusedEvent?.date 
+    ? (focusedEvent.date instanceof Date ? focusedEvent.date : parseISO(focusedEvent.date as string)) 
+    : new Date();
+    
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(initialDate);
+  const [currentMonth, setCurrentMonth] = useState<Date>(initialDate);
   
   // Parse event dates if they are strings
   const normalizedEvents = events.map(event => ({
@@ -241,21 +250,23 @@ const ProfileCalendar: React.FC<ProfileCalendarProps> = ({
                         </div>
                         
                         <div>
-                          <div className="flex justify-between items-start">
-                            <h4 className="font-medium">{event.title}</h4>
+                          <div className="flex justify-between items-start mb-1">
+                            <h4 className="font-medium text-sm leading-tight">{event.title}</h4>
                             {(event.type || event.category) && (
-                              <Badge variant="outline">{event.type || event.category}</Badge>
+                              <Badge variant="outline" className="text-xs">{event.type || event.category}</Badge>
                             )}
                           </div>
-                          
-                          {event.location && (
-                            <p className="text-sm text-muted-foreground mt-1">{event.location}</p>
+                          {(event.startTime || event.location) && (
+                            <div className="text-xs text-muted-foreground flex items-center gap-2 mt-1">
+                              {event.startTime && (
+                                <span className='flex items-center'><Clock className="h-3 w-3 mr-1" />{event.startTime}{event.endTime ? ` - ${event.endTime}` : ''}</span>
+                              )}
+                              {event.startTime && event.location && <span>·</span>}
+                              {event.location && (
+                                <span className='flex items-center truncate'><MapPin className="h-3 w-3 mr-1" />{event.location}</span>
+                              )}
+                            </div>
                           )}
-                          
-                          <div className="flex items-center text-xs text-muted-foreground mt-2">
-                            <Clock className="h-3 w-3 mr-1" />
-                            {format(event.date, 'h:mm a')}
-                          </div>
                         </div>
                       </div>
                     </Link>

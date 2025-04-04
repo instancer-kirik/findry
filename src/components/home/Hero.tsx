@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import AnimatedSection from '../ui-custom/AnimatedSection';
 import { FileText, Users } from 'lucide-react';
@@ -70,30 +69,30 @@ const Hero: React.FC = () => {
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background to-background/80"></div>
       
       {/* Abstract shapes/blurs */}
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-100/30 dark:bg-blue-900/10 rounded-full filter blur-3xl"></div>
-      <div className="absolute top-1/2 -left-40 w-80 h-80 bg-purple-100/20 dark:bg-purple-900/10 rounded-full filter blur-3xl"></div>
+      <div className="absolute -top-40 -right-40 w-96 h-96 bg-teal-100/30 dark:bg-teal-900/10 rounded-full filter blur-3xl animate-pulse"></div>
+      <div className="absolute top-1/2 -left-40 w-80 h-80 bg-green-100/20 dark:bg-green-900/10 rounded-full filter blur-3xl"></div>
       
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center">
           <AnimatedSection animation="fade-in-up" delay={100}>
             <div className="inline-block mb-4 px-3 py-1 bg-secondary rounded-full">
               <span className="text-xs font-medium text-foreground/80">
-                Creative Collaboration Platform
+                
               </span>
             </div>
           </AnimatedSection>
           
           <AnimatedSection animation="fade-in-up" delay={200}>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight">
-              {isAuthenticated ? "Welcome to Your Creative Hub" : "Findry: Connect, Create, Collaborate"}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight leading-normal pb-2 bg-gradient-to-r from-purple-400 via-teal-400 to-green-500 text-transparent bg-clip-text">
+              {isAuthenticated ? "Welcome Wonder Seeker and/or Mighty Artist\n" : "Bonjé Wonder Seeker and/or Mighty Artist\n"}
             </h1>
           </AnimatedSection>
-          
+          <br></br>
           <AnimatedSection animation="fade-in-up" delay={300}>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-muted-foreground/90 dark:text-muted-foreground/80 mb-8 max-w-2xl mx-auto">
               {isAuthenticated 
                 ? "Manage your items, track offers, and grow your creative network all in one place."
-                : "Discover and create opportunities, build relationships, and grow your network with our intuitive platform designed for humans."
+                : "Let's explore vibrant ecosystems and design opportunities. "
               }
             </p>
           </AnimatedSection>

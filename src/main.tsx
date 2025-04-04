@@ -15,7 +15,7 @@ root.render(
 // Render the app with theme provider
 setTimeout(() => {
   root.render(
-    <ThemeProvider defaultTheme="system" storageKey="theme-preference">
+    <ThemeProvider defaultTheme="system" storageKey="theme">
       <App />
     </ThemeProvider>
   );

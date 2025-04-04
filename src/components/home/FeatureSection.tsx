@@ -33,18 +33,18 @@ const FeatureSection: React.FC = () => {
   const features = [
     {
       icon: <Search className="w-6 h-6" />,
-      title: "Intelligent Discovery",
-      description: "Find perfect matches with our advanced filtering and recommendation system."
+      title: "Discovery",
+      description: "Find various things."
     },
     {
       icon: <Calendar className="w-6 h-6" />,
-      title: "Unified Scheduling",
+      title: "Calendar with pictures",
       description: "Manage your availability and bookings in one streamlined calendar."
     },
     {
       icon: <MessageSquare className="w-6 h-6" />,
-      title: "Seamless Communication",
-      description: "Connect directly with artists, brands, and venues through our platform."
+      title: "Chat",
+      description: "Connect and share with others."
     },
     {
       icon: <CheckCircle className="w-6 h-6" />,
@@ -53,8 +53,8 @@ const FeatureSection: React.FC = () => {
     },
     {
       icon: <Users className="w-6 h-6" />,
-      title: "Multiple User Types",
-      description: "Specialized interfaces for artists, brands, venues, and event organizers."
+      title: "Event planning and collaboration tools",
+      description: "Plan and share events and content with others."
     },
     {
       icon: <Globe className="w-6 h-6" />,

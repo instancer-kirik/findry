@@ -1,4 +1,3 @@
-
 import React from 'react';
 import AnimatedSection from '../ui-custom/AnimatedSection';
 import GlassmorphicCard from '../ui-custom/GlassmorphicCard';
@@ -16,9 +15,9 @@ const MarketplaceSection: React.FC = () => {
       <div className="container mx-auto px-4">
         <AnimatedSection animation="fade-in-up">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">A Multi-Sided Marketplace</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">The Creative Ecosystem Marketplace</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Connect across the creative ecosystem with intuitive discovery and booking relationships.
+              Where artists, brands, and venues connect to create, license, and showcase diverse content and experiences.
             </p>
           </div>
         </AnimatedSection>
@@ -47,9 +46,9 @@ const MarketplaceSection: React.FC = () => {
               <div className="flex items-center justify-center w-12 h-12 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full mb-4">
                 <Music className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Artists</h3>
+              <h3 className="text-xl font-semibold mb-3">Artists & Creators</h3>
               <p className="text-muted-foreground mb-4">
-                Discover opportunities with venues and brands, showcase your talent, and manage your schedule.
+                Showcase your original work, manage performance rights, and find collaboration or booking opportunities.
               </p>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center text-sm">
@@ -62,11 +61,11 @@ const MarketplaceSection: React.FC = () => {
                 </li>
                 <li className="flex items-center text-sm">
                   <ArrowRight className="w-4 h-4 mr-2 text-primary/70" />
-                  <span>Find resources</span>
+                  <span>Find resources and tools</span>
                 </li>
               </ul>
-              <a href="#" className="text-sm font-medium inline-flex items-center text-primary hover:text-primary/80">
-                Learn more
+              <a href="/signup?role=artist" className="text-sm font-medium inline-flex items-center text-primary hover:text-primary/80">
+                Join Soon, not yet available
                 <ArrowRight className="ml-1 w-4 h-4" />
               </a>
             </GlassmorphicCard>
@@ -82,26 +81,26 @@ const MarketplaceSection: React.FC = () => {
               <div className="flex items-center justify-center w-12 h-12 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-full mb-4">
                 <Store className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Brands</h3>
+              <h3 className="text-xl font-semibold mb-3">Brands & Businesses</h3>
               <p className="text-muted-foreground mb-4">
-                Discover talent, book venues, and create memorable brand experiences with the right artists.
+                Discover unique talent, license creative content, sponsor events, and book venues for activations.
               </p>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center text-sm">
                   <ArrowRight className="w-4 h-4 mr-2 text-primary/70" />
-                  <span>Find artists</span>
+                  <span>Find creators & performers</span>
                 </li>
                 <li className="flex items-center text-sm">
                   <ArrowRight className="w-4 h-4 mr-2 text-primary/70" />
-                  <span>Book venues</span>
+                  <span>License artistic content</span>
                 </li>
                 <li className="flex items-center text-sm">
                   <ArrowRight className="w-4 h-4 mr-2 text-primary/70" />
-                  <span>Manage events</span>
+                  <span>Sponsor events & venues</span>
                 </li>
               </ul>
-              <a href="#" className="text-sm font-medium inline-flex items-center text-primary hover:text-primary/80">
-                Learn more
+              <a href="/signup?role=brand" className="text-sm font-medium inline-flex items-center text-primary hover:text-primary/80">
+                Join Soon, not yet available
                 <ArrowRight className="ml-1 w-4 h-4" />
               </a>
             </GlassmorphicCard>
@@ -117,26 +116,26 @@ const MarketplaceSection: React.FC = () => {
               <div className="flex items-center justify-center w-12 h-12 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-full mb-4">
                 <Building className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Venues</h3>
+              <h3 className="text-xl font-semibold mb-3">Venues & Spaces & Resources</h3>
               <p className="text-muted-foreground mb-4">
-                List your space, discover talent, and manage bookings all in one streamlined platform.
+                List your space, host diverse events featuring artists, manage bookings, and control usage rights.
               </p>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center text-sm">
                   <ArrowRight className="w-4 h-4 mr-2 text-primary/70" />
-                  <span>List availability</span>
+                  <span>Manage availability & bookings</span>
                 </li>
                 <li className="flex items-center text-sm">
                   <ArrowRight className="w-4 h-4 mr-2 text-primary/70" />
-                  <span>Discover artists</span>
+                  <span>Discover artists & performers</span>
                 </li>
                 <li className="flex items-center text-sm">
                   <ArrowRight className="w-4 h-4 mr-2 text-primary/70" />
-                  <span>Manage calendar</span>
+                  <span>Host curated events</span>
                 </li>
               </ul>
-              <a href="#" className="text-sm font-medium inline-flex items-center text-primary hover:text-primary/80">
-                Learn more
+              <a href="/signup?role=venue" className="text-sm font-medium inline-flex items-center text-primary hover:text-primary/80">
+                Join Soon, not yet available
                 <ArrowRight className="ml-1 w-4 h-4" />
               </a>
             </GlassmorphicCard>
