@@ -10,7 +10,7 @@ interface RoleAttribute {
   [key: string]: any;
 }
 
-interface ProfileDetailsStepProps {
+export interface ProfileDetailsStepProps {
   selectedProfileTypes: string[];
   roleAttributes: Record<string, RoleAttribute>;
   handleRoleAttributeChange: (role: string, field: string, value: any) => void;

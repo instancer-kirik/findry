@@ -5,16 +5,20 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 
-interface PreferencesStepProps {
+export interface PreferencesStepProps {
   onPrevious: () => void;
   onComplete: () => void;
   isSubmitting: boolean;
+  preferences?: Record<string, any>;
+  handlePreferencesChange?: (field: string, value: any) => void;
 }
 
 const PreferencesStep: React.FC<PreferencesStepProps> = ({ 
   onPrevious, 
   onComplete, 
-  isSubmitting 
+  isSubmitting,
+  preferences = {},
+  handlePreferencesChange
 }) => {
   return (
     <div className="space-y-6">
@@ -30,7 +34,15 @@ const PreferencesStep: React.FC<PreferencesStepProps> = ({
               Receive email notifications about new messages and updates.
             </p>
           </div>
-          <Switch id="notifications" defaultChecked />
+          <Switch 
+            id="notifications" 
+            checked={preferences.emailNotifications ?? true}
+            onCheckedChange={(checked) => {
+              if (handlePreferencesChange) {
+                handlePreferencesChange('emailNotifications', checked);
+              }
+            }}
+          />
         </div>
         
         <div className="flex items-center justify-between">
@@ -40,7 +52,15 @@ const PreferencesStep: React.FC<PreferencesStepProps> = ({
               Make your profile visible to everyone.
             </p>
           </div>
-          <Switch id="publicProfile" defaultChecked />
+          <Switch 
+            id="publicProfile" 
+            checked={preferences.publicProfile ?? true}
+            onCheckedChange={(checked) => {
+              if (handlePreferencesChange) {
+                handlePreferencesChange('publicProfile', checked);
+              }
+            }}
+          />
         </div>
       </div>
       

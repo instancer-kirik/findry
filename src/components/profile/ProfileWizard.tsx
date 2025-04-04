@@ -13,8 +13,8 @@ import BasicInfoStep from './wizard/BasicInfoStep';
 import ProfileDetailsStep from './wizard/ProfileDetailsStep';
 import ProfileTypesStep from './wizard/ProfileTypesStep';
 import PreferencesStep from './wizard/PreferencesStep';
-import StepIndicator from './wizard/StepIndicator';
-import { ProfileFormValues, WizardStep } from '@/types/profile';
+import StepIndicator, { WizardStep } from './wizard/StepIndicator';
+import { ProfileFormValues } from '@/types/profile';
 
 interface ProfileWizardProps {
   initialValues?: Partial<ProfileFormValues>;
@@ -51,6 +51,7 @@ export const ProfileWizard: React.FC<ProfileWizardProps> = ({
   isSubmitting = false
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [stepsCompleted, setStepsCompleted] = useState<Record<string, boolean>>({});
   const [formValues, setFormValues] = useState<ProfileFormValues>({
     username: initialValues.username || '',
     full_name: initialValues.full_name || '',
@@ -60,7 +61,37 @@ export const ProfileWizard: React.FC<ProfileWizardProps> = ({
     role_attributes: initialValues.role_attributes || {}
   });
   
+  // New profile data state for BasicInfoStep
+  const [profileData, setProfileData] = useState({
+    displayName: initialValues.full_name || '',
+    bio: initialValues.bio || '',
+    location: '',
+    website: ''
+  });
+
+  const handleProfileDataChange = (field: string, value: string) => {
+    setProfileData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+  
   const handleNext = () => {
+    // Mark current step as completed
+    setStepsCompleted(prev => ({
+      ...prev,
+      [steps[currentStep].id]: true
+    }));
+    
+    // Update form values based on step
+    if (currentStep === 0) {
+      setFormValues(prev => ({
+        ...prev,
+        full_name: profileData.displayName,
+        bio: profileData.bio
+      }));
+    }
+    
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
@@ -74,10 +105,29 @@ export const ProfileWizard: React.FC<ProfileWizardProps> = ({
     }
   };
 
-  const updateFormValues = (values: Partial<ProfileFormValues>) => {
+  const handleRoleAttributeChange = (role: string, field: string, value: any) => {
     setFormValues(prev => ({
       ...prev,
-      ...values
+      role_attributes: {
+        ...prev.role_attributes,
+        [role]: {
+          ...(prev.role_attributes[role] || {}),
+          [field]: value
+        }
+      }
+    }));
+  };
+  
+  const handlePreferencesChange = (field: string, value: any) => {
+    setFormValues(prev => ({
+      ...prev,
+      role_attributes: {
+        ...prev.role_attributes,
+        preferences: {
+          ...(prev.role_attributes.preferences || {}),
+          [field]: value
+        }
+      }
     }));
   };
 
@@ -86,11 +136,11 @@ export const ProfileWizard: React.FC<ProfileWizardProps> = ({
       case 0:
         return (
           <BasicInfoStep
-            value={{ username: formValues.username, fullName: formValues.full_name }}
-            onChange={(values) => updateFormValues({
-              username: values.username,
-              full_name: values.fullName
-            })}
+            profileData={profileData}
+            handleProfileDataChange={handleProfileDataChange}
+            onNext={handleNext}
+            onPrevious={handleBack}
+            isSubmitting={isSubmitting}
           />
         );
       case 1:
@@ -101,27 +151,29 @@ export const ProfileWizard: React.FC<ProfileWizardProps> = ({
               const types = formValues.profile_types.includes(type)
                 ? formValues.profile_types.filter(t => t !== type)
                 : [...formValues.profile_types, type];
-              updateFormValues({ profile_types: types });
+              setFormValues(prev => ({ ...prev, profile_types: types }));
             }}
           />
         );
       case 2:
         return (
           <ProfileDetailsStep
-            value={{ bio: formValues.bio, avatarUrl: formValues.avatar_url }}
-            onChange={(values) => updateFormValues({
-              bio: values.bio,
-              avatar_url: values.avatarUrl
-            })}
+            selectedProfileTypes={formValues.profile_types}
+            roleAttributes={formValues.role_attributes}
+            handleRoleAttributeChange={handleRoleAttributeChange}
+            onNext={handleNext}
+            onPrevious={handleBack}
+            isSubmitting={isSubmitting}
           />
         );
       case 3:
         return (
           <PreferencesStep
-            value={formValues.role_attributes || {}}
-            onChange={(preferences) => updateFormValues({
-              role_attributes: preferences
-            })}
+            preferences={formValues.role_attributes.preferences}
+            handlePreferencesChange={handlePreferencesChange}
+            onComplete={handleNext}
+            onPrevious={handleBack}
+            isSubmitting={isSubmitting}
           />
         );
       default:
@@ -141,24 +193,13 @@ export const ProfileWizard: React.FC<ProfileWizardProps> = ({
             steps={steps}
             currentStep={currentStep}
             onChange={(index) => setCurrentStep(index)}
+            stepsCompleted={stepsCompleted}
           />
         </div>
         {renderStepContent()}
       </CardContent>
       <CardFooter className="flex justify-between">
-        <Button
-          variant="outline"
-          onClick={handleBack}
-          disabled={currentStep === 0}
-        >
-          Back
-        </Button>
-        <Button 
-          onClick={handleNext}
-          disabled={isSubmitting}
-        >
-          {currentStep === steps.length - 1 ? (isSubmitting ? 'Saving...' : 'Complete') : 'Next'}
-        </Button>
+        {/* Navigation buttons are now rendered within each step */}
       </CardFooter>
     </Card>
   );

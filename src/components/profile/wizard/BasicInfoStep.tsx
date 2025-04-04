@@ -5,15 +5,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 
-interface ProfileData {
-  displayName: string;
-  bio: string;
-  location: string;
-  website: string;
-}
-
-interface BasicInfoStepProps {
-  profileData: ProfileData;
+export interface BasicInfoStepProps {
+  profileData: {
+    displayName: string;
+    bio: string;
+    location: string;
+    website: string;
+  };
   handleProfileDataChange: (field: string, value: string) => void;
   onNext: () => void;
   onPrevious: () => void;
