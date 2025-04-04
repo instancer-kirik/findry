@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './use-auth';
@@ -13,6 +14,12 @@ export function useShop() {
     try {
       setLoading(true);
       setError(null);
+      
+      // First check if the table exists
+      const tableExists = await checkIfTableExists('shops');
+      if (!tableExists) {
+        throw new Error("The shops table doesn't exist yet. Please run the database migrations first.");
+      }
       
       const { data, error } = await supabase
         .from('shops')
@@ -34,6 +41,12 @@ export function useShop() {
     try {
       setLoading(true);
       setError(null);
+      
+      // First check if the table exists
+      const tableExists = await checkIfTableExists('shops');
+      if (!tableExists) {
+        throw new Error("The shops table doesn't exist yet. Please run the database migrations first.");
+      }
       
       const { data, error } = await supabase
         .from('shops')
@@ -57,6 +70,12 @@ export function useShop() {
       setLoading(true);
       setError(null);
       
+      // First check if the table exists
+      const tableExists = await checkIfTableExists('products');
+      if (!tableExists) {
+        throw new Error("The products table doesn't exist yet. Please run the database migrations first.");
+      }
+      
       const { data, error } = await supabase
         .from('products')
         .select('*')
@@ -78,6 +97,12 @@ export function useShop() {
     try {
       setLoading(true);
       setError(null);
+      
+      // First check if the table exists
+      const tableExists = await checkIfTableExists('products');
+      if (!tableExists) {
+        throw new Error("The products table doesn't exist yet. Please run the database migrations first.");
+      }
       
       const { data, error } = await supabase
         .from('products')
@@ -104,7 +129,7 @@ export function useShop() {
         .from('content_ownership')
         .select('*')
         .eq('content_id', shopId)
-        .eq('content_type', 'shop')
+        .eq('content_type', 'shop' as ContentType)
         .eq('owner_id', user.id)
         .single();
       
@@ -125,6 +150,12 @@ export function useShop() {
       setLoading(true);
       setError(null);
       
+      // First check if the table exists
+      const tableExists = await checkIfTableExists('shops');
+      if (!tableExists) {
+        throw new Error("The shops table doesn't exist yet. Please run the database migrations first.");
+      }
+      
       // Create shop
       const { data: shop, error: shopError } = await supabase
         .from('shops')
@@ -139,7 +170,7 @@ export function useShop() {
         .from('content_ownership')
         .insert({
           content_id: shop.id,
-          content_type: 'shop',
+          content_type: 'shop' as ContentType,
           owner_id: user.id,
         });
       
@@ -173,17 +204,15 @@ export interface ShopOwner {
   avatar_url: string | null;
 }
 
-// Temporary function to check if tables exist - remove when tables are created
+// Helper function to check if tables exist
 const checkIfTableExists = async (tableName: string): Promise<boolean> => {
   try {
-    // Try querying the table
+    // Try to describe the table
     const { error } = await supabase
-      .from(tableName as any)
-      .select('id')
-      .limit(1);
+      .rpc('get_table_definition', { table_name: tableName });
     
     // If there was an error, the table might not exist
-    if (error && error.message.includes("relation") && error.message.includes("does not exist")) {
+    if (error && error.message.includes("does not exist")) {
       return false;
     }
     
@@ -198,27 +227,15 @@ export const useShops = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const shopService = useShop();
 
   const fetchShops = async () => {
     setIsLoading(true);
     setError(null);
     
     try {
-      // First check if the table exists
-      const tableExists = await checkIfTableExists('shops');
-      if (!tableExists) {
-        throw new Error("The shops table doesn't exist yet. Please create it first.");
-      }
-      
-      // Use type assertion to handle type incompatibility
-      const { data, error } = await supabase
-        .from('shops' as any)
-        .select('*')
-        .order('updated_at', { ascending: false });
-
-      if (error) throw error;
-      
-      setShops(data as any || []);
+      const data = await shopService.fetchShops();
+      setShops(data);
     } catch (err: any) {
       console.error('Error fetching shops:', err);
       setError(err.message);
@@ -247,6 +264,7 @@ export const useShopDetails = (shopId: string | undefined) => {
   const [error, setError] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const { toast } = useToast();
+  const shopService = useShop();
 
   const fetchShopDetails = async () => {
     if (!shopId) return;
@@ -255,24 +273,13 @@ export const useShopDetails = (shopId: string | undefined) => {
     setError(null);
     
     try {
-      // First check if the tables exist
-      const shopsExist = await checkIfTableExists('shops');
-      const productsExist = await checkIfTableExists('products');
-      
-      if (!shopsExist) {
-        throw new Error("The shops table doesn't exist yet. Please create it first.");
+      // Get shop details
+      const shopData = await shopService.fetchShopById(shopId);
+      if (!shopData) {
+        throw new Error("Shop not found");
       }
       
-      // Get shop details
-      const { data: shopData, error: shopError } = await supabase
-        .from('shops' as any)
-        .select('*')
-        .eq('id', shopId)
-        .single();
-
-      if (shopError) throw shopError;
-      
-      setShop(shopData as any);
+      setShop(shopData);
       
       // Try to get owner details
       try {
@@ -305,18 +312,9 @@ export const useShopDetails = (shopId: string | undefined) => {
         // Continue even if we can't get owner info
       }
       
-      // Get products if the table exists
-      if (productsExist) {
-        const { data: productsData, error: productsError } = await supabase
-          .from('products' as any)
-          .select('*')
-          .eq('shop_id', shopId)
-          .order('created_at', { ascending: false });
-        
-        if (!productsError) {
-          setProducts(productsData as any || []);
-        }
-      }
+      // Get products
+      const productsData = await shopService.fetchProductsByShopId(shopId);
+      setProducts(productsData);
     } catch (err: any) {
       console.error('Error fetching shop details:', err);
       setError(err.message);
@@ -352,6 +350,7 @@ export const useProductDetails = (shopId: string | undefined, productId: string 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const shopService = useShop();
 
   const fetchProductDetails = async () => {
     if (!shopId || !productId) return;
@@ -360,22 +359,16 @@ export const useProductDetails = (shopId: string | undefined, productId: string 
     setError(null);
     
     try {
-      // Check if table exists
-      const tableExists = await checkIfTableExists('products');
-      if (!tableExists) {
-        throw new Error("The products table doesn't exist yet. Please create it first.");
+      const productData = await shopService.fetchProductById(productId);
+      if (!productData) {
+        throw new Error("Product not found");
       }
       
-      const { data, error } = await supabase
-        .from('products' as any)
-        .select('*')
-        .eq('id', productId)
-        .eq('shop_id', shopId)
-        .single();
-
-      if (error) throw error;
+      if (productData.shop_id !== shopId) {
+        throw new Error("Product doesn't belong to the specified shop");
+      }
       
-      setProduct(data as any);
+      setProduct(productData);
     } catch (err: any) {
       console.error('Error fetching product details:', err);
       setError(err.message);

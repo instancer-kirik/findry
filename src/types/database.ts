@@ -1,41 +1,14 @@
 
-export type ContentType = 'project' | 'event' | 'resource' | 'community' | 'shop';
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
-export interface ContentOwnership {
-  id: string;
-  content_id: string;
-  content_type: ContentType;
-  owner_id: string;
-  created_at: string;
-  updated_at: string;
-}
+export type ContentType = 'resource' | 'project' | 'event' | 'community' | 'artist' | 'venue' | 'brand' | 'shop';
 
-export interface ShopData {
-  id: string;
-  name: string;
-  description: string | null;
-  location: string | null;
-  website_url: string | null;
-  banner_image_url: string | null;
-  logo_url: string | null;
-  tags: string[] | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ProductData {
-  id: string;
-  shop_id: string;
-  name: string;
-  description: string | null;
-  price: number;
-  image_url: string | null;
-  category: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-// Shop definition for frontend usage
 export interface Shop {
   id: string;
   name: string;
@@ -49,7 +22,6 @@ export interface Shop {
   updated_at: string;
 }
 
-// Product definition for frontend usage
 export interface ShopProduct {
   id: string;
   shop_id: string;
@@ -60,4 +32,22 @@ export interface ShopProduct {
   category: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface Artist {
+  id: string;
+  name: string;
+  image_url: string | null;
+  location: string | null;
+  disciplines: string[] | null;
+  styles: string[] | null;
+  tags: string[] | null;
+  type: string | null;
+  subtype: string | null;
+  multidisciplinary: boolean | null;
+  created_at: string;
+  updated_at: string;
+  // Additional fields
+  bio?: string;
+  social_links?: string[];
 }

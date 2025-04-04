@@ -1,5 +1,6 @@
 
 import { CalendarEvent } from '@/components/profile/ProfileCalendar';
+import { Json } from './database';
 
 export interface ResourceAvailability {
   id: string;

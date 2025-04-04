@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ResourceDetails, ResourceAvailability, TimeSlot } from '@/types/resource';
+import { ContentType } from '@/types/database';
 
 export const useResource = (resourceId?: string) => {
   const [isOwner, setIsOwner] = useState(false);
@@ -29,7 +30,7 @@ export const useResource = (resourceId?: string) => {
         .from('content_ownership')
         .select('*')
         .eq('content_id', resourceId)
-        .eq('content_type', 'resource')
+        .eq('content_type', 'resource' as ContentType)
         .eq('owner_id', session.session.user.id)
         .single();
 
@@ -67,10 +68,16 @@ export const useResource = (resourceId?: string) => {
         });
       }
       
-      resource.availability = mockAvailability;
+      // Cast the availability to make TypeScript happy
+      const resourceWithAvailability: ResourceDetails = {
+        ...resource,
+        availability: mockAvailability
+      };
+
+      return resourceWithAvailability;
     }
 
-    return resource;
+    return resource as ResourceDetails;
   };
 
   const { data: resource, isLoading, error } = useQuery({

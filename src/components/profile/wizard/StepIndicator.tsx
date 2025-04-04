@@ -2,19 +2,25 @@
 import React from 'react';
 import { Check } from 'lucide-react';
 
-interface WizardStep {
+export interface WizardStep {
   id: string;
   title: string;
   description: string;
 }
 
-interface StepIndicatorProps {
+export interface StepIndicatorProps {
   steps: WizardStep[];
   currentStep: number;
-  stepsCompleted: Record<string, boolean>;
+  onChange?: (index: number) => void;
+  stepsCompleted?: Record<string, boolean>;
 }
 
-const StepIndicator: React.FC<StepIndicatorProps> = ({ steps, currentStep, stepsCompleted }) => {
+const StepIndicator: React.FC<StepIndicatorProps> = ({ 
+  steps, 
+  currentStep, 
+  onChange,
+  stepsCompleted = {} 
+}) => {
   return (
     <div className="mb-8">
       <div className="flex justify-between items-center">
@@ -23,9 +29,10 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ steps, currentStep, steps
             key={step.id} 
             className={`flex flex-col items-center ${index !== 0 ? 'ml-4' : ''}`}
             style={{ flex: 1 }}
+            onClick={() => onChange && onChange(index)}
           >
             <div 
-              className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 
+              className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 cursor-pointer
                 ${index < currentStep || stepsCompleted[step.id] 
                   ? 'bg-primary text-primary-foreground' 
                   : index === currentStep 
@@ -55,7 +62,7 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ steps, currentStep, steps
         <div className="absolute top-0 left-0 right-0 h-1 bg-muted"></div>
         <div 
           className="absolute top-0 left-0 h-1 bg-primary transition-all" 
-          style={{ width: `${((currentStep + (stepsCompleted[steps[currentStep].id] ? 1 : 0)) / steps.length) * 100}%` }}
+          style={{ width: `${((currentStep + (stepsCompleted[steps[currentStep]?.id] ? 1 : 0)) / steps.length) * 100}%` }}
         ></div>
       </div>
     </div>
