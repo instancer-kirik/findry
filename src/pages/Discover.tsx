@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -14,6 +15,8 @@ import { useDiscoverData } from '@/hooks/use-discover-data';
 import { ContentItemProps } from '@/components/marketplace/ContentCard';
 import { Check, Grid, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import DiscoverMobileDrawer from '@/components/discover/DiscoverMobileDrawer';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Discover = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -22,6 +25,8 @@ const Discover = () => {
   const selectionMode = searchParams.get('select') === 'true';
   const selectionTarget = searchParams.get('target') || 'event';
   const selectionType = searchParams.get('select_type') || 'all';
+
+  const isMobile = useIsMobile();
 
   // State for DiscoverHeader
   const [headerSearchQuery, setHeaderSearchQuery] = useState(query);
@@ -36,7 +41,7 @@ const Discover = () => {
   // State for DiscoverFilters
   const [activeTab, setActiveTab] = useState(typeParam || 'artists');
   const [activeSubTab, setActiveSubTab] = useState('all');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
 
   // State for selection panel
   const [selectedItems, setSelectedItems] = useState<ContentItemProps[]>([]);
@@ -161,31 +166,30 @@ const Discover = () => {
         />
         
         <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col lg:flex-row gap-8">
+          <DiscoverFilters
+            activeTab={activeTab}
+            handleTabChange={setActiveTab}
+            activeSubTab={activeSubTab}
+            handleSubTabChange={setActiveSubTab}
+            availableTabs={availableTabs}
+            tabSubcategories={tabSubcategories}
+            sidebarOpen={sidebarOpen}
+            toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+            getTabLabel={getTabLabel}
+            showFilters={showFilters}
+            setShowFilters={setShowFilters}
+          />
+          
+          <div className="flex flex-col lg:flex-row gap-8 mt-4">
             {/* Sidebar - Left side */}
-            <div className={cn(
-              "lg:w-64 flex-shrink-0",
-              !sidebarOpen && "hidden"
-            )}>
-              <DiscoverSidebar activeTabData={items.slice(0, 3)} activeTab={activeTab} />
-            </div>
+            {sidebarOpen && !isMobile && (
+              <div className="lg:w-64 flex-shrink-0 sticky top-24 self-start">
+                <DiscoverSidebar activeTabData={items.slice(0, 3)} activeTab={activeTab} />
+              </div>
+            )}
 
             {/* Main Content */}
             <div className="flex-1">
-              <DiscoverFilters
-                activeTab={activeTab}
-                handleTabChange={setActiveTab}
-                activeSubTab={activeSubTab}
-                handleSubTabChange={setActiveSubTab}
-                availableTabs={availableTabs}
-                tabSubcategories={tabSubcategories}
-                sidebarOpen={sidebarOpen}
-                toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-                getTabLabel={getTabLabel}
-                showFilters={showFilters}
-                setShowFilters={setShowFilters}
-              />
-
               {/* Selection Mode Indicator (when in selection mode) */}
               {selectionMode && (
                 <div className="flex items-center justify-between bg-muted/40 p-3 mb-4 rounded-md">
@@ -261,6 +265,29 @@ const Discover = () => {
             )}
           </div>
         </div>
+
+        {/* Mobile Drawer */}
+        <DiscoverMobileDrawer
+          items={items.slice(0, 3)}
+          activeTab={activeTab}
+          isMobile={isMobile}
+          selectedTags={selectedTags}
+          handleTagSelect={handleTagSelect}
+          clearTags={() => setSelectedTags([])}
+          userType={userType}
+          setUserType={setUserType}
+          resourceType={resourceType}
+          onResourceTypeChange={setResourceType}
+          artistStyle={artistStyle}
+          onArtistStyleChange={setArtistStyle}
+          disciplinaryType={disciplinaryType}
+          onDisciplinaryTypeChange={setDisciplinaryType}
+          selectedSubfilters={selectedSubfilters}
+          onSubfilterSelect={handleSubfilterSelect}
+          onSubfilterClear={handleSubfilterClear}
+          availableSubfilters={availableSubfilters || []}
+          allTags={allTags}
+        />
       </div>
 
       {/* Minimized Selection Panel */}
