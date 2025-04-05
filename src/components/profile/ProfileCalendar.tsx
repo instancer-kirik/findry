@@ -1,11 +1,11 @@
+
 import React, { useState } from 'react';
+import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MapPin } from 'lucide-react';
-import { format } from 'date-fns';
-import { Badge } from '@/components/ui/badge';
-import { DayContentProps } from 'react-day-picker';
+import { ChevronLeft, ChevronRight, Info } from 'lucide-react';
+import { format, isToday, isSameDay } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 export interface CalendarEvent {
   id: string;
@@ -15,186 +15,162 @@ export interface CalendarEvent {
   type?: string;
   category?: string;
   imageUrl?: string;
-  startTime?: string;
-  endTime?: string;
+  focusedEvent?: boolean;
 }
 
-export interface ProfileCalendarProps {
+interface ProfileCalendarProps {
   events: CalendarEvent[];
-  onEventClick?: (event: CalendarEvent) => void;
-  onDateSelect?: (date: Date) => void;
   isOwnProfile?: boolean;
   profileType?: string;
+  focusedEvent?: CalendarEvent;
 }
 
 const ProfileCalendar: React.FC<ProfileCalendarProps> = ({ 
-  events = [], 
-  onEventClick,
-  onDateSelect,
+  events, 
   isOwnProfile = false,
-  profileType = 'user'
+  profileType = 'artist',
+  focusedEvent
 }) => {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
-  
-  // Helper to get events for a specific date
-  const getEventsForDate = (date: Date) => {
-    return events.filter(event => 
-      event.date.getDate() === date.getDate() &&
-      event.date.getMonth() === date.getMonth() &&
-      event.date.getFullYear() === date.getFullYear()
-    );
-  };
-  
-  // Get events for the selected date
-  const selectedDateEvents = selectedDate ? getEventsForDate(selectedDate) : [];
-  
-  // Date rendering function to highlight dates with events
-  const renderDay = (props: DayContentProps) => {
-    const { date, ...dayProps } = props;
-    const dayEvents = getEventsForDate(date);
-    const hasEvents = dayEvents.length > 0;
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    focusedEvent ? new Date(focusedEvent.date) : new Date()
+  );
+  const [currentMonth, setCurrentMonth] = useState<Date>(
+    focusedEvent ? new Date(focusedEvent.date) : new Date()
+  );
+
+  // Filter events for the selected date
+  const selectedDateEvents = events.filter(event => 
+    selectedDate && isSameDay(new Date(event.date), selectedDate)
+  );
+
+  // Function to render date contents (shows a dot if there are events on that day)
+  const renderDateContents = (date: Date) => {
+    const hasEvents = events.some(event => isSameDay(new Date(event.date), date));
     
     return (
-      <div className={`relative w-full h-full p-1 flex items-center justify-center ${
-        hasEvents ? 'font-medium' : ''
-      }`}>
+      <div className="relative">
         {date.getDate()}
         {hasEvents && (
-          <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full bg-primary"></div>
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
         )}
       </div>
     );
   };
-  
-  // Change month handlers
+
+  // Next and previous month handlers
   const handlePrevMonth = () => {
     const prevMonth = new Date(currentMonth);
     prevMonth.setMonth(prevMonth.getMonth() - 1);
     setCurrentMonth(prevMonth);
   };
-  
+
   const handleNextMonth = () => {
     const nextMonth = new Date(currentMonth);
     nextMonth.setMonth(nextMonth.getMonth() + 1);
     setCurrentMonth(nextMonth);
   };
-  
-  // Handle date selection
-  const handleDateSelect = (date: Date | undefined) => {
-    setSelectedDate(date);
-    if (date && onDateSelect) {
-      onDateSelect(date);
-    }
-  };
-  
+
   return (
-    <div className="calendar-container">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Calendar View */}
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <h3 className="text-xl font-semibold">Calendar</h3>
+        
+        <div className="flex space-x-2">
+          <Button variant="outline" size="sm" onClick={handlePrevMonth}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <div className="flex items-center justify-center min-w-[120px] px-2">
+            {format(currentMonth, 'MMMM yyyy')}
+          </div>
+          <Button variant="outline" size="sm" onClick={handleNextMonth}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+      
+      <div className="grid md:grid-cols-2 gap-4">
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium">{format(currentMonth, 'MMMM yyyy')}</h3>
-              <div className="flex gap-1">
-                <Button variant="outline" size="icon" onClick={handlePrevMonth}>
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="icon" onClick={handleNextMonth}>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            
+          <CardContent className="p-3">
             <Calendar
               mode="single"
               selected={selectedDate}
-              onSelect={handleDateSelect}
+              onSelect={setSelectedDate}
               month={currentMonth}
+              onMonthChange={setCurrentMonth}
               className="rounded-md border"
               components={{
-                DayContent: renderDay
+                DayContent: (props) => renderDateContents(props.date)
+              }}
+              modifiers={{
+                today: (date) => isToday(date),
+                hasEvent: (date) => events.some(event => isSameDay(new Date(event.date), date))
+              }}
+              modifiersClassNames={{
+                today: 'bg-secondary',
+                hasEvent: 'font-semibold'
               }}
             />
-            
-            {isOwnProfile && (
-              <div className="mt-4">
-                <Button variant="outline" className="w-full">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {profileType === 'venue' ? 'Manage Availability' : 'Create Event'}
-                </Button>
-              </div>
-            )}
           </CardContent>
         </Card>
         
-        {/* Events List */}
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium">
-                {selectedDate
-                  ? `Events for ${format(selectedDate, 'MMMM d, yyyy')}`
-                  : 'All Upcoming Events'}
-              </h3>
-              {selectedDateEvents.length > 0 && (
-                <Badge variant="outline">{selectedDateEvents.length} events</Badge>
-              )}
-            </div>
+            <h3 className="font-medium mb-3">
+              {selectedDate ? format(selectedDate, 'MMMM d, yyyy') : 'Select a date'}
+            </h3>
             
-            {selectedDateEvents.length === 0 ? (
-              <div className="text-center text-muted-foreground p-8 border border-dashed rounded-md">
-                No events scheduled for this date
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {selectedDateEvents.map(event => (
+            {selectedDateEvents.length > 0 ? (
+              <div className="space-y-3 max-h-[240px] overflow-y-auto">
+                {selectedDateEvents.map((event) => (
                   <div 
                     key={event.id}
-                    className="bg-muted/20 p-3 rounded-md cursor-pointer hover:bg-accent/20 transition-colors border"
-                    onClick={() => onEventClick && onEventClick(event)}
-                  >
-                    <div className="font-medium">{event.title}</div>
-                    
-                    <div className="flex flex-col space-y-1 mt-2">
-                      {(event.startTime || event.endTime) && (
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Clock className="h-3.5 w-3.5 mr-1.5" />
-                          <span>
-                            {event.startTime && event.endTime
-                              ? `${event.startTime} - ${event.endTime}`
-                              : event.startTime || event.endTime}
-                          </span>
-                        </div>
-                      )}
-                      
-                      {event.location && (
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <MapPin className="h-3.5 w-3.5 mr-1.5" />
-                          <span>{event.location}</span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {event.type && (
-                      <Badge variant="outline" className="mt-2">
-                        {event.type}
-                      </Badge>
+                    className={cn(
+                      "p-2 rounded-md border border-muted",
+                      focusedEvent && focusedEvent.id === event.id ? "ring-2 ring-primary" : ""
                     )}
+                  >
+                    <div className="flex gap-2">
+                      {event.imageUrl && (
+                        <div className="w-12 h-12 rounded-md overflow-hidden bg-muted flex-shrink-0">
+                          <img 
+                            src={event.imageUrl} 
+                            alt={event.title} 
+                            className="w-full h-full object-cover" 
+                          />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm truncate">{event.title}</h4>
+                        {event.location && (
+                          <p className="text-xs text-muted-foreground truncate">{event.location}</p>
+                        )}
+                        <div className="flex mt-1 gap-1">
+                          {event.type && (
+                            <span className="text-xs px-1.5 py-0.5 bg-muted rounded">
+                              {event.type}
+                            </span>
+                          )}
+                          {event.category && (
+                            <span className="text-xs px-1.5 py-0.5 bg-secondary text-secondary-foreground rounded">
+                              {event.category}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
-            )}
-            
-            {/* View all events button */}
-            {events.length > 0 && selectedDateEvents.length !== events.length && (
-              <Button 
-                variant="link" 
-                className="w-full mt-4" 
-                onClick={() => setSelectedDate(undefined)}
-              >
-                View all events
-              </Button>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-[200px] text-center">
+                <Info className="h-8 w-8 text-muted-foreground mb-2" />
+                <p className="text-muted-foreground">No events scheduled for this date</p>
+                {isOwnProfile && (
+                  <Button variant="link" className="mt-2">
+                    + Add {profileType === 'resource' ? 'Availability' : 'Event'}
+                  </Button>
+                )}
+              </div>
             )}
           </CardContent>
         </Card>

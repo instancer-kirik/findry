@@ -55,17 +55,28 @@ export const parseAvailabilityFromJson = (json: Json | null): ResourceAvailabili
   try {
     // Make sure we're working with an array
     if (Array.isArray(json)) {
-      return json.map(item => ({
-        id: item.id as string,
-        date: item.date as string,
-        timeSlots: (item.timeSlots as any[]).map(slot => ({
-          id: slot.id as string,
-          startTime: slot.startTime as string,
-          endTime: slot.endTime as string,
-          status: slot.status as 'available' | 'booked' | 'pending',
-          price: slot.price as number | undefined
-        }))
-      }));
+      return json.map(item => {
+        if (typeof item === 'object' && item !== null) {
+          return {
+            id: String(item.id || ''),
+            date: String(item.date || ''),
+            timeSlots: Array.isArray(item.timeSlots) 
+              ? item.timeSlots.map((slot: any) => ({
+                  id: String(slot.id || ''),
+                  startTime: String(slot.startTime || ''),
+                  endTime: String(slot.endTime || ''),
+                  status: (slot.status as 'available' | 'booked' | 'pending') || 'available',
+                  price: typeof slot.price === 'number' ? slot.price : undefined
+                }))
+              : []
+          };
+        }
+        return {
+          id: '',
+          date: '',
+          timeSlots: []
+        };
+      });
     }
     return null;
   } catch (error) {

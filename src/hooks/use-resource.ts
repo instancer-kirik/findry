@@ -71,7 +71,7 @@ export function useResource() {
         .from('content_ownership')
         .select('*')
         .eq('content_id', resourceId)
-        .eq('content_type', 'resource')
+        .eq('content_type', 'resource' as ContentType)
         .eq('owner_id', user.id)
         .single();
 
@@ -113,7 +113,7 @@ export function useResource() {
         .from('content_ownership')
         .insert({
           content_id: resource.id,
-          content_type: 'resource',
+          content_type: 'resource' as ContentType,
           owner_id: user.id,
         });
       
@@ -204,7 +204,8 @@ export const useResourceDetails = (resourceId: string | undefined) => {
       setResource(resourceData);
 
       if (user) {
-        setIsOwner(await resourceService.isResourceOwner(resourceId));
+        const ownerStatus = await resourceService.isResourceOwner(resourceId);
+        setIsOwner(ownerStatus);
       }
     } catch (err: any) {
       console.error('Error fetching resource details:', err);
