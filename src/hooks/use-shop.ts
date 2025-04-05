@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './use-auth';
@@ -16,17 +15,13 @@ export function useShop() {
       setError(null);
       
       try {
-        // Use type assertion to tell TypeScript that this table exists
-        const { data, error } = await (supabase
-          .from('shops') as any)
-          .select('*')
-          .order('created_at', { ascending: false });
+        const { data, error } = await supabase.rpc('get_all_shops');
         
         if (error) throw error;
         
         return data as Shop[];
       } catch (err) {
-        console.error('Error accessing shops table:', err);
+        console.error('Error accessing shops:', err);
         return [];
       }
     } catch (err) {
@@ -43,11 +38,9 @@ export function useShop() {
       setError(null);
       
       try {
-        const { data, error } = await (supabase
-          .from('shops') as any)
-          .select('*')
-          .eq('id', shopId)
-          .single();
+        const { data, error } = await supabase.rpc('get_shop_by_id', { 
+          shop_id: shopId 
+        });
         
         if (error) throw error;
         
@@ -70,17 +63,15 @@ export function useShop() {
       setError(null);
       
       try {
-        const { data, error } = await (supabase
-          .from('products') as any)
-          .select('*')
-          .eq('shop_id', shopId)
-          .order('created_at', { ascending: false });
+        const { data, error } = await supabase.rpc('get_products_by_shop_id', {
+          shop_id: shopId
+        });
         
         if (error) throw error;
         
         return data as ShopProduct[];
       } catch (err) {
-        console.error('Error accessing products table:', err);
+        console.error('Error accessing products:', err);
         return [];
       }
     } catch (err) {
@@ -97,11 +88,9 @@ export function useShop() {
       setError(null);
       
       try {
-        const { data, error } = await (supabase
-          .from('products') as any)
-          .select('*')
-          .eq('id', productId)
-          .single();
+        const { data, error } = await supabase.rpc('get_product_by_id', {
+          product_id: productId
+        });
         
         if (error) throw error;
         
@@ -122,13 +111,10 @@ export function useShop() {
     if (!user) return false;
     
     try {
-      const { data, error } = await supabase
-        .from('content_ownership')
-        .select('*')
-        .eq('content_id', shopId)
-        .eq('content_type', 'shop' as ContentType)
-        .eq('owner_id', user.id)
-        .single();
+      const { data, error } = await supabase.rpc('check_shop_ownership', {
+        shop_id: shopId,
+        user_id: user.id
+      });
       
       if (error) return false;
       
@@ -148,25 +134,18 @@ export function useShop() {
       setError(null);
       
       try {
-        // Create shop
-        const { data: shop, error: shopError } = await (supabase
-          .from('shops') as any)
-          .insert(shopData)
-          .select()
-          .single();
+        const { data: shop, error: shopError } = await supabase.rpc('create_shop', {
+          shop_name: shopData.name,
+          shop_description: shopData.description,
+          shop_location: shopData.location,
+          shop_website_url: shopData.website_url,
+          shop_banner_image_url: shopData.banner_image_url,
+          shop_logo_url: shopData.logo_url,
+          shop_tags: shopData.tags,
+          owner_id: user.id
+        });
         
         if (shopError) throw shopError;
-        
-        // Create content ownership
-        const { error: ownershipError } = await supabase
-          .from('content_ownership')
-          .insert({
-            content_id: shop.id,
-            content_type: 'shop' as ContentType,
-            owner_id: user.id,
-          });
-        
-        if (ownershipError) throw ownershipError;
         
         return shop as Shop;
       } catch (err) {
@@ -183,7 +162,6 @@ export function useShop() {
 
   const checkIfTableExists = async (tableName: string): Promise<boolean> => {
     try {
-      // Use the RPC function instead of trying to directly query the information_schema
       const { data, error } = await supabase.rpc('get_table_definition', {
         table_name: tableName
       });
@@ -272,7 +250,6 @@ export const useShopDetails = (shopId: string | undefined) => {
     setError(null);
     
     try {
-      // Get shop details
       const shopData = await shopService.fetchShopById(shopId);
       if (!shopData) {
         throw new Error("Shop not found");
@@ -280,7 +257,6 @@ export const useShopDetails = (shopId: string | undefined) => {
       
       setShop(shopData);
       
-      // Try to get owner details
       try {
         const { data: ownershipData, error: ownershipError } = await supabase
           .from('content_ownership')
@@ -299,7 +275,6 @@ export const useShopDetails = (shopId: string | undefined) => {
           if (!ownerError && ownerData) {
             setOwner(ownerData as ShopOwner);
             
-            // Check if current user is owner
             if (user) {
               setIsOwner(user.id === ownerData.id);
             }
@@ -307,10 +282,8 @@ export const useShopDetails = (shopId: string | undefined) => {
         }
       } catch (ownerError) {
         console.warn('Could not fetch shop owner:', ownerError);
-        // Continue even if we can't get owner info
       }
       
-      // Get products
       const productsData = await shopService.fetchProductsByShopId(shopId);
       setProducts(productsData);
     } catch (err: any) {

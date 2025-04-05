@@ -17,6 +17,18 @@ import { useAuth } from '@/hooks/use-auth';
 import { supabase } from '@/integrations/supabase/client';
 import { ContentType } from '@/types/database';
 
+interface ContentItemProps {
+  id: string;
+  name: string;
+  category?: string;
+  image_url?: string;
+  location?: string;
+  tags?: string[];
+  description?: string;
+  selected?: boolean;
+  onClick?: () => void;
+}
+
 const CreateEvent: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -33,6 +45,8 @@ const CreateEvent: React.FC = () => {
   const [selectedBrands, setSelectedBrands] = useState<ContentItemProps[]>([]);
   const [selectedCommunities, setSelectedCommunities] = useState<ContentItemProps[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<"details" | "schedule" | "guests" | "resources" | "promotion">("details");
+  const [contentType, setContentType] = useState<ContentType>("all");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,6 +131,24 @@ const CreateEvent: React.FC = () => {
 
   const handleRemoveCommunity = (communityId: string) => {
     setSelectedCommunities(prev => prev.filter(community => community.id !== communityId));
+  };
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value as "details" | "schedule" | "guests" | "resources" | "promotion");
+    
+    switch (value) {
+      case 'guests':
+        setContentType('artists');
+        break;
+      case 'resources':
+        setContentType('resources');
+        break;
+      case 'promotion':
+        setContentType('venues');
+        break;
+      default:
+        setContentType('all');
+    }
   };
 
   const venue = selectedVenue ? (
@@ -358,6 +390,27 @@ const CreateEvent: React.FC = () => {
             </div>
           </div>
         </form>
+
+        {activeTab === 'guests' && (
+          <div className="mb-6">
+            <div className="flex space-x-2 mb-4 overflow-x-auto pb-2">
+              <Button
+                variant={contentType === 'artists' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setContentType('artists')}
+              >
+                Artists
+              </Button>
+              <Button
+                variant={contentType === 'venues' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setContentType('venues')}
+              >
+                Venues
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );

@@ -37,8 +37,7 @@ const EmailWaitlist: React.FC = () => {
         .from('waitlist')
         .insert([{ 
           email, 
-          source: 'landing_page',
-          message: message || null
+          source: 'landing_page'
         }]);
       
       if (error) {
@@ -54,6 +53,12 @@ const EmailWaitlist: React.FC = () => {
           throw error;
         }
       } else {
+        // If user added a message, store it separately since waitlist table doesn't support messages yet
+        if (message) {
+          console.log('User provided message:', message);
+          // For now just log it, we'll implement message storage later
+        }
+        
         toast({
           title: 'Thank you!',
           description: 'You have been added to our waitlist',
@@ -122,6 +127,6 @@ const EmailWaitlist: React.FC = () => {
       </form>
     </div>
   );
-};
+}
 
 export default EmailWaitlist;

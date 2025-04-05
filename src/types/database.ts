@@ -1,4 +1,3 @@
-
 export type Json =
   | string
   | number
@@ -7,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type ContentType = 'resource' | 'project' | 'event' | 'community' | 'artist' | 'venue' | 'brand' | 'shop';
+export type ContentType = "resource" | "project" | "event" | "community" | "artist" | "venue" | "brand" | "shop";
 
 export interface Shop {
   id: string;
