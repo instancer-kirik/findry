@@ -1,11 +1,14 @@
+
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useShopDetails } from '@/hooks/use-shop';
+import { Button } from '@/components/ui/button';
+import { PlusCircle } from 'lucide-react';
 
 const ShopDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { shop, owner, products, isLoading, error, isOwner } = useShopDetails(id);
+  const { shop, products, isLoading, error, isOwner } = useShopDetails(id);
   
   if (isLoading) {
     return (
@@ -66,18 +69,74 @@ const ShopDetail: React.FC = () => {
         </div>
         
         <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">Products</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold">Products</h2>
+            
+            {isOwner && (
+              <Link to={`/shops/${shop.id}/products/create`}>
+                <Button>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add Product
+                </Button>
+              </Link>
+            )}
+          </div>
           
           {products.length === 0 ? (
             <div className="text-center p-8 bg-muted/20 rounded-lg">
               <p className="text-muted-foreground">No products available in this shop yet.</p>
+              
+              {isOwner && (
+                <Link to={`/shops/${shop.id}/products/create`}>
+                  <Button className="mt-4">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add Your First Product
+                  </Button>
+                </Link>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {products.map(product => (
-                <div key={product.id} className="bg-card shadow rounded-lg overflow-hidden">
-                  {/* Product card content would go here */}
-                </div>
+                <Link to={`/shops/${shop.id}/products/${product.id}`} key={product.id}>
+                  <div className="bg-card shadow hover:shadow-md transition-shadow rounded-lg overflow-hidden h-full flex flex-col">
+                    <div className="h-48 relative">
+                      {product.image_url ? (
+                        <img 
+                          src={product.image_url} 
+                          alt={product.name} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-muted flex items-center justify-center">
+                          <span className="text-muted-foreground">No image</span>
+                        </div>
+                      )}
+                      
+                      <div className="absolute top-2 right-2 bg-background rounded-full px-3 py-1 text-sm font-medium">
+                        ${product.price.toFixed(2)}
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 flex-grow">
+                      <h3 className="font-semibold mb-1 line-clamp-1">{product.name}</h3>
+                      
+                      {product.description && (
+                        <p className="text-muted-foreground text-sm line-clamp-2">
+                          {product.description}
+                        </p>
+                      )}
+                    </div>
+                    
+                    {product.category && (
+                      <div className="px-4 pb-4">
+                        <span className="inline-block bg-muted px-2 py-1 rounded-full text-xs">
+                          {product.category}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </Link>
               ))}
             </div>
           )}

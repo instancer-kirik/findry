@@ -1,18 +1,20 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
-import { ShopProduct, Shop } from '@/types/database';
+import { ShopProduct, Shop, ContentType } from '@/types/database';
+import { useShop } from '@/hooks/use-shop';
 
 const ProductDetail: React.FC = () => {
   const { shopId, productId } = useParams<{ shopId: string; productId: string }>();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { fetchProductById, fetchShopById, isShopOwner, deleteProduct } = useShop();
   
   const [product, setProduct] = useState<ShopProduct | null>(null);
   const [shop, setShop] = useState<Shop | null>(null);
@@ -27,52 +29,39 @@ const ProductDetail: React.FC = () => {
       
       setIsLoading(true);
       try {
-        // Use direct query instead of RPC
-        const { data: product, error: productError } = await supabase
-          .from('products')
-          .select('*')
-          .eq('id', productId)
-          .single();
+        // Fetch product
+        const productData = await fetchProductById(productId);
+        if (!productData) {
+          throw new Error("Product not found");
+        }
         
-        if (productError) throw productError;
-        
-        setProduct(product as ShopProduct);
+        setProduct(productData);
         
         // Get shop data
-        if (product.shop_id) {
-          const { data: shop, error: shopError } = await supabase
-            .from('shops')
-            .select('*')
-            .eq('id', product.shop_id)
-            .single();
+        if (productData.shop_id) {
+          const shopData = await fetchShopById(productData.shop_id);
+          if (!shopData) {
+            throw new Error("Shop not found");
+          }
           
-          if (shopError) throw shopError;
-          
-          setShop(shop as Shop);
+          setShop(shopData);
           
           // Check if user is the shop owner
           if (user) {
-            const { data: ownership, error: ownershipError } = await supabase
-              .from('content_ownership')
-              .select('*')
-              .eq('content_id', shop.id)
-              .eq('content_type', 'shop' as ContentType)
-              .eq('owner_id', user.id)
-              .single();
-            
-            setIsOwner(!ownershipError && !!ownership);
+            const ownerStatus = await isShopOwner(shopData.id);
+            setIsOwner(ownerStatus);
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching product:', error);
-        setError('Failed to load product details');
+        setError(error.message || 'Failed to load product details');
       } finally {
         setIsLoading(false);
       }
     };
     
     fetchProductData();
-  }, [shopId, productId, user, navigate, toast]);
+  }, [productId, shopId, user, fetchProductById, fetchShopById, isShopOwner]);
   
   const handleDeleteProduct = async () => {
     if (!user || !product) return;
@@ -80,13 +69,7 @@ const ProductDetail: React.FC = () => {
     try {
       setIsDeleting(true);
       
-      // Use direct query instead of RPC
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', product.id);
-      
-      if (error) throw error;
+      await deleteProduct(product.id);
       
       toast({
         title: 'Product deleted',
@@ -205,8 +188,9 @@ const ProductDetail: React.FC = () => {
                     <Button 
                       variant="destructive"
                       onClick={handleDeleteProduct}
+                      disabled={isDeleting}
                     >
-                      Delete Product
+                      {isDeleting ? 'Deleting...' : 'Delete Product'}
                     </Button>
                   </div>
                 </CardContent>

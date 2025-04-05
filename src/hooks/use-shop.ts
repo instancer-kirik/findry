@@ -1,9 +1,8 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './use-auth';
-import { ContentType } from '@/types/database';
-import { Shop, ShopProduct } from '@/types/database';
+import { ContentType, Shop, ShopProduct } from '@/types/database';
 
 export function useShop() {
   const { user } = useAuth();
@@ -15,18 +14,30 @@ export function useShop() {
       setLoading(true);
       setError(null);
 
-      // Using direct query instead of RPC
+      // Check if the shops table exists by querying it
       const { data, error } = await supabase
+        .rpc('get_table_definition', { table_name: 'shops' });
+
+      if (error) {
+        throw new Error(`Table 'shops' might not exist: ${error.message}`);
+      }
+
+      if (!data || data.length === 0) {
+        return [] as Shop[];
+      }
+
+      // If the table exists, query it
+      const { data: shops, error: shopsError } = await supabase
         .from('shops')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (shopsError) throw shopsError;
       
-      return data as Shop[];
+      return shops as Shop[];
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Error fetching shops'));
-      return [];
+      return [] as Shop[];
     } finally {
       setLoading(false);
     }
@@ -37,7 +48,15 @@ export function useShop() {
       setLoading(true);
       setError(null);
 
-      // Using direct query instead of RPC
+      // Check if the shops table exists
+      const { data: tableData, error: tableError } = await supabase
+        .rpc('get_table_definition', { table_name: 'shops' });
+
+      if (tableError || !tableData || tableData.length === 0) {
+        throw new Error(`Table 'shops' might not exist: ${tableError?.message || 'No table definition found'}`);
+      }
+
+      // If the table exists, query it
       const { data, error } = await supabase
         .from('shops')
         .select('*')
@@ -60,7 +79,15 @@ export function useShop() {
       setLoading(true);
       setError(null);
 
-      // Using direct query instead of RPC
+      // Check if the products table exists
+      const { data: tableData, error: tableError } = await supabase
+        .rpc('get_table_definition', { table_name: 'products' });
+
+      if (tableError || !tableData || tableData.length === 0) {
+        throw new Error(`Table 'products' might not exist: ${tableError?.message || 'No table definition found'}`);
+      }
+
+      // If the table exists, query it
       const { data, error } = await supabase
         .from('products')
         .select('*')
@@ -72,7 +99,7 @@ export function useShop() {
       return data as ShopProduct[];
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Error fetching products'));
-      return [];
+      return [] as ShopProduct[];
     } finally {
       setLoading(false);
     }
@@ -83,7 +110,15 @@ export function useShop() {
       setLoading(true);
       setError(null);
 
-      // Using direct query instead of RPC
+      // Check if the products table exists
+      const { data: tableData, error: tableError } = await supabase
+        .rpc('get_table_definition', { table_name: 'products' });
+
+      if (tableError || !tableData || tableData.length === 0) {
+        throw new Error(`Table 'products' might not exist: ${tableError?.message || 'No table definition found'}`);
+      }
+
+      // If the table exists, query it
       const { data, error } = await supabase
         .from('products')
         .select('*')
@@ -105,7 +140,7 @@ export function useShop() {
     if (!user) return false;
 
     try {
-      // Using direct query instead of RPC
+      // Check if content_ownership table exists and contains records for this shop
       const { data, error } = await supabase
         .from('content_ownership')
         .select('*')
@@ -122,6 +157,18 @@ export function useShop() {
     }
   };
 
+  const checkIfTableExists = async (tableName: string) => {
+    try {
+      const { data, error } = await supabase
+        .rpc('get_table_definition', { table_name: tableName });
+      
+      if (error) return false;
+      return data && data.length > 0;
+    } catch {
+      return false;
+    }
+  };
+
   const createShop = async (shopData: Omit<Shop, 'id' | 'created_at' | 'updated_at'>) => {
     if (!user) {
       throw new Error('You must be logged in to create a shop');
@@ -131,7 +178,13 @@ export function useShop() {
       setLoading(true);
       setError(null);
       
-      // Using direct query instead of RPC
+      // Check if shops table exists
+      const shopsExist = await checkIfTableExists('shops');
+      if (!shopsExist) {
+        throw new Error('Shop creation is currently not available as the required tables are not set up yet.');
+      }
+      
+      // Insert the shop
       const { data: shop, error: shopError } = await supabase
         .from('shops')
         .insert(shopData)
@@ -170,13 +223,10 @@ export function useShop() {
       setError(null);
       
       // First check if the product exists and get its shop_id
-      const { data: product, error: productError } = await supabase
-        .from('products')
-        .select('shop_id')
-        .eq('id', productId)
-        .single();
-      
-      if (productError) throw productError;
+      const product = await fetchProductById(productId);
+      if (!product) {
+        throw new Error('Product not found');
+      }
       
       // Check if user is the shop owner
       const isOwner = await isShopOwner(product.shop_id);
@@ -211,6 +261,63 @@ export function useShop() {
     fetchProductById,
     isShopOwner,
     createShop,
-    deleteProduct
+    deleteProduct,
+    checkIfTableExists
   };
+}
+
+// Create a custom hook for shop details page
+export function useShopDetails(shopId: string | undefined) {
+  const [shop, setShop] = useState<Shop | null>(null);
+  const [owner, setOwner] = useState<any | null>(null);
+  const [products, setProducts] = useState<ShopProduct[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isOwner, setIsOwner] = useState(false);
+  
+  const { fetchShopById, fetchProductsByShopId, isShopOwner } = useShop();
+  const { user } = useAuth();
+  
+  useEffect(() => {
+    async function loadShopDetails() {
+      if (!shopId) {
+        setIsLoading(false);
+        return;
+      }
+      
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        // Fetch shop
+        const shopData = await fetchShopById(shopId);
+        if (!shopData) {
+          throw new Error("Shop not found");
+        }
+        setShop(shopData);
+        
+        // Fetch products
+        const productsData = await fetchProductsByShopId(shopId);
+        setProducts(productsData || []);
+        
+        // Check if current user is owner
+        if (user) {
+          const ownerStatus = await isShopOwner(shopId);
+          setIsOwner(ownerStatus);
+        }
+        
+        // TODO: Fetch owner data if needed
+        
+      } catch (err: any) {
+        console.error("Error loading shop details:", err);
+        setError(err.message || "Failed to load shop details");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    loadShopDetails();
+  }, [shopId, user, fetchShopById, fetchProductsByShopId, isShopOwner]);
+  
+  return { shop, owner, products, isLoading, error, isOwner };
 }

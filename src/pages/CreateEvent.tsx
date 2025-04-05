@@ -1,420 +1,336 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar } from '@/components/ui/calendar';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import Layout from '@/components/layout/Layout';
+import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
-import Layout from '@/components/layout/Layout';
-import EventComponentSearch from '@/components/events/EventComponentSearch';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/use-auth';
-import { supabase } from '@/integrations/supabase/client';
-import { ContentType } from '@/types/database';
+import { Calendar } from '@/components/ui/calendar';
+import ContentCard, { ContentItemProps } from '@/components/marketplace/ContentCard';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
-// Define a local ContentItemProps that's compatible with EventComponentSearch
+// Define the type for content items used in this page
+// This is different from the ContentItemProps imported above
 interface EventContentItemProps {
   id: string;
   name: string;
-  category?: string;
-  image_url?: string;
-  location?: string;
-  tags?: string[];
+  image?: string;
   description?: string;
-  selected?: boolean;
-  onClick?: () => void;
-  disciplines?: string[];
   type?: string;
+  selected?: boolean;
 }
 
-const CreateEvent: React.FC = () => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
+// Define the possible filter types for events
+type FilterType = "resources" | "artists" | "venues" | "all";
+
+const CreateEvent = () => {
   const { user } = useAuth();
-
-  const [name, setName] = useState('');
+  const navigate = useNavigate();
+  const [eventName, setEventName] = useState('');
   const [description, setDescription] = useState('');
-  const [startDate, setStartDate] = useState<Date | undefined>(new Date());
-  const [endDate, setEndDate] = useState<Date | undefined>(new Date());
   const [location, setLocation] = useState('');
-  const [capacity, setCapacity] = useState<number | undefined>(undefined);
-  const [selectedVenue, setSelectedVenue] = useState<EventContentItemProps | null>(null);
-  const [selectedArtists, setSelectedArtists] = useState<EventContentItemProps[]>([]);
-  const [selectedBrands, setSelectedBrands] = useState<EventContentItemProps[]>([]);
-  const [selectedCommunities, setSelectedCommunities] = useState<EventContentItemProps[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"details" | "schedule" | "guests" | "resources" | "promotion">("details");
-  // Use string type instead of ContentType for component type selection
-  const [componentType, setComponentType] = useState<string>("all");
+  const [startDate, setStartDate] = useState<Date>();
+  const [endDate, setEndDate] = useState<Date>();
+  const [capacity, setCapacity] = useState('');
+  const [filterType, setFilterType] = useState<FilterType>('all');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Mock data for event components
+  const [artists, setArtists] = useState<EventContentItemProps[]>([
+    {
+      id: '1',
+      name: 'DJ Spinmaster',
+      image: 'https://source.unsplash.com/random/400x400/?dj',
+      description: 'Electronic music DJ with 10 years of experience',
+      type: 'DJ'
+    },
+    {
+      id: '2',
+      name: 'The Groove Band',
+      image: 'https://source.unsplash.com/random/400x400/?band',
+      description: 'A 5-piece funk band with a brass section',
+      type: 'Band'
+    }
+  ]);
+
+  const [venues, setVenues] = useState<EventContentItemProps[]>([
+    {
+      id: '1',
+      name: 'Downtown Gallery',
+      image: 'https://source.unsplash.com/random/400x400/?gallery',
+      description: 'Spacious gallery in the heart of downtown',
+      type: 'Gallery'
+    },
+    {
+      id: '2',
+      name: 'Riverside Pavilion',
+      image: 'https://source.unsplash.com/random/400x400/?pavilion',
+      description: 'Open-air venue by the river with stunning views',
+      type: 'Outdoor'
+    }
+  ]);
+
+  const [resources, setResources] = useState<EventContentItemProps[]>([
+    {
+      id: '1',
+      name: 'Professional Sound System',
+      image: 'https://source.unsplash.com/random/400x400/?sound',
+      description: 'High-quality PA system with subwoofers',
+      type: 'Equipment'
+    },
+    {
+      id: '2',
+      name: 'Stage Lighting Package',
+      image: 'https://source.unsplash.com/random/400x400/?lighting',
+      description: 'Complete stage lighting setup with operator',
+      type: 'Equipment'
+    }
+  ]);
+
+  const handleArtistSelection = (id: string) => {
+    setArtists(artists.map(artist => 
+      artist.id === id ? { ...artist, selected: !artist.selected } : artist
+    ));
+  };
+
+  const handleVenueSelection = (id: string) => {
+    setVenues(venues.map(venue => 
+      venue.id === id ? { ...venue, selected: !venue.selected } : venue
+    ));
+  };
+
+  const handleResourceSelection = (id: string) => {
+    setResources(resources.map(resource => 
+      resource.id === id ? { ...resource, selected: !resource.selected } : resource
+    ));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
+    
     if (!user) {
-      toast({
-        title: 'Authentication required',
-        description: 'You must be logged in to create an event',
-        variant: 'destructive'
-      });
+      toast.error("Please log in to create an event");
+      return;
+    }
+    
+    if (!eventName) {
+      toast.error("Event name is required");
       return;
     }
 
-    setIsLoading(true);
-    try {
-      const { data: event, error: eventError } = await supabase
-        .from('events')
-        .insert({
-          name,
-          description,
-          start_date: startDate ? format(startDate, 'yyyy-MM-dd') : null,
-          end_date: endDate ? format(endDate, 'yyyy-MM-dd') : null,
-          location,
-          capacity,
-        })
-        .select()
-        .single();
-
-      if (eventError) throw eventError;
-
-      const { error: ownershipError } = await supabase
-        .from('content_ownership')
-        .insert({
-          content_id: event.id,
-          content_type: 'event' as ContentType,
-          owner_id: user.id,
-        });
-
-      if (ownershipError) throw ownershipError;
-
-      toast({
-        title: 'Event created',
-        description: 'Your event has been created successfully'
-      });
-
-      navigate(`/events/${event.id}`);
-    } catch (error: any) {
-      console.error('Error creating event:', error);
-      toast({
-        title: 'Error creating event',
-        description: error.message || 'An error occurred while creating the event',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsLoading(false);
+    if (!startDate) {
+      toast.error("Start date is required");
+      return;
     }
+
+    // Get selected components
+    const selectedArtists = artists.filter(a => a.selected);
+    const selectedVenues = venues.filter(v => v.selected);
+    const selectedResources = resources.filter(r => r.selected);
+
+    // In a real app, you would submit this data to your backend
+    console.log({
+      eventName,
+      description,
+      location,
+      startDate,
+      endDate,
+      capacity: capacity ? parseInt(capacity) : null,
+      selectedArtists,
+      selectedVenues,
+      selectedResources
+    });
+
+    toast.success("Event created successfully!");
+    // navigate('/events/123'); // Navigate to the new event in a real app
+    navigate('/');
   };
 
-  const handleRemoveVenue = () => {
-    setSelectedVenue(null);
-  };
-
-  const handleAddArtist = (artist: EventContentItemProps) => {
-    setSelectedArtists(prev => [...prev, artist]);
-  };
-
-  const handleRemoveArtist = (artistId: string) => {
-    setSelectedArtists(prev => prev.filter(artist => artist.id !== artistId));
-  };
-
-  const handleAddBrand = (brand: EventContentItemProps) => {
-    setSelectedBrands(prev => [...prev, brand]);
-  };
-
-  const handleRemoveBrand = (brandId: string) => {
-    setSelectedBrands(prev => prev.filter(brand => brand.id !== brandId));
-  };
-
-  const handleAddCommunity = (community: EventContentItemProps) => {
-    setSelectedCommunities(prev => [...prev, community]);
-  };
-
-  const handleRemoveCommunity = (communityId: string) => {
-    setSelectedCommunities(prev => prev.filter(community => community.id !== communityId));
-  };
-
-  const handleTabChange = (value: string) => {
-    setActiveTab(value as "details" | "schedule" | "guests" | "resources" | "promotion");
-    
-    switch (value) {
-      case 'guests':
-        setComponentType('artists');
-        break;
+  // Filter content based on the selected filter type
+  const getFilteredContent = () => {
+    switch (filterType) {
+      case 'artists':
+        return artists;
+      case 'venues':
+        return venues;
       case 'resources':
-        setComponentType('resources');
-        break;
-      case 'promotion':
-        setComponentType('venues');
-        break;
+        return resources;
+      case 'all':
       default:
-        setComponentType('all');
+        return [...artists, ...venues, ...resources];
     }
   };
 
-  const venue = selectedVenue ? (
-    <div className="flex items-center gap-2 border p-2 rounded-md bg-muted/50">
-      {selectedVenue.image_url && (
-        <img src={selectedVenue.image_url} alt={selectedVenue.name} className="h-8 w-8 rounded-md object-cover" />
-      )}
-      <div>
-        <p className="text-sm font-medium">{selectedVenue.name}</p>
-        {selectedVenue.location && (
-          <p className="text-xs text-muted-foreground">{selectedVenue.location}</p>
-        )}
-      </div>
-    </div>
-  ) : null;
-
-  const artist = selectedArtists.length > 0 ? (
-    <div className="space-y-2">
-      {selectedArtists.map(artist => (
-        <div key={artist.id} className="flex justify-between items-center border p-2 rounded-md bg-muted/50">
-          <div className="flex items-center gap-2">
-            {artist.image_url && (
-              <img src={artist.image_url} alt={artist.name} className="h-8 w-8 rounded-md object-cover" />
-            )}
-            <div>
-              <p className="text-sm font-medium">{artist.name}</p>
-              {artist.disciplines && artist.disciplines.length > 0 && (
-                <p className="text-xs text-muted-foreground">{artist.disciplines.join(', ')}</p>
-              )}
-            </div>
-          </div>
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleRemoveArtist(artist.id)}>
-            <X className="h-3.5 w-3.5" />
-          </Button>
-        </div>
-      ))}
-    </div>
-  ) : null;
-
-  const brand = selectedBrands.length > 0 ? (
-    <div className="space-y-2">
-      {selectedBrands.map(brand => (
-        <div key={brand.id} className="flex justify-between items-center border p-2 rounded-md bg-muted/50">
-          <div className="flex items-center gap-2">
-            {brand.image_url && (
-              <img src={brand.image_url} alt={brand.name} className="h-8 w-8 rounded-md object-cover" />
-            )}
-            <div>
-              <p className="text-sm font-medium">{brand.name}</p>
-              {brand.type && (
-                <p className="text-xs text-muted-foreground">{brand.type}</p>
-              )}
-            </div>
-          </div>
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleRemoveBrand(brand.id)}>
-            <X className="h-3.5 w-3.5" />
-          </Button>
-        </div>
-      ))}
-    </div>
-  ) : null;
-
-  const community = selectedCommunities.length > 0 ? (
-    <div className="space-y-2">
-      {selectedCommunities.map(community => (
-        <div key={community.id} className="flex justify-between items-center border p-2 rounded-md bg-muted/50">
-          <div className="flex items-center gap-2">
-            {community.image_url && (
-              <img src={community.image_url} alt={community.name} className="h-8 w-8 rounded-md object-cover" />
-            )}
-            <div>
-              <p className="text-sm font-medium">{community.name}</p>
-              {community.category && (
-                <p className="text-xs text-muted-foreground">{community.category}</p>
-              )}
-            </div>
-          </div>
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleRemoveCommunity(community.id)}>
-            <X className="h-3.5 w-3.5" />
-          </Button>
-        </div>
-      ))}
-    </div>
-  ) : null;
+  // Map our EventContentItemProps to ContentItemProps for the ContentCard component
+  const mapToContentCardProps = (items: EventContentItemProps[]): ContentItemProps[] => {
+    return items.map(item => ({
+      id: item.id,
+      name: item.name,
+      image_url: item.image,
+      description: item.description,
+      type: item.type || "unknown",
+      selected: item.selected
+    }));
+  };
 
   return (
     <Layout>
       <div className="container mx-auto py-8">
-        <h1 className="text-2xl font-bold mb-6">Create a New Event</h1>
-
-        <form onSubmit={handleSubmit} className="max-w-3xl">
-          <div className="grid gap-4">
+        <h1 className="text-3xl font-bold mb-6">Create New Event</h1>
+        
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Basic Information */}
+          <section className="space-y-4">
+            <h2 className="text-xl font-semibold">Event Details</h2>
+            
             <div>
-              <Label htmlFor="name">Event Name</Label>
-              <Input
-                type="text"
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+              <Label htmlFor="eventName">Event Name</Label>
+              <Input 
+                id="eventName" 
+                value={eventName} 
+                onChange={(e) => setEventName(e.target.value)} 
+                placeholder="Enter event name"
                 required
               />
             </div>
-
+            
             <div>
               <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+              <Textarea 
+                id="description" 
+                value={description} 
+                onChange={(e) => setDescription(e.target.value)} 
+                placeholder="Describe your event"
+                rows={4}
               />
             </div>
-
+            
+            <div>
+              <Label htmlFor="location">Location</Label>
+              <Input 
+                id="location" 
+                value={location} 
+                onChange={(e) => setLocation(e.target.value)} 
+                placeholder="Event location"
+              />
+            </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label>Start Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={'outline'}
-                      className={cn(
-                        'w-full justify-start text-left font-normal',
-                        !startDate && 'text-muted-foreground'
-                      )}
-                    >
-                      {startDate ? format(startDate, 'MMMM dd, yyyy') : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={startDate}
-                      onSelect={setStartDate}
-                      disabled={date => date > (endDate || new Date())}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <Calendar
+                  mode="single"
+                  selected={startDate}
+                  onSelect={setStartDate}
+                  className="rounded-md border"
+                />
               </div>
-
+              
               <div>
                 <Label>End Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={'outline'}
-                      className={cn(
-                        'w-full justify-start text-left font-normal',
-                        !endDate && 'text-muted-foreground'
-                      )}
-                    >
-                      {endDate ? format(endDate, 'MMMM dd, yyyy') : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={endDate}
-                      onSelect={setEndDate}
-                      disabled={date => date < (startDate || new Date())}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <Calendar
+                  mode="single"
+                  selected={endDate}
+                  onSelect={setEndDate}
+                  className="rounded-md border"
+                />
               </div>
             </div>
-
-            <div>
-              <Label htmlFor="location">Location</Label>
-              <Input
-                type="text"
-                id="location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              />
-            </div>
-
+            
             <div>
               <Label htmlFor="capacity">Capacity</Label>
-              <Input
+              <Input 
+                id="capacity" 
+                value={capacity} 
+                onChange={(e) => setCapacity(e.target.value)} 
+                placeholder="Maximum number of attendees"
                 type="number"
-                id="capacity"
-                value={capacity === undefined ? '' : capacity.toString()}
-                onChange={(e) => setCapacity(e.target.value === '' ? undefined : parseInt(e.target.value))}
               />
             </div>
-
-            <div>
-              <Label>Venue</Label>
-              <EventComponentSearch
-                componentType="venues"
-                onSelectItem={(item) => setSelectedVenue(item as EventContentItemProps)}
-                selectedItems={selectedVenue ? [selectedVenue] : []}
-                onRemoveItem={handleRemoveVenue}
-              />
-              {venue}
-            </div>
-
-            <div>
-              <Label>Artists</Label>
-              <EventComponentSearch
-                componentType="artists"
-                onSelectItem={handleAddArtist as any}
-                selectedItems={selectedArtists as any}
-                onRemoveItem={handleRemoveArtist}
-              />
-              {artist}
-            </div>
-
-            <div>
-              <Label>Brands</Label>
-              <EventComponentSearch
-                componentType="brands"
-                onSelectItem={handleAddBrand as any}
-                selectedItems={selectedBrands as any}
-                onRemoveItem={handleRemoveBrand}
-              />
-              {brand}
-            </div>
-
-            <div>
-              <Label>Communities</Label>
-              <EventComponentSearch
-                componentType="communities"
-                onSelectItem={handleAddCommunity as any}
-                selectedItems={selectedCommunities as any}
-                onRemoveItem={handleRemoveCommunity}
-              />
-              {community}
-            </div>
-
-            <div className="mt-6">
-              <Button
-                type="submit"
-                className="bg-primary text-primary-foreground px-4 py-2 rounded"
-                disabled={isLoading}
-              >
-                {isLoading ? 'Creating...' : 'Create Event'}
-              </Button>
-            </div>
+          </section>
+          
+          {/* Event Components */}
+          <section className="space-y-4">
+            <h2 className="text-xl font-semibold">Event Components</h2>
+            <p className="text-muted-foreground">
+              Select artists, venues, and resources for your event
+            </p>
+            
+            <Tabs defaultValue="all">
+              <TabsList>
+                <TabsTrigger value="all" onClick={() => setFilterType("all")}>All</TabsTrigger>
+                <TabsTrigger value="artists" onClick={() => setFilterType("artists")}>Artists</TabsTrigger>
+                <TabsTrigger value="venues" onClick={() => setFilterType("venues")}>Venues</TabsTrigger>
+                <TabsTrigger value="resources" onClick={() => setFilterType("resources")}>Resources</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="all" className="pt-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {mapToContentCardProps(getFilteredContent()).map(item => (
+                    <ContentCard 
+                      key={item.id}
+                      item={item}
+                      onSelect={() => {
+                        if (artists.some(a => a.id === item.id)) {
+                          handleArtistSelection(item.id);
+                        } else if (venues.some(v => v.id === item.id)) {
+                          handleVenueSelection(item.id);
+                        } else {
+                          handleResourceSelection(item.id);
+                        }
+                      }}
+                    />
+                  ))}
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="artists" className="pt-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {mapToContentCardProps(artists).map(item => (
+                    <ContentCard 
+                      key={item.id}
+                      item={item}
+                      onSelect={() => handleArtistSelection(item.id)}
+                    />
+                  ))}
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="venues" className="pt-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {mapToContentCardProps(venues).map(item => (
+                    <ContentCard 
+                      key={item.id}
+                      item={item}
+                      onSelect={() => handleVenueSelection(item.id)}
+                    />
+                  ))}
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="resources" className="pt-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {mapToContentCardProps(resources).map(item => (
+                    <ContentCard 
+                      key={item.id}
+                      item={item}
+                      onSelect={() => handleResourceSelection(item.id)}
+                    />
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </section>
+          
+          <div className="flex justify-end space-x-4">
+            <Button type="button" variant="outline" onClick={() => navigate('/')}>
+              Cancel
+            </Button>
+            <Button type="submit">Create Event</Button>
           </div>
         </form>
-
-        {activeTab === 'guests' && (
-          <div className="mb-6">
-            <div className="flex space-x-2 mb-4 overflow-x-auto pb-2">
-              <Button
-                variant={componentType === 'artists' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setComponentType('artists')}
-              >
-                Artists
-              </Button>
-              <Button
-                variant={componentType === 'venues' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setComponentType('venues')}
-              >
-                Venues
-              </Button>
-            </div>
-          </div>
-        )}
       </div>
     </Layout>
   );

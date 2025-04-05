@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
@@ -27,7 +28,7 @@ const CreateShop: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tableExists, setTableExists] = useState<boolean | null>(null);
   
-  React.useEffect(() => {
+  useEffect(() => {
     const checkTable = async () => {
       const exists = await checkIfTableExists('shops');
       setTableExists(exists);
@@ -118,7 +119,7 @@ const CreateShop: React.FC = () => {
         )}
         
         {tableExists === true && !user && (
-          <Alert variant="warning" className="mb-6">
+          <Alert className="mb-6">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Authentication Required</AlertTitle>
             <AlertDescription>
