@@ -21,7 +21,8 @@ import {
   CalendarClock,
   CalendarPlus,
   ChevronDown,
-  Store
+  Store,
+  Code
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -62,6 +63,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { href: '/', icon: <Sparkles className="h-5 w-5" />, label: 'Home' },
   { href: '/discover', icon: <Search className="h-5 w-5" />, label: 'Discover' },
+  { href: '/projects', icon: <Code className="h-5 w-5" />, label: 'Projects' },
   { href: '/communities', icon: <Users className="h-5 w-5" />, label: 'Communities' },
   { href: '/shops', icon: <Store className="h-5 w-5" />, label: 'Shops' },
   { href: '/chats', icon: <MessageSquare className="h-5 w-5" />, label: 'Chats', badge: 3 },

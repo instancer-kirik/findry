@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Toaster } from '@/components/ui/toaster'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -14,6 +13,7 @@ import CreateEvent from './pages/CreateEvent'
 import EventDetail from './pages/EventDetail'
 import Collaboration from './pages/Collaboration'
 import ProjectDetail from './pages/ProjectDetail'
+import Projects from './pages/Projects'
 import MeetingScheduler from './pages/MeetingScheduler'
 import Communities from './pages/Communities'
 import Chats from './pages/Chats'
@@ -49,7 +49,7 @@ function App() {
             <Route path="/resources" element={<Discover />} />
             <Route path="/resources/index" element={<ResourceIndexPage />} />
             <Route path="/resources/:resourceId" element={<ResourceDetail />} />
-            <Route path="/projects" element={<Discover />} />
+            <Route path="/projects" element={<Projects />} />
             <Route path="/events" element={<Discover />} />
             <Route path="/venues" element={<Discover />} />
             <Route path="/venues/:venueId" element={<VenueDetail />} />
