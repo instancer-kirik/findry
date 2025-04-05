@@ -1,8 +1,8 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './use-auth';
-import { ResourceDetails, parseAvailabilityFromJson, formatAvailabilityToJson } from '@/types/resource';
+import { ResourceDetails, ResourceAvailability, parseAvailabilityFromJson, formatAvailabilityToJson } from '@/types/resource';
 import { ContentType } from '@/types/database';
 
 export function useResource() {
@@ -96,6 +96,8 @@ export function useResource() {
       // Format availability for database storage
       const formattedData = {
         ...resourceData,
+        name: resourceData.name,
+        type: resourceData.type || 'space',
         availability: resourceData.availability ? formatAvailabilityToJson(resourceData.availability) : null
       };
       
