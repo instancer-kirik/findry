@@ -47,7 +47,6 @@ export interface Artist {
   multidisciplinary: boolean | null;
   created_at: string;
   updated_at: string;
-  // Additional fields
-  bio?: string;
-  social_links?: string[];
+  bio?: string | null;
+  social_links?: string[] | null;
 }

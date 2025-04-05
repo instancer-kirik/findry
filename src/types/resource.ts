@@ -53,11 +53,12 @@ export const mapResourceAvailabilityToCalendarEvents = (
 export const parseAvailabilityFromJson = (json: Json | null): ResourceAvailability[] | null => {
   if (!json) return null;
   try {
+    // Make sure we're working with an array
     if (Array.isArray(json)) {
       return json.map(item => ({
         id: item.id as string,
         date: item.date as string,
-        timeSlots: (item.timeSlots as Json[]).map(slot => ({
+        timeSlots: (item.timeSlots as any[]).map(slot => ({
           id: slot.id as string,
           startTime: slot.startTime as string,
           endTime: slot.endTime as string,

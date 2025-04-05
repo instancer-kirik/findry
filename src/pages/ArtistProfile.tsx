@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -125,6 +124,9 @@ const ArtistProfile = () => {
     );
   }
 
+  const bio = artist?.bio || '';
+  const socialLinks = artist?.social_links || [];
+
   return (
     <Layout>
       <div className="container mx-auto py-8">
@@ -241,7 +243,7 @@ const ArtistProfile = () => {
                 <div>
                   <h2 className="text-xl font-bold mb-2">Bio</h2>
                   <div className="text-muted-foreground whitespace-pre-line">
-                    {artist.bio}
+                    {bio}
                   </div>
                 </div>
                 

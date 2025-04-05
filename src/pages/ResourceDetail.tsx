@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { useResource } from '@/hooks/use-resource';
+import { useResourceDetails } from '@/hooks/use-resource';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,7 @@ import { format } from 'date-fns';
 
 const ResourceDetail: React.FC = () => {
   const { resourceId } = useParams<{ resourceId: string }>();
-  const { resource, isLoading, error, isOwner } = useResource(resourceId);
+  const { resource, isLoading, error, isOwner } = useResourceDetails(resourceId);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   if (isLoading) {

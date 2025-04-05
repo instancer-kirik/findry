@@ -54,61 +54,42 @@ const ProductDetail: React.FC = () => {
       try {
         if (!shopId || !productId) return;
 
-        // Get product details with type casting
-        const { data: productData, error: productError } = await supabase
+        const productResult = await supabase
           .from('products')
           .select('*')
           .eq('id', productId)
-          .eq('shop_id', shopId)
           .single();
-
-        if (productError) throw productError;
-        setProduct(productData as ShopProduct);
-
-        // Get shop details with type casting
-        const { data: shopData, error: shopError } = await supabase
+        
+        if (productResult.error) throw productResult.error;
+        setProduct(productResult.data as unknown as ShopProduct);
+        
+        const shopResult = await supabase
           .from('shops')
-          .select('id, name, location, logo_url')
-          .eq('id', shopId)
+          .select('*')
+          .eq('id', productResult.data.shop_id)
           .single();
-
-        if (shopError) throw shopError;
-        setShop(shopData as Shop);
-
-        // Get ownership details
-        const { data: ownershipData, error: ownershipError } = await supabase
-          .from('content_ownership')
-          .select('owner_id')
-          .eq('content_id', shopId)
-          .eq('content_type', 'shop')
-          .single();
-
-        if (ownershipError) throw ownershipError;
-
-        // Get owner details
-        const { data: ownerData, error: ownerError } = await supabase
-          .from('profiles')
-          .select('id, username, full_name, avatar_url')
-          .eq('id', ownershipData.owner_id)
-          .single();
-
-        if (ownerError) throw ownerError;
-        setOwner(ownerData as ShopOwner);
-
-        // Check if current user is the owner
-        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (shopResult.error) throw shopResult.error;
+        setShop(shopResult.data as unknown as Shop);
+        
         if (user) {
-          setIsOwner(user.id === ownerData.id);
+          const ownershipResult = await supabase
+            .from('content_ownership')
+            .select('*')
+            .eq('content_id', shopResult.data.id)
+            .eq('content_type', 'shop')
+            .eq('owner_id', user.id)
+            .single();
+          
+          setIsOwner(!ownershipResult.error);
         }
-
-      } catch (error: any) {
-        console.error('Error fetching product details:', error);
+      } catch (err) {
+        console.error('Error fetching product details:', err);
         toast({
           title: 'Error loading product',
-          description: error.message || 'Failed to load product details',
+          description: 'Failed to load product details. Please try again later.',
           variant: 'destructive'
         });
-      } finally {
         setIsLoading(false);
       }
     };
@@ -132,7 +113,6 @@ const ProductDetail: React.FC = () => {
         description: 'The product has been successfully deleted.',
       });
 
-      // Navigate back to shop page
       navigate(`/shops/${shopId}`);
     } catch (error: any) {
       console.error('Error deleting product:', error);

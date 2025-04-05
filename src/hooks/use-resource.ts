@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './use-auth';
 import { ResourceDetails, parseAvailabilityFromJson, formatAvailabilityToJson } from '@/types/resource';
@@ -70,7 +71,7 @@ export function useResource() {
         .from('content_ownership')
         .select('*')
         .eq('content_id', resourceId)
-        .eq('content_type', 'resource' as ContentType)
+        .eq('content_type', 'resource')
         .eq('owner_id', user.id)
         .single();
 
@@ -112,7 +113,7 @@ export function useResource() {
         .from('content_ownership')
         .insert({
           content_id: resource.id,
-          content_type: 'resource' as ContentType,
+          content_type: 'resource',
           owner_id: user.id,
         });
       

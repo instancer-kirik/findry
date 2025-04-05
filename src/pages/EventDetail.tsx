@@ -726,7 +726,6 @@ const EventDetail: React.FC = () => {
           <TabsContent value="calendar">
              <ProfileCalendar 
                events={calendarEvents} 
-               focusedEvent={calendarEvents[0]}
                isOwnProfile={isOwnEvent(event.organizerId)}
                profileType="event"
              />

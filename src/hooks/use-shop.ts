@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './use-auth';
@@ -15,20 +14,19 @@ export function useShop() {
       setLoading(true);
       setError(null);
       
-      // First check if the table exists
-      const tableExists = await checkIfTableExists('shops');
-      if (!tableExists) {
-        throw new Error("The shops table doesn't exist yet. Please run the database migrations first.");
+      try {
+        const { data, error } = await supabase
+          .from('shops')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        return data as unknown as Shop[];
+      } catch (err) {
+        console.error('Error accessing shops table:', err);
+        return [];
       }
-      
-      const { data, error } = await supabase
-        .from('shops')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      
-      return data as Shop[];
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Error fetching shops'));
       return [];
@@ -42,21 +40,20 @@ export function useShop() {
       setLoading(true);
       setError(null);
       
-      // First check if the table exists
-      const tableExists = await checkIfTableExists('shops');
-      if (!tableExists) {
-        throw new Error("The shops table doesn't exist yet. Please run the database migrations first.");
+      try {
+        const { data, error } = await supabase
+          .from('shops')
+          .select('*')
+          .eq('id', shopId)
+          .single();
+        
+        if (error) throw error;
+        
+        return data as unknown as Shop;
+      } catch (err) {
+        console.error('Error accessing shop details:', err);
+        return null;
       }
-      
-      const { data, error } = await supabase
-        .from('shops')
-        .select('*')
-        .eq('id', shopId)
-        .single();
-      
-      if (error) throw error;
-      
-      return data as Shop;
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Error fetching shop'));
       return null;
@@ -70,21 +67,20 @@ export function useShop() {
       setLoading(true);
       setError(null);
       
-      // First check if the table exists
-      const tableExists = await checkIfTableExists('products');
-      if (!tableExists) {
-        throw new Error("The products table doesn't exist yet. Please run the database migrations first.");
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('shop_id', shopId)
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        return data as unknown as ShopProduct[];
+      } catch (err) {
+        console.error('Error accessing products table:', err);
+        return [];
       }
-      
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('shop_id', shopId)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      
-      return data as ShopProduct[];
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Error fetching products'));
       return [];
@@ -98,21 +94,20 @@ export function useShop() {
       setLoading(true);
       setError(null);
       
-      // First check if the table exists
-      const tableExists = await checkIfTableExists('products');
-      if (!tableExists) {
-        throw new Error("The products table doesn't exist yet. Please run the database migrations first.");
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', productId)
+          .single();
+        
+        if (error) throw error;
+        
+        return data as unknown as ShopProduct;
+      } catch (err) {
+        console.error('Error accessing product details:', err);
+        return null;
       }
-      
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('id', productId)
-        .single();
-      
-      if (error) throw error;
-      
-      return data as ShopProduct;
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Error fetching product'));
       return null;
@@ -129,7 +124,7 @@ export function useShop() {
         .from('content_ownership')
         .select('*')
         .eq('content_id', shopId)
-        .eq('content_type', 'shop' as ContentType)
+        .eq('content_type', 'shop')
         .eq('owner_id', user.id)
         .single();
       
@@ -150,38 +145,51 @@ export function useShop() {
       setLoading(true);
       setError(null);
       
-      // First check if the table exists
-      const tableExists = await checkIfTableExists('shops');
-      if (!tableExists) {
-        throw new Error("The shops table doesn't exist yet. Please run the database migrations first.");
+      try {
+        // Create shop
+        const { data: shop, error: shopError } = await supabase
+          .from('shops')
+          .insert(shopData)
+          .select()
+          .single();
+        
+        if (shopError) throw shopError;
+        
+        // Create content ownership
+        const { error: ownershipError } = await supabase
+          .from('content_ownership')
+          .insert({
+            content_id: shop.id,
+            content_type: 'shop',
+            owner_id: user.id,
+          });
+        
+        if (ownershipError) throw ownershipError;
+        
+        return shop as unknown as Shop;
+      } catch (err) {
+        console.error('Error creating shop:', err);
+        throw err;
       }
-      
-      // Create shop
-      const { data: shop, error: shopError } = await supabase
-        .from('shops')
-        .insert(shopData)
-        .select()
-        .single();
-      
-      if (shopError) throw shopError;
-      
-      // Create content ownership
-      const { error: ownershipError } = await supabase
-        .from('content_ownership')
-        .insert({
-          content_id: shop.id,
-          content_type: 'shop' as ContentType,
-          owner_id: user.id,
-        });
-      
-      if (ownershipError) throw ownershipError;
-      
-      return shop as Shop;
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Error creating shop'));
       throw err;
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkIfTableExists = async (tableName: string): Promise<boolean> => {
+    try {
+      // Try a simple query to check if table exists
+      try {
+        await supabase.from(tableName).select('id').limit(1);
+        return true;
+      } catch {
+        return false;
+      }
+    } catch {
+      return false;
     }
   };
 
@@ -193,7 +201,8 @@ export function useShop() {
     fetchProductsByShopId,
     fetchProductById,
     isShopOwner,
-    createShop
+    createShop,
+    checkIfTableExists
   };
 }
 
@@ -203,33 +212,6 @@ export interface ShopOwner {
   full_name: string;
   avatar_url: string | null;
 }
-
-// Helper function to check if tables exist
-const checkIfTableExists = async (tableName: string): Promise<boolean> => {
-  try {
-    // Try using information_schema to check if table exists
-    const { data, error } = await supabase
-      .from('information_schema.tables')
-      .select('table_name')
-      .eq('table_schema', 'public')
-      .eq('table_name', tableName)
-      .single();
-    
-    if (error) {
-      // Alternative approach - try a simple query
-      try {
-        await supabase.from(tableName).select('id').limit(1);
-        return true;
-      } catch {
-        return false;
-      }
-    }
-    
-    return !!data;
-  } catch {
-    return false;
-  }
-};
 
 export const useShops = () => {
   const [shops, setShops] = useState<Shop[]>([]);
@@ -296,7 +278,7 @@ export const useShopDetails = (shopId: string | undefined) => {
           .from('content_ownership')
           .select('owner_id')
           .eq('content_id', shopId)
-          .eq('content_type', 'shop' as ContentType)
+          .eq('content_type', 'shop')
           .single();
         
         if (!ownershipError && ownershipData) {
