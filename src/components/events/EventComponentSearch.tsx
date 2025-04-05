@@ -44,7 +44,19 @@ const EventComponentSearch: React.FC<EventComponentSearchProps> = ({
         return [];
       }
 
-      return data || [];
+      // Convert to ContentItemProps format
+      const formattedData = (data || []).map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        type: type,
+        subtype: item.subtype,
+        image_url: item.image_url,
+        location: item.location,
+        tags: item.tags,
+        description: item.description
+      }));
+
+      return formattedData as ContentItemProps[];
     } catch (error) {
       console.error('Error searching for components:', error);
       return [];

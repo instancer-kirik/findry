@@ -29,25 +29,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  image_url: string;
-  category: string;
-  created_at: string;
-  updated_at: string;
-  shop_id: string;
-}
-
-interface Shop {
-  id: string;
-  name: string;
-  location: string;
-  logo_url: string;
-}
+import { Shop, ShopProduct } from "@/types/database";
 
 interface ShopOwner {
   id: string;
@@ -58,7 +40,7 @@ interface ShopOwner {
 
 const ProductDetail: React.FC = () => {
   const { shopId, productId } = useParams<{ shopId: string; productId: string }>();
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState<ShopProduct | null>(null);
   const [shop, setShop] = useState<Shop | null>(null);
   const [owner, setOwner] = useState<ShopOwner | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -72,7 +54,7 @@ const ProductDetail: React.FC = () => {
       try {
         if (!shopId || !productId) return;
 
-        // Get product details
+        // Get product details with type casting
         const { data: productData, error: productError } = await supabase
           .from('products')
           .select('*')
@@ -81,9 +63,9 @@ const ProductDetail: React.FC = () => {
           .single();
 
         if (productError) throw productError;
-        setProduct(productData);
+        setProduct(productData as ShopProduct);
 
-        // Get shop details
+        // Get shop details with type casting
         const { data: shopData, error: shopError } = await supabase
           .from('shops')
           .select('id, name, location, logo_url')
@@ -91,7 +73,7 @@ const ProductDetail: React.FC = () => {
           .single();
 
         if (shopError) throw shopError;
-        setShop(shopData);
+        setShop(shopData as Shop);
 
         // Get ownership details
         const { data: ownershipData, error: ownershipError } = await supabase
@@ -111,7 +93,7 @@ const ProductDetail: React.FC = () => {
           .single();
 
         if (ownerError) throw ownerError;
-        setOwner(ownerData);
+        setOwner(ownerData as ShopOwner);
 
         // Check if current user is the owner
         const { data: { user } } = await supabase.auth.getUser();
@@ -345,4 +327,4 @@ const ProductDetail: React.FC = () => {
   );
 };
 
-export default ProductDetail; 
+export default ProductDetail;

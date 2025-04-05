@@ -207,16 +207,25 @@ export interface ShopOwner {
 // Helper function to check if tables exist
 const checkIfTableExists = async (tableName: string): Promise<boolean> => {
   try {
-    // Try to describe the table
-    const { error } = await supabase
-      .rpc('get_table_definition', { table_name: tableName });
+    // Try using information_schema to check if table exists
+    const { data, error } = await supabase
+      .from('information_schema.tables')
+      .select('table_name')
+      .eq('table_schema', 'public')
+      .eq('table_name', tableName)
+      .single();
     
-    // If there was an error, the table might not exist
-    if (error && error.message.includes("does not exist")) {
-      return false;
+    if (error) {
+      // Alternative approach - try a simple query
+      try {
+        await supabase.from(tableName).select('id').limit(1);
+        return true;
+      } catch {
+        return false;
+      }
     }
     
-    return true;
+    return !!data;
   } catch {
     return false;
   }

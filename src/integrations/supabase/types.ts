@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       artists: {
         Row: {
+          bio: string | null
           created_at: string
           disciplines: string[] | null
           id: string
@@ -18,6 +19,7 @@ export type Database = {
           location: string | null
           multidisciplinary: boolean | null
           name: string
+          social_links: string[] | null
           styles: string[] | null
           subtype: string | null
           tags: string[] | null
@@ -25,6 +27,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          bio?: string | null
           created_at?: string
           disciplines?: string[] | null
           id?: string
@@ -32,6 +35,7 @@ export type Database = {
           location?: string | null
           multidisciplinary?: boolean | null
           name: string
+          social_links?: string[] | null
           styles?: string[] | null
           subtype?: string | null
           tags?: string[] | null
@@ -39,6 +43,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          bio?: string | null
           created_at?: string
           disciplines?: string[] | null
           id?: string
@@ -46,6 +51,7 @@ export type Database = {
           location?: string | null
           multidisciplinary?: boolean | null
           name?: string
+          social_links?: string[] | null
           styles?: string[] | null
           subtype?: string | null
           tags?: string[] | null
@@ -598,6 +604,16 @@ export type Database = {
         }
         Returns: number
       }
+      get_table_definition: {
+        Args: {
+          table_name: string
+        }
+        Returns: {
+          column_name: string
+          data_type: string
+          is_nullable: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["user_role"]
@@ -631,6 +647,7 @@ export type Database = {
         | "artist"
         | "venue"
         | "brand"
+        | "shop"
       user_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {

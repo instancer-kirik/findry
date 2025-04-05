@@ -1,95 +1,223 @@
-
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { ResourceDetails, ResourceAvailability, TimeSlot } from '@/types/resource';
+import { useAuth } from './use-auth';
+import { ResourceDetails, parseAvailabilityFromJson, formatAvailabilityToJson } from '@/types/resource';
 import { ContentType } from '@/types/database';
 
-export const useResource = (resourceId?: string) => {
-  const [isOwner, setIsOwner] = useState(false);
+export function useResource() {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
-  const fetchResource = async (): Promise<ResourceDetails | null> => {
-    if (!resourceId) return null;
+  const fetchResources = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { data, error } = await supabase
+        .from('resources')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    // Fetch resource data
-    const { data: resource, error } = await supabase
-      .from('resources')
-      .select('*')
-      .eq('id', resourceId)
-      .single();
+      if (error) throw error;
 
-    if (error) {
-      console.error('Error fetching resource:', error);
-      return null;
+      // Convert availability from JSON to ResourceAvailability
+      const resources: ResourceDetails[] = data.map(resource => ({
+        ...resource,
+        availability: parseAvailabilityFromJson(resource.availability)
+      }));
+
+      return resources;
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Error fetching resources'));
+      return [];
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // Check if the user is the owner
-    const { data: session } = await supabase.auth.getSession();
-    if (session?.session?.user) {
-      const { data: ownership } = await supabase
+  const fetchResourceById = async (resourceId: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { data, error } = await supabase
+        .from('resources')
+        .select('*')
+        .eq('id', resourceId)
+        .single();
+
+      if (error) throw error;
+
+      // Convert availability from JSON to ResourceAvailability
+      const resource: ResourceDetails = {
+        ...data,
+        availability: parseAvailabilityFromJson(data.availability)
+      };
+
+      return resource;
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Error fetching resource'));
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const isResourceOwner = async (resourceId: string) => {
+    if (!user) return false;
+
+    try {
+      const { data, error } = await supabase
         .from('content_ownership')
         .select('*')
         .eq('content_id', resourceId)
         .eq('content_type', 'resource' as ContentType)
-        .eq('owner_id', session.session.user.id)
+        .eq('owner_id', user.id)
         .single();
 
-      setIsOwner(!!ownership);
+      if (error) return false;
+
+      return !!data;
+    } catch {
+      return false;
     }
-
-    // Generate mock availability if none exists
-    if (!resource.availability) {
-      const today = new Date();
-      const mockAvailability: ResourceAvailability[] = [];
-      
-      // Create mock availability for the next 14 days
-      for (let i = 0; i < 14; i++) {
-        const date = new Date(today);
-        date.setDate(today.getDate() + i);
-        
-        const timeSlots: TimeSlot[] = [];
-        
-        // Create time slots for each day
-        for (let hour = 9; hour < 18; hour++) {
-          const status = Math.random() > 0.7 ? 'booked' : 'available';
-          timeSlots.push({
-            id: `slot-${i}-${hour}`,
-            startTime: `${hour}:00`,
-            endTime: `${hour + 1}:00`,
-            status,
-            price: resource.type === 'space' ? 50 : 25
-          });
-        }
-        
-        mockAvailability.push({
-          id: `day-${i}`,
-          date: date.toISOString().split('T')[0],
-          timeSlots
-        });
-      }
-      
-      // Cast the availability to make TypeScript happy
-      const resourceWithAvailability: ResourceDetails = {
-        ...resource,
-        availability: mockAvailability
-      };
-
-      return resourceWithAvailability;
-    }
-
-    return resource as ResourceDetails;
   };
 
-  const { data: resource, isLoading, error } = useQuery({
-    queryKey: ['resource', resourceId],
-    queryFn: fetchResource,
-    enabled: !!resourceId
-  });
+  // Update the createResource function to handle JSON conversion
+  const createResource = async (resourceData: Omit<ResourceDetails, 'id' | 'created_at' | 'updated_at'>) => {
+    if (!user) {
+      throw new Error('You must be logged in to create a resource');
+    }
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Format availability for database storage
+      const formattedData = {
+        ...resourceData,
+        availability: resourceData.availability ? formatAvailabilityToJson(resourceData.availability) : null
+      };
+      
+      // Create resource
+      const { data: resource, error: resourceError } = await supabase
+        .from('resources')
+        .insert(formattedData)
+        .select()
+        .single();
+      
+      if (resourceError) throw resourceError;
+      
+      // Create content ownership
+      const { error: ownershipError } = await supabase
+        .from('content_ownership')
+        .insert({
+          content_id: resource.id,
+          content_type: 'resource' as ContentType,
+          owner_id: user.id,
+        });
+      
+      if (ownershipError) throw ownershipError;
+      
+      // Parse availability from database format
+      const resourceDetails: ResourceDetails = {
+        ...resource,
+        availability: parseAvailabilityFromJson(resource.availability)
+      };
+      
+      return resourceDetails;
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Error creating resource'));
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Add this helper function to convert database resource to ResourceDetails
+  const convertToResourceDetails = (resource: any): ResourceDetails => {
+    return {
+      ...resource,
+      availability: parseAvailabilityFromJson(resource.availability)
+    };
+  };
 
   return {
-    resource,
-    isLoading,
+    loading,
     error,
-    isOwner
+    fetchResources,
+    fetchResourceById,
+    isResourceOwner,
+    createResource,
+    convertToResourceDetails
   };
+}
+
+export const useResources = () => {
+  const [resources, setResources] = useState<ResourceDetails[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const resourceService = useResource();
+
+  const fetchResources = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const data = await resourceService.fetchResources();
+      setResources(data);
+    } catch (err: any) {
+      console.error('Error fetching resources:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchResources();
+  }, []);
+
+  return { resources, isLoading, error, refetch: fetchResources };
+};
+
+export const useResourceDetails = (resourceId: string | undefined) => {
+  const [resource, setResource] = useState<ResourceDetails | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isOwner, setIsOwner] = useState<boolean>(false);
+  const resourceService = useResource();
+  const { user } = useAuth();
+
+  const fetchResourceDetails = async () => {
+    if (!resourceId) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const resourceData = await resourceService.fetchResourceById(resourceId);
+      if (!resourceData) {
+        throw new Error("Resource not found");
+      }
+
+      setResource(resourceData);
+
+      if (user) {
+        setIsOwner(await resourceService.isResourceOwner(resourceId));
+      }
+    } catch (err: any) {
+      console.error('Error fetching resource details:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (resourceId) {
+      fetchResourceDetails();
+    }
+  }, [resourceId, user]);
+
+  return { resource, isLoading, error, isOwner, refetch: fetchResourceDetails };
 };

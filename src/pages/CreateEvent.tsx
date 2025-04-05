@@ -61,7 +61,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const CreateEvent: React.FC = () => {
+export const CreateEvent = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -72,7 +72,11 @@ const CreateEvent: React.FC = () => {
   const [eventSlots, setEventSlots] = useState<EventSlot[]>([]);
   const [formStep, setFormStep] = useState<'details' | 'schedule' | 'components'>('details');
   const [eventComponents, setEventComponents] = useState<ContentItemProps[]>([]);
-  
+  const [venueItems, setVenueItems] = useState<ContentItemProps[]>([]);
+  const [artistItems, setArtistItems] = useState<ContentItemProps[]>([]);
+  const [brandItems, setBrandItems] = useState<ContentItemProps[]>([]);
+  const [communityItems, setCommunityItems] = useState<ContentItemProps[]>([]);
+
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     
@@ -244,11 +248,51 @@ const CreateEvent: React.FC = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
-        <AnimatedSection animation="fade-in-up">
-          <h1 className="text-3xl font-bold mb-6">Create New Event</h1>
-        </AnimatedSection>
-
+      <div className="container mx-auto py-8">
+        <h1 className="text-3xl font-bold mb-6">Create Event</h1>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Venues</h2>
+            <EventComponentSearch 
+              componentType="venues"
+              selectedItems={venueItems} 
+              onSelectItem={(item) => setVenueItems([...venueItems, item])}
+              onRemoveItem={(itemId) => setVenueItems(venueItems.filter(item => item.id !== itemId))}
+            />
+          </div>
+          
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Artists</h2>
+            <EventComponentSearch 
+              componentType="artists"
+              selectedItems={artistItems} 
+              onSelectItem={(item) => setArtistItems([...artistItems, item])}
+              onRemoveItem={(itemId) => setArtistItems(artistItems.filter(item => item.id !== itemId))}
+            />
+          </div>
+          
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Brands</h2>
+            <EventComponentSearch 
+              componentType="all"
+              selectedItems={brandItems} 
+              onSelectItem={(item) => setBrandItems([...brandItems, item])}
+              onRemoveItem={(itemId) => setBrandItems(brandItems.filter(item => item.id !== itemId))}
+            />
+          </div>
+          
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Communities</h2>
+            <EventComponentSearch 
+              componentType="all"
+              selectedItems={communityItems} 
+              onSelectItem={(item) => setCommunityItems([...communityItems, item])}
+              onRemoveItem={(itemId) => setCommunityItems(communityItems.filter(item => item.id !== itemId))}
+            />
+          </div>
+        </div>
+        
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           <div className="lg:col-span-3">
             <AnimatedSection animation="fade-in-up" delay={100}>

@@ -1,9 +1,10 @@
+
 import { ContentType } from './database';
 
 export interface ContentItemProps {
   id: string;
   name: string;
-  type: string;  // Can include 'shop' now
+  type: string;  // Can include 'shop' and 'product' now
   subtype?: string;
   description?: string;
   image_url?: string;

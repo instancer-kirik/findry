@@ -48,3 +48,32 @@ export const mapResourceAvailabilityToCalendarEvents = (
     }));
   });
 };
+
+// Helper functions to convert between JSON and ResourceAvailability
+export const parseAvailabilityFromJson = (json: Json | null): ResourceAvailability[] | null => {
+  if (!json) return null;
+  try {
+    if (Array.isArray(json)) {
+      return json.map(item => ({
+        id: item.id as string,
+        date: item.date as string,
+        timeSlots: (item.timeSlots as Json[]).map(slot => ({
+          id: slot.id as string,
+          startTime: slot.startTime as string,
+          endTime: slot.endTime as string,
+          status: slot.status as 'available' | 'booked' | 'pending',
+          price: slot.price as number | undefined
+        }))
+      }));
+    }
+    return null;
+  } catch (error) {
+    console.error('Error parsing resource availability:', error);
+    return null;
+  }
+};
+
+export const formatAvailabilityToJson = (availability: ResourceAvailability[] | null): Json => {
+  if (!availability) return null;
+  return availability as unknown as Json;
+};
