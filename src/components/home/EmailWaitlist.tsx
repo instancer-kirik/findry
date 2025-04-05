@@ -31,13 +31,17 @@ const EmailWaitlist: React.FC = () => {
     
     try {
       console.log('Submitting email to waitlist:', email);
+      if (message) {
+        console.log('With message:', message);
+      }
       
-      // Insert the email into Supabase
+      // Insert the email into Supabase with the message
       const { error } = await supabase
         .from('waitlist')
         .insert([{ 
           email, 
-          source: 'landing_page'
+          source: 'landing_page',
+          message: message || null
         }]);
       
       if (error) {
@@ -53,12 +57,6 @@ const EmailWaitlist: React.FC = () => {
           throw error;
         }
       } else {
-        // If user added a message, store it separately since waitlist table doesn't support messages yet
-        if (message) {
-          console.log('User provided message:', message);
-          // For now just log it, we'll implement message storage later
-        }
-        
         toast({
           title: 'Thank you!',
           description: 'You have been added to our waitlist',

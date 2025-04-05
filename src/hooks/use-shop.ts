@@ -13,10 +13,10 @@ export function useShop() {
   const checkIfTableExists = async (tableName: string) => {
     try {
       const { data, error } = await supabase
-        .rpc('get_table_definition', { table_name: tableName });
+        .rpc('table_exists', { schema_name: 'public', table_name: tableName });
       
       if (error) return false;
-      return data && data.length > 0;
+      return data === true;
     } catch {
       return false;
     }
@@ -33,15 +33,13 @@ export function useShop() {
         return [] as Shop[];
       }
 
-      // Using raw query to avoid TypeScript errors
+      // Using rpc to avoid TypeScript errors with table names
       const { data, error: queryError } = await supabase
-        .from('shops')
-        .select('*')
-        .order('created_at', { ascending: false }) as { data: Shop[] | null, error: any };
+        .rpc('get_all_shops');
 
       if (queryError) throw queryError;
       
-      return data as Shop[] || [];
+      return (data || []) as Shop[];
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Error fetching shops'));
       return [] as Shop[];
@@ -61,16 +59,13 @@ export function useShop() {
         return null;
       }
 
-      // Using raw query to avoid TypeScript errors
+      // Using rpc to avoid TypeScript errors with table names
       const { data, error: queryError } = await supabase
-        .from('shops')
-        .select('*')
-        .eq('id', shopId)
-        .single() as { data: Shop | null, error: any };
+        .rpc('get_shop_by_id', { shop_id: shopId });
 
       if (queryError) throw queryError;
       
-      return data as Shop;
+      return Array.isArray(data) && data.length > 0 ? data[0] as Shop : null;
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Error fetching shop'));
       return null;
@@ -90,16 +85,13 @@ export function useShop() {
         return [] as ShopProduct[];
       }
 
-      // Using raw query to avoid TypeScript errors
+      // Using rpc to avoid TypeScript errors with table names
       const { data, error: queryError } = await supabase
-        .from('products')
-        .select('*')
-        .eq('shop_id', shopId)
-        .order('created_at', { ascending: false }) as { data: ShopProduct[] | null, error: any };
+        .rpc('get_products_by_shop_id', { shop_id: shopId });
 
       if (queryError) throw queryError;
       
-      return data as ShopProduct[] || [];
+      return (data || []) as ShopProduct[];
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Error fetching products'));
       return [] as ShopProduct[];
@@ -119,16 +111,13 @@ export function useShop() {
         return null;
       }
 
-      // Using raw query to avoid TypeScript errors
+      // Using rpc to avoid TypeScript errors with table names
       const { data, error: queryError } = await supabase
-        .from('products')
-        .select('*')
-        .eq('id', productId)
-        .single() as { data: ShopProduct | null, error: any };
+        .rpc('get_product_by_id', { product_id: productId });
 
       if (queryError) throw queryError;
       
-      return data as ShopProduct;
+      return Array.isArray(data) && data.length > 0 ? data[0] as ShopProduct : null;
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Error fetching product'));
       return null;
@@ -145,18 +134,16 @@ export function useShop() {
       const ownershipExists = await checkIfTableExists('content_ownership');
       if (!ownershipExists) return false;
 
-      // Check if user owns the shop
+      // Check if user owns the shop using RPC to avoid TypeScript errors
       const { data, error } = await supabase
-        .from('content_ownership')
-        .select('*')
-        .eq('content_id', shopId)
-        .eq('content_type', 'shop')
-        .eq('owner_id', user.id)
-        .single() as { data: any, error: any };
+        .rpc('check_shop_ownership', { 
+          shop_id: shopId,
+          user_id: user.id
+        });
 
       if (error) return false;
       
-      return !!data;
+      return data === true;
     } catch {
       return false;
     }
@@ -183,26 +170,21 @@ export function useShop() {
         throw new Error('Shop creation is currently not available as the required tables are not set up yet.');
       }
       
-      // Insert the shop
+      // Insert the shop using RPC to avoid TypeScript errors
       const { data: shop, error: shopError } = await supabase
-        .from('shops')
-        .insert(shopData)
-        .select()
-        .single() as { data: Shop | null, error: any };
+        .rpc('create_shop', {
+          shop_name: shopData.name,
+          shop_description: shopData.description || null,
+          shop_location: shopData.location || null,
+          shop_website_url: shopData.website_url || null,
+          shop_banner_image_url: shopData.banner_image_url || null,
+          shop_logo_url: shopData.logo_url || null,
+          shop_tags: shopData.tags || null,
+          owner_id: user.id
+        });
       
       if (shopError) throw shopError;
       if (!shop) throw new Error('Failed to create shop');
-      
-      // Create content ownership
-      const { error: ownershipError } = await supabase
-        .from('content_ownership')
-        .insert({
-          content_id: shop.id,
-          content_type: 'shop' as ContentType,
-          owner_id: user.id,
-        });
-      
-      if (ownershipError) throw ownershipError;
       
       return shop as Shop;
     } catch (err) {
@@ -222,28 +204,13 @@ export function useShop() {
       setLoading(true);
       setError(null);
       
-      // First check if the product exists and get its shop_id
-      const product = await fetchProductById(productId);
-      if (!product) {
-        throw new Error('Product not found');
-      }
+      // Using RPC to avoid TypeScript errors
+      const { data, error } = await supabase
+        .rpc('delete_product', { product_id: productId });
       
-      // Check if user is the shop owner
-      const isOwner = await isShopOwner(product.shop_id);
+      if (error) throw error;
       
-      if (!isOwner) {
-        throw new Error('You do not have permission to delete this product');
-      }
-      
-      // Delete the product
-      const { error: deleteError } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', productId);
-      
-      if (deleteError) throw deleteError;
-      
-      return true;
+      return data === true;
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Error deleting product'));
       throw err;
@@ -266,7 +233,7 @@ export function useShop() {
   };
 }
 
-// Create a custom hook for shop details page
+// Custom hook for shop details page
 export function useShopDetails(shopId: string | undefined) {
   const [shop, setShop] = useState<Shop | null>(null);
   const [owner, setOwner] = useState<any | null>(null);
@@ -310,8 +277,6 @@ export function useShopDetails(shopId: string | undefined) {
         const ownerStatus = await isShopOwner(shopId);
         setIsOwner(ownerStatus);
       }
-      
-      // TODO: Fetch owner data if needed
       
     } catch (err: any) {
       console.error("Error loading shop details:", err);

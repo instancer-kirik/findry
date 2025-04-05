@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { useShopDetails } from '@/hooks/use-shop';
+import { useShop, useShopDetails } from '@/hooks/use-shop';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 
@@ -12,7 +12,7 @@ const ShopDetail: React.FC = () => {
   
   useEffect(() => {
     loadShopDetails();
-  }, [id]);
+  }, [id, loadShopDetails]);
   
   if (isLoading) {
     return (
@@ -118,7 +118,7 @@ const ShopDetail: React.FC = () => {
                       )}
                       
                       <div className="absolute top-2 right-2 bg-background rounded-full px-3 py-1 text-sm font-medium">
-                        ${product.price.toFixed(2)}
+                        ${typeof product.price === 'number' ? product.price.toFixed(2) : product.price}
                       </div>
                     </div>
                     

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -24,7 +25,7 @@ const ProductDetail: React.FC = () => {
   
   useEffect(() => {
     const fetchProductData = async () => {
-      if (!productId) return;
+      if (!productId || !shopId) return;
       
       setIsLoading(true);
       try {
@@ -37,8 +38,8 @@ const ProductDetail: React.FC = () => {
         setProduct(productData);
         
         // Get shop data
-        if (productData.shop_id) {
-          const shopData = await fetchShopById(productData.shop_id);
+        if (shopId) {
+          const shopData = await fetchShopById(shopId);
           if (!shopData) {
             throw new Error("Shop not found");
           }
@@ -47,7 +48,7 @@ const ProductDetail: React.FC = () => {
           
           // Check if user is the shop owner
           if (user) {
-            const ownerStatus = await isShopOwner(shopData.id);
+            const ownerStatus = await isShopOwner(shopId);
             setIsOwner(ownerStatus);
           }
         }
@@ -63,19 +64,19 @@ const ProductDetail: React.FC = () => {
   }, [productId, shopId, user, fetchProductById, fetchShopById, isShopOwner]);
   
   const handleDeleteProduct = async () => {
-    if (!user || !product) return;
+    if (!user || !product || !productId) return;
     
     try {
       setIsDeleting(true);
       
-      await deleteProduct(product.id);
+      await deleteProduct(productId);
       
       toast({
         title: 'Product deleted',
         description: 'The product has been successfully deleted',
       });
       
-      navigate(`/shops/${product.shop_id}`);
+      navigate(`/shops/${shopId}`);
     } catch (error: any) {
       console.error('Error deleting product:', error);
       toast({
@@ -154,7 +155,7 @@ const ProductDetail: React.FC = () => {
             <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
             
             <div className="text-2xl font-semibold mb-4">
-              ${product.price.toFixed(2)}
+              ${typeof product.price === 'number' ? product.price.toFixed(2) : product.price}
             </div>
             
             {product.description && (

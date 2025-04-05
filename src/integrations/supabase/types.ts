@@ -293,6 +293,50 @@ export type Database = {
         }
         Relationships: []
       }
+      products: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          name: string
+          price: number
+          shop_id: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          price?: number
+          shop_id: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          price?: number
+          shop_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -413,6 +457,45 @@ export type Database = {
           tags?: string[] | null
           type?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      shops: {
+        Row: {
+          banner_image_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          location: string | null
+          logo_url: string | null
+          name: string
+          tags: string[] | null
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          banner_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          logo_url?: string | null
+          name: string
+          tags?: string[] | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          banner_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          logo_url?: string | null
+          name?: string
+          tags?: string[] | null
+          updated_at?: string
+          website_url?: string | null
         }
         Relationships: []
       }
@@ -571,18 +654,21 @@ export type Database = {
           created_at: string | null
           email: string
           id: number
+          message: string | null
           source: string | null
         }
         Insert: {
           created_at?: string | null
           email: string
           id?: never
+          message?: string | null
           source?: string | null
         }
         Update: {
           created_at?: string | null
           email?: string
           id?: never
+          message?: string | null
           source?: string | null
         }
         Relationships: []
@@ -636,6 +722,13 @@ export type Database = {
           tag_filters?: string[]
         }
         Returns: Json
+      }
+      table_exists: {
+        Args: {
+          schema_name: string
+          table_name: string
+        }
+        Returns: boolean
       }
     }
     Enums: {
