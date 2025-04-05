@@ -7,20 +7,20 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
-import ContentCard, { ContentItemProps } from '@/components/marketplace/ContentCard';
+import ContentCard from '@/components/marketplace/ContentCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
-// Define the type for content items used in this page
-// This is different from the ContentItemProps imported above
-interface EventContentItemProps {
+// Define a simpler event content item type
+interface EventContentItem {
   id: string;
   name: string;
   image?: string;
   description?: string;
   type?: string;
   selected?: boolean;
+  location?: string; // Add location to match ContentItemProps expectations
 }
 
 // Define the possible filter types for events
@@ -38,54 +38,60 @@ const CreateEvent = () => {
   const [filterType, setFilterType] = useState<FilterType>('all');
 
   // Mock data for event components
-  const [artists, setArtists] = useState<EventContentItemProps[]>([
+  const [artists, setArtists] = useState<EventContentItem[]>([
     {
       id: '1',
       name: 'DJ Spinmaster',
       image: 'https://source.unsplash.com/random/400x400/?dj',
       description: 'Electronic music DJ with 10 years of experience',
-      type: 'DJ'
+      type: 'DJ',
+      location: 'New York'
     },
     {
       id: '2',
       name: 'The Groove Band',
       image: 'https://source.unsplash.com/random/400x400/?band',
       description: 'A 5-piece funk band with a brass section',
-      type: 'Band'
+      type: 'Band',
+      location: 'Los Angeles'
     }
   ]);
 
-  const [venues, setVenues] = useState<EventContentItemProps[]>([
+  const [venues, setVenues] = useState<EventContentItem[]>([
     {
       id: '1',
       name: 'Downtown Gallery',
       image: 'https://source.unsplash.com/random/400x400/?gallery',
       description: 'Spacious gallery in the heart of downtown',
-      type: 'Gallery'
+      type: 'Gallery',
+      location: 'Chicago'
     },
     {
       id: '2',
       name: 'Riverside Pavilion',
       image: 'https://source.unsplash.com/random/400x400/?pavilion',
       description: 'Open-air venue by the river with stunning views',
-      type: 'Outdoor'
+      type: 'Outdoor',
+      location: 'San Francisco'
     }
   ]);
 
-  const [resources, setResources] = useState<EventContentItemProps[]>([
+  const [resources, setResources] = useState<EventContentItem[]>([
     {
       id: '1',
       name: 'Professional Sound System',
       image: 'https://source.unsplash.com/random/400x400/?sound',
       description: 'High-quality PA system with subwoofers',
-      type: 'Equipment'
+      type: 'Equipment',
+      location: 'Warehouse'
     },
     {
       id: '2',
       name: 'Stage Lighting Package',
       image: 'https://source.unsplash.com/random/400x400/?lighting',
       description: 'Complete stage lighting setup with operator',
-      type: 'Equipment'
+      type: 'Equipment',
+      location: 'Warehouse'
     }
   ]);
 
@@ -144,7 +150,6 @@ const CreateEvent = () => {
     });
 
     toast.success("Event created successfully!");
-    // navigate('/events/123'); // Navigate to the new event in a real app
     navigate('/');
   };
 
@@ -163,16 +168,17 @@ const CreateEvent = () => {
     }
   };
 
-  // Map our EventContentItemProps to ContentItemProps for the ContentCard component
-  const mapToContentCardProps = (items: EventContentItemProps[]): ContentItemProps[] => {
-    return items.map(item => ({
+  // Convert our EventContentItem to match what ContentCard expects
+  const adaptItemForContentCard = (item: EventContentItem) => {
+    return {
       id: item.id,
       name: item.name,
       image_url: item.image,
       description: item.description,
       type: item.type || "unknown",
-      selected: item.selected
-    }));
+      location: item.location || "",
+      selected: item.selected || false
+    };
   };
 
   return (
@@ -268,10 +274,10 @@ const CreateEvent = () => {
               
               <TabsContent value="all" className="pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {mapToContentCardProps(getFilteredContent()).map(item => (
+                  {getFilteredContent().map(item => (
                     <ContentCard 
                       key={item.id}
-                      item={item}
+                      {...adaptItemForContentCard(item)}
                       onSelect={() => {
                         if (artists.some(a => a.id === item.id)) {
                           handleArtistSelection(item.id);
@@ -288,10 +294,10 @@ const CreateEvent = () => {
               
               <TabsContent value="artists" className="pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {mapToContentCardProps(artists).map(item => (
+                  {artists.map(item => (
                     <ContentCard 
                       key={item.id}
-                      item={item}
+                      {...adaptItemForContentCard(item)}
                       onSelect={() => handleArtistSelection(item.id)}
                     />
                   ))}
@@ -300,10 +306,10 @@ const CreateEvent = () => {
               
               <TabsContent value="venues" className="pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {mapToContentCardProps(venues).map(item => (
+                  {venues.map(item => (
                     <ContentCard 
                       key={item.id}
-                      item={item}
+                      {...adaptItemForContentCard(item)}
                       onSelect={() => handleVenueSelection(item.id)}
                     />
                   ))}
@@ -312,10 +318,10 @@ const CreateEvent = () => {
               
               <TabsContent value="resources" className="pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {mapToContentCardProps(resources).map(item => (
+                  {resources.map(item => (
                     <ContentCard 
                       key={item.id}
-                      item={item}
+                      {...adaptItemForContentCard(item)}
                       onSelect={() => handleResourceSelection(item.id)}
                     />
                   ))}

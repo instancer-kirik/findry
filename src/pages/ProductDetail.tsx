@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -6,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
-import { ShopProduct, Shop, ContentType } from '@/types/database';
+import { ShopProduct, Shop } from '@/types/database';
 import { useShop } from '@/hooks/use-shop';
 
 const ProductDetail: React.FC = () => {

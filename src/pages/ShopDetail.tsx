@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useShopDetails } from '@/hooks/use-shop';
@@ -8,7 +8,11 @@ import { PlusCircle } from 'lucide-react';
 
 const ShopDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { shop, products, isLoading, error, isOwner } = useShopDetails(id);
+  const { shop, products, isLoading, error, isOwner, loadShopDetails } = useShopDetails(id);
+  
+  useEffect(() => {
+    loadShopDetails();
+  }, [id]);
   
   if (isLoading) {
     return (
