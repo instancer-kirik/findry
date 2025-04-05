@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/use-auth';
@@ -28,7 +27,6 @@ const CreateShop: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tableExists, setTableExists] = useState<boolean | null>(null);
   
-  // Check if the shops table exists
   React.useEffect(() => {
     const checkTable = async () => {
       const exists = await checkIfTableExists('shops');
@@ -86,7 +84,6 @@ const CreateShop: React.FC = () => {
         description: 'Your shop has been created successfully'
       });
       
-      // Navigate to the shop page
       navigate(`/shops/${shop.id}`);
     } catch (error: any) {
       console.error('Error creating shop:', error);
@@ -194,6 +191,7 @@ const CreateShop: React.FC = () => {
                 <Button
                   type="submit"
                   className="w-full"
+                  variant="default"
                   disabled={isSubmitting || tableExists === false || !user}
                 >
                   {isSubmitting ? 'Creating...' : 'Create Shop'}

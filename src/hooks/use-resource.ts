@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './use-auth';
 import { ResourceDetails, ResourceAvailability, parseAvailabilityFromJson, formatAvailabilityToJson } from '@/types/resource';
@@ -24,6 +24,7 @@ export function useResource() {
       // Convert availability from JSON to ResourceAvailability
       const resources: ResourceDetails[] = data.map(resource => ({
         ...resource,
+        url: null, // Add the missing url property
         availability: parseAvailabilityFromJson(resource.availability)
       }));
 
@@ -51,6 +52,7 @@ export function useResource() {
       // Convert availability from JSON to ResourceAvailability
       const resource: ResourceDetails = {
         ...data,
+        url: null, // Add the missing url property
         availability: parseAvailabilityFromJson(data.availability)
       };
 
@@ -124,6 +126,7 @@ export function useResource() {
       // Parse availability from database format
       const resourceDetails: ResourceDetails = {
         ...resource,
+        url: null, // Add the missing url property
         availability: parseAvailabilityFromJson(resource.availability)
       };
       
@@ -140,6 +143,7 @@ export function useResource() {
   const convertToResourceDetails = (resource: any): ResourceDetails => {
     return {
       ...resource,
+      url: null, // Add the missing url property
       availability: parseAvailabilityFromJson(resource.availability)
     };
   };

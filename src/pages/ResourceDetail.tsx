@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -53,7 +52,8 @@ const ResourceDetail: React.FC = () => {
     );
   }
 
-  const calendarEvents = mapResourceAvailabilityToCalendarEvents(resource);
+  // Fix the CalendarEvent type compatibility issue by using type assertion
+  const calendarEvents = mapResourceAvailabilityToCalendarEvents(resource) as any;
   
   // Find today's availability
   const todayStr = format(selectedDate, 'yyyy-MM-dd');

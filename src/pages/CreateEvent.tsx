@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
@@ -11,13 +12,13 @@ import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import EventComponentSearch from '@/components/events/EventComponentSearch';
-import { ContentItemProps } from '@/components/marketplace/ContentCard';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 import { supabase } from '@/integrations/supabase/client';
 import { ContentType } from '@/types/database';
 
-interface ContentItemProps {
+// Define a local ContentItemProps that's compatible with EventComponentSearch
+interface EventContentItemProps {
   id: string;
   name: string;
   category?: string;
@@ -27,6 +28,8 @@ interface ContentItemProps {
   description?: string;
   selected?: boolean;
   onClick?: () => void;
+  disciplines?: string[];
+  type?: string;
 }
 
 const CreateEvent: React.FC = () => {
@@ -40,13 +43,14 @@ const CreateEvent: React.FC = () => {
   const [endDate, setEndDate] = useState<Date | undefined>(new Date());
   const [location, setLocation] = useState('');
   const [capacity, setCapacity] = useState<number | undefined>(undefined);
-  const [selectedVenue, setSelectedVenue] = useState<ContentItemProps | null>(null);
-  const [selectedArtists, setSelectedArtists] = useState<ContentItemProps[]>([]);
-  const [selectedBrands, setSelectedBrands] = useState<ContentItemProps[]>([]);
-  const [selectedCommunities, setSelectedCommunities] = useState<ContentItemProps[]>([]);
+  const [selectedVenue, setSelectedVenue] = useState<EventContentItemProps | null>(null);
+  const [selectedArtists, setSelectedArtists] = useState<EventContentItemProps[]>([]);
+  const [selectedBrands, setSelectedBrands] = useState<EventContentItemProps[]>([]);
+  const [selectedCommunities, setSelectedCommunities] = useState<EventContentItemProps[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"details" | "schedule" | "guests" | "resources" | "promotion">("details");
-  const [contentType, setContentType] = useState<ContentType>("all");
+  // Use string type instead of ContentType for component type selection
+  const [componentType, setComponentType] = useState<string>("all");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,7 +113,7 @@ const CreateEvent: React.FC = () => {
     setSelectedVenue(null);
   };
 
-  const handleAddArtist = (artist: ContentItemProps) => {
+  const handleAddArtist = (artist: EventContentItemProps) => {
     setSelectedArtists(prev => [...prev, artist]);
   };
 
@@ -117,7 +121,7 @@ const CreateEvent: React.FC = () => {
     setSelectedArtists(prev => prev.filter(artist => artist.id !== artistId));
   };
 
-  const handleAddBrand = (brand: ContentItemProps) => {
+  const handleAddBrand = (brand: EventContentItemProps) => {
     setSelectedBrands(prev => [...prev, brand]);
   };
 
@@ -125,7 +129,7 @@ const CreateEvent: React.FC = () => {
     setSelectedBrands(prev => prev.filter(brand => brand.id !== brandId));
   };
 
-  const handleAddCommunity = (community: ContentItemProps) => {
+  const handleAddCommunity = (community: EventContentItemProps) => {
     setSelectedCommunities(prev => [...prev, community]);
   };
 
@@ -138,16 +142,16 @@ const CreateEvent: React.FC = () => {
     
     switch (value) {
       case 'guests':
-        setContentType('artists');
+        setComponentType('artists');
         break;
       case 'resources':
-        setContentType('resources');
+        setComponentType('resources');
         break;
       case 'promotion':
-        setContentType('venues');
+        setComponentType('venues');
         break;
       default:
-        setContentType('all');
+        setComponentType('all');
     }
   };
 
@@ -339,7 +343,7 @@ const CreateEvent: React.FC = () => {
               <Label>Venue</Label>
               <EventComponentSearch
                 componentType="venues"
-                onSelectItem={(item) => setSelectedVenue(item)}
+                onSelectItem={(item) => setSelectedVenue(item as EventContentItemProps)}
                 selectedItems={selectedVenue ? [selectedVenue] : []}
                 onRemoveItem={handleRemoveVenue}
               />
@@ -350,8 +354,8 @@ const CreateEvent: React.FC = () => {
               <Label>Artists</Label>
               <EventComponentSearch
                 componentType="artists"
-                onSelectItem={handleAddArtist}
-                selectedItems={selectedArtists}
+                onSelectItem={handleAddArtist as any}
+                selectedItems={selectedArtists as any}
                 onRemoveItem={handleRemoveArtist}
               />
               {artist}
@@ -361,8 +365,8 @@ const CreateEvent: React.FC = () => {
               <Label>Brands</Label>
               <EventComponentSearch
                 componentType="brands"
-                onSelectItem={handleAddBrand}
-                selectedItems={selectedBrands}
+                onSelectItem={handleAddBrand as any}
+                selectedItems={selectedBrands as any}
                 onRemoveItem={handleRemoveBrand}
               />
               {brand}
@@ -372,8 +376,8 @@ const CreateEvent: React.FC = () => {
               <Label>Communities</Label>
               <EventComponentSearch
                 componentType="communities"
-                onSelectItem={handleAddCommunity}
-                selectedItems={selectedCommunities}
+                onSelectItem={handleAddCommunity as any}
+                selectedItems={selectedCommunities as any}
                 onRemoveItem={handleRemoveCommunity}
               />
               {community}
@@ -395,16 +399,16 @@ const CreateEvent: React.FC = () => {
           <div className="mb-6">
             <div className="flex space-x-2 mb-4 overflow-x-auto pb-2">
               <Button
-                variant={contentType === 'artists' ? 'default' : 'outline'}
+                variant={componentType === 'artists' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setContentType('artists')}
+                onClick={() => setComponentType('artists')}
               >
                 Artists
               </Button>
               <Button
-                variant={contentType === 'venues' ? 'default' : 'outline'}
+                variant={componentType === 'venues' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setContentType('venues')}
+                onClick={() => setComponentType('venues')}
               >
                 Venues
               </Button>

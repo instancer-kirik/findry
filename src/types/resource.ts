@@ -86,6 +86,7 @@ export interface CalendarEvent {
   end: Date;
   status: string;
   resourceId?: string;
+  date?: string; // Adding this for compatibility with ProfileCalendar
 }
 
 export function mapResourceAvailabilityToCalendarEvents(
@@ -113,6 +114,7 @@ export function mapResourceAvailabilityToCalendarEvents(
         end,
         status: slot.status,
         resourceId: resource.id,
+        date: day.date // Add the date string for ProfileCalendar compatibility
       };
     });
   });

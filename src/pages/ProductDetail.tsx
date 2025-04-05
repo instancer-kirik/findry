@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -18,74 +17,74 @@ const ProductDetail: React.FC = () => {
   const [product, setProduct] = useState<ShopProduct | null>(null);
   const [shop, setShop] = useState<Shop | null>(null);
   const [isOwner, setIsOwner] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
-    const fetchProductDetails = async () => {
-      if (!shopId || !productId) return;
+    const fetchProductData = async () => {
+      if (!productId) return;
       
+      setIsLoading(true);
       try {
-        // Use RPCs to fetch data
-        const { data: productData, error: productError } = await supabase.rpc('get_product_by_id', {
-          product_id: productId
-        });
+        // Use direct query instead of RPC
+        const { data: product, error: productError } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', productId)
+          .single();
         
-        if (productError || !productData) {
-          throw new Error(productError?.message || 'Product not found');
-        }
+        if (productError) throw productError;
         
-        // Check if product belongs to the specified shop
-        if (productData.shop_id !== shopId) {
-          throw new Error("Product doesn't belong to the specified shop");
-        }
+        setProduct(product as ShopProduct);
         
-        setProduct(productData as ShopProduct);
-        
-        // Fetch shop details
-        const { data: shopData, error: shopError } = await supabase.rpc('get_shop_by_id', {
-          shop_id: shopId
-        });
-        
-        if (shopError || !shopData) {
-          throw new Error(shopError?.message || 'Shop not found');
-        }
-        
-        setShop(shopData as Shop);
-        
-        // Check if current user is the owner
-        if (user) {
-          const { data: isOwnerData } = await supabase.rpc('check_shop_ownership', {
-            shop_id: shopId,
-            user_id: user.id
-          });
+        // Get shop data
+        if (product.shop_id) {
+          const { data: shop, error: shopError } = await supabase
+            .from('shops')
+            .select('*')
+            .eq('id', product.shop_id)
+            .single();
           
-          setIsOwner(!!isOwnerData);
+          if (shopError) throw shopError;
+          
+          setShop(shop as Shop);
+          
+          // Check if user is the shop owner
+          if (user) {
+            const { data: ownership, error: ownershipError } = await supabase
+              .from('content_ownership')
+              .select('*')
+              .eq('content_id', shop.id)
+              .eq('content_type', 'shop' as ContentType)
+              .eq('owner_id', user.id)
+              .single();
+            
+            setIsOwner(!ownershipError && !!ownership);
+          }
         }
-        
-      } catch (error: any) {
-        console.error('Error fetching product details:', error);
-        toast({
-          title: 'Error',
-          description: error.message || 'Failed to load product details',
-          variant: 'destructive',
-        });
-        navigate(`/shops/${shopId}`);
+      } catch (error) {
+        console.error('Error fetching product:', error);
+        setError('Failed to load product details');
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
     
-    fetchProductDetails();
+    fetchProductData();
   }, [shopId, productId, user, navigate, toast]);
   
-  const handleDelete = async () => {
-    if (!product || !confirm('Are you sure you want to delete this product?')) return;
+  const handleDeleteProduct = async () => {
+    if (!user || !product) return;
     
     try {
-      // Use RPC for deletion
-      const { error } = await supabase.rpc('delete_product', {
-        product_id: product.id
-      });
+      setIsDeleting(true);
+      
+      // Use direct query instead of RPC
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', product.id);
       
       if (error) throw error;
       
@@ -94,18 +93,20 @@ const ProductDetail: React.FC = () => {
         description: 'The product has been successfully deleted',
       });
       
-      navigate(`/shops/${shopId}`);
+      navigate(`/shops/${product.shop_id}`);
     } catch (error: any) {
       console.error('Error deleting product:', error);
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to delete product',
-        variant: 'destructive',
+        title: 'Error deleting product',
+        description: error.message || 'An error occurred while deleting the product',
+        variant: 'destructive'
       });
+    } finally {
+      setIsDeleting(false);
     }
   };
   
-  if (loading) {
+  if (isLoading) {
     return (
       <Layout>
         <div className="container mx-auto py-8">
@@ -203,7 +204,7 @@ const ProductDetail: React.FC = () => {
                     <Button variant="outline">Edit Product</Button>
                     <Button 
                       variant="destructive"
-                      onClick={handleDelete}
+                      onClick={handleDeleteProduct}
                     >
                       Delete Product
                     </Button>
