@@ -84,7 +84,7 @@ const Hero: React.FC = () => {
           
           <AnimatedSection animation="fade-in-up" delay={200}>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight leading-normal pb-2 bg-gradient-to-r from-purple-400 via-teal-400 to-green-500 text-transparent bg-clip-text">
-              {isAuthenticated ? "Welcome Wonder Seeker and/or Mighty Artist\n" : "Bonjé Wonder Seeker and/or Mighty Artist\n"}
+              {isAuthenticated ? "Welcome Wonder Seeker and/or Mighty Artist\n" : "Bonj! Wonder Seeker and/or Mighty Artist\n"}
             </h1>
           </AnimatedSection>
           <br></br>

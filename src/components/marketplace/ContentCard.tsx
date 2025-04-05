@@ -94,7 +94,12 @@ const ContentCard: React.FC<ContentCardProps> = ({
     }
     
     // Otherwise navigate to the profile page
-    navigate(getProfilePath());
+    const path = getProfilePath();
+    navigate(path);
+    
+    // Update window location to ensure proper URL is displayed in browser
+    // This is important for SEO and sharing links
+    window.history.pushState({}, '', path);
   };
 
   const handleAddToCollection = (e: React.MouseEvent, collectionName: string) => {

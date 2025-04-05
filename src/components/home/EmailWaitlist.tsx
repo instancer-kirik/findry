@@ -1,12 +1,16 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 
 const EmailWaitlist: React.FC = () => {
   const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [showMessage, setShowMessage] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -32,7 +36,8 @@ const EmailWaitlist: React.FC = () => {
         .from('waitlist')
         .insert({ 
           email, 
-          source: 'landing_page' 
+          source: 'landing_page',
+          message: message || null
         });
       
       if (error) {
@@ -53,6 +58,8 @@ const EmailWaitlist: React.FC = () => {
           description: 'You have been added to our waitlist',
         });
         setEmail('');
+        setMessage('');
+        setShowMessage(false);
       }
     } catch (error: any) {
       console.error('Error saving to waitlist:', error);
@@ -74,18 +81,43 @@ const EmailWaitlist: React.FC = () => {
         Be the first to know when we launch new features and opportunities.
       </p>
       
-      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
-        <Input
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="flex-1"
-          required
-        />
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? 'Joining...' : 'Join Waitlist'}
-        </Button>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Input
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="flex-1"
+            required
+          />
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? 'Joining...' : 'Join Waitlist'}
+          </Button>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <Checkbox 
+            id="showMessage" 
+            checked={showMessage} 
+            onCheckedChange={(checked) => setShowMessage(checked === true)}
+          />
+          <Label 
+            htmlFor="showMessage" 
+            className="text-sm cursor-pointer text-muted-foreground"
+          >
+            I'd like to include a message with my registration
+          </Label>
+        </div>
+        
+        {showMessage && (
+          <Textarea
+            placeholder="Tell us how you'd like to use the platform or what you're most excited about (optional)"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            className="min-h-[100px]"
+          />
+        )}
       </form>
     </div>
   );

@@ -1,4 +1,3 @@
-
 import { CalendarEvent } from '@/components/profile/ProfileCalendar';
 
 export interface VenueDetails {
@@ -37,5 +36,7 @@ export const mapVenueEventsToCalendarEvents = (
     location: venue.location || undefined,
     type: venue.type || undefined,
     imageUrl: venue.image_url || undefined,
+    startTime: event.start_time,
+    endTime: event.end_time
   }));
 };

@@ -6,24 +6,6 @@ import EcosystemSection from '@/components/home/EcosystemSection';
 import ScreenshotGallery from '@/components/home/ScreenshotGallery';
 import EmailWaitlist from '@/components/home/EmailWaitlist';
 
-// Define screenshots for the gallery
-const screenshots = [
-  {
-    src: "/screenshots/funnel-1.png",
-    alt: "Main Event",
-    title: "Main Event"
-  },
-  {
-    src: "/screenshots/funnel-2.png",
-    alt: "Create Event",
-    title: "Create Event"
-  },
-  {
-    src: "/screenshots/funnel-3.png",
-    alt: "Discovery",
-    title: "Discovery"
-  }
-];
 
 const Index: React.FC = () => {
   return (
@@ -34,7 +16,7 @@ const Index: React.FC = () => {
       <Hero />
       <FeatureSection />
       <EcosystemSection />
-      <ScreenshotGallery screenshots={screenshots} />
+    
     </Layout>
   );
 };
