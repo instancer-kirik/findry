@@ -1,9 +1,6 @@
-import React, { useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { Plus, Trash2, Calendar, Clock, User, Box, Edit } from 'lucide-react';
-import { EventSlot } from '@/types/event';
-import { ContentItemProps } from '@/components/marketplace/ContentCard';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -13,520 +10,292 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose,
-} from '@/components/ui/dialog';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Clock, Plus, Trash2, CalendarClock, PlusCircle } from 'lucide-react';
+import { EventSlot } from '@/types/event';
+import { v4 as uuidv4 } from 'uuid';
+import { format } from 'date-fns';
+import { ContentItemProps } from '@/components/marketplace/ContentCard';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { artists, resources } from '@/components/discover/DiscoverData';
+import { cn } from '@/lib/utils';
 
 interface EventSlotManagerProps {
   slots: EventSlot[];
   onSlotsChange: (slots: EventSlot[]) => void;
-  eventStartTime: string;
-  eventEndTime: string;
-  eventDate: Date;
-  readOnly?: boolean;
+  eventStartTime?: string;
+  eventEndTime?: string;
+  eventDate?: Date;
+  availableComponents?: ContentItemProps[];
 }
 
 const EventSlotManager: React.FC<EventSlotManagerProps> = ({
-  slots,
+  slots = [],
   onSlotsChange,
-  eventStartTime,
-  eventEndTime,
+  eventStartTime = '',
+  eventEndTime = '',
   eventDate,
-  readOnly = false
+  availableComponents = [],
 }) => {
-  const [selectedSlot, setSelectedSlot] = useState<EventSlot | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const [searchArtistQuery, setSearchArtistQuery] = useState('');
-  const [searchResourceQuery, setSearchResourceQuery] = useState('');
-
-  const handleAddSlot = () => {
-    const newSlot: EventSlot = {
-      id: uuidv4(),
-      title: 'New Slot',
-      startTime: eventStartTime,
-      endTime: eventEndTime,
-      status: 'available',
-      slotType: 'performance'
-    };
-    setSelectedSlot(newSlot);
-    setEditMode(false);
-    setIsDialogOpen(true);
-  };
-
-  const handleEditSlot = (slot: EventSlot) => {
-    setSelectedSlot(slot);
-    setEditMode(true);
-    setIsDialogOpen(true);
-  };
-
-  const handleRemoveSlot = (slotId: string) => {
-    onSlotsChange(slots.filter(slot => slot.id !== slotId));
-  };
-
-  const handleSaveSlot = () => {
-    if (!selectedSlot) return;
-
-    if (editMode) {
-      onSlotsChange(slots.map(slot => 
-        slot.id === selectedSlot.id ? selectedSlot : slot
-      ));
-    } else {
-      onSlotsChange([...slots, selectedSlot]);
-    }
-    
-    setIsDialogOpen(false);
-  };
-
-  const handleSlotChange = (field: keyof EventSlot, value: any) => {
-    if (!selectedSlot) return;
-    
-    setSelectedSlot({
-      ...selectedSlot,
-      [field]: value
-    });
-  };
-
-  const handleAssignArtist = (artist: ContentItemProps) => {
-    if (!selectedSlot) return;
-    
-    setSelectedSlot({
-      ...selectedSlot,
-      artist,
-      artistId: artist.id
-    });
-  };
-
-  const handleAssignResource = (resource: ContentItemProps) => {
-    if (!selectedSlot) return;
-    
-    setSelectedSlot({
-      ...selectedSlot,
-      resource,
-      resourceId: resource.id
-    });
-  };
-
-  const handleRemoveArtist = () => {
-    if (!selectedSlot) return;
-    
-    setSelectedSlot({
-      ...selectedSlot,
-      artist: undefined,
-      artistId: undefined
-    });
-  };
-
-  const handleRemoveResource = () => {
-    if (!selectedSlot) return;
-    
-    setSelectedSlot({
-      ...selectedSlot,
-      resource: undefined,
-      resourceId: undefined
-    });
-  };
-
-  const filteredArtists = searchArtistQuery
-    ? artists.filter(artist => 
-        artist.name.toLowerCase().includes(searchArtistQuery.toLowerCase()) ||
-        (artist.tags && artist.tags.some(tag => 
-          tag.toLowerCase().includes(searchArtistQuery.toLowerCase())
-        ))
-      )
-    : artists;
-
-  const filteredResources = searchResourceQuery
-    ? resources.filter(resource => 
-        resource.name.toLowerCase().includes(searchResourceQuery.toLowerCase()) ||
-        (resource.tags && resource.tags.some(tag => 
-          tag.toLowerCase().includes(searchResourceQuery.toLowerCase())
-        ))
-      )
-    : resources;
-
-  const sortedSlots = [...slots].sort((a, b) => {
-    return a.startTime.localeCompare(b.startTime);
+  const [newSlot, setNewSlot] = useState<Partial<EventSlot>>({
+    title: '',
+    startTime: eventStartTime,
+    endTime: '',
+    slotType: 'performance',
+    status: 'available',
   });
 
-  // Time display helper
-  const formatTime = (time: string) => {
-    const [hours, minutes] = time.split(':');
-    const parsedHours = parseInt(hours);
-    return `${parsedHours % 12 || 12}:${minutes} ${parsedHours >= 12 ? 'PM' : 'AM'}`;
+  // When props change, update the default new slot
+  useEffect(() => {
+    setNewSlot(prev => ({
+      ...prev,
+      startTime: eventStartTime || prev.startTime,
+    }));
+  }, [eventStartTime]);
+
+  // Group available components by type
+  const artists = availableComponents.filter(c => c.type === 'artist');
+  const resources = availableComponents.filter(c => c.type === 'resource' || c.type === 'tool' || c.type === 'space');
+
+  const handleAddSlot = () => {
+    if (!newSlot.title || !newSlot.startTime || !newSlot.endTime) {
+      return;
+    }
+
+    const slot: EventSlot = {
+      id: uuidv4(),
+      title: newSlot.title || '',
+      startTime: newSlot.startTime || '',
+      endTime: newSlot.endTime || '',
+      slotType: newSlot.slotType as 'performance' | 'setup' | 'breakdown' | 'break' | 'other',
+      status: 'available',
+      description: newSlot.description,
+      artist: newSlot.artist,
+      artistId: newSlot.artistId,
+      resource: newSlot.resource,
+      resourceId: newSlot.resourceId,
+      notes: newSlot.notes,
+    };
+
+    onSlotsChange([...slots, slot]);
+
+    // Reset the form except for endTime becoming the new startTime for the next slot
+    setNewSlot({
+      title: '',
+      startTime: slot.endTime,
+      endTime: '',
+      slotType: 'performance',
+      status: 'available',
+    });
   };
 
-  const getSlotTypeColor = (slotType: string) => {
-    switch (slotType) {
-      case 'performance':
-        return 'bg-blue-100 text-blue-800';
-      case 'setup':
-        return 'bg-green-100 text-green-800';
-      case 'breakdown':
-        return 'bg-orange-100 text-orange-800';
-      case 'break':
-        return 'bg-purple-100 text-purple-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+  const handleSlotChange = (id: string, field: keyof EventSlot, value: any) => {
+    const updatedSlots = slots.map(slot => {
+      if (slot.id === id) {
+        return { ...slot, [field]: value };
+      }
+      return slot;
+    });
+    onSlotsChange(updatedSlots);
+  };
+
+  const handleRemoveSlot = (id: string) => {
+    const updatedSlots = slots.filter(slot => slot.id !== id);
+    onSlotsChange(updatedSlots);
+  };
+
+  const handleAssignArtist = (slotId: string, artistId: string) => {
+    const artist = artists.find(a => a.id === artistId);
+    if (artist) {
+      handleSlotChange(slotId, 'artist', artist);
+      handleSlotChange(slotId, 'artistId', artist.id);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'available':
-        return 'bg-green-100 text-green-800';
-      case 'reserved':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'confirmed':
-        return 'bg-blue-100 text-blue-800';
-      case 'canceled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+  const handleAssignResource = (slotId: string, resourceId: string) => {
+    const resource = resources.find(r => r.id === resourceId);
+    if (resource) {
+      handleSlotChange(slotId, 'resource', resource);
+      handleSlotChange(slotId, 'resourceId', resource.id);
     }
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Event Schedule</h3>
-        {!readOnly && (
-          <Button onClick={handleAddSlot} size="sm">
-            <Plus className="h-4 w-4 mr-2" /> Add Slot
-          </Button>
-        )}
-      </div>
+    <div className="event-slot-manager space-y-6">
+      {/* Display event date if available */}
+      {eventDate && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+          <CalendarClock className="h-4 w-4" />
+          <span>Event Date: {format(eventDate, 'PPPP')}</span>
+        </div>
+      )}
 
-      <div className="space-y-2">
-        {sortedSlots.length === 0 ? (
-          <div className="text-center py-8 border border-dashed rounded-md text-muted-foreground">
-            {readOnly ? "No slots scheduled for this event yet." : "Add time slots to schedule your event."}
-          </div>
-        ) : (
-          sortedSlots.map(slot => (
-            <Card key={slot.id} className="mb-2">
-              <CardContent className="p-4">
-                <div className="flex justify-between items-start">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Badge className={getSlotTypeColor(slot.slotType)}>
-                        {slot.slotType.charAt(0).toUpperCase() + slot.slotType.slice(1)}
-                      </Badge>
-                      <Badge className={getStatusColor(slot.status)}>
-                        {slot.status.charAt(0).toUpperCase() + slot.status.slice(1)}
-                      </Badge>
-                    </div>
-                    <h4 className="font-semibold">{slot.title}</h4>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center">
-                        <Clock className="h-3.5 w-3.5 mr-1" /> 
-                        {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
-                      </div>
-                    </div>
-                    {slot.description && (
-                      <p className="text-sm">{slot.description}</p>
-                    )}
-                    
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {slot.artist && (
-                        <div className="flex items-center bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs">
-                          <User className="h-3 w-3 mr-1" /> 
-                          {slot.artist.name}
-                        </div>
-                      )}
-                      {slot.resource && (
-                        <div className="flex items-center bg-green-50 text-green-700 px-2 py-1 rounded text-xs">
-                          <Box className="h-3 w-3 mr-1" /> 
-                          {slot.resource.name}
-                        </div>
-                      )}
-                    </div>
+      {/* Existing slots */}
+      {slots.length > 0 ? (
+        <div className="space-y-4">
+          {slots.map(slot => (
+            <Card key={slot.id} className="p-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <div className="font-medium mb-2">{slot.title}</div>
+                  <div className="flex items-center text-sm text-muted-foreground mb-3">
+                    <Clock className="h-4 w-4 mr-1" />
+                    <span>{slot.startTime} - {slot.endTime}</span>
                   </div>
                   
-                  {!readOnly && (
-                    <div className="flex gap-2">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => handleEditSlot(slot)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Edit slot</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              className="h-8 w-8 text-destructive hover:text-destructive"
-                              onClick={() => handleRemoveSlot(slot.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Remove slot</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                  )}
+                  <div className="space-y-1">
+                    <Badge variant="outline" className="capitalize">
+                      {slot.slotType}
+                    </Badge>
+                    
+                    <Badge variant="outline" className={cn(
+                      slot.status === 'available' && "bg-green-100 text-green-800",
+                      slot.status === 'reserved' && "bg-yellow-100 text-yellow-800",
+                      slot.status === 'confirmed' && "bg-blue-100 text-blue-800",
+                      slot.status === 'canceled' && "bg-red-100 text-red-800"
+                    )}>
+                      {slot.status}
+                    </Badge>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{editMode ? 'Edit Slot' : 'Add New Slot'}</DialogTitle>
-            <DialogDescription>
-              Schedule a time slot and assign artists or resources.
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedSlot && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium">Title</label>
-                  <Input 
-                    value={selectedSlot.title}
-                    onChange={(e) => handleSlotChange('title', e.target.value)}
-                    placeholder="e.g., Opening Act, Main Performance"
-                  />
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium">Description</label>
-                  <Textarea 
-                    value={selectedSlot.description || ''}
-                    onChange={(e) => handleSlotChange('description', e.target.value)}
-                    placeholder="Describe this slot"
-                  />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-2">
+                  {/* Artist assignment */}
                   <div>
-                    <label className="text-sm font-medium">Start Time</label>
-                    <Input 
-                      type="time"
-                      value={selectedSlot.startTime}
-                      onChange={(e) => handleSlotChange('startTime', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">End Time</label>
-                    <Input 
-                      type="time"
-                      value={selectedSlot.endTime}
-                      onChange={(e) => handleSlotChange('endTime', e.target.value)}
-                    />
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="text-sm font-medium">Slot Type</label>
-                    <Select 
-                      value={selectedSlot.slotType}
-                      onValueChange={(value) => handleSlotChange('slotType', value)}
+                    <label className="text-sm font-medium">Assigned Artist</label>
+                    <Select
+                      value={slot.artistId}
+                      onValueChange={(value) => handleAssignArtist(slot.id, value)}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Assign an artist" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="performance">Performance</SelectItem>
-                        <SelectItem value="setup">Setup</SelectItem>
-                        <SelectItem value="breakdown">Breakdown</SelectItem>
-                        <SelectItem value="break">Break</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem value="">None</SelectItem>
+                        {artists.map(artist => (
+                          <SelectItem key={artist.id} value={artist.id}>
+                            {artist.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
+
+                  {/* Resource assignment */}
                   <div>
-                    <label className="text-sm font-medium">Status</label>
-                    <Select 
-                      value={selectedSlot.status}
-                      onValueChange={(value) => handleSlotChange('status', value as EventSlot['status'])}
+                    <label className="text-sm font-medium">Required Resource</label>
+                    <Select
+                      value={slot.resourceId}
+                      onValueChange={(value) => handleAssignResource(slot.id, value)}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Assign a resource" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="available">Available</SelectItem>
-                        <SelectItem value="reserved">Reserved</SelectItem>
-                        <SelectItem value="confirmed">Confirmed</SelectItem>
-                        <SelectItem value="canceled">Canceled</SelectItem>
+                        <SelectItem value="">None</SelectItem>
+                        {resources.map(resource => (
+                          <SelectItem key={resource.id} value={resource.id}>
+                            {resource.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium">Notes</label>
-                  <Textarea 
-                    value={selectedSlot.notes || ''}
-                    onChange={(e) => handleSlotChange('notes', e.target.value)}
-                    placeholder="Additional notes"
-                  />
+
+                  <div>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => handleRemoveSlot(slot.id)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Remove Slot
+                    </Button>
+                  </div>
                 </div>
               </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <label className="text-sm font-medium">Assigned Artist</label>
-                    {selectedSlot.artist && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={handleRemoveArtist}
-                        className="h-6 text-xs text-destructive"
-                      >
-                        <Trash2 className="h-3 w-3 mr-1" /> Remove
-                      </Button>
-                    )}
-                  </div>
-                  
-                  {selectedSlot.artist ? (
-                    <div className="p-3 border rounded-md">
-                      <div className="flex items-center gap-2">
-                        <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
-                          <User className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <p className="font-medium">{selectedSlot.artist.name}</p>
-                          <p className="text-xs text-muted-foreground">{selectedSlot.artist.location}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <Input 
-                        placeholder="Search artists..."
-                        value={searchArtistQuery}
-                        onChange={(e) => setSearchArtistQuery(e.target.value)}
-                        className="mb-2"
-                      />
-                      <ScrollArea className="h-[150px] border rounded-md p-2">
-                        {filteredArtists.length === 0 ? (
-                          <p className="text-sm text-muted-foreground text-center py-4">No artists found</p>
-                        ) : (
-                          filteredArtists.map(artist => (
-                            <div 
-                              key={artist.id} 
-                              className="p-2 hover:bg-muted rounded-md cursor-pointer mb-1"
-                              onClick={() => handleAssignArtist(artist)}
-                            >
-                              <p className="font-medium">{artist.name}</p>
-                              <p className="text-xs text-muted-foreground">{artist.location}</p>
-                            </div>
-                          ))
-                        )}
-                      </ScrollArea>
-                    </div>
-                  )}
-                </div>
-                
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <label className="text-sm font-medium">Assigned Resource</label>
-                    {selectedSlot.resource && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={handleRemoveResource}
-                        className="h-6 text-xs text-destructive"
-                      >
-                        <Trash2 className="h-3 w-3 mr-1" /> Remove
-                      </Button>
-                    )}
-                  </div>
-                  
-                  {selectedSlot.resource ? (
-                    <div className="p-3 border rounded-md">
-                      <div className="flex items-center gap-2">
-                        <div className="h-10 w-10 bg-green-50 rounded-full flex items-center justify-center">
-                          <Box className="h-5 w-5 text-green-600" />
-                        </div>
-                        <div>
-                          <p className="font-medium">{selectedSlot.resource.name}</p>
-                          <p className="text-xs text-muted-foreground">{selectedSlot.resource.location}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <Input 
-                        placeholder="Search resources..."
-                        value={searchResourceQuery}
-                        onChange={(e) => setSearchResourceQuery(e.target.value)}
-                        className="mb-2"
-                      />
-                      <ScrollArea className="h-[150px] border rounded-md p-2">
-                        {filteredResources.length === 0 ? (
-                          <p className="text-sm text-muted-foreground text-center py-4">No resources found</p>
-                        ) : (
-                          filteredResources.map(resource => (
-                            <div 
-                              key={resource.id} 
-                              className="p-2 hover:bg-muted rounded-md cursor-pointer mb-1"
-                              onClick={() => handleAssignResource(resource)}
-                            >
-                              <p className="font-medium">{resource.name}</p>
-                              <p className="text-xs text-muted-foreground">{resource.location}</p>
-                            </div>
-                          ))
-                        )}
-                      </ScrollArea>
-                    </div>
-                  )}
-                </div>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-8 text-muted-foreground border rounded-md">
+          <p>No time slots added yet</p>
+          <p className="text-sm">Add slots to organize your event schedule</p>
+        </div>
+      )}
+
+      {/* Add new slot form */}
+      <Card className="p-4">
+        <h3 className="text-lg font-medium mb-4">Add New Time Slot</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-medium">Title</label>
+              <Input
+                placeholder="Slot title"
+                value={newSlot.title}
+                onChange={(e) => setNewSlot({ ...newSlot, title: e.target.value })}
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-sm font-medium">Start Time</label>
+                <Input
+                  type="time"
+                  value={newSlot.startTime}
+                  onChange={(e) => setNewSlot({ ...newSlot, startTime: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">End Time</label>
+                <Input
+                  type="time"
+                  value={newSlot.endTime}
+                  onChange={(e) => setNewSlot({ ...newSlot, endTime: e.target.value })}
+                />
               </div>
             </div>
-          )}
+          </div>
           
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button onClick={handleSaveSlot}>Save</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-medium">Slot Type</label>
+              <Select
+                value={newSlot.slotType}
+                onValueChange={(value) => setNewSlot({ ...newSlot, slotType: value as EventSlot['slotType'] })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select slot type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="performance">Performance</SelectItem>
+                  <SelectItem value="setup">Setup</SelectItem>
+                  <SelectItem value="breakdown">Breakdown</SelectItem>
+                  <SelectItem value="break">Break</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium">Description (Optional)</label>
+              <Textarea
+                placeholder="Description of this time slot"
+                value={newSlot.description || ''}
+                onChange={(e) => setNewSlot({ ...newSlot, description: e.target.value })}
+                className="h-20"
+              />
+            </div>
+          </div>
+        </div>
+        
+        <Button className="w-full mt-4" onClick={handleAddSlot} disabled={!newSlot.title || !newSlot.startTime || !newSlot.endTime}>
+          <PlusCircle className="h-4 w-4 mr-2" />
+          Add Slot
+        </Button>
+      </Card>
     </div>
   );
 };
 
-export default EventSlotManager; 
+export default EventSlotManager;

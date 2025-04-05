@@ -39,14 +39,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { EventSlot } from '@/types/event';
 import EventSlotManager from '@/components/events/EventSlotManager';
-
-// Import data
-import {
-  artists,
-  venues,
-  communities,
-  brands
-} from '../components/discover/DiscoverData';
+import EventComponentSearch from '@/components/events/EventComponentSearch';
 import { ContentItemProps } from '../components/marketplace/ContentCard';
 
 const formSchema = z.object({
@@ -77,13 +70,12 @@ const CreateEvent: React.FC = () => {
   const [selectedBrand, setSelectedBrand] = useState<ContentItemProps | null>(null);
   const [selectedCommunity, setSelectedCommunity] = useState<ContentItemProps | null>(null);
   const [eventSlots, setEventSlots] = useState<EventSlot[]>([]);
-  const [formStep, setFormStep] = useState<'details' | 'schedule'>('details');
+  const [formStep, setFormStep] = useState<'details' | 'schedule' | 'components'>('details');
+  const [eventComponents, setEventComponents] = useState<ContentItemProps[]>([]);
   
-  // Parse query params to pre-fill form
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     
-    // Check for venue
     const venueId = queryParams.get('venue');
     if (venueId) {
       const venue = venues.find(v => v.id === venueId);
@@ -91,43 +83,36 @@ const CreateEvent: React.FC = () => {
         setSelectedVenue(venue);
         form.setValue('location', venue.location);
         form.setValue('venueId', venue.id);
-        // Add venue tags
         setSelectedTags(prev => [...prev, ...venue.tags]);
       }
     }
     
-    // Check for artist
     const artistId = queryParams.get('artist');
     if (artistId) {
       const artist = artists.find(a => a.id === artistId);
       if (artist) {
         setSelectedArtist(artist);
         form.setValue('hostId', artist.id);
-        // Add artist tags
         setSelectedTags(prev => [...prev, ...artist.tags]);
       }
     }
     
-    // Check for brand sponsor
     const brandId = queryParams.get('brand');
     if (brandId) {
       const brand = brands.find(b => b.id === brandId);
       if (brand) {
         setSelectedBrand(brand);
         form.setValue('sponsorId', brand.id);
-        // Add brand tags
         setSelectedTags(prev => [...prev, ...brand.tags]);
       }
     }
     
-    // Check for community
     const communityId = queryParams.get('community');
     if (communityId) {
       const community = communities.find(c => c.id === communityId);
       if (community) {
         setSelectedCommunity(community);
         form.setValue('communityId', community.id);
-        // Add community tags
         setSelectedTags(prev => [...prev, ...community.tags]);
       }
     }
@@ -160,13 +145,10 @@ const CreateEvent: React.FC = () => {
     console.log('Selected community:', selectedCommunity);
     console.log('Event slots:', eventSlots);
     
-    // In a real app, we would save this data to a database
-    // For now, we'll just show a success message and redirect
     toast.success('Event created successfully!', {
       description: `Your event "${data.title}" has been scheduled for ${format(data.date, 'PPP')}.`,
     });
     
-    // Redirect to the events page
     setTimeout(() => {
       navigate('/events');
     }, 1500);
@@ -214,8 +196,46 @@ const CreateEvent: React.FC = () => {
     }
   };
   
+  const goToComponents = () => {
+    setFormStep('components');
+  };
+  
   const goToDetails = () => {
     setFormStep('details');
+  };
+
+  const handleAddComponent = (component: ContentItemProps) => {
+    setEventComponents(prev => [...prev, component]);
+    
+    if (component.type === 'venue') {
+      setSelectedVenue(component);
+      form.setValue('location', component.location || '');
+      form.setValue('venueId', component.id);
+    } else if (component.type === 'artist') {
+      setSelectedArtist(component);
+      form.setValue('hostId', component.id);
+    }
+    
+    if (component.tags && component.tags.length > 0) {
+      setSelectedTags(prev => [
+        ...prev, 
+        ...component.tags.filter(tag => !prev.includes(tag))
+      ]);
+    }
+  };
+  
+  const handleRemoveComponent = (componentId: string) => {
+    const component = eventComponents.find(c => c.id === componentId);
+    setEventComponents(prev => prev.filter(c => c.id !== componentId));
+    
+    if (component?.type === 'venue' && selectedVenue?.id === componentId) {
+      setSelectedVenue(null);
+      form.setValue('location', '');
+      form.setValue('venueId', '');
+    } else if (component?.type === 'artist' && selectedArtist?.id === componentId) {
+      setSelectedArtist(null);
+      form.setValue('hostId', '');
+    }
   };
 
   const submitForm = () => {
@@ -244,10 +264,16 @@ const CreateEvent: React.FC = () => {
                         Event Details
                       </Button>
                       <Button 
+                        variant={formStep === 'components' ? "default" : "outline"}
+                        onClick={goToComponents}
+                        size="sm"
+                      >
+                        Components
+                      </Button>
+                      <Button 
                         variant={formStep === 'schedule' ? "default" : "outline"}
                         onClick={goToSchedule}
                         size="sm"
-                        disabled={formStep === 'details'}
                       >
                         Schedule
                       </Button>
@@ -263,7 +289,7 @@ const CreateEvent: React.FC = () => {
                 
                 {formStep === 'details' && (
                   <Form {...form}>
-                    <form onSubmit={form.handleSubmit(goToSchedule)} className="space-y-8">
+                    <form onSubmit={form.handleSubmit(goToComponents)} className="space-y-8">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormField
                           control={form.control}
@@ -499,11 +525,40 @@ const CreateEvent: React.FC = () => {
 
                       <div className="flex justify-end">
                         <Button type="submit">
-                          Next: Schedule
+                          Next: Components
                         </Button>
                       </div>
                     </form>
                   </Form>
+                )}
+                
+                {formStep === 'components' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Event Components</CardTitle>
+                        <CardDescription>
+                          Search for and add artists, venues, and resources to your event
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <EventComponentSearch 
+                          onSelectItem={handleAddComponent} 
+                          selectedItems={eventComponents}
+                          onRemoveItem={handleRemoveComponent}
+                        />
+                      </CardContent>
+                    </Card>
+                    
+                    <div className="flex justify-between">
+                      <Button variant="outline" onClick={goToDetails}>
+                        Back to Details
+                      </Button>
+                      <Button onClick={goToSchedule}>
+                        Next: Schedule
+                      </Button>
+                    </div>
+                  </div>
                 )}
                 
                 {formStep === 'schedule' && (
@@ -522,13 +577,14 @@ const CreateEvent: React.FC = () => {
                           eventStartTime={form.getValues('startTime')}
                           eventEndTime={form.getValues('endTime')}
                           eventDate={form.getValues('date')}
+                          availableComponents={eventComponents}
                         />
                       </CardContent>
                     </Card>
                     
                     <div className="flex justify-between">
-                      <Button variant="outline" onClick={goToDetails}>
-                        Back to Details
+                      <Button variant="outline" onClick={goToComponents}>
+                        Back to Components
                       </Button>
                       <Button onClick={submitForm}>
                         Create Event
@@ -547,70 +603,41 @@ const CreateEvent: React.FC = () => {
                   <CardTitle className="text-lg">Selected Components</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {selectedVenue && (
-                    <div className="p-3 bg-muted rounded-md relative">
-                      <button 
-                        type="button" 
-                        onClick={handleRemoveVenue}
-                        className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                      <h3 className="font-medium">Venue</h3>
-                      <p className="text-sm">{selectedVenue.name}</p>
-                      <p className="text-xs text-muted-foreground">{selectedVenue.location}</p>
+                  {eventComponents.length > 0 ? (
+                    <div className="space-y-3">
+                      {eventComponents.map(component => (
+                        <div key={component.id} className="p-3 bg-muted rounded-md relative">
+                          <button 
+                            type="button" 
+                            onClick={() => handleRemoveComponent(component.id)}
+                            className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                          <h3 className="font-medium capitalize">{component.type}</h3>
+                          <p className="text-sm">{component.name}</p>
+                          <p className="text-xs text-muted-foreground">{component.location}</p>
+                          {component.tags && component.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {component.tags.slice(0, 3).map(tag => (
+                                <Badge key={tag} variant="outline" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                              {component.tags.length > 3 && (
+                                <Badge variant="outline" className="text-xs">
+                                  +{component.tags.length - 3} more
+                                </Badge>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
                     </div>
-                  )}
-                  
-                  {selectedArtist && (
-                    <div className="p-3 bg-muted rounded-md relative">
-                      <button 
-                        type="button" 
-                        onClick={handleRemoveArtist}
-                        className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                      <h3 className="font-medium">Artist/Host</h3>
-                      <p className="text-sm">{selectedArtist.name}</p>
-                      <p className="text-xs text-muted-foreground">{selectedArtist.location}</p>
-                    </div>
-                  )}
-                  
-                  {selectedBrand && (
-                    <div className="p-3 bg-muted rounded-md relative">
-                      <button 
-                        type="button" 
-                        onClick={handleRemoveBrand}
-                        className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                      <h3 className="font-medium">Brand/Sponsor</h3>
-                      <p className="text-sm">{selectedBrand.name}</p>
-                      <p className="text-xs text-muted-foreground">{selectedBrand.location}</p>
-                    </div>
-                  )}
-                  
-                  {selectedCommunity && (
-                    <div className="p-3 bg-muted rounded-md relative">
-                      <button 
-                        type="button" 
-                        onClick={handleRemoveCommunity}
-                        className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                      <h3 className="font-medium">Community</h3>
-                      <p className="text-sm">{selectedCommunity.name}</p>
-                      <p className="text-xs text-muted-foreground">{selectedCommunity.location}</p>
-                    </div>
-                  )}
-                  
-                  {!selectedVenue && !selectedArtist && !selectedBrand && !selectedCommunity && (
+                  ) : (
                     <div className="text-center p-4 text-muted-foreground">
                       <p>No components selected</p>
-                      <p className="text-xs mt-2">Select components from Discover page to use them in your event</p>
+                      <p className="text-xs mt-2">Go to the Components tab to add artists, venues, and resources</p>
                     </div>
                   )}
                 </CardContent>

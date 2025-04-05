@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,11 +35,11 @@ const EmailWaitlist: React.FC = () => {
       // Insert the email into Supabase
       const { error } = await supabase
         .from('waitlist')
-        .insert({ 
+        .insert([{ 
           email, 
           source: 'landing_page',
           message: message || null
-        });
+        }]);
       
       if (error) {
         console.error('Error saving to waitlist:', error);
