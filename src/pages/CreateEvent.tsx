@@ -12,15 +12,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
-// Define a simpler event content item type
+// Define a simpler event content item type that matches ContentCardProps
 interface EventContentItem {
   id: string;
   name: string;
-  image?: string;
+  type: string;
+  location: string;
+  image_url?: string;
   description?: string;
-  type?: string;
+  tags?: string[];
   selected?: boolean;
-  location?: string; // Add location to match ContentItemProps expectations
 }
 
 // Define the possible filter types for events
@@ -37,12 +38,12 @@ const CreateEvent = () => {
   const [capacity, setCapacity] = useState('');
   const [filterType, setFilterType] = useState<FilterType>('all');
 
-  // Mock data for event components
+  // Mock data for event components with proper structure
   const [artists, setArtists] = useState<EventContentItem[]>([
     {
       id: '1',
       name: 'DJ Spinmaster',
-      image: 'https://source.unsplash.com/random/400x400/?dj',
+      image_url: 'https://source.unsplash.com/random/400x400/?dj',
       description: 'Electronic music DJ with 10 years of experience',
       type: 'DJ',
       location: 'New York'
@@ -50,7 +51,7 @@ const CreateEvent = () => {
     {
       id: '2',
       name: 'The Groove Band',
-      image: 'https://source.unsplash.com/random/400x400/?band',
+      image_url: 'https://source.unsplash.com/random/400x400/?band',
       description: 'A 5-piece funk band with a brass section',
       type: 'Band',
       location: 'Los Angeles'
@@ -61,7 +62,7 @@ const CreateEvent = () => {
     {
       id: '1',
       name: 'Downtown Gallery',
-      image: 'https://source.unsplash.com/random/400x400/?gallery',
+      image_url: 'https://source.unsplash.com/random/400x400/?gallery',
       description: 'Spacious gallery in the heart of downtown',
       type: 'Gallery',
       location: 'Chicago'
@@ -69,7 +70,7 @@ const CreateEvent = () => {
     {
       id: '2',
       name: 'Riverside Pavilion',
-      image: 'https://source.unsplash.com/random/400x400/?pavilion',
+      image_url: 'https://source.unsplash.com/random/400x400/?pavilion',
       description: 'Open-air venue by the river with stunning views',
       type: 'Outdoor',
       location: 'San Francisco'
@@ -80,7 +81,7 @@ const CreateEvent = () => {
     {
       id: '1',
       name: 'Professional Sound System',
-      image: 'https://source.unsplash.com/random/400x400/?sound',
+      image_url: 'https://source.unsplash.com/random/400x400/?sound',
       description: 'High-quality PA system with subwoofers',
       type: 'Equipment',
       location: 'Warehouse'
@@ -88,7 +89,7 @@ const CreateEvent = () => {
     {
       id: '2',
       name: 'Stage Lighting Package',
-      image: 'https://source.unsplash.com/random/400x400/?lighting',
+      image_url: 'https://source.unsplash.com/random/400x400/?lighting',
       description: 'Complete stage lighting setup with operator',
       type: 'Equipment',
       location: 'Warehouse'
@@ -166,19 +167,6 @@ const CreateEvent = () => {
       default:
         return [...artists, ...venues, ...resources];
     }
-  };
-
-  // Convert our EventContentItem to match what ContentCard expects
-  const adaptItemForContentCard = (item: EventContentItem) => {
-    return {
-      id: item.id,
-      name: item.name,
-      image_url: item.image,
-      description: item.description,
-      type: item.type || "unknown",
-      location: item.location || "",
-      selected: item.selected || false
-    };
   };
 
   return (
@@ -277,8 +265,15 @@ const CreateEvent = () => {
                   {getFilteredContent().map(item => (
                     <ContentCard 
                       key={item.id}
-                      {...adaptItemForContentCard(item)}
-                      onSelect={() => {
+                      id={item.id}
+                      name={item.name}
+                      image_url={item.image_url}
+                      description={item.description}
+                      type={item.type}
+                      location={item.location}
+                      isSelected={item.selected}
+                      selectionMode={true}
+                      onClick={() => {
                         if (artists.some(a => a.id === item.id)) {
                           handleArtistSelection(item.id);
                         } else if (venues.some(v => v.id === item.id)) {
@@ -297,8 +292,15 @@ const CreateEvent = () => {
                   {artists.map(item => (
                     <ContentCard 
                       key={item.id}
-                      {...adaptItemForContentCard(item)}
-                      onSelect={() => handleArtistSelection(item.id)}
+                      id={item.id}
+                      name={item.name}
+                      image_url={item.image_url}
+                      description={item.description}
+                      type={item.type}
+                      location={item.location}
+                      isSelected={item.selected}
+                      selectionMode={true}
+                      onClick={() => handleArtistSelection(item.id)}
                     />
                   ))}
                 </div>
@@ -309,8 +311,15 @@ const CreateEvent = () => {
                   {venues.map(item => (
                     <ContentCard 
                       key={item.id}
-                      {...adaptItemForContentCard(item)}
-                      onSelect={() => handleVenueSelection(item.id)}
+                      id={item.id}
+                      name={item.name}
+                      image_url={item.image_url}
+                      description={item.description}
+                      type={item.type}
+                      location={item.location}
+                      isSelected={item.selected}
+                      selectionMode={true}
+                      onClick={() => handleVenueSelection(item.id)}
                     />
                   ))}
                 </div>
@@ -321,8 +330,15 @@ const CreateEvent = () => {
                   {resources.map(item => (
                     <ContentCard 
                       key={item.id}
-                      {...adaptItemForContentCard(item)}
-                      onSelect={() => handleResourceSelection(item.id)}
+                      id={item.id}
+                      name={item.name}
+                      image_url={item.image_url}
+                      description={item.description}
+                      type={item.type}
+                      location={item.location} 
+                      isSelected={item.selected}
+                      selectionMode={true}
+                      onClick={() => handleResourceSelection(item.id)}
                     />
                   ))}
                 </div>

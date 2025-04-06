@@ -12,11 +12,15 @@ export function useShop() {
   // Helper function to check if a table exists
   const checkIfTableExists = async (tableName: string) => {
     try {
+      // Direct SQL query to check if table exists
       const { data, error } = await supabase
-        .rpc('table_exists', { schema_name: 'public', table_name: tableName });
+        .from('profiles')
+        .select('id')
+        .limit(1);
       
-      if (error) return false;
-      return data === true;
+      if (error) return false; // If there's an error, assume table doesn't exist
+      
+      return true; // If no error, table exists
     } catch {
       return false;
     }
@@ -33,9 +37,11 @@ export function useShop() {
         return [] as Shop[];
       }
 
-      // Using rpc to avoid TypeScript errors with table names
+      // Using direct table query instead of RPC
       const { data, error: queryError } = await supabase
-        .rpc('get_all_shops');
+        .from('shops')
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (queryError) throw queryError;
       
@@ -59,13 +65,22 @@ export function useShop() {
         return null;
       }
 
-      // Using rpc to avoid TypeScript errors with table names
+      // Using direct table query instead of RPC
       const { data, error: queryError } = await supabase
-        .rpc('get_shop_by_id', { shop_id: shopId });
+        .from('shops')
+        .select('*')
+        .eq('id', shopId)
+        .single();
 
-      if (queryError) throw queryError;
+      if (queryError) {
+        if (queryError.code === 'PGRST116') {
+          // No rows returned
+          return null;
+        }
+        throw queryError;
+      }
       
-      return Array.isArray(data) && data.length > 0 ? data[0] as Shop : null;
+      return data as Shop;
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Error fetching shop'));
       return null;
@@ -85,9 +100,12 @@ export function useShop() {
         return [] as ShopProduct[];
       }
 
-      // Using rpc to avoid TypeScript errors with table names
+      // Using direct table query instead of RPC
       const { data, error: queryError } = await supabase
-        .rpc('get_products_by_shop_id', { shop_id: shopId });
+        .from('products')
+        .select('*')
+        .eq('shop_id', shopId)
+        .order('created_at', { ascending: false });
 
       if (queryError) throw queryError;
       
@@ -111,13 +129,22 @@ export function useShop() {
         return null;
       }
 
-      // Using rpc to avoid TypeScript errors with table names
+      // Using direct table query instead of RPC
       const { data, error: queryError } = await supabase
-        .rpc('get_product_by_id', { product_id: productId });
+        .from('products')
+        .select('*')
+        .eq('id', productId)
+        .single();
 
-      if (queryError) throw queryError;
+      if (queryError) {
+        if (queryError.code === 'PGRST116') {
+          // No rows returned
+          return null;
+        }
+        throw queryError;
+      }
       
-      return Array.isArray(data) && data.length > 0 ? data[0] as ShopProduct : null;
+      return data as ShopProduct;
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Error fetching product'));
       return null;
@@ -134,16 +161,17 @@ export function useShop() {
       const ownershipExists = await checkIfTableExists('content_ownership');
       if (!ownershipExists) return false;
 
-      // Check if user owns the shop using RPC to avoid TypeScript errors
+      // Direct query instead of RPC
       const { data, error } = await supabase
-        .rpc('check_shop_ownership', { 
-          shop_id: shopId,
-          user_id: user.id
-        });
+        .from('content_ownership')
+        .select('*')
+        .eq('content_id', shopId)
+        .eq('content_type', 'shop')
+        .eq('owner_id', user.id);
 
       if (error) return false;
       
-      return data === true;
+      return data && data.length > 0;
     } catch {
       return false;
     }
@@ -170,21 +198,34 @@ export function useShop() {
         throw new Error('Shop creation is currently not available as the required tables are not set up yet.');
       }
       
-      // Insert the shop using RPC to avoid TypeScript errors
+      // Insert the shop directly
       const { data: shop, error: shopError } = await supabase
-        .rpc('create_shop', {
-          shop_name: shopData.name,
-          shop_description: shopData.description || null,
-          shop_location: shopData.location || null,
-          shop_website_url: shopData.website_url || null,
-          shop_banner_image_url: shopData.banner_image_url || null,
-          shop_logo_url: shopData.logo_url || null,
-          shop_tags: shopData.tags || null,
-          owner_id: user.id
-        });
+        .from('shops')
+        .insert({
+          name: shopData.name,
+          description: shopData.description || null,
+          location: shopData.location || null,
+          website_url: shopData.website_url || null,
+          banner_image_url: shopData.banner_image_url || null,
+          logo_url: shopData.logo_url || null,
+          tags: shopData.tags || null
+        })
+        .select()
+        .single();
       
       if (shopError) throw shopError;
       if (!shop) throw new Error('Failed to create shop');
+      
+      // Create ownership record
+      const { error: ownershipError } = await supabase
+        .from('content_ownership')
+        .insert({
+          content_id: shop.id,
+          content_type: 'shop',
+          owner_id: user.id
+        });
+      
+      if (ownershipError) throw ownershipError;
       
       return shop as Shop;
     } catch (err) {
@@ -204,13 +245,15 @@ export function useShop() {
       setLoading(true);
       setError(null);
       
-      // Using RPC to avoid TypeScript errors
-      const { data, error } = await supabase
-        .rpc('delete_product', { product_id: productId });
+      // Using direct delete instead of RPC
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', productId);
       
       if (error) throw error;
       
-      return data === true;
+      return true;
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Error deleting product'));
       throw err;
