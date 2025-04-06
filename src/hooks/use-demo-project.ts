@@ -75,6 +75,16 @@ export function useDemoProject(projectId: string) {
               priority: 'high',
               assigned_to: 'Dev Team',
               due_date: '2025-05-01'
+            },
+            {
+              id: 'task-4',
+              project_id: 'meta-project-tracker',
+              title: 'Fix database connection issue',
+              description: 'Resolve intermittent connection drops',
+              status: 'blocked',
+              priority: 'high',
+              assigned_to: 'Maya Rodriguez',
+              due_date: '2025-04-10'
             }
           ];
 
@@ -126,6 +136,14 @@ export function useDemoProject(projectId: string) {
                 description: 'Input, select, checkbox components',
                 status: 'ready',
                 type: 'ui'
+              },
+              {
+                id: 'ui-3',
+                project_id: 'components-library',
+                name: 'Data Table',
+                description: 'Advanced table with sorting and filtering',
+                status: 'in-development',
+                type: 'ui'
               }
             ],
             tasks: [
@@ -135,7 +153,8 @@ export function useDemoProject(projectId: string) {
                 title: 'Document all components',
                 description: 'Create comprehensive documentation',
                 status: 'in-progress',
-                priority: 'high'
+                priority: 'high',
+                assigned_to: 'Jordan Taylor'
               },
               {
                 id: 'lib-task-2',
@@ -143,7 +162,19 @@ export function useDemoProject(projectId: string) {
                 title: 'Accessibility review',
                 description: 'Ensure all components meet WCAG guidelines',
                 status: 'not-started',
-                priority: 'medium'
+                priority: 'medium',
+                assigned_to: 'Pat Lee',
+                due_date: '2025-05-15'
+              },
+              {
+                id: 'lib-task-3',
+                project_id: 'components-library',
+                title: 'Add theme support',
+                description: 'Implement dark mode and custom themes',
+                status: 'completed',
+                priority: 'high',
+                assigned_to: 'Morgan Williams',
+                due_date: '2025-03-30'
               }
             ]
           });
@@ -178,6 +209,14 @@ export function useDemoProject(projectId: string) {
                 description: 'Gallery display for artwork',
                 status: 'planned',
                 type: 'feature'
+              },
+              {
+                id: 'platform-3',
+                project_id: 'artist-platform',
+                name: 'Payment Processing',
+                description: 'Secure payment system for artwork purchases',
+                status: 'planned',
+                type: 'integration'
               }
             ],
             tasks: [
@@ -187,7 +226,9 @@ export function useDemoProject(projectId: string) {
                 title: 'Market research',
                 description: 'Research competitor platforms',
                 status: 'completed',
-                priority: 'high'
+                priority: 'high',
+                assigned_to: 'Research Team',
+                due_date: '2025-03-01'
               },
               {
                 id: 'platform-task-2',
@@ -195,7 +236,150 @@ export function useDemoProject(projectId: string) {
                 title: 'Design artist profile page',
                 description: 'Create wireframes and mockups',
                 status: 'in-progress',
-                priority: 'medium'
+                priority: 'medium',
+                assigned_to: 'Design Team',
+                due_date: '2025-04-15'
+              },
+              {
+                id: 'platform-task-3',
+                project_id: 'artist-platform',
+                title: 'User testing',
+                description: 'Conduct user testing sessions',
+                status: 'not-started',
+                priority: 'medium',
+                assigned_to: 'UX Team',
+                due_date: '2025-06-01'
+              }
+            ]
+          });
+        } else if (projectId === '1') {
+          // Mock data for Findry Platform Core
+          setProject({
+            id: '1',
+            name: 'Findry Platform Core',
+            description: 'The core platform for Findry, including user authentication, profiles, and basic functionality.',
+            status: 'development',
+            version: '0.8.5',
+            progress: 65,
+            repo_url: 'https://github.com/findry/platform',
+            location: 'Global',
+            budget: '$150,000',
+            type: 'Web Platform',
+            timeline: '12 months',
+            tags: ['core', 'platform', 'authentication'],
+            components: [
+              {
+                id: 'comp-1',
+                project_id: '1',
+                name: 'Authentication System',
+                description: 'User registration, login, and session management',
+                status: 'ready',
+                type: 'feature'
+              },
+              {
+                id: 'comp-2',
+                project_id: '1',
+                name: 'User Profiles',
+                description: 'User profile creation and management',
+                status: 'in-development',
+                type: 'feature'
+              }
+            ],
+            tasks: [
+              {
+                id: 'task-1',
+                project_id: '1',
+                title: 'Implement password reset',
+                description: 'Add functionality for users to reset their password',
+                status: 'completed',
+                priority: 'high',
+                assigned_to: 'Security Team',
+                due_date: '2025-03-15'
+              },
+              {
+                id: 'task-2',
+                project_id: '1',
+                title: 'Optimize profile image upload',
+                description: 'Improve the performance and user experience of profile image uploads',
+                status: 'in-progress',
+                priority: 'medium',
+                assigned_to: 'Frontend Team',
+                due_date: '2025-04-10'
+              },
+              {
+                id: 'task-3',
+                project_id: '1',
+                title: 'Implement social login',
+                description: 'Add Google and Facebook login options',
+                status: 'not-started',
+                priority: 'medium',
+                assigned_to: 'Auth Team',
+                due_date: '2025-05-20'
+              }
+            ]
+          });
+        } else if (projectId === '2') {
+          // Mock data for Creator Marketplace
+          setProject({
+            id: '2',
+            name: 'Creator Marketplace',
+            description: 'A marketplace for creators to showcase and sell their work',
+            status: 'planning',
+            version: '0.2.0',
+            progress: 25,
+            location: 'Global',
+            budget: '$100,000',
+            type: 'Marketplace',
+            timeline: '9 months',
+            tags: ['marketplace', 'creators', 'e-commerce'],
+            components: [
+              {
+                id: 'comp-3',
+                project_id: '2',
+                name: 'Product Listings',
+                description: 'Create and manage product listings',
+                status: 'planned',
+                type: 'feature'
+              },
+              {
+                id: 'comp-4',
+                project_id: '2',
+                name: 'Payment Processing',
+                description: 'Integration with payment gateways',
+                status: 'planned',
+                type: 'integration'
+              }
+            ],
+            tasks: [
+              {
+                id: 'task-3',
+                project_id: '2',
+                title: 'Design product listing UI',
+                description: 'Create wireframes and mockups for product listings',
+                status: 'in-progress',
+                priority: 'high',
+                assigned_to: 'Design Team',
+                due_date: '2025-04-30'
+              },
+              {
+                id: 'task-4',
+                project_id: '2',
+                title: 'Research payment processors',
+                description: 'Evaluate different payment processors for integration',
+                status: 'not-started',
+                priority: 'medium',
+                assigned_to: 'Finance Team',
+                due_date: '2025-05-15'
+              },
+              {
+                id: 'task-5',
+                project_id: '2',
+                title: 'Draft marketplace terms',
+                description: 'Create terms of service for marketplace users',
+                status: 'completed',
+                priority: 'high',
+                assigned_to: 'Legal Team',
+                due_date: '2025-03-10'
               }
             ]
           });
