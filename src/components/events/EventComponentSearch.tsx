@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Search, X, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -15,6 +14,14 @@ interface EventComponentSearchProps {
   selectedItems?: ContentItemProps[];
   onRemoveItem?: (itemId: string) => void;
   componentType?: 'artists' | 'venues' | 'resources' | 'all';
+}
+
+interface EventComponent {
+  id: string;
+  event_id: string;
+  component_id: string;
+  component_type: string;
+  created_at: string;
 }
 
 const EventComponentSearch: React.FC<EventComponentSearchProps> = ({
@@ -108,6 +115,180 @@ const EventComponentSearch: React.FC<EventComponentSearchProps> = ({
       title: 'Item added',
       description: `${item.name} added to your event`,
     });
+  };
+
+  // Fetch related components
+  const fetchSelectedComponents = async (eventId: string) => {
+    try {
+      // Since event_components table isn't in the types yet, 
+      // we'll use a more generic approach with explicit type casting
+      const { data, error } = await supabase
+        .from('event_components')
+        .select('*')
+        .eq('event_id', eventId);
+
+      if (error) {
+        console.error('Error fetching event components:', error);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        // No components found
+        return;
+      }
+
+      // Process the components based on their types
+      const venues: string[] = [];
+      const artists: string[] = [];
+      const brands: string[] = [];
+      const communities: string[] = [];
+
+      // Cast data to our interface to ensure typing
+      (data as EventComponent[]).forEach(item => {
+        switch (item.component_type) {
+          case 'venue':
+            venues.push(item.component_id);
+            break;
+          case 'artist':
+            artists.push(item.component_id);
+            break;
+          case 'brand':
+            brands.push(item.component_id);
+            break;
+          case 'community':
+            communities.push(item.component_id);
+            break;
+        }
+      });
+
+      // Fetch the full component data for each type
+      await Promise.all([
+        venues.length > 0 ? fetchVenueDetails(venues) : null,
+        artists.length > 0 ? fetchArtistDetails(artists) : null,
+        brands.length > 0 ? fetchBrandDetails(brands) : null,
+        communities.length > 0 ? fetchCommunityDetails(communities) : null,
+      ]);
+    } catch (err) {
+      console.error('Error in fetchSelectedComponents:', err);
+    }
+  };
+
+  // Functions to fetch details for different component types
+  const fetchVenueDetails = async (ids: string[]) => {
+    if (!ids.length) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('venues')
+        .select('*')
+        .in('id', ids);
+        
+      if (error) {
+        console.error('Error fetching venue details:', error);
+        return;
+      }
+      
+      // Process venue data
+      return data.map(venue => ({
+        id: venue.id,
+        name: venue.name,
+        type: 'venue',
+        subtype: venue.type,
+        image_url: venue.image_url,
+        location: venue.location,
+        tags: venue.tags,
+      }));
+    } catch (err) {
+      console.error('Error in fetchVenueDetails:', err);
+      return [];
+    }
+  };
+
+  const fetchArtistDetails = async (ids: string[]) => {
+    if (!ids.length) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('artists')
+        .select('*')
+        .in('id', ids);
+        
+      if (error) {
+        console.error('Error fetching artist details:', error);
+        return;
+      }
+      
+      return data.map(artist => ({
+        id: artist.id,
+        name: artist.name,
+        type: 'artist',
+        subtype: artist.subtype,
+        image_url: artist.image_url,
+        location: artist.location,
+        tags: artist.tags,
+      }));
+    } catch (err) {
+      console.error('Error in fetchArtistDetails:', err);
+      return [];
+    }
+  };
+
+  const fetchBrandDetails = async (ids: string[]) => {
+    if (!ids.length) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('brands')
+        .select('*')
+        .in('id', ids);
+        
+      if (error) {
+        console.error('Error fetching brand details:', error);
+        return;
+      }
+      
+      return data.map(brand => ({
+        id: brand.id,
+        name: brand.name,
+        type: 'brand',
+        subtype: brand.subtype,
+        image_url: brand.image_url,
+        location: brand.location,
+        tags: brand.tags,
+      }));
+    } catch (err) {
+      console.error('Error in fetchBrandDetails:', err);
+      return [];
+    }
+  };
+
+  const fetchCommunityDetails = async (ids: string[]) => {
+    if (!ids.length) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('communities')
+        .select('*')
+        .in('id', ids);
+        
+      if (error) {
+        console.error('Error fetching community details:', error);
+        return;
+      }
+      
+      return data.map(community => ({
+        id: community.id,
+        name: community.name,
+        type: 'community',
+        subtype: community.type,
+        image_url: community.image_url,
+        location: community.location,
+        tags: community.tags,
+      }));
+    } catch (err) {
+      console.error('Error in fetchCommunityDetails:', err);
+      return [];
+    }
   };
 
   return (

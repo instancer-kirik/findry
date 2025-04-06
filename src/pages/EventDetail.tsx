@@ -46,20 +46,14 @@ interface EventProps {
   tags: string[] | null;
 }
 
-const EventDetail: React.FC = () => {
-  const { eventId } = useParams<{ eventId: string }>();
+// Hook for fetching event details with error handling
+const useEventDetail = (eventId: string | undefined) => {
   const [event, setEvent] = useState<EventProps | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState(false);
   const [eventSlots, setEventSlots] = useState<{ id: string; startTime: string; endTime: string; }[]>([]);
-  const [selectedVenue, setSelectedVenue] = useState<ContentItemProps | null>(null);
-  const [selectedArtists, setSelectedArtists] = useState<ContentItemProps[]>([]);
-  const [selectedBrands, setSelectedBrands] = useState<ContentItemProps[]>([]);
-  const [selectedCommunities, setSelectedCommunities] = useState<ContentItemProps[]>([]);
-  const { toast } = useToast();
-  const navigate = useNavigate();
-
+  
   useEffect(() => {
     const fetchEvent = async () => {
       if (!eventId) {
@@ -72,14 +66,16 @@ const EventDetail: React.FC = () => {
       setError(null);
 
       try {
-        const { data, error } = await supabase
+        // Fetch event data
+        const { data, error: eventError } = await supabase
           .from('events')
           .select('*')
           .eq('id', eventId)
           .single();
 
-        if (error) {
-          throw new Error(error.message);
+        if (eventError) {
+          console.error("Event fetch error:", eventError);
+          throw new Error(eventError.message);
         }
 
         if (!data) {
@@ -89,29 +85,39 @@ const EventDetail: React.FC = () => {
 
         setEvent(data);
 
-        // Fetch event slots (assuming you have a way to fetch these)
-        // For now, let's initialize with some dummy data
+        // Initialize with dummy data for now
+        // This would be replaced with actual event slot data
         setEventSlots([
           { id: '1', startTime: '10:00', endTime: '11:00' },
           { id: '2', startTime: '14:00', endTime: '15:00' },
         ]);
 
         // Check if the user is the owner of the event
-        const { data: ownershipData, error: ownershipError } = await supabase
-          .from('content_ownership')
-          .select('*')
-          .eq('content_id', eventId)
-          .eq('content_type', 'event')
-          .single();
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData && userData.user) {
+          try {
+            const { data: ownershipData, error: ownershipError } = await supabase
+              .from('content_ownership')
+              .select('id') // Only select the id to minimize data transfer
+              .eq('content_id', eventId)
+              .eq('content_type', 'event')
+              .eq('owner_id', userData.user.id);
 
-        if (ownershipError) {
-          console.warn('Could not fetch ownership:', ownershipError);
+            if (ownershipError) {
+              console.warn('Could not fetch ownership:', ownershipError);
+            } else {
+              setIsOwner(ownershipData && ownershipData.length > 0);
+            }
+          } catch (err) {
+            console.warn('Error checking ownership:', err);
+            setIsOwner(false);
+          }
+        } else {
+          setIsOwner(false);
         }
-
-        setIsOwner(!!ownershipData);
       } catch (err: any) {
         setError(err.message || 'Failed to load event');
-        console.error(err);
+        console.error("Event load error:", err);
       } finally {
         setIsLoading(false);
       }
@@ -119,6 +125,26 @@ const EventDetail: React.FC = () => {
 
     fetchEvent();
   }, [eventId]);
+
+  return { event, isLoading, error, isOwner, eventSlots, setEventSlots };
+};
+
+const EventDetail: React.FC = () => {
+  const { eventId } = useParams<{ eventId: string }>();
+  const { 
+    event, 
+    isLoading, 
+    error, 
+    isOwner, 
+    eventSlots, 
+    setEventSlots 
+  } = useEventDetail(eventId);
+  const [selectedVenue, setSelectedVenue] = useState<ContentItemProps | null>(null);
+  const [selectedArtists, setSelectedArtists] = useState<ContentItemProps[]>([]);
+  const [selectedBrands, setSelectedBrands] = useState<ContentItemProps[]>([]);
+  const [selectedCommunities, setSelectedCommunities] = useState<ContentItemProps[]>([]);
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleDeleteEvent = async () => {
     if (!eventId) {
