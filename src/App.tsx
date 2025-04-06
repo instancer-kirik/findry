@@ -50,7 +50,13 @@ function App() {
             <Route path="/resources/index" element={<ResourceIndexPage />} />
             <Route path="/resources/:resourceId" element={<ResourceDetail />} />
             <Route path="/projects" element={<Projects />} />
+            <Route path="/projects/:projectId" element={<ProjectDetail />} />
             <Route path="/events" element={<Discover />} />
+            <Route path="/events/create" element={<CreateEvent />} />
+            <Route path="/events/interested" element={<Discover />} />
+            <Route path="/events/calendar" element={<Discover />} />
+            <Route path="/events/upcoming" element={<Discover />} />
+            <Route path="/events/:eventId" element={<EventDetail />} />
             <Route path="/venues" element={<Discover />} />
             <Route path="/venues/:venueId" element={<VenueDetail />} />
             <Route path="/communities" element={<Communities />} />
@@ -68,11 +74,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
-            <Route path="/events/create" element={<CreateEvent />} />
-            <Route path="/events/:eventId" element={<EventDetail />} />
-            <Route path="/events/interested" element={<Discover />} />
             <Route path="/collaboration" element={<Collaboration />} />
-            <Route path="/projects/:projectId" element={<ProjectDetail />} />
             <Route path="/meetings" element={<MeetingScheduler />} />
             <Route path="/meetings/schedule" element={<MeetingScheduler />} />
             <Route path="/meetings/:meetingId" element={<MeetingScheduler />} />
