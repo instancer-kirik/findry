@@ -1,176 +1,238 @@
-
-import { useState, useEffect } from 'react';
-import { ContentItemProps } from '../components/marketplace/ContentCard';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { 
-  artists, 
-  resources, 
-  projects, 
-  events, 
-  venues, 
-  communities, 
-  brands 
-} from '../components/discover/DiscoverData';
-
-// Use a local Json interface to avoid conflicts
-interface LocalJson {
-  [key: string]: any;
-}
+import { useEffect, useState } from 'react';
+import { ContentItemProps } from '@/components/marketplace/ContentCard';
 
 export const useDiscoverData = (
-  activeTab: string,
-  searchQuery: string, 
-  selectedTags: string[],
-  resourceType: string,
-  artistStyle: string,
-  disciplinaryType: string,
-  activeSubTab: string,
-  selectedSubfilters: string[]
+  category: string,
+  searchQuery: string = '',
+  tags: string[] = [],
+  resourceType: string = 'all',
+  artistStyle: string = 'all',
+  disciplinaryType: string = 'all',
+  subTab: string = 'all',
+  subfilters: string[] = []
 ) => {
   const [items, setItems] = useState<ContentItemProps[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchData();
-    }, 300); // Debounce for search input
-    
-    return () => clearTimeout(timer);
-  }, [searchQuery, selectedTags, resourceType, artistStyle, disciplinaryType, activeSubTab, activeTab, selectedSubfilters]);
+    const fetchItems = async () => {
+      setIsLoading(true);
+      setError(null);
 
-  const fetchData = async () => {
-    setIsLoading(true);
-    try {
-      // Try to fetch from Supabase first
-      const { data, error } = await supabase.rpc('search_discover_content', {
-        content_type: activeTab,
-        search_query: searchQuery,
-        tag_filters: selectedTags.length > 0 ? selectedTags : null
-      });
-      
-      if (error) {
-        console.error('Error fetching data from Supabase:', error);
-        // Fall back to mock data if Supabase fails
-        useFallbackData();
-      } else if (data && Array.isArray(data) && data.length > 0) {
-        let filteredItems = processData(data);
-        setItems(filteredItems);
-      } else {
-        console.warn('No data returned from Supabase, using fallback data');
-        useFallbackData();
+      try {
+        // Determine which data to fetch based on category
+        // For demonstration, we're using sample data
+        let result: ContentItemProps[] = [];
+
+        // Add project sample data that simulates a Meta Project Tracker
+        const projectsSampleData: ContentItemProps[] = [
+          {
+            id: 'meta-project-tracker',
+            name: 'Meta Project Tracker',
+            type: 'project',
+            subtype: 'development',
+            location: 'Global',
+            tags: ['react', 'typescript', 'project-management'],
+            image_url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+          },
+          {
+            id: 'components-library',
+            name: 'Components Library',
+            type: 'project',
+            subtype: 'ui',
+            location: 'Frontend',
+            tags: ['ui', 'components', 'shadcn'],
+            image_url: 'https://images.unsplash.com/photo-1556742031-c6961e8560b0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+          },
+          {
+            id: 'artist-platform',
+            name: 'Artist Platform',
+            type: 'project',
+            subtype: 'application',
+            location: 'Online',
+            tags: ['artists', 'portfolio', 'marketplace'],
+            image_url: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+          }
+        ];
+
+        // Simulate fetching data based on category
+        if (category === 'artists') {
+          // Fetch artists data
+          result = [
+            {
+              id: 'artist1',
+              name: 'John Doe',
+              type: 'artist',
+              location: 'New York',
+              tags: ['music', 'pop'],
+              image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+            },
+            {
+              id: 'artist2',
+              name: 'Jane Smith',
+              type: 'artist',
+              location: 'Los Angeles',
+              tags: ['art', 'painting'],
+              image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+            },
+          ];
+        } else if (category === 'resources') {
+          // Fetch resources data
+          result = [
+            {
+              id: 'resource1',
+              name: 'Studio A',
+              type: 'resource',
+              location: 'New York',
+              tags: ['studio', 'music'],
+              image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+            },
+            {
+              id: 'resource2',
+              name: 'Gallery B',
+              type: 'resource',
+              location: 'Los Angeles',
+              tags: ['gallery', 'art'],
+              image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+            },
+          ];
+        } else if (category === 'events') {
+          // Fetch events data
+          result = [
+            {
+              id: 'event1',
+              name: 'Concert',
+              type: 'event',
+              location: 'New York',
+              tags: ['music', 'live'],
+              image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+            },
+            {
+              id: 'event2',
+              name: 'Exhibition',
+              type: 'event',
+              location: 'Los Angeles',
+              tags: ['art', 'gallery'],
+              image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+            },
+          ];
+        } else if (category === 'venues') {
+          // Fetch venues data
+          result = [
+            {
+              id: 'venue1',
+              name: 'The Venue',
+              type: 'venue',
+              location: 'New York',
+              tags: ['music', 'live'],
+              image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+            },
+            {
+              id: 'venue2',
+              name: 'The Gallery',
+              type: 'venue',
+              location: 'Los Angeles',
+              tags: ['art', 'gallery'],
+              image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+            },
+          ];
+        } else if (category === 'communities') {
+          // Fetch communities data
+          result = [
+            {
+              id: 'community1',
+              name: 'The Community',
+              type: 'community',
+              location: 'New York',
+              tags: ['music', 'live'],
+              image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+            },
+            {
+              id: 'community2',
+              name: 'The Art Collective',
+              type: 'community',
+              location: 'Los Angeles',
+              tags: ['art', 'gallery'],
+              image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+            },
+          ];
+        } else if (category === 'brands') {
+          // Fetch brands data
+          result = [
+            {
+              id: 'brand1',
+              name: 'The Brand',
+              type: 'brand',
+              location: 'New York',
+              tags: ['music', 'live'],
+              image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+            },
+            {
+              id: 'brand2',
+              name: 'The Art Brand',
+              type: 'brand',
+              location: 'Los Angeles',
+              tags: ['art', 'gallery'],
+              image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+            },
+          ];
+        }
+
+        // Add in the project data if category is projects
+        if (category === 'projects') {
+          result = [...projectsSampleData];
+        }
+
+        // Filter by search query
+        if (searchQuery) {
+          result = result.filter(item =>
+            item.name.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+        }
+
+        // Filter by tags
+        if (tags.length > 0) {
+          result = result.filter(item =>
+            tags.every(tag => item.tags?.includes(tag))
+          );
+        }
+
+        // Filter by resource type
+        if (resourceType !== 'all' && category === 'resources') {
+          result = result.filter(item => item.subtype === resourceType);
+        }
+
+        // Filter by artist style
+        if (artistStyle !== 'all' && category === 'artists') {
+          result = result.filter(item => item.styles?.includes(artistStyle));
+        }
+
+        // Filter by disciplinary type
+        if (disciplinaryType !== 'all' && category === 'artists') {
+          result = result.filter(item => item.disciplines?.includes(disciplinaryType));
+        }
+
+        setItems(result);
+      } catch (err) {
+        console.error('Error fetching items:', err);
+        setError('Failed to load data. Please try again later.');
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Unexpected error:', error);
-      // Fall back to mock data on any error
-      useFallbackData();
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
 
-  const useFallbackData = () => {
-    console.log('Using fallback data for', activeTab);
-    // Use mock data from DiscoverData.ts
-    let mockData: ContentItemProps[] = [];
-    
-    switch (activeTab) {
-      case 'artists':
-        mockData = artists;
-        break;
-      case 'resources':
-        mockData = resources;
-        break;
-      case 'projects':
-        mockData = projects;
-        break;
-      case 'events':
-        mockData = events;
-        break;
-      case 'venues':
-        mockData = venues;
-        break;
-      case 'communities':
-        mockData = communities;
-        break;
-      case 'brands':
-        mockData = brands;
-        break;
-      default:
-        mockData = [];
-    }
-    
-    let filteredItems = processData(mockData);
-    setItems(filteredItems);
-  };
+    fetchItems();
+  }, [
+    category,
+    searchQuery,
+    tags.join(','),
+    resourceType,
+    artistStyle,
+    disciplinaryType,
+    subTab,
+    subfilters.join(','),
+  ]);
 
-  const processData = (data: any[]): ContentItemProps[] => {
-    // Map any data format to ContentItemProps
-    let itemsData = data.map((item: LocalJson) => ({
-      id: item.id,
-      name: item.name,
-      type: item.type || '',
-      subtype: item.subtype || item.type || '',  // Add subtype property to ContentItemProps
-      location: item.location || 'Location not specified',
-      tags: Array.isArray(item.tags) ? item.tags : [],
-      image_url: item.image_url || '/placeholder.svg',
-      multidisciplinary: item.multidisciplinary || false,
-      styles: item.styles || [],
-      disciplines: item.disciplines || [],
-      // Add empty author that can be populated later if needed
-      author: item.author
-    })) as ContentItemProps[];
-    
-    // Apply additional filters
-    if (activeTab === 'resources' && resourceType !== 'all') {
-      itemsData = itemsData.filter(item => 
-        item.type?.toLowerCase() === resourceType.toLowerCase()
-      );
-    }
-    
-    if (activeTab === 'artists') {
-      if (artistStyle !== 'all') {
-        itemsData = itemsData.filter(item => 
-          item.styles && item.styles.some((style: string) => 
-            style.toLowerCase() === artistStyle.toLowerCase()
-          )
-        );
-      }
-      
-      if (disciplinaryType !== 'all') {
-        itemsData = itemsData.filter(item => 
-          (disciplinaryType === 'multi' && item.multidisciplinary) || 
-          (disciplinaryType === 'single' && !item.multidisciplinary)
-        );
-      }
-    }
-    
-    // Apply subtab filtering
-    if (activeSubTab !== 'all') {
-      itemsData = itemsData.filter(item => 
-        (item.subtype && item.subtype.toLowerCase() === activeSubTab.toLowerCase()) || 
-        (item.type && item.type.toLowerCase() === activeSubTab.toLowerCase())
-      );
-    }
-    
-    // Apply multi-select subfilters
-    if (selectedSubfilters.length > 0) {
-      itemsData = itemsData.filter(item => 
-        selectedSubfilters.some(filter => {
-          if (item.tags?.includes(filter)) return true;
-          if (item.type?.toLowerCase() === filter.toLowerCase()) return true;
-          if (item.subtype?.toLowerCase() === filter.toLowerCase()) return true;
-          if (item.styles && item.styles.some((style: string) => 
-            style.toLowerCase() === filter.toLowerCase()
-          )) return true;
-          return false;
-        })
-      );
-    }
-    
-    return itemsData;
-  };
-
-  return { items, isLoading, fetchData };
+  return { items, isLoading, error };
 };

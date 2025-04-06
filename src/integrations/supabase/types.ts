@@ -373,6 +373,97 @@ export type Database = {
         }
         Relationships: []
       }
+      project_components: {
+        Row: {
+          created_at: string
+          dependencies: string[] | null
+          description: string | null
+          id: string
+          name: string
+          project_id: string
+          status: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dependencies?: string[] | null
+          description?: string | null
+          id?: string
+          name: string
+          project_id: string
+          status: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dependencies?: string[] | null
+          description?: string | null
+          id?: string
+          name?: string
+          project_id?: string
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_components_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_tasks: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: string
+          project_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority: string
+          project_id: string
+          status: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string
+          project_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           budget: string | null
@@ -690,6 +781,39 @@ export type Database = {
         }
         Returns: number
       }
+      get_project_components: {
+        Args: {
+          p_project_id: string
+        }
+        Returns: {
+          created_at: string
+          dependencies: string[] | null
+          description: string | null
+          id: string
+          name: string
+          project_id: string
+          status: string
+          type: string
+          updated_at: string
+        }[]
+      }
+      get_project_tasks: {
+        Args: {
+          p_project_id: string
+        }
+        Returns: {
+          assigned_to: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: string
+          project_id: string
+          status: string
+          title: string
+          updated_at: string
+        }[]
+      }
       get_table_definition: {
         Args: {
           table_name: string
@@ -706,6 +830,50 @@ export type Database = {
           _user_id?: string
         }
         Returns: boolean
+      }
+      insert_project_component: {
+        Args: {
+          p_project_id: string
+          p_name: string
+          p_description: string
+          p_status: string
+          p_type: string
+          p_dependencies: string[]
+        }
+        Returns: {
+          created_at: string
+          dependencies: string[] | null
+          description: string | null
+          id: string
+          name: string
+          project_id: string
+          status: string
+          type: string
+          updated_at: string
+        }
+      }
+      insert_project_task: {
+        Args: {
+          p_project_id: string
+          p_title: string
+          p_description: string
+          p_status: string
+          p_priority: string
+          p_assigned_to: string
+          p_due_date: string
+        }
+        Returns: {
+          assigned_to: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: string
+          project_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
       }
       is_content_owner: {
         Args: {
@@ -729,6 +897,50 @@ export type Database = {
           table_name: string
         }
         Returns: boolean
+      }
+      update_project_component: {
+        Args: {
+          p_id: string
+          p_name: string
+          p_description: string
+          p_status: string
+          p_type: string
+          p_dependencies: string[]
+        }
+        Returns: {
+          created_at: string
+          dependencies: string[] | null
+          description: string | null
+          id: string
+          name: string
+          project_id: string
+          status: string
+          type: string
+          updated_at: string
+        }
+      }
+      update_project_task: {
+        Args: {
+          p_id: string
+          p_title: string
+          p_description: string
+          p_status: string
+          p_priority: string
+          p_assigned_to: string
+          p_due_date: string
+        }
+        Returns: {
+          assigned_to: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: string
+          project_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
       }
     }
     Enums: {
