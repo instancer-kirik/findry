@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
@@ -32,7 +31,8 @@ import {
   AlertCircle,
   Pencil,
   Plus,
-  MapPin
+  MapPin,
+  Layers
 } from 'lucide-react';
 import AnimatedSection from '../components/ui-custom/AnimatedSection';
 import { toast } from 'sonner';
@@ -107,7 +107,6 @@ const ProjectDetail: React.FC = () => {
     return colors[status as keyof typeof colors] || 'bg-purple-100 text-purple-800';
   };
 
-  // Calculate project progress based on completed tasks
   const calculateProgress = () => {
     if (!project.tasks || project.tasks.length === 0) return 0;
     const completedTasks = project.tasks.filter(t => t.status === 'completed').length;
@@ -168,7 +167,7 @@ const ProjectDetail: React.FC = () => {
                   <CheckSquare className="mr-2 h-4 w-4" /> Tasks
                 </TabsTrigger>
                 <TabsTrigger value="components">
-                  <Users className="mr-2 h-4 w-4" /> Components
+                  <Layers className="mr-2 h-4 w-4" /> Components
                 </TabsTrigger>
                 <TabsTrigger value="details">
                   <FileText className="mr-2 h-4 w-4" /> Details

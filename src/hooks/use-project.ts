@@ -76,24 +76,22 @@ export function useProjects() {
 
     if (projectError) throw projectError;
 
+    // Using rpc function to safely get components
     const { data: components, error: componentsError } = await supabase
-      .from('project_components')
-      .select('*')
-      .eq('project_id', id);
+      .rpc('get_project_components', { p_project_id: id });
 
     if (componentsError) throw componentsError;
 
+    // Using rpc function to safely get tasks
     const { data: tasks, error: tasksError } = await supabase
-      .from('project_tasks')
-      .select('*')
-      .eq('project_id', id);
+      .rpc('get_project_tasks', { p_project_id: id });
 
     if (tasksError) throw tasksError;
 
     return {
       ...project,
-      components: components || [],
-      tasks: tasks || []
+      components: components as ProjectComponent[] || [],
+      tasks: tasks as ProjectTask[] || []
     } as Project;
   };
 
@@ -127,30 +125,49 @@ export function useProjects() {
 
     // Insert components if provided
     if (project.components && project.components.length > 0) {
-      const { error: componentsError } = await supabase
-        .from('project_components')
-        .insert(
-          project.components.map(component => ({
-            ...component,
-            project_id: projectId
-          }))
-        );
-
-      if (componentsError) throw componentsError;
+      const componentsToInsert = project.components.map(component => ({
+        ...component,
+        project_id: projectId
+      }));
+      
+      // Using rpc to insert components
+      for (const component of componentsToInsert) {
+        const { error: componentError } = await supabase
+          .rpc('insert_project_component', { 
+            p_project_id: projectId,
+            p_name: component.name,
+            p_description: component.description || null,
+            p_status: component.status,
+            p_type: component.type,
+            p_dependencies: component.dependencies || []
+          });
+        
+        if (componentError) throw componentError;
+      }
     }
 
     // Insert tasks if provided
     if (project.tasks && project.tasks.length > 0) {
-      const { error: tasksError } = await supabase
-        .from('project_tasks')
-        .insert(
-          project.tasks.map(task => ({
-            ...task,
-            project_id: projectId
-          }))
-        );
-
-      if (tasksError) throw tasksError;
+      const tasksToInsert = project.tasks.map(task => ({
+        ...task,
+        project_id: projectId
+      }));
+      
+      // Using rpc to insert tasks
+      for (const task of tasksToInsert) {
+        const { error: taskError } = await supabase
+          .rpc('insert_project_task', { 
+            p_project_id: projectId,
+            p_title: task.title,
+            p_description: task.description || null,
+            p_status: task.status,
+            p_priority: task.priority,
+            p_assigned_to: task.assigned_to || null,
+            p_due_date: task.due_date || null
+          });
+        
+        if (taskError) throw taskError;
+      }
     }
 
     return data as Project;
@@ -175,11 +192,16 @@ export function useProjects() {
   const createProjectComponent = async (component: Omit<ProjectComponent, 'id' | 'created_at' | 'updated_at'>) => {
     if (!user) throw new Error('User not authenticated');
 
+    // Using rpc to create component
     const { data, error } = await supabase
-      .from('project_components')
-      .insert(component)
-      .select()
-      .single();
+      .rpc('insert_project_component', { 
+        p_project_id: component.project_id,
+        p_name: component.name,
+        p_description: component.description || null,
+        p_status: component.status,
+        p_type: component.type,
+        p_dependencies: component.dependencies || []
+      });
 
     if (error) throw error;
 
@@ -189,12 +211,16 @@ export function useProjects() {
   const updateProjectComponent = async ({ id, ...componentData }: ProjectComponent) => {
     if (!user) throw new Error('User not authenticated');
 
+    // Using rpc to update component
     const { data, error } = await supabase
-      .from('project_components')
-      .update(componentData)
-      .eq('id', id)
-      .select()
-      .single();
+      .rpc('update_project_component', { 
+        p_id: id,
+        p_name: componentData.name,
+        p_description: componentData.description || null,
+        p_status: componentData.status,
+        p_type: componentData.type,
+        p_dependencies: componentData.dependencies || []
+      });
 
     if (error) throw error;
 
@@ -204,11 +230,17 @@ export function useProjects() {
   const createProjectTask = async (task: Omit<ProjectTask, 'id' | 'created_at' | 'updated_at'>) => {
     if (!user) throw new Error('User not authenticated');
 
+    // Using rpc to create task
     const { data, error } = await supabase
-      .from('project_tasks')
-      .insert(task)
-      .select()
-      .single();
+      .rpc('insert_project_task', { 
+        p_project_id: task.project_id,
+        p_title: task.title,
+        p_description: task.description || null,
+        p_status: task.status,
+        p_priority: task.priority,
+        p_assigned_to: task.assigned_to || null,
+        p_due_date: task.due_date || null
+      });
 
     if (error) throw error;
 
@@ -218,12 +250,17 @@ export function useProjects() {
   const updateProjectTask = async ({ id, ...taskData }: ProjectTask) => {
     if (!user) throw new Error('User not authenticated');
 
+    // Using rpc to update task
     const { data, error } = await supabase
-      .from('project_tasks')
-      .update(taskData)
-      .eq('id', id)
-      .select()
-      .single();
+      .rpc('update_project_task', { 
+        p_id: id,
+        p_title: taskData.title,
+        p_description: taskData.description || null,
+        p_status: taskData.status,
+        p_priority: taskData.priority,
+        p_assigned_to: taskData.assigned_to || null,
+        p_due_date: taskData.due_date || null
+      });
 
     if (error) throw error;
 

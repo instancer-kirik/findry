@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -65,8 +64,14 @@ const CreateProject: React.FC = () => {
       return;
     }
 
+    if (!values.name) {
+      toast.error('Project name is required');
+      return;
+    }
+
     createProject({
       ...values,
+      name: values.name,
       tags,
       components: [],
       tasks: []
