@@ -14,6 +14,7 @@ import EventDetail from './pages/EventDetail'
 import Collaboration from './pages/Collaboration'
 import ProjectDetail from './pages/ProjectDetail'
 import Projects from './pages/Projects'
+import CreateProject from './pages/CreateProject'
 import MeetingScheduler from './pages/MeetingScheduler'
 import Communities from './pages/Communities'
 import Chats from './pages/Chats'
@@ -51,6 +52,7 @@ function App() {
             <Route path="/resources/:resourceId" element={<ResourceDetail />} />
             <Route path="/projects" element={<Projects />} />
             <Route path="/projects/:projectId" element={<ProjectDetail />} />
+            <Route path="/projects/create" element={<CreateProject />} />
             <Route path="/events" element={<Discover />} />
             <Route path="/events/create" element={<CreateEvent />} />
             <Route path="/events/interested" element={<Discover />} />
