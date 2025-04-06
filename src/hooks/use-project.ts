@@ -76,22 +76,26 @@ export function useProjects() {
 
     if (projectError) throw projectError;
 
-    // Using rpc function to safely get components
-    const { data: components, error: componentsError } = await supabase
+    // Fetch components using the RPC function
+    const { data: componentsData, error: componentsError } = await supabase
       .rpc('get_project_components', { p_project_id: id });
 
     if (componentsError) throw componentsError;
 
-    // Using rpc function to safely get tasks
-    const { data: tasks, error: tasksError } = await supabase
+    // Fetch tasks using the RPC function
+    const { data: tasksData, error: tasksError } = await supabase
       .rpc('get_project_tasks', { p_project_id: id });
 
     if (tasksError) throw tasksError;
 
+    // Convert the any[] type to our specific types
+    const components = componentsData as unknown as ProjectComponent[];
+    const tasks = tasksData as unknown as ProjectTask[];
+
     return {
       ...project,
-      components: components as ProjectComponent[] || [],
-      tasks: tasks as ProjectTask[] || []
+      components: components || [],
+      tasks: tasks || []
     } as Project;
   };
 
@@ -105,7 +109,8 @@ export function useProjects() {
       .from('projects')
       .insert({
         id: projectId,
-        ...project
+        ...project,
+        name: project.name || '' // Ensure name is not undefined
       })
       .select()
       .single();
@@ -125,13 +130,7 @@ export function useProjects() {
 
     // Insert components if provided
     if (project.components && project.components.length > 0) {
-      const componentsToInsert = project.components.map(component => ({
-        ...component,
-        project_id: projectId
-      }));
-      
-      // Using rpc to insert components
-      for (const component of componentsToInsert) {
+      for (const component of project.components) {
         const { error: componentError } = await supabase
           .rpc('insert_project_component', { 
             p_project_id: projectId,
@@ -148,13 +147,7 @@ export function useProjects() {
 
     // Insert tasks if provided
     if (project.tasks && project.tasks.length > 0) {
-      const tasksToInsert = project.tasks.map(task => ({
-        ...task,
-        project_id: projectId
-      }));
-      
-      // Using rpc to insert tasks
-      for (const task of tasksToInsert) {
+      for (const task of project.tasks) {
         const { error: taskError } = await supabase
           .rpc('insert_project_task', { 
             p_project_id: projectId,
@@ -205,7 +198,7 @@ export function useProjects() {
 
     if (error) throw error;
 
-    return data as ProjectComponent;
+    return data as unknown as ProjectComponent;
   };
 
   const updateProjectComponent = async ({ id, ...componentData }: ProjectComponent) => {
@@ -224,7 +217,7 @@ export function useProjects() {
 
     if (error) throw error;
 
-    return data as ProjectComponent;
+    return data as unknown as ProjectComponent;
   };
 
   const createProjectTask = async (task: Omit<ProjectTask, 'id' | 'created_at' | 'updated_at'>) => {
@@ -244,7 +237,7 @@ export function useProjects() {
 
     if (error) throw error;
 
-    return data as ProjectTask;
+    return data as unknown as ProjectTask;
   };
 
   const updateProjectTask = async ({ id, ...taskData }: ProjectTask) => {
@@ -264,7 +257,7 @@ export function useProjects() {
 
     if (error) throw error;
 
-    return data as ProjectTask;
+    return data as unknown as ProjectTask;
   };
 
   const useGetProjects = () => {
