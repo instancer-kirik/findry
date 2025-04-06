@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -71,6 +72,8 @@ const ContentCard: React.FC<ContentCardProps> = ({
         return `/brands/${id}`;
       case 'event':
         return `/events/${id}`;
+      case 'project':
+        return `/projects/${id}`;
       default:
         return `/profile/${id}`;
     }
