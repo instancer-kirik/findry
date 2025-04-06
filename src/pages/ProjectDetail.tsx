@@ -15,7 +15,7 @@ const ProjectDetail: React.FC = () => {
   const navigate = useNavigate();
   
   // Check if this is a demo project (meta-project-tracker, components-library, artist-platform)
-  const isDemoProject = ['meta-project-tracker', 'components-library', 'artist-platform'].includes(projectId);
+  const isDemoProject = ['5a7b8c9d-0e1f-2345-6789-012345678901', '7b8c9d0e-1f23-4567-8901-234567890123', '9d0e1f23-4567-8901-2345-67890123456a'].includes(projectId);
   
   // Use the appropriate hook based on whether it's a demo project or not
   const { useGetProject } = useProjects();
@@ -49,7 +49,7 @@ const ProjectDetail: React.FC = () => {
     return tasks.reduce((counts, task) => {
       if (task.status === 'completed') counts.completed++;
       else if (task.status === 'in-progress') counts.inProgress++;
-      else if (task.status === 'not-started' || task.status === 'pending') counts.notStarted++;
+      else if (task.status === 'not-started') counts.notStarted++;
       else if (task.status === 'blocked') counts.blocked++;
       return counts;
     }, { completed: 0, inProgress: 0, notStarted: 0, blocked: 0 });
@@ -115,10 +115,12 @@ const ProjectDetail: React.FC = () => {
           
           <div className="flex flex-col items-end mt-4 md:mt-0">
             <div className="flex items-center gap-3 mb-2">
-              <Badge variant={project.status === 'released' ? 'success' : 
-                             project.status === 'maintenance' ? 'default' :
-                             project.status === 'development' ? 'warning' : 
-                             project.status === 'testing' ? 'info' : 'outline'}>
+              <Badge variant={
+                project.status === 'released' ? 'secondary' : 
+                project.status === 'maintenance' ? 'default' :
+                project.status === 'development' ? 'secondary' : 
+                project.status === 'testing' ? 'outline' : 'outline'
+              }>
                 {project.status ? project.status.charAt(0).toUpperCase() + project.status.slice(1) : 'Planning'}
               </Badge>
               {project.version && <span className="text-sm text-muted-foreground">v{project.version}</span>}
