@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Toaster } from '@/components/ui/toaster'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -14,6 +15,7 @@ import EventDetail from './pages/EventDetail'
 import Collaboration from './pages/Collaboration'
 import ProjectDetail from './pages/ProjectDetail'
 import Projects from './pages/Projects'
+import CreateProject from './pages/CreateProject'
 import MeetingScheduler from './pages/MeetingScheduler'
 import Communities from './pages/Communities'
 import Chats from './pages/Chats'
@@ -50,6 +52,8 @@ function App() {
             <Route path="/resources/index" element={<ResourceIndexPage />} />
             <Route path="/resources/:resourceId" element={<ResourceDetail />} />
             <Route path="/projects" element={<Projects />} />
+            <Route path="/projects/create" element={<CreateProject />} />
+            <Route path="/projects/:projectId" element={<ProjectDetail />} />
             <Route path="/events" element={<Discover />} />
             <Route path="/venues" element={<Discover />} />
             <Route path="/venues/:venueId" element={<VenueDetail />} />
@@ -72,7 +76,6 @@ function App() {
             <Route path="/events/:eventId" element={<EventDetail />} />
             <Route path="/events/interested" element={<Discover />} />
             <Route path="/collaboration" element={<Collaboration />} />
-            <Route path="/projects/:projectId" element={<ProjectDetail />} />
             <Route path="/meetings" element={<MeetingScheduler />} />
             <Route path="/meetings/schedule" element={<MeetingScheduler />} />
             <Route path="/meetings/:meetingId" element={<MeetingScheduler />} />
