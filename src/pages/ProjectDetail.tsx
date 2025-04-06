@@ -6,8 +6,6 @@ import { useDemoProject } from '@/hooks/use-demo-project';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-// Import any other components needed for the project detail view
-
 const ProjectDetail: React.FC = () => {
   const { projectId = '' } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
@@ -59,7 +57,7 @@ const ProjectDetail: React.FC = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="text-center p-6 bg-red-50 rounded-lg border border-red-200">
             <h2 className="text-xl font-bold text-red-700 mb-2">Error Loading Project</h2>
-            <p className="text-red-600">{error || "Project not found"}</p>
+            <p className="text-red-600">{error ? (error instanceof Error ? error.message : String(error)) : "Project not found"}</p>
             <Button 
               variant="outline" 
               onClick={() => navigate('/projects')}
