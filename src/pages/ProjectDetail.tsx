@@ -1,320 +1,777 @@
-
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import Layout from '@/components/layout/Layout';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useProjects, Project, ProjectComponent, ProjectTask } from '@/hooks/use-project';
-import { useDemoProject } from '@/hooks/use-demo-project';
-import { Loader2, ArrowLeft, Check, Clock, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Check, Github, Clock, ArrowLeft, Plus, Edit } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { toast } from "sonner";
 
-const ProjectDetail: React.FC = () => {
-  const { projectId = '' } = useParams<{ projectId: string }>();
+// Form schemas for components and tasks
+const componentSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  description: z.string().min(2, { message: "Description is required." }),
+  status: z.enum(["planned", "in-development", "ready", "needs-revision"]),
+  type: z.enum(["ui", "feature", "integration", "page"]),
+});
+
+const taskSchema = z.object({
+  title: z.string().min(2, { message: "Title must be at least 2 characters." }),
+  description: z.string().min(2, { message: "Description is required." }),
+  status: z.enum(["pending", "in-progress", "completed", "blocked"]),
+  priority: z.enum(["low", "medium", "high"]),
+  assignedTo: z.string().optional(),
+  dueDate: z.string().optional(),
+});
+
+export default function ProjectDetail() {
+  const { id } = useParams();
   const navigate = useNavigate();
+  const { useGetProject, useCreateProjectComponent, useUpdateProjectComponent, useCreateProjectTask, useUpdateProjectTask } = useProjects();
   
-  // Check if this is a demo project (meta-project-tracker, components-library, artist-platform)
-  const isDemoProject = ['5a7b8c9d-0e1f-2345-6789-012345678901', '7b8c9d0e-1f23-4567-8901-234567890123', '9d0e1f23-4567-8901-2345-67890123456a'].includes(projectId);
+  // Get the source from URL search params
+  const searchParams = new URLSearchParams(window.location.search);
+  const source = searchParams.get('source') || undefined;
   
-  // Use the appropriate hook based on whether it's a demo project or not
-  const { useGetProject } = useProjects();
-  const realProjectQuery = useGetProject(projectId);
-  const demoProjectQuery = useDemoProject(projectId);
-  
-  // Use either the real project data or demo project data
-  const {
-    data: realProject,
-    isLoading: isRealProjectLoading,
-    error: realProjectError
-  } = realProjectQuery;
-  
-  const {
-    project: demoProject,
-    isLoading: isDemoProjectLoading,
-    error: demoProjectError
-  } = demoProjectQuery;
-  
-  // Combine the results
-  const project = isDemoProject ? demoProject : realProject;
-  const isLoading = isDemoProject ? isDemoProjectLoading : isRealProjectLoading;
-  const error = isDemoProject ? demoProjectError : realProjectError;
+  const { data: project, isLoading, error } = useGetProject(id, source);
   
   const [activeTab, setActiveTab] = useState('overview');
+  const [selectedComponent, setSelectedComponent] = useState<ProjectComponent | null>(null);
+  const [selectedTask, setSelectedTask] = useState<ProjectTask | null>(null);
+  const [isComponentDialogOpen, setIsComponentDialogOpen] = useState(false);
+  const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
   
-  // Count tasks by status
-  const getTaskStatusCounts = (tasks?: ProjectTask[]) => {
-    if (!tasks || tasks.length === 0) return { completed: 0, inProgress: 0, notStarted: 0, blocked: 0 };
+  // Mutations
+  const createComponent = useCreateProjectComponent();
+  const updateComponent = useUpdateProjectComponent();
+  const createTask = useCreateProjectTask();
+  const updateTask = useUpdateProjectTask();
+  
+  // Component form
+  const componentForm = useForm<z.infer<typeof componentSchema>>({
+    resolver: zodResolver(componentSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      status: "planned",
+      type: "feature",
+    },
+  });
+  
+  // Task form
+  const taskForm = useForm<z.infer<typeof taskSchema>>({
+    resolver: zodResolver(taskSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      status: "pending",
+      priority: "medium",
+      assignedTo: "",
+      dueDate: "",
+    },
+  });
+  
+  // Handle component form submit
+  const onComponentSubmit = (values: z.infer<typeof componentSchema>) => {
+    // Create a complete component object with required fields
+    const componentData = {
+      name: values.name,
+      description: values.description,
+      status: values.status,
+      type: values.type
+    };
     
-    return tasks.reduce((counts, task) => {
-      if (task.status === 'completed') counts.completed++;
-      else if (task.status === 'in-progress') counts.inProgress++;
-      else if (task.status === 'not-started') counts.notStarted++;
-      else if (task.status === 'blocked') counts.blocked++;
-      return counts;
-    }, { completed: 0, inProgress: 0, notStarted: 0, blocked: 0 });
+    if (selectedComponent) {
+      // Update existing component
+      updateComponent.mutate({
+        projectId: id!,
+        componentId: selectedComponent.id,
+        updates: values
+      }, {
+        onSuccess: () => {
+          setIsComponentDialogOpen(false);
+          setSelectedComponent(null);
+          componentForm.reset();
+        }
+      });
+    } else {
+      // Create new component
+      createComponent.mutate({
+        projectId: id!,
+        component: componentData
+      }, {
+        onSuccess: () => {
+          setIsComponentDialogOpen(false);
+          componentForm.reset();
+        }
+      });
+    }
   };
   
-  const taskStatusCounts = getTaskStatusCounts(project?.tasks);
+  // Handle task form submit
+  const onTaskSubmit = (values: z.infer<typeof taskSchema>) => {
+    // Create a complete task object with required fields
+    const taskData = {
+      title: values.title,
+      description: values.description,
+      status: values.status,
+      priority: values.priority,
+      assignedTo: values.assignedTo,
+      dueDate: values.dueDate
+    };
+    
+    if (selectedTask) {
+      // Update existing task
+      updateTask.mutate({
+        projectId: id!,
+        taskId: selectedTask.id,
+        updates: values
+      }, {
+        onSuccess: () => {
+          setIsTaskDialogOpen(false);
+          setSelectedTask(null);
+          taskForm.reset();
+        }
+      });
+    } else {
+      // Create new task
+      createTask.mutate({
+        projectId: id!,
+        task: taskData
+      }, {
+        onSuccess: () => {
+          setIsTaskDialogOpen(false);
+          taskForm.reset();
+        }
+      });
+    }
+  };
   
+  // Open component dialog for editing
+  const openComponentDialog = (component?: ProjectComponent) => {
+    if (component) {
+      setSelectedComponent(component);
+      componentForm.reset({
+        name: component.name,
+        description: component.description,
+        status: component.status,
+        type: component.type,
+      });
+    } else {
+      setSelectedComponent(null);
+      componentForm.reset();
+    }
+    setIsComponentDialogOpen(true);
+  };
+  
+  // Open task dialog for editing
+  const openTaskDialog = (task?: ProjectTask) => {
+    if (task) {
+      setSelectedTask(task);
+      taskForm.reset({
+        title: task.title,
+        description: task.description,
+        status: task.status,
+        priority: task.priority,
+        assignedTo: task.assignedTo || "",
+        dueDate: task.dueDate || "",
+      });
+    } else {
+      setSelectedTask(null);
+      taskForm.reset();
+    }
+    setIsTaskDialogOpen(true);
+  };
+  
+  // Handle back navigation
+  const handleBack = () => {
+    // Navigate back based on the source
+    if (project?.source === 'discover') {
+      navigate('/discover?tab=projects');
+    } else {
+      navigate('/projects');
+    }
+  };
+
   if (isLoading) {
     return (
-      <Layout>
-        <div className="container mx-auto px-4 py-8 flex justify-center items-center min-h-[60vh]">
-          <div className="text-center">
-            <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading project details...</p>
-          </div>
-        </div>
-      </Layout>
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+      </div>
     );
   }
-  
+
   if (error || !project) {
     return (
-      <Layout>
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center p-6 bg-red-50 rounded-lg border border-red-200">
-            <h2 className="text-xl font-bold text-red-700 mb-2">Error Loading Project</h2>
-            <p className="text-red-600">{error ? (error instanceof Error ? error.message : String(error)) : "Project not found"}</p>
-            <Button 
-              variant="outline" 
-              onClick={() => navigate('/projects')}
-              className="mt-4"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Projects
-            </Button>
-          </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Error Loading Project</h1>
+          <p className="mb-4">We couldn't load the project details. Please try again later.</p>
+          <Button onClick={() => navigate('/projects')}>Back to Projects</Button>
         </div>
-      </Layout>
+      </div>
     );
   }
-  
+
+  // Status color mapping
+  const getStatusColor = (status: string) => {
+    const statusMap: Record<string, string> = {
+      'planning': 'bg-blue-100 text-blue-800',
+      'development': 'bg-yellow-100 text-yellow-800',
+      'testing': 'bg-purple-100 text-purple-800',
+      'released': 'bg-green-100 text-green-800',
+      'maintenance': 'bg-gray-100 text-gray-800',
+    };
+    return statusMap[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  // Progress color mapping
+  const getProgressColor = (progress: number) => {
+    if (progress < 30) return 'bg-red-500';
+    if (progress < 70) return 'bg-yellow-500';
+    return 'bg-green-500';
+  };
+
+  // Component status color
+  const getComponentStatusColor = (status: string) => {
+    const statusMap: Record<string, string> = {
+      'planned': 'bg-blue-100 text-blue-800',
+      'in-development': 'bg-yellow-100 text-yellow-800',
+      'ready': 'bg-green-100 text-green-800',
+      'needs-revision': 'bg-red-100 text-red-800',
+    };
+    return statusMap[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  // Task status color
+  const getTaskStatusColor = (status: string) => {
+    const statusMap: Record<string, string> = {
+      'pending': 'bg-blue-100 text-blue-800',
+      'in-progress': 'bg-yellow-100 text-yellow-800',
+      'completed': 'bg-green-100 text-green-800',
+      'blocked': 'bg-red-100 text-red-800',
+    };
+    return statusMap[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  // Task priority color
+  const getTaskPriorityColor = (priority: string) => {
+    const priorityMap: Record<string, string> = {
+      'low': 'bg-blue-100 text-blue-800',
+      'medium': 'bg-yellow-100 text-yellow-800',
+      'high': 'bg-red-100 text-red-800',
+    };
+    return priorityMap[priority] || 'bg-gray-100 text-gray-800';
+  };
+
   return (
-    <Layout>
-      <div className="container mx-auto px-4 py-8">
-        <Button 
-          variant="outline" 
-          onClick={() => navigate('/projects')}
-          className="mb-6"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Projects
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex items-center mb-6">
+        <Button variant="ghost" size="icon" onClick={handleBack} className="mr-2">
+          <ArrowLeft size={18} />
         </Button>
-        
-        <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
-          <div>
-            <h1 className="text-3xl font-bold">{project.name}</h1>
-            <p className="text-muted-foreground mt-1">{project.description}</p>
-            
-            <div className="flex flex-wrap gap-2 mt-3">
-              {project.tags && project.tags.map(tag => (
-                <Badge key={tag} variant="secondary">{tag}</Badge>
-              ))}
+        <h1 className="text-3xl font-bold">{project.name}</h1>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle>Status</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Badge className={`${getStatusColor(project.status)} px-3 py-1 text-sm font-medium rounded-full`}>
+              {project.status}
+            </Badge>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle>Progress</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Progress value={project.progress} className={getProgressColor(project.progress)} />
+              <p className="text-sm text-muted-foreground">{project.progress}% Complete</p>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle>Version</CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center">
+            <Badge variant="outline" className="px-3 py-1 text-sm font-medium">
+              v{project.version}
+            </Badge>
+            {project.repoUrl && (
+              <a href={project.repoUrl} target="_blank" rel="noopener noreferrer" className="ml-2 text-gray-500 hover:text-gray-700">
+                <Github size={18} />
+              </a>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="mb-8">
+        <h2 className="text-xl font-bold mb-2">Description</h2>
+        <p className="text-gray-700">{project.description}</p>
+      </div>
+
+      <div className="mb-4">
+        <h2 className="text-xl font-bold mb-2">Tags</h2>
+        <div className="flex flex-wrap gap-2">
+          {project.tags && project.tags.map((tag, index) => (
+            <Badge key={index} variant="secondary" className="px-3 py-1 text-sm font-medium">
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      </div>
+
+      <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="mt-8">
+        <TabsList className="mb-4">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="components">Components</TabsTrigger>
+          <TabsTrigger value="tasks">Tasks</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Components</CardTitle>
+                <CardDescription>Key components in this project</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {project.components && project.components.length > 0 ? (
+                    project.components.slice(0, 3).map((component) => (
+                      <div key={component.id} className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-medium">{component.name}</h3>
+                          <p className="text-sm text-muted-foreground line-clamp-1">{component.description}</p>
+                        </div>
+                        <Badge className={`${getComponentStatusColor(component.status)}`}>
+                          {component.status}
+                        </Badge>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground">No components added yet</p>
+                  )}
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button variant="outline" size="sm" onClick={() => setActiveTab('components')}>
+                  View All Components
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Tasks</CardTitle>
+                <CardDescription>Current tasks in progress</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {project.tasks && project.tasks.length > 0 ? (
+                    project.tasks.slice(0, 3).map((task) => (
+                      <div key={task.id} className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-medium">{task.title}</h3>
+                          <p className="text-sm text-muted-foreground line-clamp-1">{task.description}</p>
+                        </div>
+                        <Badge className={`${getTaskStatusColor(task.status)}`}>
+                          {task.status}
+                        </Badge>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground">No tasks added yet</p>
+                  )}
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button variant="outline" size="sm" onClick={() => setActiveTab('tasks')}>
+                  View All Tasks
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="components">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold">Components</h2>
+            <Button onClick={() => openComponentDialog()}>
+              <Plus className="mr-2 h-4 w-4" /> Add Component
+            </Button>
           </div>
           
-          <div className="flex flex-col items-end mt-4 md:mt-0">
-            <div className="flex items-center gap-3 mb-2">
-              <Badge variant={
-                project.status === 'released' ? 'secondary' : 
-                project.status === 'maintenance' ? 'default' :
-                project.status === 'development' ? 'secondary' : 
-                project.status === 'testing' ? 'outline' : 'outline'
-              }>
-                {project.status ? project.status.charAt(0).toUpperCase() + project.status.slice(1) : 'Planning'}
-              </Badge>
-              {project.version && <span className="text-sm text-muted-foreground">v{project.version}</span>}
-            </div>
-            
-            {project.progress !== undefined && (
-              <div className="w-full md:w-40 bg-secondary rounded-full h-2 mt-2">
-                <div 
-                  className="bg-primary h-2 rounded-full" 
-                  style={{ width: `${project.progress}%` }}
-                ></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {project.components && project.components.length > 0 ? (
+              project.components.map((component) => (
+                <Card key={component.id}>
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between">
+                      <CardTitle>{component.name}</CardTitle>
+                      <Button variant="ghost" size="icon" onClick={() => openComponentDialog(component)}>
+                        <Edit size={16} />
+                      </Button>
+                    </div>
+                    <Badge className={getComponentStatusColor(component.status)}>
+                      {component.status}
+                    </Badge>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-2">{component.description}</p>
+                    <Badge variant="outline">{component.type}</Badge>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-2 text-center py-8">
+                <p className="text-muted-foreground mb-4">No components added to this project yet</p>
+                <Button onClick={() => openComponentDialog()}>Add First Component</Button>
               </div>
             )}
           </div>
-        </div>
-        
-        <Tabs defaultValue="overview" className="w-full" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="components">Components</TabsTrigger>
-            <TabsTrigger value="tasks">Tasks</TabsTrigger>
-          </TabsList>
+        </TabsContent>
+
+        <TabsContent value="tasks">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold">Tasks</h2>
+            <Button onClick={() => openTaskDialog()}>
+              <Plus className="mr-2 h-4 w-4" /> Add Task
+            </Button>
+          </div>
           
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Project Stats */}
-              <div className="col-span-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Project Overview</CardTitle>
-                    <CardDescription>Key project details and statistics</CardDescription>
+          <div className="grid grid-cols-1 gap-4">
+            {project.tasks && project.tasks.length > 0 ? (
+              project.tasks.map((task) => (
+                <Card key={task.id}>
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between">
+                      <CardTitle>{task.title}</CardTitle>
+                      <Button variant="ghost" size="icon" onClick={() => openTaskDialog(task)}>
+                        <Edit size={16} />
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <h3 className="font-medium text-sm text-muted-foreground mb-1">Timeline</h3>
-                        <p>{project.timeline || 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-sm text-muted-foreground mb-1">Budget</h3>
-                        <p>{project.budget || 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-sm text-muted-foreground mb-1">Location</h3>
-                        <p>{project.location || 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-sm text-muted-foreground mb-1">Type</h3>
-                        <p>{project.type || 'Not specified'}</p>
-                      </div>
-                      {project.repo_url && (
-                        <div className="col-span-2">
-                          <h3 className="font-medium text-sm text-muted-foreground mb-1">Repository</h3>
-                          <a href={project.repo_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{project.repo_url}</a>
-                        </div>
+                    <p className="text-sm text-muted-foreground mb-4">{task.description}</p>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge className={getTaskStatusColor(task.status)}>
+                        {task.status}
+                      </Badge>
+                      <Badge className={getTaskPriorityColor(task.priority)}>
+                        {task.priority} priority
+                      </Badge>
+                      {task.dueDate && (
+                        <Badge variant="outline">
+                          <Clock className="mr-1 h-3 w-3" /> Due: {new Date(task.dueDate).toLocaleDateString()}
+                        </Badge>
+                      )}
+                      {task.assignedTo && (
+                        <Badge variant="outline">
+                          <Avatar className="h-4 w-4 mr-1">
+                            <AvatarFallback>{task.assignedTo.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          {task.assignedTo}
+                        </Badge>
                       )}
                     </div>
                   </CardContent>
                 </Card>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-4">No tasks added to this project yet</p>
+                <Button onClick={() => openTaskDialog()}>Add First Task</Button>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
+      
+      {/* Component Dialog */}
+      <Dialog open={isComponentDialogOpen} onOpenChange={setIsComponentDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedComponent ? 'Edit Component' : 'Add Component'}</DialogTitle>
+            <DialogDescription>
+              {selectedComponent ? 'Update the component details.' : 'Add a new component to your project.'}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...componentForm}>
+            <form onSubmit={componentForm.handleSubmit(onComponentSubmit)} className="space-y-4">
+              <FormField
+                control={componentForm.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Component name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={componentForm.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Describe the component..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={componentForm.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="planned">Planned</SelectItem>
+                          <SelectItem value="in-development">In Development</SelectItem>
+                          <SelectItem value="ready">Ready</SelectItem>
+                          <SelectItem value="needs-revision">Needs Revision</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={componentForm.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="ui">UI</SelectItem>
+                          <SelectItem value="feature">Feature</SelectItem>
+                          <SelectItem value="integration">Integration</SelectItem>
+                          <SelectItem value="page">Page</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
               
-              {/* Task Summary */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Task Status</CardTitle>
-                  <CardDescription>Summary of task progress</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <Check className="h-4 w-4 text-green-500 mr-2" />
-                      <span>Completed</span>
-                    </div>
-                    <Badge variant="outline">{taskStatusCounts.completed}</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <Clock className="h-4 w-4 text-amber-500 mr-2" />
-                      <span>In Progress</span>
-                    </div>
-                    <Badge variant="outline">{taskStatusCounts.inProgress}</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <Clock className="h-4 w-4 text-gray-500 mr-2" />
-                      <span>Not Started</span>
-                    </div>
-                    <Badge variant="outline">{taskStatusCounts.notStarted}</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <AlertCircle className="h-4 w-4 text-red-500 mr-2" />
-                      <span>Blocked</span>
-                    </div>
-                    <Badge variant="outline">{taskStatusCounts.blocked}</Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
+              <DialogFooter>
+                <Button variant="outline" type="button" onClick={() => setIsComponentDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">
+                  {selectedComponent ? 'Update Component' : 'Add Component'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Task Dialog */}
+      <Dialog open={isTaskDialogOpen} onOpenChange={setIsTaskDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedTask ? 'Edit Task' : 'Add Task'}</DialogTitle>
+            <DialogDescription>
+              {selectedTask ? 'Update the task details.' : 'Add a new task to your project.'}
+            </DialogDescription>
+          </DialogHeader>
           
-          <TabsContent value="components" className="space-y-6">
-            <h2 className="text-xl font-bold mb-4">Components</h2>
-            {project.components && project.components.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {project.components.map(component => (
-                  <Card key={component.id} className="overflow-hidden">
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <CardTitle className="text-lg">{component.name}</CardTitle>
-                        <Badge className={`${
-                          component.status === 'ready' ? 'bg-green-100 text-green-800' :
-                          component.status === 'in-development' ? 'bg-amber-100 text-amber-800' :
-                          component.status === 'planned' ? 'bg-purple-100 text-purple-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                          {component.status.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                        </Badge>
-                      </div>
-                      <CardDescription>
-                        <span className="text-xs capitalize">{component.type} Component</span>
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground">{component.description}</p>
-                      {component.dependencies && component.dependencies.length > 0 && (
-                        <div className="mt-3">
-                          <h4 className="text-xs text-muted-foreground mb-1">Dependencies:</h4>
-                          <div className="flex flex-wrap gap-1">
-                            {component.dependencies.map((dep, index) => (
-                              <Badge key={index} variant="outline" className="text-xs">{dep}</Badge>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
+          <Form {...taskForm}>
+            <form onSubmit={taskForm.handleSubmit(onTaskSubmit)} className="space-y-4">
+              <FormField
+                control={taskForm.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Task title" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={taskForm.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Describe the task..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={taskForm.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="in-progress">In Progress</SelectItem>
+                          <SelectItem value="completed">Completed</SelectItem>
+                          <SelectItem value="blocked">Blocked</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={taskForm.control}
+                  name="priority"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Priority</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select priority" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="low">Low</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="high">High</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-            ) : (
-              <p className="text-muted-foreground">No components have been added to this project yet.</p>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="tasks" className="space-y-6">
-            <h2 className="text-xl font-bold mb-4">Tasks</h2>
-            {project.tasks && project.tasks.length > 0 ? (
-              <div className="space-y-4">
-                {project.tasks.map(task => (
-                  <Card key={task.id}>
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <CardTitle className="text-lg">{task.title}</CardTitle>
-                        <div className="flex gap-2">
-                          <Badge className={`${
-                            task.status === 'completed' ? 'bg-green-100 text-green-800' :
-                            task.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
-                            task.status === 'blocked' ? 'bg-red-100 text-red-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
-                            {task.status.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                          </Badge>
-                          <Badge variant="outline" className="capitalize">{task.priority} priority</Badge>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground">{task.description}</p>
-                      <div className="flex justify-between mt-4 text-sm">
-                        {task.assigned_to && (
-                          <div>
-                            <span className="text-muted-foreground mr-1">Assigned to:</span>
-                            <span>{task.assigned_to}</span>
-                          </div>
-                        )}
-                        {task.due_date && (
-                          <div>
-                            <span className="text-muted-foreground mr-1">Due:</span>
-                            <span>{task.due_date}</span>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+              
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={taskForm.control}
+                  name="assignedTo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Assigned To</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Username or email" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={taskForm.control}
+                  name="dueDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Due Date</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-            ) : (
-              <p className="text-muted-foreground">No tasks have been added to this project yet.</p>
-            )}
-          </TabsContent>
-        </Tabs>
-      </div>
-    </Layout>
+              
+              <DialogFooter>
+                <Button variant="outline" type="button" onClick={() => setIsTaskDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">
+                  {selectedTask ? 'Update Task' : 'Add Task'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
-};
-
-export default ProjectDetail;
+}

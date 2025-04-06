@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useProjects, Project, ProjectComponent, ProjectTask } from '@/hooks/use-projects';
+import { useProjects, Project, ProjectComponent, ProjectTask } from '@/hooks/use-project';
 import {
   CheckIcon,
   CircleIcon,
@@ -60,7 +60,7 @@ export default function Projects() {
   // Get status color for task status badges
   const getTaskStatusColor = (status: ProjectTask['status']) => {
     switch (status) {
-      case 'pending':
+      case 'not-started':
         return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
       case 'in-progress':
         return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
@@ -80,7 +80,7 @@ export default function Projects() {
         return <CheckIcon className="h-4 w-4" />;
       case 'in-progress':
         return <ClockIcon className="h-4 w-4" />;
-      case 'pending':
+      case 'not-started':
         return <CircleIcon className="h-4 w-4" />;
       case 'blocked':
         return <CircleIcon className="h-4 w-4" />;
@@ -107,7 +107,7 @@ export default function Projects() {
   const getAllComponents = (): ProjectComponent[] => {
     if (!projects) return [];
     return projects.flatMap(project => 
-      project.components.map(component => ({
+      (project.components || []).map(component => ({
         ...component,
         projectName: project.name,
         projectId: project.id
@@ -119,7 +119,7 @@ export default function Projects() {
   const getAllTasks = (): ProjectTask[] => {
     if (!projects) return [];
     return projects.flatMap(project => 
-      project.tasks.map(task => ({
+      (project.tasks || []).map(task => ({
         ...task,
         projectName: project.name,
         projectId: project.id
@@ -192,7 +192,7 @@ export default function Projects() {
                       <Progress value={project.progress} className="h-2" />
                     </div>
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {project.tags.map((tag) => (
+                      {project.tags?.map((tag) => (
                         <Badge key={tag} variant="outline" className="text-xs">
                           {tag}
                         </Badge>
@@ -201,10 +201,10 @@ export default function Projects() {
                     <div className="flex justify-between mt-4">
                       <div className="flex gap-2">
                         <Badge variant="outline">
-                          {project.components.length} Components
+                          {project.components?.length || 0} Components
                         </Badge>
                         <Badge variant="outline">
-                          {project.tasks.length} Tasks
+                          {project.tasks?.length || 0} Tasks
                         </Badge>
                       </div>
                       <Button 
@@ -286,7 +286,9 @@ export default function Projects() {
                             ? 'text-red-500 bg-red-500/10'
                             : task.status === 'in-progress'
                               ? 'text-blue-500 bg-blue-500/10'
-                              : 'text-amber-500 bg-amber-500/10'
+                              : task.status === 'not-started'
+                                ? 'text-amber-500 bg-amber-500/10'
+                                : 'text-gray-500 bg-gray-500/10'
                       }`}>
                         {getTaskStatusIcon(task.status)}
                       </div>

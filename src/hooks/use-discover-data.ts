@@ -1,5 +1,62 @@
 import { useEffect, useState } from 'react';
 import { ContentItemProps } from '@/components/marketplace/ContentCard';
+import { supabase } from '@/integrations/supabase/client';
+
+// Define interfaces for the various data types
+interface ProfileData {
+  id: string;
+  username: string;
+  full_name?: string | null;
+  avatar_url?: string | null;
+  profile_types?: string[] | null;
+  bio?: string | null;
+}
+
+interface ResourceData {
+  id: string;
+  name: string;
+  type?: string;
+  location?: string;
+  tags?: string[];
+  image_url?: string;
+}
+
+interface EventData {
+  id: string;
+  name: string;
+  title?: string;
+  type?: string;
+  location?: string;
+  tags?: string[];
+  image_url?: string;
+}
+
+interface VenueData {
+  id: string;
+  name: string;
+  type?: string;
+  location?: string;
+  tags?: string[];
+  image_url?: string;
+}
+
+interface CommunityData {
+  id: string;
+  name: string;
+  type?: string;
+  location?: string;
+  tags?: string[];
+  image_url?: string;
+}
+
+interface BrandData {
+  id: string;
+  name: string;
+  type?: string;
+  location?: string;
+  tags?: string[];
+  image_url?: string;
+}
 
 export const useDiscoverData = (
   category: string,
@@ -21,167 +78,163 @@ export const useDiscoverData = (
       setError(null);
 
       try {
-        // Determine which data to fetch based on category
-        // For demonstration, we're using sample data
         let result: ContentItemProps[] = [];
 
-        // Add project sample data that simulates a Meta Project Tracker
-        const projectsSampleData: ContentItemProps[] = [
-          {
-            id: 'meta-project-tracker',
-            name: 'Meta Project Tracker',
-            type: 'project',
-            subtype: 'development',
-            location: 'Global',
-            tags: ['react', 'typescript', 'project-management'],
-            image_url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-          },
-          {
-            id: 'components-library',
-            name: 'Components Library',
-            type: 'project',
-            subtype: 'ui',
-            location: 'Frontend',
-            tags: ['ui', 'components', 'shadcn'],
-            image_url: 'https://images.unsplash.com/photo-1556742031-c6961e8560b0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-          },
-          {
-            id: 'artist-platform',
-            name: 'Artist Platform',
-            type: 'project',
-            subtype: 'application',
-            location: 'Online',
-            tags: ['artists', 'portfolio', 'marketplace'],
-            image_url: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-          }
-        ];
+        // Fetch data from Supabase based on category
+        if (category === 'projects') {
+          // Fetch projects
+          const { data, error } = await supabase
+            .from('projects')
+            .select('*');
 
-        // Simulate fetching data based on category
-        if (category === 'artists') {
-          // Fetch artists data
-          result = [
-            {
-              id: 'artist1',
-              name: 'John Doe',
-              type: 'artist',
-              location: 'New York',
-              tags: ['music', 'pop'],
-              image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-            },
-            {
-              id: 'artist2',
-              name: 'Jane Smith',
-              type: 'artist',
-              location: 'Los Angeles',
-              tags: ['art', 'painting'],
-              image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-            },
-          ];
+          if (error) throw error;
+
+          // Transform the data to match ContentItemProps format
+          result = data.map(project => ({
+            id: project.id,
+            name: project.name,
+            type: 'project',
+            subtype: (project as any).status || 'development',
+            location: project.location || 'Global',
+            tags: project.tags || [],
+            image_url: project.image_url || 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+          }));
+        } else if (category === 'artists') {
+          // Fixing the artists query based on correct profile structure
+          let { data, error } = await supabase
+            .from('profiles')
+            .select('id, username, full_name, avatar_url, profile_types, bio');
+          
+          if (error) throw error;
+
+          // Filter profiles that have 'artist' in their profile_types array
+          const artistsData = data?.filter(profile => 
+            profile.profile_types && profile.profile_types.includes('artist')
+          ) || [];
+          
+          // Transform the data to match ContentItemProps format
+          result = artistsData.map(profile => ({
+            id: profile.id,
+            name: profile.full_name || profile.username || 'Unknown Artist',
+            type: 'artist',
+            subtype: 'creator', // Default subtype
+            location: 'Unknown', // Location isn't in profiles table
+            tags: [], // Tags aren't in profiles table currently
+            image_url: profile.avatar_url || 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+            styles: [],
+            disciplines: [],
+            multidisciplinary: false
+          }));
         } else if (category === 'resources') {
           // Fetch resources data
-          result = [
-            {
-              id: 'resource1',
-              name: 'Studio A',
-              type: 'resource',
-              location: 'New York',
-              tags: ['studio', 'music'],
-              image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-            },
-            {
-              id: 'resource2',
-              name: 'Gallery B',
-              type: 'resource',
-              location: 'Los Angeles',
-              tags: ['gallery', 'art'],
-              image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-            },
-          ];
+          const { data, error } = await supabase
+            .from('resources')
+            .select('*');
+
+          if (error) throw error;
+
+          // Transform the data to match ContentItemProps format
+          result = (data as any[]).map(resource => ({
+            id: resource.id,
+            name: resource.name,
+            type: 'resource',
+            subtype: resource.type || 'space',
+            location: resource.location || 'Unknown',
+            tags: resource.tags || [],
+            image_url: resource.image_url || 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+          }));
         } else if (category === 'events') {
           // Fetch events data
-          result = [
-            {
-              id: 'event1',
-              name: 'Concert',
-              type: 'event',
-              location: 'New York',
-              tags: ['music', 'live'],
-              image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-            },
-            {
-              id: 'event2',
-              name: 'Exhibition',
-              type: 'event',
-              location: 'Los Angeles',
-              tags: ['art', 'gallery'],
-              image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-            },
-          ];
+          const { data, error } = await supabase
+            .from('events')
+            .select('*');
+
+          if (error) throw error;
+
+          // Transform the data to match ContentItemProps format
+          result = (data as any[]).map(event => ({
+            id: event.id,
+            name: event.title || event.name,
+            type: 'event',
+            subtype: event.type || 'other',
+            location: event.location || 'Unknown',
+            tags: event.tags || [],
+            image_url: event.image_url || 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+          }));
         } else if (category === 'venues') {
           // Fetch venues data
-          result = [
-            {
-              id: 'venue1',
-              name: 'The Venue',
-              type: 'venue',
-              location: 'New York',
-              tags: ['music', 'live'],
-              image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-            },
-            {
-              id: 'venue2',
-              name: 'The Gallery',
-              type: 'venue',
-              location: 'Los Angeles',
-              tags: ['art', 'gallery'],
-              image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-            },
-          ];
+          const { data, error } = await supabase
+            .from('venues')
+            .select('*');
+
+          if (error) throw error;
+
+          // Transform the data to match ContentItemProps format
+          result = (data as VenueData[]).map(venue => ({
+            id: venue.id,
+            name: venue.name,
+            type: 'venue',
+            subtype: venue.type || 'other',
+            location: venue.location || 'Unknown',
+            tags: venue.tags || [],
+            image_url: venue.image_url || 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+          }));
         } else if (category === 'communities') {
           // Fetch communities data
-          result = [
-            {
-              id: 'community1',
-              name: 'The Community',
-              type: 'community',
-              location: 'New York',
-              tags: ['music', 'live'],
-              image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-            },
-            {
-              id: 'community2',
-              name: 'The Art Collective',
-              type: 'community',
-              location: 'Los Angeles',
-              tags: ['art', 'gallery'],
-              image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-            },
-          ];
+          const { data, error } = await supabase
+            .from('communities')
+            .select('*');
+
+          if (error) throw error;
+
+          // Transform the data to match ContentItemProps format
+          result = (data as CommunityData[]).map(community => ({
+            id: community.id,
+            name: community.name,
+            type: 'community',
+            subtype: community.type || 'group',
+            location: community.location || 'Online',
+            tags: community.tags || [],
+            image_url: community.image_url || 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+          }));
         } else if (category === 'brands') {
           // Fetch brands data
+          const { data, error } = await supabase
+            .from('brands')
+            .select('*');
+
+          if (error) throw error;
+
+          // Transform the data to match ContentItemProps format
+          result = (data as BrandData[]).map(brand => ({
+            id: brand.id,
+            name: brand.name,
+            type: 'brand',
+            subtype: brand.type || 'business',
+            location: brand.location || 'Global',
+            tags: brand.tags || [],
+            image_url: brand.image_url || 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+          }));
+        } else {
+          // If the category doesn't match any of our tables, use this fallback
           result = [
             {
-              id: 'brand1',
-              name: 'The Brand',
-              type: 'brand',
-              location: 'New York',
-              tags: ['music', 'live'],
+              id: 'default1',
+              name: `Default ${category} 1`,
+              type: category,
+              location: 'Unknown',
+              tags: ['sample'],
               image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
             },
             {
-              id: 'brand2',
-              name: 'The Art Brand',
-              type: 'brand',
-              location: 'Los Angeles',
-              tags: ['art', 'gallery'],
+              id: 'default2',
+              name: `Default ${category} 2`,
+              type: category,
+              location: 'Unknown',
+              tags: ['sample'],
               image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-            },
+            }
           ];
-        }
-
-        // Add in the project data if category is projects
-        if (category === 'projects') {
-          result = [...projectsSampleData];
         }
 
         // Filter by search query
@@ -210,7 +263,23 @@ export const useDiscoverData = (
 
         // Filter by disciplinary type
         if (disciplinaryType !== 'all' && category === 'artists') {
-          result = result.filter(item => item.disciplines?.includes(disciplinaryType));
+          if (disciplinaryType === 'multi') {
+            result = result.filter(item => item.multidisciplinary);
+          } else {
+            result = result.filter(item => !item.multidisciplinary);
+          }
+        }
+
+        // Handle any relevant subfilters
+        if (subfilters.length > 0) {
+          result = result.filter(item => {
+            // Different logic based on the category
+            if (category === 'artists' && item.subtype) {
+              return subfilters.includes(item.subtype.toLowerCase());
+            }
+            // Add more category-specific filters as needed
+            return true;
+          });
         }
 
         setItems(result);

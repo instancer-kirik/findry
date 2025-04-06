@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PlusCircle, Calendar, Tag, Info, Users, CircleUserRound, Tags, Star, MessageSquare, AlertCircle, BookOpen } from 'lucide-react';
@@ -163,7 +162,7 @@ const DiscoverSidebar: React.FC<DiscoverSidebarProps> = ({
   return (
     <div className="h-full overflow-y-auto">
       <ResizablePanelGroup direction="vertical" className="min-h-[600px]">
-        <ResizablePanel defaultSize={15} minSize={10}>
+        <ResizablePanel defaultSize={20} minSize={10}>
           <AnimatedSection animation="slide-in-left" delay={100}>
             <Card>
               <CardHeader className="pb-3">
@@ -188,7 +187,7 @@ const DiscoverSidebar: React.FC<DiscoverSidebarProps> = ({
 
         <ResizableHandle withHandle />
 
-        <ResizablePanel defaultSize={15} minSize={10}>
+        <ResizablePanel defaultSize={30} minSize={10}>
           <AnimatedSection animation="slide-in-left" delay={200}>
             <Card>
               <CardHeader className="pb-3">
@@ -217,7 +216,7 @@ const DiscoverSidebar: React.FC<DiscoverSidebarProps> = ({
 
         <ResizableHandle withHandle />
         
-        <ResizablePanel defaultSize={20} minSize={15}>
+        <ResizablePanel defaultSize={50} minSize={15}>
           <AnimatedSection animation="slide-in-left" delay={400}>
             <Card>
               <CardHeader className="pb-3">
