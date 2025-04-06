@@ -268,7 +268,6 @@ const CreateEvent = () => {
                       id={item.id}
                       name={item.name}
                       image_url={item.image_url}
-                      description={item.description}
                       type={item.type}
                       location={item.location}
                       isSelected={item.selected}
@@ -295,7 +294,6 @@ const CreateEvent = () => {
                       id={item.id}
                       name={item.name}
                       image_url={item.image_url}
-                      description={item.description}
                       type={item.type}
                       location={item.location}
                       isSelected={item.selected}
@@ -314,7 +312,6 @@ const CreateEvent = () => {
                       id={item.id}
                       name={item.name}
                       image_url={item.image_url}
-                      description={item.description}
                       type={item.type}
                       location={item.location}
                       isSelected={item.selected}
@@ -333,7 +330,6 @@ const CreateEvent = () => {
                       id={item.id}
                       name={item.name}
                       image_url={item.image_url}
-                      description={item.description}
                       type={item.type}
                       location={item.location} 
                       isSelected={item.selected}
