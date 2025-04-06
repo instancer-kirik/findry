@@ -100,30 +100,27 @@ export const useDiscoverData = (
             image_url: project.image_url || 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
           }));
         } else if (category === 'artists') {
-          // Fixing the artists query based on correct profile structure
-          let { data, error } = await supabase
-            .from('profiles')
-            .select('id, username, full_name, avatar_url, profile_types, bio');
+          // Use the dedicated artists table instead of profiles
+          const { data, error } = await supabase
+            .from('artists')
+            .select('*');
           
           if (error) throw error;
-
-          // Filter profiles that have 'artist' in their profile_types array
-          const artistsData = data?.filter(profile => 
-            profile.profile_types && profile.profile_types.includes('artist')
-          ) || [];
+          
+          console.log("Artists data from Supabase:", data);
           
           // Transform the data to match ContentItemProps format
-          result = artistsData.map(profile => ({
-            id: profile.id,
-            name: profile.full_name || profile.username || 'Unknown Artist',
+          result = (data || []).map(artist => ({
+            id: artist.id,
+            name: artist.name,
             type: 'artist',
-            subtype: 'creator', // Default subtype
-            location: 'Unknown', // Location isn't in profiles table
-            tags: [], // Tags aren't in profiles table currently
-            image_url: profile.avatar_url || 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-            styles: [],
-            disciplines: [],
-            multidisciplinary: false
+            subtype: artist.subtype || 'creator',
+            location: artist.location || 'Unknown',
+            tags: artist.tags || [],
+            image_url: artist.image_url || 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+            styles: artist.styles || [],
+            disciplines: artist.disciplines || [],
+            multidisciplinary: artist.multidisciplinary || false
           }));
         } else if (category === 'resources') {
           // Fetch resources data

@@ -60,7 +60,7 @@ export default function Projects() {
   // Get status color for task status badges
   const getTaskStatusColor = (status: ProjectTask['status']) => {
     switch (status) {
-      case 'not-started':
+      case 'pending':
         return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
       case 'in-progress':
         return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
@@ -80,7 +80,7 @@ export default function Projects() {
         return <CheckIcon className="h-4 w-4" />;
       case 'in-progress':
         return <ClockIcon className="h-4 w-4" />;
-      case 'not-started':
+      case 'pending':
         return <CircleIcon className="h-4 w-4" />;
       case 'blocked':
         return <CircleIcon className="h-4 w-4" />;
@@ -198,22 +198,13 @@ export default function Projects() {
                         </Badge>
                       ))}
                     </div>
-                    <div className="flex justify-between mt-4">
-                      <div className="flex gap-2">
-                        <Badge variant="outline">
-                          {project.components?.length || 0} Components
-                        </Badge>
-                        <Badge variant="outline">
-                          {project.tasks?.length || 0} Tasks
-                        </Badge>
-                      </div>
-                      <Button 
-                        size="sm" 
+                    <div className="flex flex-wrap justify-between items-center gap-3 mt-6">
+                      <Button
                         variant="outline"
-                        onClick={() => navigate(`/projects/${project.id}`)}
+                        onClick={() => navigate(`/projects/${project.id}?source=projects`)}
+                        className="flex-1 sm:flex-auto"
                       >
-                        Details
-                        <ArrowRightIcon className="ml-2 h-4 w-4" />
+                        View Details <ArrowRightIcon className="ml-2 h-4 w-4" />
                       </Button>
                     </div>
                   </Card>
@@ -286,7 +277,7 @@ export default function Projects() {
                             ? 'text-red-500 bg-red-500/10'
                             : task.status === 'in-progress'
                               ? 'text-blue-500 bg-blue-500/10'
-                              : task.status === 'not-started'
+                              : task.status === 'pending'
                                 ? 'text-amber-500 bg-amber-500/10'
                                 : 'text-gray-500 bg-gray-500/10'
                       }`}>

@@ -66,7 +66,11 @@ const taskSchema = z.object({
 });
 
 export default function ProjectDetail() {
-  const { id } = useParams();
+  // Get the id parameter from the URL
+  const params = useParams<{ id: string }>();
+  const id = params.id || '';
+  
+  console.log("URL params:", params);
   const navigate = useNavigate();
   const { useGetProject, useCreateProjectComponent, useUpdateProjectComponent, useCreateProjectTask, useUpdateProjectTask } = useProjects();
   
@@ -74,7 +78,16 @@ export default function ProjectDetail() {
   const searchParams = new URLSearchParams(window.location.search);
   const source = searchParams.get('source') || undefined;
   
+  console.log("Project ID from URL:", id);
+  console.log("Source from URL:", source);
+  
   const { data: project, isLoading, error } = useGetProject(id, source);
+  
+  // Debug output
+  console.log("Project ID:", id);
+  console.log("Source:", source);
+  console.log("Project data:", project);
+  console.log("Error:", error);
   
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedComponent, setSelectedComponent] = useState<ProjectComponent | null>(null);

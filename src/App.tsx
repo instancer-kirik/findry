@@ -51,7 +51,7 @@ function App() {
             <Route path="/resources/index" element={<ResourceIndexPage />} />
             <Route path="/resources/:resourceId" element={<ResourceDetail />} />
             <Route path="/projects" element={<Projects />} />
-            <Route path="/projects/:projectId" element={<ProjectDetail />} />
+            <Route path="/projects/:id" element={<ProjectDetail />} />
             <Route path="/projects/create" element={<CreateProject />} />
             <Route path="/events" element={<Discover />} />
             <Route path="/events/create" element={<CreateEvent />} />

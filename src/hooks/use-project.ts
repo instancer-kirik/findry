@@ -213,7 +213,7 @@ export const useProjects = () => {
             tags: p.tags || [],
             components: [],
             tasks: [],
-            repoUrl: p.repo_url,
+            repoUrl: p.image_url,
             source: source || (p as any).source || 'projects' // Track source
           };
           
@@ -586,6 +586,72 @@ export const useProjects = () => {
         toast.error(`Failed to update task: ${error.message}`);
       }
     });
+  };
+  
+  // Function to fetch a single project
+  const fetchProject = async (id: string, source?: string): Promise<Project> => {
+    console.log("Fetching project with ID:", id, "Source:", source);
+    
+    try {
+      // If source is 'discover', we want to fetch the project from the public projects
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*, project_components(*), project_tasks(*)')
+        .eq('id', id)
+        .single();
+
+      console.log("Supabase query result:", data, "Error:", error);
+
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
+
+      if (!data) {
+        console.error("No project found with ID:", id);
+        throw new Error('No project found');
+      }
+
+      const components = (data.project_components || []).map((component: any) => ({
+        id: component.id,
+        name: component.name,
+        description: component.description || '',
+        status: (component.status as 'planned' | 'in-development' | 'ready' | 'needs-revision') || 'planned',
+        type: (component.type as 'ui' | 'feature' | 'integration' | 'page') || 'feature'
+      }));
+
+      const tasks = (data.project_tasks || []).map((task: any) => ({
+        id: task.id,
+        title: task.title,
+        description: task.description || '',
+        status: (task.status as 'pending' | 'in-progress' | 'completed' | 'blocked') || 'pending',
+        priority: (task.priority as 'low' | 'medium' | 'high') || 'medium',
+        assignedTo: task.assigned_to,
+        dueDate: task.due_date
+      }));
+
+      // Convert the database record to our Project interface with safe fallbacks
+      const project: Project = {
+        id: data.id,
+        name: data.name,
+        description: data.description || '',
+        // Map the database fields to our interface, with fallbacks
+        status: (data.type as any) || 'planning',
+        version: '0.1.0', // Default version
+        progress: 0, // Default progress
+        components,
+        tasks,
+        repoUrl: data.image_url, // Use the image_url field which exists in the database
+        tags: data.tags || [],
+        source: source || (data as any).source || 'projects' // Track source
+      };
+
+      console.log("Transformed project:", project);
+      return project;
+    } catch (error) {
+      console.error("Error in fetchProject:", error);
+      throw error;
+    }
   };
   
   return {

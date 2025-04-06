@@ -12,6 +12,8 @@ Findry is a holistic event discovery and organization platform that bridges the 
 - Profile calendar with event thumbnails implemented
 - Artist profile viewing functionality added
 
+profiles table - This is for user accounts and authentication. When someone signs up for your app, a record is created in the profiles table with their basic info (username, name, avatar, etc). This table can store multiple profile types, including artists, but it's not specialized for artist data.
+artists table - This is a dedicated table for artist information with proper schema for artist-specific fields like styles, disciplines, location, and multimedia info. Your artists table has 6 records while your profiles only has 2 records (and only 1 is marked as an artist).
 ## Phase 1: Core Platform (T1)
 
 ### User Experience
@@ -150,3 +152,5 @@ Findry is a holistic event discovery and organization platform that bridges the 
 - Maintain flexibility for different user types
 - Regular feedback from artists, organizers, and consumers
 - Continuous improvement based on industry needs 
+
+
