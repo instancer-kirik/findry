@@ -76,26 +76,26 @@ export function useProjects() {
 
     if (projectError) throw projectError;
 
-    // Fetch components using the RPC function
+    // Fetch components using a direct query instead of rpc
     const { data: componentsData, error: componentsError } = await supabase
-      .rpc('get_project_components', { p_project_id: id });
+      .from('project_components')
+      .select('*')
+      .eq('project_id', id);
 
     if (componentsError) throw componentsError;
 
-    // Fetch tasks using the RPC function
+    // Fetch tasks using a direct query instead of rpc
     const { data: tasksData, error: tasksError } = await supabase
-      .rpc('get_project_tasks', { p_project_id: id });
+      .from('project_tasks')
+      .select('*')
+      .eq('project_id', id);
 
     if (tasksError) throw tasksError;
 
-    // Convert the any[] type to our specific types
-    const components = componentsData as unknown as ProjectComponent[];
-    const tasks = tasksData as unknown as ProjectTask[];
-
     return {
       ...project,
-      components: components || [],
-      tasks: tasks || []
+      components: componentsData as ProjectComponent[] || [],
+      tasks: tasksData as ProjectTask[] || []
     } as Project;
   };
 
@@ -131,14 +131,16 @@ export function useProjects() {
     // Insert components if provided
     if (project.components && project.components.length > 0) {
       for (const component of project.components) {
+        // Use direct insert instead of rpc
         const { error: componentError } = await supabase
-          .rpc('insert_project_component', { 
-            p_project_id: projectId,
-            p_name: component.name,
-            p_description: component.description || null,
-            p_status: component.status,
-            p_type: component.type,
-            p_dependencies: component.dependencies || []
+          .from('project_components')
+          .insert({
+            project_id: projectId,
+            name: component.name,
+            description: component.description || null,
+            status: component.status,
+            type: component.type,
+            dependencies: component.dependencies || []
           });
         
         if (componentError) throw componentError;
@@ -148,15 +150,17 @@ export function useProjects() {
     // Insert tasks if provided
     if (project.tasks && project.tasks.length > 0) {
       for (const task of project.tasks) {
+        // Use direct insert instead of rpc
         const { error: taskError } = await supabase
-          .rpc('insert_project_task', { 
-            p_project_id: projectId,
-            p_title: task.title,
-            p_description: task.description || null,
-            p_status: task.status,
-            p_priority: task.priority,
-            p_assigned_to: task.assigned_to || null,
-            p_due_date: task.due_date || null
+          .from('project_tasks')
+          .insert({
+            project_id: projectId,
+            title: task.title,
+            description: task.description || null,
+            status: task.status,
+            priority: task.priority,
+            assigned_to: task.assigned_to || null,
+            due_date: task.due_date || null
           });
         
         if (taskError) throw taskError;
@@ -185,79 +189,91 @@ export function useProjects() {
   const createProjectComponent = async (component: Omit<ProjectComponent, 'id' | 'created_at' | 'updated_at'>) => {
     if (!user) throw new Error('User not authenticated');
 
-    // Using rpc to create component
+    // Using direct insert instead of rpc
     const { data, error } = await supabase
-      .rpc('insert_project_component', { 
-        p_project_id: component.project_id,
-        p_name: component.name,
-        p_description: component.description || null,
-        p_status: component.status,
-        p_type: component.type,
-        p_dependencies: component.dependencies || []
-      });
+      .from('project_components')
+      .insert({
+        project_id: component.project_id,
+        name: component.name,
+        description: component.description || null,
+        status: component.status,
+        type: component.type,
+        dependencies: component.dependencies || []
+      })
+      .select()
+      .single();
 
     if (error) throw error;
 
-    return data as unknown as ProjectComponent;
+    return data as ProjectComponent;
   };
 
   const updateProjectComponent = async ({ id, ...componentData }: ProjectComponent) => {
     if (!user) throw new Error('User not authenticated');
 
-    // Using rpc to update component
+    // Using direct update instead of rpc
     const { data, error } = await supabase
-      .rpc('update_project_component', { 
-        p_id: id,
-        p_name: componentData.name,
-        p_description: componentData.description || null,
-        p_status: componentData.status,
-        p_type: componentData.type,
-        p_dependencies: componentData.dependencies || []
-      });
+      .from('project_components')
+      .update({
+        name: componentData.name,
+        description: componentData.description || null,
+        status: componentData.status,
+        type: componentData.type,
+        dependencies: componentData.dependencies || []
+      })
+      .eq('id', id)
+      .select()
+      .single();
 
     if (error) throw error;
 
-    return data as unknown as ProjectComponent;
+    return data as ProjectComponent;
   };
 
   const createProjectTask = async (task: Omit<ProjectTask, 'id' | 'created_at' | 'updated_at'>) => {
     if (!user) throw new Error('User not authenticated');
 
-    // Using rpc to create task
+    // Using direct insert instead of rpc
     const { data, error } = await supabase
-      .rpc('insert_project_task', { 
-        p_project_id: task.project_id,
-        p_title: task.title,
-        p_description: task.description || null,
-        p_status: task.status,
-        p_priority: task.priority,
-        p_assigned_to: task.assigned_to || null,
-        p_due_date: task.due_date || null
-      });
+      .from('project_tasks')
+      .insert({
+        project_id: task.project_id,
+        title: task.title,
+        description: task.description || null,
+        status: task.status,
+        priority: task.priority,
+        assigned_to: task.assigned_to || null,
+        due_date: task.due_date || null
+      })
+      .select()
+      .single();
 
     if (error) throw error;
 
-    return data as unknown as ProjectTask;
+    return data as ProjectTask;
   };
 
   const updateProjectTask = async ({ id, ...taskData }: ProjectTask) => {
     if (!user) throw new Error('User not authenticated');
 
-    // Using rpc to update task
+    // Using direct update instead of rpc
     const { data, error } = await supabase
-      .rpc('update_project_task', { 
-        p_id: id,
-        p_title: taskData.title,
-        p_description: taskData.description || null,
-        p_status: taskData.status,
-        p_priority: taskData.priority,
-        p_assigned_to: taskData.assigned_to || null,
-        p_due_date: taskData.due_date || null
-      });
+      .from('project_tasks')
+      .update({
+        title: taskData.title,
+        description: taskData.description || null,
+        status: taskData.status,
+        priority: taskData.priority,
+        assigned_to: taskData.assigned_to || null,
+        due_date: taskData.due_date || null
+      })
+      .eq('id', id)
+      .select()
+      .single();
 
     if (error) throw error;
 
-    return data as unknown as ProjectTask;
+    return data as ProjectTask;
   };
 
   const useGetProjects = () => {
