@@ -1,5 +1,6 @@
 
 import { ContentType } from './database';
+import { Profile } from './profile';
 
 export interface ContentItemProps {
   id: string;
@@ -18,10 +19,7 @@ export interface ContentItemProps {
   logo_url?: string; 
   category?: string;  // For products
   shop_id?: string;   // For products
-  author?: {
-    name: string;
-    avatar?: string;
-  };
+  author?: Profile;   // Changed from simple object to Profile type
   created_at?: string;
   updated_at?: string;
   multidisciplinary?: boolean;

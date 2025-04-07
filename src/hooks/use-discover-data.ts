@@ -125,9 +125,10 @@ export const useDiscoverData = (
               type: 'artist',
               subtype: 'musician',
               description: 'Electronic music producer and DJ with a unique sound',
-              location: 'Los Angeles, CA', // Ensure location is always provided
+              location: 'Los Angeles, CA',
               tags: ['electronic', 'dj', 'producer'],
               image_url: 'https://source.unsplash.com/random/800x600/?dj'
+              // Removed author property as it's optional
             },
             {
               id: generateUniqueId('artist'),
