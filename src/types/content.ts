@@ -5,10 +5,10 @@ export interface ContentItemProps {
   id: string;
   name: string;
   type: string;  // Can include 'shop' and 'product' now
+  location: string; // Changed from optional to required to match ContentCard component
   subtype?: string;
   description?: string;
   image_url?: string;
-  location?: string;
   tags?: string[];
   price?: number;
   date?: string;
@@ -24,6 +24,9 @@ export interface ContentItemProps {
   };
   created_at?: string;
   updated_at?: string;
+  multidisciplinary?: boolean;
+  styles?: string[];
+  disciplines?: string[];
 }
 
 export interface ContentOwnershipProps {

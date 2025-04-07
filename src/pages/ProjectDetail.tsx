@@ -163,7 +163,6 @@ export default function ProjectDetail() {
           description: values.description,
           status: values.status,
           type: values.type,
-          project_id: id,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         };
@@ -213,8 +212,7 @@ export default function ProjectDetail() {
           status: values.status,
           priority: values.priority,
           assignedTo: values.assignedTo || null,
-          due_date: values.dueDate || null,
-          project_id: id,
+          dueDate: values.dueDate || null,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         };
@@ -570,7 +568,10 @@ export default function ProjectDetail() {
                         handleTabChange('chat');
                         addComponentReference(component);
                         setTimeout(() => {
-                          document.querySelector('.project-chat-input')?.focus();
+                          const element = document.querySelector('.project-chat-input') as HTMLInputElement;
+                          if (element) {
+                            element.focus();
+                          }
                         }, 100);
                       }}
                     >
@@ -643,7 +644,10 @@ export default function ProjectDetail() {
                         handleTabChange('chat');
                         addTaskReference(task);
                         setTimeout(() => {
-                          document.querySelector('.project-chat-input')?.focus();
+                          const element = document.querySelector('.project-chat-input') as HTMLInputElement;
+                          if (element) {
+                            element.focus();
+                          }
                         }, 100);
                       }}
                     >

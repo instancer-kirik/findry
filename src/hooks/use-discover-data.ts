@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ContentItemProps } from '@/types/content';
@@ -124,7 +125,7 @@ export const useDiscoverData = (
               type: 'artist',
               subtype: 'musician',
               description: 'Electronic music producer and DJ with a unique sound',
-              location: 'Los Angeles, CA',
+              location: 'Los Angeles, CA', // Ensure location is always provided
               tags: ['electronic', 'dj', 'producer'],
               image_url: 'https://source.unsplash.com/random/800x600/?dj'
             },
@@ -237,14 +238,14 @@ export const useDiscoverData = (
           const query = searchQuery.toLowerCase();
           mockData = mockData.filter(item => 
             item.name.toLowerCase().includes(query) || 
-            item.description.toLowerCase().includes(query) ||
-            item.tags.some(tag => tag.toLowerCase().includes(query))
+            item.description?.toLowerCase().includes(query) ||
+            item.tags?.some(tag => tag.toLowerCase().includes(query))
           );
         }
         
         if (selectedTags.length > 0) {
           mockData = mockData.filter(item => 
-            selectedTags.some(tag => item.tags.includes(tag))
+            item.tags && selectedTags.some(tag => item.tags?.includes(tag))
           );
         }
         
