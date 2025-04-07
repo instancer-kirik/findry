@@ -39,7 +39,7 @@ const Login: React.FC = () => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate('/');
+        navigate('/dashboard');
       }
     };
     
@@ -81,8 +81,8 @@ const Login: React.FC = () => {
           : 'Please check your email to verify your account. You can continue using the app while waiting for verification.',
       });
       
-      // Navigate to home page
-      navigate('/');
+      // Navigate to dashboard page instead of home
+      navigate('/dashboard');
     } catch (error: any) {
       console.error('Login error:', error);
       

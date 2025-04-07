@@ -6,10 +6,13 @@ import { supabase } from '@/integrations/supabase/client';
 interface ProfileData {
   id: string;
   username: string;
-  full_name?: string | null;
-  avatar_url?: string | null;
-  profile_types?: string[] | null;
-  bio?: string | null;
+  full_name: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  profile_types: string[] | null;
+  role_attributes: Record<string, any> | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface ResourceData {
@@ -100,28 +103,92 @@ export const useDiscoverData = (
             image_url: project.image_url || 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
           }));
         } else if (category === 'artists') {
-          // Use the dedicated artists table instead of profiles
-          const { data, error } = await supabase
-            .from('artists')
-            .select('*');
-          
-          if (error) throw error;
-          
-          console.log("Artists data from Supabase:", data);
-          
-          // Transform the data to match ContentItemProps format
-          result = (data || []).map(artist => ({
-            id: artist.id,
-            name: artist.name,
-            type: 'artist',
-            subtype: artist.subtype || 'creator',
-            location: artist.location || 'Unknown',
-            tags: artist.tags || [],
-            image_url: artist.image_url || 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
-            styles: artist.styles || [],
-            disciplines: artist.disciplines || [],
-            multidisciplinary: artist.multidisciplinary || false
-          }));
+          try {
+            // First try to fetch from the artists table
+            const { data, error } = await supabase
+              .from('artists')
+              .select('*');
+            
+            if (error) {
+              console.error('Error fetching artists:', error);
+              // Fallback to profiles table if artists table fails
+              const { data: profileData, error: profileError } = await supabase
+                .from('profiles')
+                .select('*')
+                .contains('profile_types', ['artist']);
+              
+              if (profileError) {
+                console.error('Error fetching profiles:', profileError);
+                throw profileError;
+              }
+              
+              // Transform profile data
+              const transformedProfiles = profileData.map(profile => {
+                const roleAttrs = profile.role_attributes as Record<string, any> || {};
+                return {
+                  id: profile.id,
+                  name: profile.full_name || profile.username,
+                  description: profile.bio || '',
+                  image_url: profile.avatar_url || '',
+                  type: 'artist',
+                  subtype: profile.profile_types?.[0] || 'artist',
+                  location: roleAttrs.location || 'Unknown',
+                  tags: roleAttrs.tags || [],
+                  styles: roleAttrs.styles || [],
+                  disciplines: roleAttrs.disciplines || [],
+                  multidisciplinary: roleAttrs.multidisciplinary || false,
+                  path: `/artist-profile/${profile.id}`
+                };
+              });
+              result = transformedProfiles;
+            } else {
+              // Use artists data if available
+              result = (data || []).map(artist => ({
+                id: artist.id,
+                name: artist.name,
+                type: 'artist',
+                subtype: artist.subtype || 'creator',
+                location: artist.location || 'Unknown',
+                tags: artist.tags || [],
+                image_url: artist.image_url || 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+                styles: artist.styles || [],
+                disciplines: artist.disciplines || [],
+                multidisciplinary: artist.multidisciplinary || false,
+                path: `/artist-profile/${artist.id}`
+              }));
+            }
+          } catch (err) {
+            console.error('Error in artists fetch:', err);
+            // Provide fallback data if both tables fail
+            result = [
+              {
+                id: 'fallback1',
+                name: 'Sample Artist 1',
+                type: 'artist',
+                subtype: 'creator',
+                location: 'New York',
+                tags: ['music', 'performance'],
+                image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+                styles: ['contemporary'],
+                disciplines: ['music'],
+                multidisciplinary: false,
+                path: `/artist-profile/fallback1`
+              },
+              {
+                id: 'fallback2',
+                name: 'Sample Artist 2',
+                type: 'artist',
+                subtype: 'visual',
+                location: 'Los Angeles',
+                tags: ['visual', 'digital'],
+                image_url: 'https://images.unsplash.com/photo-1543968536-c825e4aa6a60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80',
+                styles: ['experimental'],
+                disciplines: ['visual'],
+                multidisciplinary: true,
+                path: `/artist-profile/fallback2`
+              }
+            ];
+          }
         } else if (category === 'resources') {
           // Fetch resources data
           const { data, error } = await supabase

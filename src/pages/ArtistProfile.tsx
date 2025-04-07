@@ -24,63 +24,145 @@ import ProfileCalendar, { CalendarEvent } from '@/components/profile/ProfileCale
 import { Artist } from '@/types/database';
 
 const ArtistProfile = () => {
-  const { id } = useParams<{ id: string }>();
+  const { artistId, artistSlug } = useParams<{ artistId?: string; artistSlug?: string }>();
   const [artist, setArtist] = useState<Artist | null>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchArtist = async () => {
-      if (!id) return;
-      
       try {
         setIsLoading(true);
+        setError(null);
         
-        const { data, error } = await supabase
-          .from('artists')
-          .select('*')
-          .eq('id', id)
-          .single();
+        console.log('Fetching artist with params:', { artistId, artistSlug });
         
-        if (error) throw error;
+        // If we don't have either id or slug, show error
+        if (!artistId && !artistSlug) {
+          setError('No artist identifier provided');
+          return;
+        }
         
-        // Enhance the artist with default values for missing properties
+        let query = supabase.from('profiles').select('*');
+        
+        // Check if we're using ID or slug
+        if (artistSlug) {
+          query = query.eq('username', artistSlug);
+          console.log('Querying by username/slug:', artistSlug);
+        } else {
+          query = query.eq('id', artistId);
+          console.log('Querying by ID:', artistId);
+        }
+        
+        const { data, error: fetchError } = await query.single();
+        
+        console.log('Query result:', { data, error: fetchError });
+        
+        if (fetchError) {
+          console.error('Error fetching profile:', fetchError);
+          
+          // Try fetching from artists table as fallback
+          const { data: artistData, error: artistError } = await supabase
+            .from('artists')
+            .select('*')
+            .eq('id', artistId)
+            .single();
+            
+          console.log('Fallback artist query result:', { artistData, error: artistError });
+          
+          if (artistError || !artistData) {
+            setError('Could not load artist profile. Please try again later.');
+            return;
+          }
+          
+          // Convert artist data to Artist type
+          const enhancedArtist: Artist = {
+            id: artistData.id,
+            name: artistData.name,
+            bio: artistData.bio || 'No bio available.',
+            image_url: artistData.image_url,
+            location: artistData.location || 'Unknown',
+            disciplines: artistData.disciplines || [],
+            styles: artistData.styles || [],
+            tags: artistData.tags || [],
+            type: 'artist',
+            subtype: artistData.subtype || 'artist',
+            multidisciplinary: artistData.multidisciplinary || false,
+            social_links: artistData.social_links || [],
+            created_at: artistData.created_at,
+            updated_at: artistData.updated_at
+          };
+          
+          setArtist(enhancedArtist);
+          generateMockEvents(enhancedArtist);
+          return;
+        }
+        
+        if (!data) {
+          setError('Artist not found');
+          return;
+        }
+        
+        // Check if this profile is an artist type
+        const profileTypes = data.profile_types || [];
+        if (!profileTypes.includes('artist')) {
+          console.warn('Profile is not an artist type:', data);
+        }
+        
+        // Transform profile data to match Artist type
+        const roleAttrs = data.role_attributes as Record<string, any> || {};
         const enhancedArtist: Artist = {
-          ...data,
+          id: data.id,
+          name: data.full_name || data.username,
           bio: data.bio || 'No bio available.',
-          social_links: data.social_links || []
+          image_url: data.avatar_url,
+          location: roleAttrs.location || 'Unknown',
+          disciplines: roleAttrs.disciplines || [],
+          styles: roleAttrs.styles || [],
+          tags: roleAttrs.tags || [],
+          type: 'artist',
+          subtype: (data.profile_types && data.profile_types[0]) || 'artist',
+          multidisciplinary: roleAttrs.multidisciplinary || false,
+          social_links: roleAttrs.social_links || [],
+          created_at: data.created_at,
+          updated_at: data.updated_at
         };
         
         setArtist(enhancedArtist);
-        
-        // Generate some mock events
-        const mockEvents: CalendarEvent[] = [];
-        const today = new Date();
-        
-        for (let i = 0; i < 5; i++) {
-          const date = new Date(today);
-          date.setDate(today.getDate() + Math.floor(Math.random() * 30));
-          
-          mockEvents.push({
-            id: `event-${i}`,
-            title: `Performance at ${['Club Vibe', 'The Venue', 'Jazz Hub', 'City Hall', 'Music Festival'][i % 5]}`,
-            date,
-            location: ['New York', 'Los Angeles', 'Berlin', 'Tokyo', 'London'][i % 5],
-            type: 'performance',
-            category: data.disciplines && data.disciplines[0] ? data.disciplines[0] : 'music'
-          });
-        }
-        
-        setEvents(mockEvents);
+        generateMockEvents(enhancedArtist);
       } catch (error) {
-        console.error('Error fetching artist:', error);
+        console.error('Error in fetchArtist:', error);
+        setError('An unexpected error occurred. Please try again later.');
       } finally {
         setIsLoading(false);
       }
     };
     
+    // Helper function to generate mock events
+    const generateMockEvents = (artist: Artist) => {
+      const mockEvents: CalendarEvent[] = [];
+      const today = new Date();
+      
+      for (let i = 0; i < 5; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + Math.floor(Math.random() * 30));
+        
+        mockEvents.push({
+          id: `event-${i}`,
+          title: `Performance at ${['Club Vibe', 'The Venue', 'Jazz Hub', 'City Hall', 'Music Festival'][i % 5]}`,
+          date,
+          location: ['New York', 'Los Angeles', 'Berlin', 'Tokyo', 'London'][i % 5],
+          type: 'performance',
+          category: artist.disciplines && artist.disciplines[0] ? artist.disciplines[0] : 'music'
+        });
+      }
+      
+      setEvents(mockEvents);
+    };
+    
     fetchArtist();
-  }, [id]);
+  }, [artistId, artistSlug]);
 
   if (isLoading) {
     return (
@@ -102,6 +184,22 @@ const ArtistProfile = () => {
                 <div className="h-4 bg-muted rounded w-3/4"></div>
               </div>
             </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="container mx-auto py-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">Error Loading Artist</h1>
+            <p className="text-muted-foreground mb-6">{error}</p>
+            <Button asChild>
+              <Link to="/discover">Browse Artists</Link>
+            </Button>
           </div>
         </div>
       </Layout>
@@ -130,6 +228,17 @@ const ArtistProfile = () => {
   return (
     <Layout>
       <div className="container mx-auto py-8">
+        {/* Debugging information */}
+        <div className="mb-8 p-4 border border-red-300 bg-red-50 rounded-md">
+          <h3 className="font-bold text-red-800 mb-2">Debug Information</h3>
+          <div className="text-sm font-mono">
+            <p><strong>artistId:</strong> {artistId || 'not provided'}</p>
+            <p><strong>artistSlug:</strong> {artistSlug || 'not provided'}</p>
+            <p><strong>URL Path:</strong> {window.location.pathname}</p>
+            <p><strong>URL Search:</strong> {window.location.search}</p>
+          </div>
+        </div>
+        
         <div className="flex flex-col md:flex-row gap-8">
           {/* Sidebar */}
           <div className="md:w-1/3">

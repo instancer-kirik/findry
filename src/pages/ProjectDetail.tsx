@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useProjects, Project, ProjectComponent, ProjectTask } from '@/hooks/use-project';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Check, Github, Clock, ArrowLeft, Plus, Edit } from 'lucide-react';
+import { Check, Github, Clock, ArrowLeft, Plus, Edit, MessageCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -47,6 +47,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
+import ProjectChat from '@/components/projects/ProjectChat';
+import { useProjectChat } from '@/hooks/use-project-chat';
 
 // Form schemas for components and tasks
 const componentSchema = z.object({
@@ -72,6 +74,7 @@ export default function ProjectDetail() {
   
   console.log("URL params:", params);
   const navigate = useNavigate();
+  const location = useLocation();
   const { useGetProject, useCreateProjectComponent, useUpdateProjectComponent, useCreateProjectTask, useUpdateProjectTask } = useProjects();
   
   // Get the source from URL search params
@@ -89,7 +92,12 @@ export default function ProjectDetail() {
   console.log("Project data:", project);
   console.log("Error:", error);
   
-  const [activeTab, setActiveTab] = useState('overview');
+  // Get query params
+  const queryParams = new URLSearchParams(location.search);
+  const tabFromQuery = queryParams.get('tab');
+  
+  // State
+  const [activeTab, setActiveTab] = useState(tabFromQuery || 'overview');
   const [selectedComponent, setSelectedComponent] = useState<ProjectComponent | null>(null);
   const [selectedTask, setSelectedTask] = useState<ProjectTask | null>(null);
   const [isComponentDialogOpen, setIsComponentDialogOpen] = useState(false);
@@ -125,79 +133,114 @@ export default function ProjectDetail() {
     },
   });
   
-  // Handle component form submit
-  const onComponentSubmit = (values: z.infer<typeof componentSchema>) => {
-    // Create a complete component object with required fields
-    const componentData = {
-      name: values.name,
-      description: values.description,
-      status: values.status,
-      type: values.type
-    };
+  // Initialize project chat functions
+  const { sendProjectUpdate } = useProjectChat({
+    projectId: project?.id || '',
+    projectName: project?.name || 'Project'
+  });
+
+  // Set active tab based on URL query parameter
+  useEffect(() => {
+    if (tabFromQuery && ['overview', 'components', 'tasks', 'chat'].includes(tabFromQuery)) {
+      setActiveTab(tabFromQuery);
+    }
+  }, [tabFromQuery]);
+
+  // Function to update URL when tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    // Update URL without full page reload
+    const newUrl = `${location.pathname}?tab=${value}`;
+    window.history.pushState({ path: newUrl }, '', newUrl);
+  };
+
+  // Handle component form submission
+  const onComponentSubmit = async (values: z.infer<typeof componentSchema>) => {
+    setIsComponentDialogOpen(false);
     
-    if (selectedComponent) {
-      // Update existing component
-      updateComponent.mutate({
-        projectId: id!,
-        componentId: selectedComponent.id,
-        updates: values
-      }, {
-        onSuccess: () => {
-          setIsComponentDialogOpen(false);
-          setSelectedComponent(null);
-          componentForm.reset();
+    try {
+      if (selectedComponent) {
+        // Update existing component
+        await updateComponent.mutateAsync({
+          projectId: id,
+          componentId: selectedComponent.id,
+          updates: values
+        });
+        
+        toast.success("Component updated successfully!");
+        
+        // Send notification to project chat
+        if (sendProjectUpdate) {
+          await sendProjectUpdate(`Component "${values.name}" updated`);
         }
-      });
-    } else {
-      // Create new component
-      createComponent.mutate({
-        projectId: id!,
-        component: componentData
-      }, {
-        onSuccess: () => {
-          setIsComponentDialogOpen(false);
-          componentForm.reset();
+      } else {
+        // Create new component
+        await createComponent.mutateAsync({
+          projectId: id,
+          component: values
+        });
+        
+        toast.success("Component added successfully!");
+        
+        // Send notification to project chat
+        if (sendProjectUpdate) {
+          await sendProjectUpdate(`New component "${values.name}" added`);
         }
-      });
+      }
+      
+      // Reset states
+      setSelectedComponent(null);
+      componentForm.reset();
+      
+    } catch (error) {
+      console.error('Error saving component:', error);
+      toast.error("Failed to save component. Please try again.");
     }
   };
-  
-  // Handle task form submit
-  const onTaskSubmit = (values: z.infer<typeof taskSchema>) => {
-    // Create a complete task object with required fields
-    const taskData = {
-      title: values.title,
-      description: values.description,
-      status: values.status,
-      priority: values.priority,
-      assignedTo: values.assignedTo,
-      dueDate: values.dueDate
-    };
+
+  // Handle task form submission
+  const onTaskSubmit = async (values: z.infer<typeof taskSchema>) => {
+    setIsTaskDialogOpen(false);
     
-    if (selectedTask) {
-      // Update existing task
-      updateTask.mutate({
-        projectId: id!,
-        taskId: selectedTask.id,
-        updates: values
-      }, {
-        onSuccess: () => {
-          setIsTaskDialogOpen(false);
-          setSelectedTask(null);
-          taskForm.reset();
+    try {
+      if (selectedTask) {
+        // Update existing task
+        await updateTask.mutateAsync({
+          projectId: id,
+          taskId: selectedTask.id,
+          updates: values
+        });
+        
+        toast.success("Task updated successfully!");
+        
+        // Send notification to project chat if status changed
+        if (sendProjectUpdate && selectedTask.status !== values.status) {
+          await sendProjectUpdate(`Task "${values.title}" status changed to ${values.status}`);
+        } else if (sendProjectUpdate) {
+          await sendProjectUpdate(`Task "${values.title}" updated`);
         }
-      });
-    } else {
-      // Create new task
-      createTask.mutate({
-        projectId: id!,
-        task: taskData
-      }, {
-        onSuccess: () => {
-          setIsTaskDialogOpen(false);
-          taskForm.reset();
+      } else {
+        // Create new task
+        await createTask.mutateAsync({
+          projectId: id,
+          task: values
+        });
+        
+        toast.success("Task added successfully!");
+        
+        // Send notification to project chat
+        if (sendProjectUpdate) {
+          await sendProjectUpdate(`New task "${values.title}" added`);
         }
-      });
+      }
+      
+      // Reset states
+      setSelectedTask(null);
+      taskForm.reset();
+      
+    } catch (error) {
+      console.error('Error saving task:', error);
+      toast.error("Failed to save task. Please try again.");
     }
   };
   
@@ -244,6 +287,35 @@ export default function ProjectDetail() {
       navigate('/discover?tab=projects');
     } else {
       navigate('/projects');
+    }
+  };
+
+  // Add this to your state declarations
+  const projectChatRef = useRef<any>(null);
+
+  // Function to add a component reference to the chat
+  const addComponentReference = (component: ProjectComponent) => {
+    // Need to use a ref to access the ProjectChat component
+    if (projectChatRef.current) {
+      projectChatRef.current.addReference({
+        id: component.id,
+        type: 'component',
+        name: component.name,
+        status: component.status
+      });
+    }
+  };
+
+  // Function to add a task reference to the chat
+  const addTaskReference = (task: ProjectTask) => {
+    // Need to use a ref to access the ProjectChat component
+    if (projectChatRef.current) {
+      projectChatRef.current.addReference({
+        id: task.id,
+        type: 'task',
+        name: task.title,
+        status: task.status
+      });
     }
   };
 
@@ -384,11 +456,15 @@ export default function ProjectDetail() {
         </div>
       </div>
 
-      <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="mt-8">
+      <Tabs defaultValue="overview" value={activeTab} onValueChange={handleTabChange} className="mt-8">
         <TabsList className="mb-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="components">Components</TabsTrigger>
           <TabsTrigger value="tasks">Tasks</TabsTrigger>
+          <TabsTrigger value="chat">
+            <MessageCircle className="h-4 w-4 mr-2" />
+            Chat
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -472,9 +548,11 @@ export default function ProjectDetail() {
                   <CardHeader className="pb-2">
                     <div className="flex justify-between">
                       <CardTitle>{component.name}</CardTitle>
-                      <Button variant="ghost" size="icon" onClick={() => openComponentDialog(component)}>
-                        <Edit size={16} />
-                      </Button>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openComponentDialog(component)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                     <Badge className={getComponentStatusColor(component.status)}>
                       {component.status}
@@ -484,6 +562,25 @@ export default function ProjectDetail() {
                     <p className="text-sm text-muted-foreground mb-2">{component.description}</p>
                     <Badge variant="outline">{component.type}</Badge>
                   </CardContent>
+                  <div className="flex justify-between items-center mt-2">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                      onClick={() => {
+                        // Switch to chat tab
+                        handleTabChange('chat');
+                        // Open reference popover with this component pre-selected
+                        addComponentReference(component);
+                        // Focus the chat input
+                        setTimeout(() => {
+                          document.querySelector('.project-chat-input')?.focus();
+                        }, 100);
+                      }}
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </Card>
               ))
             ) : (
@@ -510,9 +607,11 @@ export default function ProjectDetail() {
                   <CardHeader className="pb-2">
                     <div className="flex justify-between">
                       <CardTitle>{task.title}</CardTitle>
-                      <Button variant="ghost" size="icon" onClick={() => openTaskDialog(task)}>
-                        <Edit size={16} />
-                      </Button>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openTaskDialog(task)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -539,6 +638,25 @@ export default function ProjectDetail() {
                       )}
                     </div>
                   </CardContent>
+                  <div className="flex justify-between items-center mt-2">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                      onClick={() => {
+                        // Switch to chat tab
+                        handleTabChange('chat');
+                        // Open reference popover with this task pre-selected
+                        addTaskReference(task);
+                        // Focus the chat input
+                        setTimeout(() => {
+                          document.querySelector('.project-chat-input')?.focus();
+                        }, 100);
+                      }}
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </Card>
               ))
             ) : (
@@ -547,6 +665,67 @@ export default function ProjectDetail() {
                 <Button onClick={() => openTaskDialog()}>Add First Task</Button>
               </div>
             )}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="chat">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-2">
+              <ProjectChat 
+                ref={projectChatRef}
+                project={project} 
+                onReferenceClick={{
+                  component: (componentId) => {
+                    const component = project.components?.find(c => c.id === componentId);
+                    if (component) {
+                      setSelectedComponent(component);
+                      setIsComponentDialogOpen(true);
+                    }
+                  },
+                  task: (taskId) => {
+                    const task = project.tasks?.find(t => t.id === taskId);
+                    if (task) {
+                      setSelectedTask(task);
+                      setIsTaskDialogOpen(true);
+                    }
+                  }
+                }}
+              />
+            </div>
+            <div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Project Members</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {project.contributors ? (
+                      project.contributors.map((contributor, index) => (
+                        <div key={index} className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarFallback>{contributor.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{contributor.name}</p>
+                            <p className="text-sm text-muted-foreground">{contributor.role}</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <Avatar>
+                          <AvatarFallback>YO</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">You</p>
+                          <p className="text-sm text-muted-foreground">Owner</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </TabsContent>
       </Tabs>

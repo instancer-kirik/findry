@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -59,24 +58,42 @@ const ContentCard: React.FC<ContentCardProps> = ({
   
   // Get profile path based on content type
   const getProfilePath = () => {
+    let path;
+    
     switch (type) {
       case 'artist':
-        return `/artists/${id}`;
+        // Check if this is a UUID format, which indicates it's from the profiles table
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+        
+        // Log the ID format for debugging
+        console.log(`Artist ID: ${id}, UUID format: ${isUuid}`);
+        
+        // Use explicit path to avoid routing conflicts
+        path = `/artist-profile/${id}`;
+        break;
       case 'venue':
-        return `/venues/${id}`;
+        path = `/venues/${id}`;
+        break;
       case 'resource':
       case 'space':
       case 'tool':
-        return `/resources/${id}`;
+        path = `/resources/${id}`;
+        break;
       case 'brand':
-        return `/brands/${id}`;
+        path = `/brands/${id}`;
+        break;
       case 'event':
-        return `/events/${id}`;
+        path = `/events/${id}`;
+        break;
       case 'project':
-        return `/projects/${id}`;
+        path = `/projects/${id}`;
+        break;
       default:
-        return `/profile/${id}`;
+        path = `/profile/${id}`;
     }
+    
+    console.log(`ContentCard: Navigating to ${path} for ${type} with ID ${id}`);
+    return path;
   };
 
   const handleSave = (e: React.MouseEvent) => {
@@ -98,6 +115,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
     
     // Otherwise navigate to the profile page
     const path = getProfilePath();
+    console.log(`ContentCard: Click handler navigating to ${path}`);
     navigate(path);
     
     // Update window location to ensure proper URL is displayed in browser

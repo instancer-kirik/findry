@@ -94,8 +94,8 @@ const SignUpForm: React.FC = () => {
         description: 'Please check your email to verify your account. You can continue using the app while waiting for verification.',
       });
 
-      // Navigate to profile setup
-      navigate('/profile-setup');
+      // Navigate to dashboard instead of profile setup
+      navigate('/dashboard');
     } catch (error) {
       console.error('Sign up error:', error);
       toast({

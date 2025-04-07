@@ -22,7 +22,13 @@ import {
   CalendarPlus,
   ChevronDown,
   Store,
-  Code
+  Code,
+  LayoutDashboard,
+  Palette,
+  FileBox,
+  FolderKanban,
+  MapPin,
+  ShoppingBag
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -47,11 +53,15 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from '@/hooks/use-auth';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 interface NavItem {
   href: string;
   icon: React.ReactNode;
   label: string;
+  requiresAuth?: boolean;
+  visibleWhenAuth?: boolean;
   badge?: number;
   subItems?: {
     href: string;
@@ -60,13 +70,57 @@ interface NavItem {
   }[];
 }
 
-const navItems: NavItem[] = [
-  { href: '/', icon: <Sparkles className="h-5 w-5" />, label: 'Home' },
-  { href: '/discover', icon: <Search className="h-5 w-5" />, label: 'Discover' },
-  { href: '/projects', icon: <Code className="h-5 w-5" />, label: 'Projects' },
-  { href: '/communities', icon: <Users className="h-5 w-5" />, label: 'Communities' },
-  { href: '/shops', icon: <Store className="h-5 w-5" />, label: 'Shops' },
-  { href: '/chats', icon: <MessageSquare className="h-5 w-5" />, label: 'Chats', badge: 3 },
+// Define base navigation items
+const baseNavItems: NavItem[] = [
+  { 
+    href: '/', 
+    icon: <Home className="h-5 w-5" />, 
+    label: 'Landing',
+    visibleWhenAuth: false
+  },
+  { 
+    href: '/dashboard', 
+    icon: <LayoutDashboard className="h-5 w-5" />, 
+    label: 'Dashboard',
+    requiresAuth: true
+  },
+  { 
+    href: '/discover', 
+    icon: <Search className="h-5 w-5" />, 
+    label: 'Discover'
+  },
+  { 
+    href: '/artists', 
+    icon: <Palette className="h-5 w-5" />, 
+    label: 'Artists'
+  },
+  { 
+    href: '/resources', 
+    icon: <FileBox className="h-5 w-5" />, 
+    label: 'Resources'
+  },
+  { 
+    href: '/projects', 
+    icon: <FolderKanban className="h-5 w-5" />, 
+    label: 'Projects'
+  },
+  { 
+    href: '/communities', 
+    icon: <Users className="h-5 w-5" />, 
+    label: 'Communities'
+  },
+  { 
+    href: '/shops', 
+    icon: <Store className="h-5 w-5" />, 
+    label: 'Shops' 
+  },
+  { 
+    href: '/chats', 
+    icon: <MessageSquare className="h-5 w-5" />, 
+    label: 'Chats', 
+    badge: 3, 
+    requiresAuth: true 
+  },
   { 
     href: '/events', 
     icon: <Calendar className="h-5 w-5" />, 
@@ -104,33 +158,51 @@ const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [session, setSession] = useState<any>(null);
+  const { user } = useAuth();
+  const isAuthenticated = !!user;
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const { toast } = useToast();
+  const [mode, setMode] = useLocalStorage<'light' | 'dark' | 'system'>(
+    'vite-ui-theme',
+    'system'
+  );
+  const [activeSubMenu, setActiveSubMenu] = useState<string | null>(null);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
-        setSession(currentSession);
+        // Handle session changes
       }
     );
 
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      setSession(currentSession);
+      // Handle initial session
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
+  // Filter navigation items based on authentication status
+  const navItems = baseNavItems.filter(item => {
+    // Hide items that require auth if user is not authenticated
+    if (item.requiresAuth && !isAuthenticated) return false;
+    
+    // Hide items marked as not visible when authenticated
+    if (item.visibleWhenAuth === false && isAuthenticated) return false;
+    
+    return true;
+  });
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    setSession(null);
-    navigate('/login');
+    navigate('/');
   };
 
   const handleProfileAction = (action: string) => {
     if (action === 'profile') {
       navigate('/profile');
+    } else if (action === 'dashboard') {
+      navigate('/dashboard');
     } else {
       toast({
         title: "Action triggered",
@@ -139,8 +211,7 @@ const Navbar: React.FC = () => {
     }
   };
 
-  const userProfileLink = session ? `/profile` : '/login';
-  const user = session?.user;
+  const userProfileLink = isAuthenticated ? `/profile` : '/login';
 
   const renderNavItem = (item: NavItem) => {
     if (item.subItems) {
@@ -192,9 +263,18 @@ const Navbar: React.FC = () => {
     );
   };
 
+  // Toggle submenu visibility
+  const toggleSubMenu = (label: string) => {
+    if (activeSubMenu === label) {
+      setActiveSubMenu(null);
+    } else {
+      setActiveSubMenu(label);
+    }
+  };
+
   return (
     <div className="container flex h-16 items-center justify-between">
-      <Link to="/" className="font-bold text-xl">
+      <Link to={isAuthenticated ? "/dashboard" : "/"} className="font-bold text-xl">
         Findry
       </Link>
 
@@ -210,7 +290,7 @@ const Navbar: React.FC = () => {
       {/* Auth Buttons */}
       <div className="hidden md:flex items-center space-x-4">
         <ThemeNavbarToggle />
-        {user ? (
+        {isAuthenticated ? (
           <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -224,6 +304,10 @@ const Navbar: React.FC = () => {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleProfileAction('dashboard')}>
+                  <LayoutDashboard className="h-4 w-4 mr-2" />
+                  Dashboard
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleProfileAction('profile')}>
                   <UserRound className="h-4 w-4 mr-2" />
                   Profile
@@ -249,95 +333,123 @@ const Navbar: React.FC = () => {
               </Button>
             </Link>
             <Link to="/signup">
-              <Button>
-                <User className="h-4 w-4 mr-2" />
-                Sign Up
-              </Button>
+              <Button>Sign Up</Button>
             </Link>
           </>
         )}
       </div>
 
-      {/* Mobile Navigation */}
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild className="md:hidden">
-          <Button variant="ghost" size="icon">
-            <Menu className="h-5 w-5" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-64 p-6">
-          <div className="mb-4">
-            <Link to="/" className="font-bold text-xl block" onClick={() => setOpen(false)}>
-              Findry
-            </Link>
-          </div>
-          <div className="flex flex-col space-y-2">
-            {navItems.map((item) => (
-              <div key={item.href}>
-                {item.subItems ? (
-                  <div className="space-y-1">
-                    <div className="flex items-center space-x-2 py-2 text-sm font-medium">
-                      {item.icon}
-                      <span>{item.label}</span>
-                    </div>
-                    {item.subItems.map((subItem) => (
-                      <Link
-                        key={subItem.href}
-                        to={subItem.href}
-                        className="flex items-center space-x-2 py-2 text-sm pl-7"
-                        onClick={() => setOpen(false)}
-                      >
-                        {subItem.icon}
-                        <span>{subItem.label}</span>
-                      </Link>
-                    ))}
-                  </div>
-                ) : (
-                  <MobileNavItem
-                    href={item.href}
-                    icon={item.icon}
-                    label={item.label}
-                    badge={item.badge}
-                    onClick={() => setOpen(false)}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 pt-4 border-t">
-            <ThemeNavbarToggle />
-            {user ? (
-              <>
-                <Link to={userProfileLink} className="flex items-center space-x-2 py-2 text-sm" onClick={() => setOpen(false)}>
-                  <Avatar className="h-6 w-6">
-                    <AvatarImage src={user.user_metadata?.avatar_url} alt={user.user_metadata?.full_name} />
-                    <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <span>Profile</span>
-                </Link>
-                <Button variant="ghost" className="w-full justify-start" onClick={() => {
-                  handleLogout();
-                  setOpen(false);
-                }}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Log Out
+      {/* Mobile Menu */}
+      <div className="md:hidden flex items-center">
+        <ThemeNavbarToggle />
+        
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="ml-2">
+              <Menu className="h-6 w-6" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left">
+            <div className="flex flex-col h-full">
+              <div className="flex items-center justify-between mb-6">
+                <Link to={isAuthenticated ? "/dashboard" : "/"} className="font-bold text-xl" onClick={() => setOpen(false)}>Findry</Link>
+                <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>
+                  <X className="h-5 w-5" />
                 </Button>
-              </>
-            ) : (
-              <>
-                <Link to="/login" className="flex items-center space-x-2 py-2 text-sm" onClick={() => setOpen(false)}>
-                  <LogIn className="mr-2 h-4 w-4" />
-                  <span>Log In</span>
-                </Link>
-                <Link to="/signup" className="flex items-center space-x-2 py-2 text-sm" onClick={() => setOpen(false)}>
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Sign Up</span>
-                </Link>
-              </>
-            )}
-          </div>
-        </SheetContent>
-      </Sheet>
+              </div>
+              
+              <div className="flex-1 space-y-4">
+                {navItems.map((item) => {
+                  if (item.subItems) {
+                    return (
+                      <div key={item.href} className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          {item.icon}
+                          <span className="font-medium">{item.label}</span>
+                        </div>
+                        <div className="pl-6 space-y-2">
+                          {item.subItems.map((subItem) => (
+                            <MobileNavItem
+                              key={subItem.href}
+                              href={subItem.href}
+                              icon={subItem.icon}
+                              label={subItem.label}
+                              onClick={() => setOpen(false)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  }
+                  
+                  return (
+                    <MobileNavItem
+                      key={item.href}
+                      href={item.href}
+                      icon={item.icon}
+                      label={item.label}
+                      badge={item.badge}
+                      onClick={() => setOpen(false)}
+                    />
+                  );
+                })}
+              </div>
+              
+              {isAuthenticated ? (
+                <div className="pt-4 border-t">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={user.user_metadata?.avatar_url} />
+                      <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">{user.user_metadata?.full_name || 'User'}</p>
+                      <p className="text-sm text-muted-foreground">{user.email}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <MobileNavItem
+                      href="/profile"
+                      icon={<UserRound className="h-5 w-5" />}
+                      label="Profile"
+                      onClick={() => setOpen(false)}
+                    />
+                    <MobileNavItem
+                      href="/settings"
+                      icon={<Settings className="h-5 w-5" />}
+                      label="Settings"
+                      onClick={() => setOpen(false)}
+                    />
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => {
+                        handleLogout();
+                        setOpen(false);
+                      }}
+                    >
+                      <LogOut className="h-5 w-5 mr-2" />
+                      Log out
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="pt-4 border-t space-y-2">
+                  <Link to="/login" className="w-full" onClick={() => setOpen(false)}>
+                    <Button variant="outline" className="w-full">
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Log In
+                    </Button>
+                  </Link>
+                  <Link to="/signup" className="w-full" onClick={() => setOpen(false)}>
+                    <Button className="w-full">Sign Up</Button>
+                  </Link>
+                </div>
+              )}
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
     </div>
   );
 };

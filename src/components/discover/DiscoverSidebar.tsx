@@ -187,7 +187,7 @@ const DiscoverSidebar: React.FC<DiscoverSidebarProps> = ({
 
         <ResizableHandle withHandle />
 
-        <ResizablePanel defaultSize={30} minSize={10}>
+        <ResizablePanel defaultSize={30} minSize={15}>
           <AnimatedSection animation="slide-in-left" delay={200}>
             <Card>
               <CardHeader className="pb-3">
@@ -216,7 +216,7 @@ const DiscoverSidebar: React.FC<DiscoverSidebarProps> = ({
 
         <ResizableHandle withHandle />
         
-        <ResizablePanel defaultSize={50} minSize={15}>
+        <ResizablePanel defaultSize={25} minSize={15}>
           <AnimatedSection animation="slide-in-left" delay={400}>
             <Card>
               <CardHeader className="pb-3">
@@ -288,7 +288,7 @@ const DiscoverSidebar: React.FC<DiscoverSidebarProps> = ({
 
         <ResizableHandle withHandle />
 
-        <ResizablePanel defaultSize={20} minSize={15}>
+        <ResizablePanel defaultSize={15} minSize={10}>
           <AnimatedSection animation="slide-in-left" delay={300}>
             <Card>
               <CardHeader className="pb-3">
@@ -363,7 +363,7 @@ const DiscoverSidebar: React.FC<DiscoverSidebarProps> = ({
 
         <ResizableHandle withHandle />
         
-        <ResizablePanel defaultSize={20} minSize={15}>
+        <ResizablePanel defaultSize={15} minSize={10}>
           <AnimatedSection animation="slide-in-left" delay={500}>
             <Card>
               <CardHeader className="pb-3">

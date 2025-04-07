@@ -6,8 +6,8 @@ import EcosystemSection from '@/components/home/EcosystemSection';
 import ScreenshotGallery from '@/components/home/ScreenshotGallery';
 import EmailWaitlist from '@/components/home/EmailWaitlist';
 
-
-const Index: React.FC = () => {
+// Renamed from Index to Landing to reflect its purpose as a landing page for visitors
+const Landing: React.FC = () => {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-12">
@@ -21,4 +21,4 @@ const Index: React.FC = () => {
   );
 };
 
-export default Index;
+export default Landing;

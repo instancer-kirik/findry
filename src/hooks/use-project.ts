@@ -35,6 +35,12 @@ export interface Project {
   progress: number;
   tags: string[];
   source?: string;  // Added to track where the project came from (discover or projects)
+  contributors?: {
+    id: string;
+    name: string;
+    role: string;
+    avatar?: string;
+  }[];
 }
 
 // Define database types
@@ -90,34 +96,53 @@ export const useProjects = () => {
     return useQuery({
       queryKey: ['projects'],
       queryFn: async (): Promise<Project[]> => {
-        if (!user) return [];
-        
         try {
-          // First get the IDs of projects owned by the user
-          const { data: ownershipData, error: ownershipError } = await supabase
-            .from('content_ownership')
-            .select('content_id')
-            .eq('content_type', 'project')
-            .eq('owner_id', user.id);
-
-          if (ownershipError) throw ownershipError;
+          let projectsData;
           
-          if (!ownershipData || ownershipData.length === 0) {
-            return [];
+          if (user) {
+            // First get the IDs of projects owned by the user
+            const { data: ownershipData, error: ownershipError } = await supabase
+              .from('content_ownership')
+              .select('content_id')
+              .eq('content_type', 'project')
+              .eq('owner_id', user.id);
+
+            if (ownershipError) throw ownershipError;
+            
+            if (!ownershipData || ownershipData.length === 0) {
+              // If no owned projects, get public projects instead
+              const { data, error } = await supabase
+                .from('projects')
+                .select('*')
+                .limit(10);
+                
+              if (error) throw error;
+              projectsData = data;
+            } else {
+              const projectIds = ownershipData.map(item => item.content_id);
+              
+              // Then fetch the actual projects
+              const { data, error } = await supabase
+                .from('projects')
+                .select('*')
+                .in('id', projectIds);
+
+              if (error) throw error;
+              projectsData = data;
+            }
+          } else {
+            // If not logged in, just load all public projects
+            const { data, error } = await supabase
+              .from('projects')
+              .select('*')
+              .limit(10);
+              
+            if (error) throw error;
+            projectsData = data;
           }
           
-          const projectIds = ownershipData.map(item => item.content_id);
-          
-          // Then fetch the actual projects
-          const { data, error } = await supabase
-            .from('projects')
-            .select('*')
-            .in('id', projectIds);
-
-          if (error) throw error;
-          
           // Process the data to match our Project interface
-          const projects: Project[] = (data || []).map((p: ProjectRecord) => {
+          const projects: Project[] = (projectsData || []).map((p: ProjectRecord) => {
             const project: Project = {
               id: p.id,
               name: p.name,
@@ -177,8 +202,7 @@ export const useProjects = () => {
           console.error('Error fetching projects:', error);
           return [];
         }
-      },
-      enabled: !!user
+      }
     });
   };
   
@@ -636,15 +660,22 @@ export const useProjects = () => {
         name: data.name,
         description: data.description || '',
         // Map the database fields to our interface, with fallbacks
-        status: (data.type as any) || 'planning',
-        version: '0.1.0', // Default version
-        progress: 0, // Default progress
+        status: 'planning', // Default to planning
+        version: '0.1.0',   // Default version
+        progress: 0,        // Default progress
         components,
         tasks,
-        repoUrl: data.image_url, // Use the image_url field which exists in the database
+        repoUrl: data.image_url, // Use image_url which is guaranteed to exist
         tags: data.tags || [],
-        source: source || (data as any).source || 'projects' // Track source
+        source: source || 'projects' // Track source
       };
+      
+      // Apply any additional properties that might exist
+      if ((data as any).status) project.status = (data as any).status;
+      if ((data as any).type) project.status = (data as any).type;
+      if ((data as any).version) project.version = (data as any).version;
+      if ((data as any).progress) project.progress = (data as any).progress;
+      if ((data as any).repo_url) project.repoUrl = (data as any).repo_url;
 
       console.log("Transformed project:", project);
       return project;
