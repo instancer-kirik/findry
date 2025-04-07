@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -73,22 +74,19 @@ const Landing: React.FC = () => {
       <ScreenshotGallery 
         screenshots={[
           {
-            id: "1",
-            title: "Artist Discovery",
-            description: "Find and connect with artists in your area",
-            image: "https://source.unsplash.com/random/800x600/?artist"
+            src: "https://source.unsplash.com/random/800x600/?artist",
+            alt: "Artist Discovery",
+            title: "Find and connect with artists in your area"
           },
           {
-            id: "2",
-            title: "Event Management",
-            description: "Create and manage creative events",
-            image: "https://source.unsplash.com/random/800x600/?event"
+            src: "https://source.unsplash.com/random/800x600/?event",
+            alt: "Event Management",
+            title: "Create and manage creative events"
           },
           {
-            id: "3",
-            title: "Resource Marketplace",
-            description: "Find spaces, tools, and services for your projects",
-            image: "https://source.unsplash.com/random/800x600/?studio"
+            src: "https://source.unsplash.com/random/800x600/?studio",
+            alt: "Resource Marketplace",
+            title: "Find spaces, tools, and services for your projects"
           }
         ]}
       />

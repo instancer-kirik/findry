@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import DashboardCard from '@/components/home/DashboardCard';
-import RecentActivity from '@/components/home/RecentActivity';
+import RecentActivity, { ActivityItem } from '@/components/home/RecentActivity';
 import { Bell, Calendar, User, Briefcase, FileText, MessageSquare, Music, Users, Clock, Star, Globe, Home, Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -20,7 +20,6 @@ interface UserProfile {
   profile_types?: string[];
 }
 
-// Sample data for recent activity
 const dummyActivities = [
   {
     id: '1',
@@ -48,30 +47,30 @@ const dummyActivities = [
   }
 ];
 
-const recentActivity = [
+const recentActivity: ActivityItem[] = [
   {
     id: "1",
     title: "Project Milestone Achieved",
-    type: "project" as const, // Use as const to narrow the type
+    type: "project",
     description: "The Findry Platform Core reached 75% completion",
     timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-    status: "Completed"
+    status: "completed"
   },
   {
     id: "2",
     title: "New Resource Available",
-    type: "item" as const, // Use as const to narrow the type
+    type: "item",
     description: "Recording Studio on 5th Ave added to available resources",
     timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000),
-    status: "Available"
+    status: "active"
   },
   {
     id: "3",
     title: "Collaboration Opportunity",
-    type: "offer" as const, // Use as const to narrow the type
+    type: "offer",
     description: "Producer seeking vocalist for electronic track",
     timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
-    status: "Open"
+    status: "pending"
   }
 ];
 

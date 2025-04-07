@@ -163,7 +163,6 @@ export default function ProjectDetail() {
           description: values.description,
           status: values.status,
           type: values.type,
-          dependencies: [],
           project_id: id,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
@@ -213,7 +212,7 @@ export default function ProjectDetail() {
           description: values.description,
           status: values.status,
           priority: values.priority,
-          assigned_to: values.assignedTo || null,
+          assignedTo: values.assignedTo || null,
           due_date: values.dueDate || null,
           project_id: id,
           created_at: new Date().toISOString(),
@@ -375,8 +374,8 @@ export default function ProjectDetail() {
   useEffect(() => {
     if (isComponentDialogOpen && !selectedComponent) {
       const element = document.getElementById('component-name-input');
-      if (element && 'focus' in element) {
-        (element as HTMLElement).focus();
+      if (element instanceof HTMLElement) {
+        element.focus();
       }
     }
   }, [isComponentDialogOpen, selectedComponent]);
@@ -384,8 +383,8 @@ export default function ProjectDetail() {
   useEffect(() => {
     if (isTaskDialogOpen && !selectedTask) {
       const element = document.getElementById('task-title-input');
-      if (element && 'focus' in element) {
-        (element as HTMLElement).focus();
+      if (element instanceof HTMLElement) {
+        element.focus();
       }
     }
   }, [isTaskDialogOpen, selectedTask]);
