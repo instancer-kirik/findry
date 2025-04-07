@@ -50,7 +50,6 @@ import { toast } from "sonner";
 import ProjectChat from '@/components/projects/ProjectChat';
 import { useProjectChat } from '@/hooks/use-project-chat';
 
-// Form schemas for components and tasks
 const componentSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   description: z.string().min(2, { message: "Description is required." }),
@@ -68,7 +67,6 @@ const taskSchema = z.object({
 });
 
 export default function ProjectDetail() {
-  // Get the id parameter from the URL
   const params = useParams<{ id: string }>();
   const id = params.id || '';
   
@@ -77,7 +75,6 @@ export default function ProjectDetail() {
   const location = useLocation();
   const { useGetProject, useCreateProjectComponent, useUpdateProjectComponent, useCreateProjectTask, useUpdateProjectTask } = useProjects();
   
-  // Get the source from URL search params
   const searchParams = new URLSearchParams(window.location.search);
   const source = searchParams.get('source') || undefined;
   
@@ -86,30 +83,25 @@ export default function ProjectDetail() {
   
   const { data: project, isLoading, error } = useGetProject(id, source);
   
-  // Debug output
   console.log("Project ID:", id);
   console.log("Source:", source);
   console.log("Project data:", project);
   console.log("Error:", error);
   
-  // Get query params
   const queryParams = new URLSearchParams(location.search);
   const tabFromQuery = queryParams.get('tab');
   
-  // State
   const [activeTab, setActiveTab] = useState(tabFromQuery || 'overview');
   const [selectedComponent, setSelectedComponent] = useState<ProjectComponent | null>(null);
   const [selectedTask, setSelectedTask] = useState<ProjectTask | null>(null);
   const [isComponentDialogOpen, setIsComponentDialogOpen] = useState(false);
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
   
-  // Mutations
   const createComponent = useCreateProjectComponent();
   const updateComponent = useUpdateProjectComponent();
   const createTask = useCreateProjectTask();
   const updateTask = useUpdateProjectTask();
   
-  // Component form
   const componentForm = useForm<z.infer<typeof componentSchema>>({
     resolver: zodResolver(componentSchema),
     defaultValues: {
@@ -120,7 +112,6 @@ export default function ProjectDetail() {
     },
   });
   
-  // Task form
   const taskForm = useForm<z.infer<typeof taskSchema>>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
@@ -133,34 +124,28 @@ export default function ProjectDetail() {
     },
   });
   
-  // Initialize project chat functions
   const { sendProjectUpdate } = useProjectChat({
     projectId: project?.id || '',
     projectName: project?.name || 'Project'
   });
 
-  // Set active tab based on URL query parameter
   useEffect(() => {
     if (tabFromQuery && ['overview', 'components', 'tasks', 'chat'].includes(tabFromQuery)) {
       setActiveTab(tabFromQuery);
     }
   }, [tabFromQuery]);
 
-  // Function to update URL when tab changes
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    // Update URL without full page reload
     const newUrl = `${location.pathname}?tab=${value}`;
     window.history.pushState({ path: newUrl }, '', newUrl);
   };
 
-  // Handle component form submission
   const onComponentSubmit = async (values: z.infer<typeof componentSchema>) => {
     setIsComponentDialogOpen(false);
     
     try {
       if (selectedComponent) {
-        // Update existing component
         await updateComponent.mutateAsync({
           projectId: id,
           componentId: selectedComponent.id,
@@ -169,42 +154,46 @@ export default function ProjectDetail() {
         
         toast.success("Component updated successfully!");
         
-        // Send notification to project chat
         if (sendProjectUpdate) {
           await sendProjectUpdate(`Component "${values.name}" updated`);
         }
       } else {
-        // Create new component
+        const newComponent: Omit<ProjectComponent, "id"> = {
+          name: values.name,
+          description: values.description,
+          status: values.status,
+          type: values.type,
+          dependencies: [],
+          project_id: id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        
         await createComponent.mutateAsync({
           projectId: id,
-          component: values
+          component: newComponent
         });
         
         toast.success("Component added successfully!");
         
-        // Send notification to project chat
         if (sendProjectUpdate) {
           await sendProjectUpdate(`New component "${values.name}" added`);
         }
       }
       
-      // Reset states
       setSelectedComponent(null);
       componentForm.reset();
-      
     } catch (error) {
       console.error('Error saving component:', error);
       toast.error("Failed to save component. Please try again.");
     }
   };
 
-  // Handle task form submission
   const onTaskSubmit = async (values: z.infer<typeof taskSchema>) => {
     setIsTaskDialogOpen(false);
     
     try {
       if (selectedTask) {
-        // Update existing task
         await updateTask.mutateAsync({
           projectId: id,
           taskId: selectedTask.id,
@@ -213,38 +202,44 @@ export default function ProjectDetail() {
         
         toast.success("Task updated successfully!");
         
-        // Send notification to project chat if status changed
         if (sendProjectUpdate && selectedTask.status !== values.status) {
           await sendProjectUpdate(`Task "${values.title}" status changed to ${values.status}`);
         } else if (sendProjectUpdate) {
           await sendProjectUpdate(`Task "${values.title}" updated`);
         }
       } else {
-        // Create new task
+        const newTask: Omit<ProjectTask, "id"> = {
+          title: values.title,
+          description: values.description,
+          status: values.status,
+          priority: values.priority,
+          assigned_to: values.assignedTo || null,
+          due_date: values.dueDate || null,
+          project_id: id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        
         await createTask.mutateAsync({
           projectId: id,
-          task: values
+          task: newTask
         });
         
         toast.success("Task added successfully!");
         
-        // Send notification to project chat
         if (sendProjectUpdate) {
           await sendProjectUpdate(`New task "${values.title}" added`);
         }
       }
       
-      // Reset states
       setSelectedTask(null);
       taskForm.reset();
-      
     } catch (error) {
       console.error('Error saving task:', error);
       toast.error("Failed to save task. Please try again.");
     }
   };
-  
-  // Open component dialog for editing
+
   const openComponentDialog = (component?: ProjectComponent) => {
     if (component) {
       setSelectedComponent(component);
@@ -260,8 +255,7 @@ export default function ProjectDetail() {
     }
     setIsComponentDialogOpen(true);
   };
-  
-  // Open task dialog for editing
+
   const openTaskDialog = (task?: ProjectTask) => {
     if (task) {
       setSelectedTask(task);
@@ -279,10 +273,8 @@ export default function ProjectDetail() {
     }
     setIsTaskDialogOpen(true);
   };
-  
-  // Handle back navigation
+
   const handleBack = () => {
-    // Navigate back based on the source
     if (project?.source === 'discover') {
       navigate('/discover?tab=projects');
     } else {
@@ -290,12 +282,9 @@ export default function ProjectDetail() {
     }
   };
 
-  // Add this to your state declarations
   const projectChatRef = useRef<any>(null);
 
-  // Function to add a component reference to the chat
   const addComponentReference = (component: ProjectComponent) => {
-    // Need to use a ref to access the ProjectChat component
     if (projectChatRef.current) {
       projectChatRef.current.addReference({
         id: component.id,
@@ -306,9 +295,7 @@ export default function ProjectDetail() {
     }
   };
 
-  // Function to add a task reference to the chat
   const addTaskReference = (task: ProjectTask) => {
-    // Need to use a ref to access the ProjectChat component
     if (projectChatRef.current) {
       projectChatRef.current.addReference({
         id: task.id,
@@ -339,7 +326,6 @@ export default function ProjectDetail() {
     );
   }
 
-  // Status color mapping
   const getStatusColor = (status: string) => {
     const statusMap: Record<string, string> = {
       'planning': 'bg-blue-100 text-blue-800',
@@ -351,14 +337,12 @@ export default function ProjectDetail() {
     return statusMap[status] || 'bg-gray-100 text-gray-800';
   };
 
-  // Progress color mapping
   const getProgressColor = (progress: number) => {
     if (progress < 30) return 'bg-red-500';
     if (progress < 70) return 'bg-yellow-500';
     return 'bg-green-500';
   };
 
-  // Component status color
   const getComponentStatusColor = (status: string) => {
     const statusMap: Record<string, string> = {
       'planned': 'bg-blue-100 text-blue-800',
@@ -369,7 +353,6 @@ export default function ProjectDetail() {
     return statusMap[status] || 'bg-gray-100 text-gray-800';
   };
 
-  // Task status color
   const getTaskStatusColor = (status: string) => {
     const statusMap: Record<string, string> = {
       'pending': 'bg-blue-100 text-blue-800',
@@ -380,7 +363,6 @@ export default function ProjectDetail() {
     return statusMap[status] || 'bg-gray-100 text-gray-800';
   };
 
-  // Task priority color
   const getTaskPriorityColor = (priority: string) => {
     const priorityMap: Record<string, string> = {
       'low': 'bg-blue-100 text-blue-800',
@@ -389,6 +371,24 @@ export default function ProjectDetail() {
     };
     return priorityMap[priority] || 'bg-gray-100 text-gray-800';
   };
+
+  useEffect(() => {
+    if (isComponentDialogOpen && !selectedComponent) {
+      const element = document.getElementById('component-name-input');
+      if (element && 'focus' in element) {
+        (element as HTMLElement).focus();
+      }
+    }
+  }, [isComponentDialogOpen, selectedComponent]);
+
+  useEffect(() => {
+    if (isTaskDialogOpen && !selectedTask) {
+      const element = document.getElementById('task-title-input');
+      if (element && 'focus' in element) {
+        (element as HTMLElement).focus();
+      }
+    }
+  }, [isTaskDialogOpen, selectedTask]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -568,11 +568,8 @@ export default function ProjectDetail() {
                       size="icon" 
                       className="h-8 w-8 text-muted-foreground hover:text-foreground"
                       onClick={() => {
-                        // Switch to chat tab
                         handleTabChange('chat');
-                        // Open reference popover with this component pre-selected
                         addComponentReference(component);
-                        // Focus the chat input
                         setTimeout(() => {
                           document.querySelector('.project-chat-input')?.focus();
                         }, 100);
@@ -644,11 +641,8 @@ export default function ProjectDetail() {
                       size="icon" 
                       className="h-8 w-8 text-muted-foreground hover:text-foreground"
                       onClick={() => {
-                        // Switch to chat tab
                         handleTabChange('chat');
-                        // Open reference popover with this task pre-selected
                         addTaskReference(task);
-                        // Focus the chat input
                         setTimeout(() => {
                           document.querySelector('.project-chat-input')?.focus();
                         }, 100);
@@ -730,7 +724,6 @@ export default function ProjectDetail() {
         </TabsContent>
       </Tabs>
       
-      {/* Component Dialog */}
       <Dialog open={isComponentDialogOpen} onOpenChange={setIsComponentDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -833,7 +826,6 @@ export default function ProjectDetail() {
         </DialogContent>
       </Dialog>
       
-      {/* Task Dialog */}
       <Dialog open={isTaskDialogOpen} onOpenChange={setIsTaskDialogOpen}>
         <DialogContent>
           <DialogHeader>

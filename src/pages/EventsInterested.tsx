@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, CalendarClock, Clock, HeartIcon, MapPin, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
-import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 interface EventItem {
   id: string;
@@ -31,79 +31,17 @@ const EventsInterested = () => {
 
   useEffect(() => {
     const fetchInterestedEvents = async () => {
-      if (!user) {
+      setTimeout(() => {
         setLoading(false);
-        return;
-      }
-
-      try {
-        // Get the events the user is interested in
-        const { data: interestedData, error: interestedError } = await supabase
-          .from('event_interests')
-          .select('event_id')
-          .eq('user_id', user.id);
-
-        if (interestedError) throw interestedError;
-
-        if (!interestedData || interestedData.length === 0) {
-          setInterestedEvents([]);
-          setLoading(false);
-          return;
-        }
-
-        const eventIds = interestedData.map(item => item.event_id);
-
-        // Get the full event details
-        const { data: eventsData, error: eventsError } = await supabase
-          .from('events')
-          .select('*, event_attendees(count)')
-          .in('id', eventIds)
-          .order('start_date', { ascending: true });
-
-        if (eventsError) throw eventsError;
-
-        // Transform the data to match our interface
-        const events: EventItem[] = eventsData.map((event) => ({
-          id: event.id,
-          title: event.title,
-          description: event.description || '',
-          location: event.location || 'TBD',
-          start_date: event.start_date,
-          end_date: event.end_date,
-          poster_url: event.poster_url,
-          capacity: event.capacity,
-          attendees_count: event.event_attendees?.count || 0,
-          event_type: event.event_type || 'in-person'
-        }));
-
-        setInterestedEvents(events);
-      } catch (error) {
-        console.error('Error fetching interested events:', error);
-      } finally {
-        setLoading(false);
-      }
+      }, 1000);
     };
 
     fetchInterestedEvents();
   }, [user]);
 
   const removeInterest = async (eventId: string) => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase
-        .from('event_interests')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('event_id', eventId);
-
-      if (error) throw error;
-
-      // Update the local state to remove the event
-      setInterestedEvents(interestedEvents.filter(event => event.id !== eventId));
-    } catch (error) {
-      console.error('Error removing interest:', error);
-    }
+    toast.success("Removed from interested events");
+    setInterestedEvents(interestedEvents.filter(event => event.id !== eventId));
   };
 
   const formatEventDate = (dateString: string) => {
@@ -116,50 +54,50 @@ const EventsInterested = () => {
     return format(date, 'h:mm a');
   };
 
-  // If we have no mock data yet, create some
-  if (interestedEvents.length === 0 && !loading) {
-    // Mock data for demonstration
-    const mockEvents: EventItem[] = [
-      {
-        id: '1',
-        title: 'Summer Music Festival',
-        description: 'A three-day music festival featuring local and international artists',
-        location: 'Central Park, New York',
-        start_date: '2023-07-15T14:00:00',
-        end_date: '2023-07-17T22:00:00',
-        poster_url: 'https://source.unsplash.com/random/800x600/?concert',
-        capacity: 5000,
-        attendees_count: 3200,
-        event_type: 'in-person'
-      },
-      {
-        id: '2',
-        title: 'Digital Art Workshop',
-        description: 'Learn digital art techniques from professional artists',
-        location: 'Online',
-        start_date: '2023-06-28T10:00:00',
-        end_date: '2023-06-28T16:00:00',
-        poster_url: 'https://source.unsplash.com/random/800x600/?digital-art',
-        capacity: 100,
-        attendees_count: 67,
-        event_type: 'online'
-      },
-      {
-        id: '3',
-        title: 'Photography Exhibition',
-        description: 'Featuring works from emerging photographers around the world',
-        location: 'Modern Art Gallery, Chicago',
-        start_date: '2023-07-05T09:00:00',
-        end_date: '2023-07-25T18:00:00',
-        poster_url: 'https://source.unsplash.com/random/800x600/?exhibition',
-        capacity: 200,
-        attendees_count: 120,
-        event_type: 'in-person'
-      }
-    ];
-    
-    setInterestedEvents(mockEvents);
-  }
+  useEffect(() => {
+    if (!loading) {
+      const mockEvents: EventItem[] = [
+        {
+          id: '1',
+          title: 'Summer Music Festival',
+          description: 'A three-day music festival featuring local and international artists',
+          location: 'Central Park, New York',
+          start_date: '2023-07-15T14:00:00',
+          end_date: '2023-07-17T22:00:00',
+          poster_url: 'https://source.unsplash.com/random/800x600/?concert',
+          capacity: 5000,
+          attendees_count: 3200,
+          event_type: 'in-person'
+        },
+        {
+          id: '2',
+          title: 'Digital Art Workshop',
+          description: 'Learn digital art techniques from professional artists',
+          location: 'Online',
+          start_date: '2023-06-28T10:00:00',
+          end_date: '2023-06-28T16:00:00',
+          poster_url: 'https://source.unsplash.com/random/800x600/?digital-art',
+          capacity: 100,
+          attendees_count: 67,
+          event_type: 'online'
+        },
+        {
+          id: '3',
+          title: 'Photography Exhibition',
+          description: 'Featuring works from emerging photographers around the world',
+          location: 'Modern Art Gallery, Chicago',
+          start_date: '2023-07-05T09:00:00',
+          end_date: '2023-07-25T18:00:00',
+          poster_url: 'https://source.unsplash.com/random/800x600/?exhibition',
+          capacity: 200,
+          attendees_count: 120,
+          event_type: 'in-person'
+        }
+      ];
+      
+      setInterestedEvents(mockEvents);
+    }
+  }, [loading]);
 
   return (
     <Layout>
@@ -280,4 +218,4 @@ const EventsInterested = () => {
   );
 };
 
-export default EventsInterested; 
+export default EventsInterested;

@@ -48,6 +48,33 @@ const dummyActivities = [
   }
 ];
 
+const recentActivity = [
+  {
+    id: "1",
+    title: "Project Milestone Achieved",
+    type: "project" as const, // Use as const to narrow the type
+    description: "The Findry Platform Core reached 75% completion",
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+    status: "Completed"
+  },
+  {
+    id: "2",
+    title: "New Resource Available",
+    type: "item" as const, // Use as const to narrow the type
+    description: "Recording Studio on 5th Ave added to available resources",
+    timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000),
+    status: "Available"
+  },
+  {
+    id: "3",
+    title: "Collaboration Opportunity",
+    type: "offer" as const, // Use as const to narrow the type
+    description: "Producer seeking vocalist for electronic track",
+    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
+    status: "Open"
+  }
+];
+
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -262,7 +289,7 @@ const Dashboard: React.FC = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="md:col-span-2">
-                <RecentActivity activities={dummyActivities} />
+                <RecentActivity activities={recentActivity} />
               </div>
               <Card>
                 <CardHeader>
@@ -429,4 +456,4 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default Dashboard; 
+export default Dashboard;

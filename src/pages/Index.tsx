@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -70,7 +69,29 @@ const Landing: React.FC = () => {
       
       <FeatureSection />
       <EcosystemSection />
-      <ScreenshotGallery />
+      
+      <ScreenshotGallery 
+        screenshots={[
+          {
+            id: "1",
+            title: "Artist Discovery",
+            description: "Find and connect with artists in your area",
+            image: "https://source.unsplash.com/random/800x600/?artist"
+          },
+          {
+            id: "2",
+            title: "Event Management",
+            description: "Create and manage creative events",
+            image: "https://source.unsplash.com/random/800x600/?event"
+          },
+          {
+            id: "3",
+            title: "Resource Marketplace",
+            description: "Find spaces, tools, and services for your projects",
+            image: "https://source.unsplash.com/random/800x600/?studio"
+          }
+        ]}
+      />
       
       <div className="container mx-auto px-4 py-12 text-center">
         <h2 className="text-3xl font-bold mb-6">Ready to Join the Creative Ecosystem?</h2>

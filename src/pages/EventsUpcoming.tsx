@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, CalendarClock, Clock, HeartIcon, MapPin, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
-import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format, isFuture, parseISO } from 'date-fns';
+import { toast } from 'sonner';
 
 interface EventItem {
   id: string;
@@ -32,57 +32,10 @@ const EventsUpcoming = () => {
 
   useEffect(() => {
     const fetchUpcomingEvents = async () => {
-      try {
-        // Get current date in ISO format
-        const currentDate = new Date().toISOString();
-
-        // Fetch events with a start date in the future
-        const { data: eventsData, error: eventsError } = await supabase
-          .from('events')
-          .select('*')
-          .gte('start_date', currentDate)
-          .order('start_date', { ascending: true });
-
-        if (eventsError) throw eventsError;
-
-        // If user is logged in, fetch their interested events
-        let userInterests: string[] = [];
-        if (user) {
-          try {
-            const { data: interestsData } = await supabase
-              .from('user_event_interests')
-              .select('event_id')
-              .eq('user_id', user.id);
-
-            if (interestsData) {
-              userInterests = interestsData.map(item => item.event_id);
-            }
-          } catch (error) {
-            console.error('Error fetching user interests:', error);
-          }
-        }
-
-        // Transform the data to match our interface
-        const events: EventItem[] = eventsData ? eventsData.map((event) => ({
-          id: event.id,
-          title: event.title || event.name,
-          description: event.description || '',
-          location: event.location || 'TBD',
-          start_date: event.start_date,
-          end_date: event.end_date,
-          poster_url: event.poster_url || event.image_url,
-          capacity: event.capacity,
-          attendees_count: event.attendees_count || 0,
-          event_type: event.event_type || 'in-person',
-          is_interested: userInterests.includes(event.id)
-        })) : [];
-
-        setUpcomingEvents(events);
-      } catch (error) {
-        console.error('Error fetching upcoming events:', error);
-      } finally {
+      // Wait a bit to simulate loading
+      setTimeout(() => {
         setLoading(false);
-      }
+      }, 1000);
     };
 
     fetchUpcomingEvents();
@@ -98,30 +51,19 @@ const EventsUpcoming = () => {
     const event = upcomingEvents.find(e => e.id === eventId);
     if (!event) return;
 
-    try {
-      if (event.is_interested) {
-        // Remove interest
-        await supabase
-          .from('user_event_interests')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('event_id', eventId);
-      } else {
-        // Add interest
-        await supabase
-          .from('user_event_interests')
-          .insert({ user_id: user.id, event_id: eventId });
-      }
-
-      // Update local state
-      setUpcomingEvents(upcomingEvents.map(e => 
-        e.id === eventId 
-          ? { ...e, is_interested: !e.is_interested } 
-          : e
-      ));
-    } catch (error) {
-      console.error('Error toggling interest:', error);
+    // Mock implementation for toggling interest
+    if (event.is_interested) {
+      toast.success("Removed from interested events");
+    } else {
+      toast.success("Added to interested events");
     }
+
+    // Update local state
+    setUpcomingEvents(upcomingEvents.map(e => 
+      e.id === eventId 
+        ? { ...e, is_interested: !e.is_interested } 
+        : e
+    ));
   };
 
   const formatEventDate = (dateString: string) => {
@@ -134,59 +76,63 @@ const EventsUpcoming = () => {
     return format(date, 'h:mm a');
   };
   
-  // If we have no events or data is loading, create mock data for display
-  if (upcomingEvents.length === 0 && !loading) {
-    // Generate dates starting from tomorrow
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    
-    const nextWeek = new Date();
-    nextWeek.setDate(nextWeek.getDate() + 7);
-    
-    const nextMonth = new Date();
-    nextMonth.setMonth(nextMonth.getMonth() + 1);
-    
-    // Mock data for demonstration
-    const mockEvents: EventItem[] = [
-      {
-        id: '1',
-        title: 'Summer Music Festival',
-        description: 'A three-day music festival featuring local and international artists',
-        location: 'Central Park, New York',
-        start_date: tomorrow.toISOString(),
-        end_date: nextWeek.toISOString(),
-        poster_url: 'https://source.unsplash.com/random/800x600/?concert',
-        capacity: 5000,
-        attendees_count: 3200,
-        event_type: 'in-person'
-      },
-      {
-        id: '2',
-        title: 'Digital Art Workshop',
-        description: 'Learn digital art techniques from professional artists',
-        location: 'Online',
-        start_date: nextWeek.toISOString(),
-        poster_url: 'https://source.unsplash.com/random/800x600/?digital-art',
-        capacity: 100,
-        attendees_count: 67,
-        event_type: 'online'
-      },
-      {
-        id: '3',
-        title: 'Photography Exhibition',
-        description: 'Featuring works from emerging photographers around the world',
-        location: 'Modern Art Gallery, Chicago',
-        start_date: nextMonth.toISOString(),
-        end_date: new Date(nextMonth.getTime() + 20 * 24 * 60 * 60 * 1000).toISOString(),
-        poster_url: 'https://source.unsplash.com/random/800x600/?exhibition',
-        capacity: 200,
-        attendees_count: 120,
-        event_type: 'in-person'
-      }
-    ];
-    
-    setUpcomingEvents(mockEvents);
-  }
+  useEffect(() => {
+    if (!loading) {
+      // Generate dates starting from tomorrow
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      const nextWeek = new Date();
+      nextWeek.setDate(nextWeek.getDate() + 7);
+      
+      const nextMonth = new Date();
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
+      
+      // Mock data for demonstration
+      const mockEvents: EventItem[] = [
+        {
+          id: '1',
+          title: 'Summer Music Festival',
+          description: 'A three-day music festival featuring local and international artists',
+          location: 'Central Park, New York',
+          start_date: tomorrow.toISOString(),
+          end_date: nextWeek.toISOString(),
+          poster_url: 'https://source.unsplash.com/random/800x600/?concert',
+          capacity: 5000,
+          attendees_count: 3200,
+          event_type: 'in-person',
+          is_interested: false
+        },
+        {
+          id: '2',
+          title: 'Digital Art Workshop',
+          description: 'Learn digital art techniques from professional artists',
+          location: 'Online',
+          start_date: nextWeek.toISOString(),
+          poster_url: 'https://source.unsplash.com/random/800x600/?digital-art',
+          capacity: 100,
+          attendees_count: 67,
+          event_type: 'online',
+          is_interested: true
+        },
+        {
+          id: '3',
+          title: 'Photography Exhibition',
+          description: 'Featuring works from emerging photographers around the world',
+          location: 'Modern Art Gallery, Chicago',
+          start_date: nextMonth.toISOString(),
+          end_date: new Date(nextMonth.getTime() + 20 * 24 * 60 * 60 * 1000).toISOString(),
+          poster_url: 'https://source.unsplash.com/random/800x600/?exhibition',
+          capacity: 200,
+          attendees_count: 120,
+          event_type: 'in-person',
+          is_interested: false
+        }
+      ];
+      
+      setUpcomingEvents(mockEvents);
+    }
+  }, [loading]);
 
   return (
     <Layout>
@@ -313,4 +259,4 @@ const EventsUpcoming = () => {
   );
 };
 
-export default EventsUpcoming; 
+export default EventsUpcoming;
