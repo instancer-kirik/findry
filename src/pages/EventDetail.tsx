@@ -33,6 +33,8 @@ import {
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs"
+import EventbriteIntegration from '@/components/events/EventbriteIntegration';
+import EventbriteCheckoutWidget from '@/components/events/EventbriteCheckoutWidget';
 
 interface EventProps {
   id: string;
@@ -46,6 +48,7 @@ interface EventProps {
   type: string | null;
   subtype: string | null;
   tags: string[] | null;
+  eventbrite_id: string | null;
 }
 
 // Hook for fetching event details with error handling
@@ -390,6 +393,24 @@ const EventDetail: React.FC = () => {
               eventDate={new Date(event.start_date)}
               readOnly={!isOwner}
             />
+            
+            {isOwner && (
+              <div className="mt-6">
+                <EventbriteIntegration 
+                  eventId={event.id}
+                  eventData={{
+                    id: event.id,
+                    title: event.name,
+                    description: event.description || '',
+                    start_date: event.start_date || '',
+                    end_date: event.end_date || '',
+                    location: event.location || '',
+                    capacity: event.capacity || 100,
+                    is_online: event.type === 'online'
+                  }}
+                />
+              </div>
+            )}
           </>
         );
       case "artists":
@@ -785,6 +806,27 @@ const EventDetail: React.FC = () => {
                   </div>
                 )}
               </CardContent>
+              
+              <CardFooter className="pt-0">
+                <div className="w-full space-y-2">
+                  {event.eventbrite_id ? (
+                    <EventbriteCheckoutWidget 
+                      eventId={event.id} 
+                      eventbriteId={event.eventbrite_id}
+                      className="w-full"
+                      buttonText="Get Tickets"
+                    />
+                  ) : (
+                    <Button className="w-full">Register</Button>
+                  )}
+                  
+                  {isOwner && (
+                    <Link to={`/events/${eventId}/edit`} className="w-full">
+                      <Button variant="outline" className="w-full">Edit Event</Button>
+                    </Link>
+                  )}
+                </div>
+              </CardFooter>
             </Card>
 
             {selectedVenue && (

@@ -34,6 +34,8 @@ import TandemXShop from './pages/TandemXShop'
 import VenueDetail from './pages/VenueDetail'
 import ResourceDetail from './pages/ResourceDetail'
 import BrandDetail from './pages/BrandDetail'
+import EventbriteCallback from './pages/EventbriteCallback'
+import EventbriteOrders from './pages/EventbriteOrders'
 
 import './App.css'
 
@@ -66,6 +68,10 @@ function App() {
             <Route path="/events/upcoming" element={<EventsUpcoming />} />
             <Route path="/events/:eventId" element={<EventDetail />} />
             <Route path="/events" element={<Discover />} />
+            
+            {/* Eventbrite integration routes */}
+            <Route path="/eventbrite/callback" element={<EventbriteCallback />} />
+            <Route path="/eventbrite/orders" element={<EventbriteOrders />} />
             
             <Route path="/resources/index" element={<ResourceIndexPage />} />
             <Route path="/resources/:resourceId" element={<ResourceDetail />} />
