@@ -13,22 +13,9 @@ import {
   Settings,
   Bell,
   UserRound,
-  Sparkles,
-  Users,
-  Star,
-  CalendarDays,
-  CalendarCheck,
-  CalendarClock,
-  CalendarPlus,
   ChevronDown,
-  Store,
-  Code,
   LayoutDashboard,
-  Palette,
-  FileBox,
-  FolderKanban,
-  MapPin,
-  ShoppingBag
+  Compass
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -42,117 +29,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
-  DropdownMenuPortal,
+  DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from '@/hooks/use-auth';
 import { useLocalStorage } from '@/hooks/use-local-storage';
-
-interface NavItem {
-  href: string;
-  icon: React.ReactNode;
-  label: string;
-  requiresAuth?: boolean;
-  visibleWhenAuth?: boolean;
-  badge?: number;
-  subItems?: {
-    href: string;
-    icon: React.ReactNode;
-    label: string;
-  }[];
-}
-
-// Define base navigation items
-const baseNavItems: NavItem[] = [
-  { 
-    href: '/', 
-    icon: <Home className="h-5 w-5" />, 
-    label: 'Landing',
-    visibleWhenAuth: false
-  },
-  { 
-    href: '/dashboard', 
-    icon: <LayoutDashboard className="h-5 w-5" />, 
-    label: 'Dashboard',
-    requiresAuth: true
-  },
-  { 
-    href: '/discover', 
-    icon: <Search className="h-5 w-5" />, 
-    label: 'Discover'
-  },
-  { 
-    href: '/artists', 
-    icon: <Palette className="h-5 w-5" />, 
-    label: 'Artists'
-  },
-  { 
-    href: '/resources', 
-    icon: <FileBox className="h-5 w-5" />, 
-    label: 'Resources'
-  },
-  { 
-    href: '/projects', 
-    icon: <FolderKanban className="h-5 w-5" />, 
-    label: 'Projects'
-  },
-  { 
-    href: '/communities', 
-    icon: <Users className="h-5 w-5" />, 
-    label: 'Communities'
-  },
-  { 
-    href: '/shops', 
-    icon: <Store className="h-5 w-5" />, 
-    label: 'Shops' 
-  },
-  { 
-    href: '/chats', 
-    icon: <MessageSquare className="h-5 w-5" />, 
-    label: 'Chats', 
-    badge: 3, 
-    requiresAuth: true 
-  },
-  { 
-    href: '/events', 
-    icon: <Calendar className="h-5 w-5" />, 
-    label: 'Events',
-    subItems: [
-      { href: '/events/calendar', icon: <CalendarDays className="h-4 w-4" />, label: 'Calendar' },
-      { href: '/events/interested', icon: <CalendarCheck className="h-4 w-4" />, label: 'Interested' },
-      { href: '/events/upcoming', icon: <CalendarClock className="h-4 w-4" />, label: 'Upcoming' },
-      { href: '/events/create', icon: <CalendarPlus className="h-4 w-4" />, label: 'Create Event' },
-    ]
-  },
-];
-
-interface MobileNavItemProps {
-  href: string;
-  icon: React.ReactNode;
-  label: string;
-  badge?: number;
-  onClick?: () => void;
-}
-
-const MobileNavItem: React.FC<MobileNavItemProps> = ({ href, icon, label, badge, onClick }) => (
-  <Link to={href} className="flex items-center space-x-2 py-2 text-sm relative" onClick={onClick}>
-    {icon}
-    <span>{label}</span>
-    {badge && (
-      <span className="absolute right-0 top-1/2 -translate-y-1/2 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
-        {badge}
-      </span>
-    )}
-  </Link>
-);
 
 const Navbar: React.FC = () => {
   const location = useLocation();
@@ -160,13 +41,11 @@ const Navbar: React.FC = () => {
   const [open, setOpen] = useState(false);
   const { user } = useAuth();
   const isAuthenticated = !!user;
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const { toast } = useToast();
-  const [mode, setMode] = useLocalStorage<'light' | 'dark' | 'system'>(
+  const [mode] = useLocalStorage<'light' | 'dark' | 'system'>(
     'vite-ui-theme',
     'system'
   );
-  const [activeSubMenu, setActiveSubMenu] = useState<string | null>(null);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -181,17 +60,6 @@ const Navbar: React.FC = () => {
 
     return () => subscription.unsubscribe();
   }, []);
-
-  // Filter navigation items based on authentication status
-  const navItems = baseNavItems.filter(item => {
-    // Hide items that require auth if user is not authenticated
-    if (item.requiresAuth && !isAuthenticated) return false;
-    
-    // Hide items marked as not visible when authenticated
-    if (item.visibleWhenAuth === false && isAuthenticated) return false;
-    
-    return true;
-  });
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -211,80 +79,127 @@ const Navbar: React.FC = () => {
     }
   };
 
-  const userProfileLink = isAuthenticated ? `/profile` : '/login';
-
-  const renderNavItem = (item: NavItem) => {
-    if (item.subItems) {
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className={`flex items-center space-x-2 relative ${location.pathname.startsWith(item.href) ? 'text-primary' : 'hover:text-primary'}`}
-            >
-              {item.icon}
-              <span>{item.label}</span>
-              <ChevronDown className="h-4 w-4" />
-              {item.badge && (
-                <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {item.badge}
-                </span>
-              )}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-48">
-            {item.subItems.map((subItem) => (
-              <DropdownMenuItem key={subItem.href} asChild>
-                <Link to={subItem.href} className="flex items-center space-x-2">
-                  {subItem.icon}
-                  <span>{subItem.label}</span>
-                </Link>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    }
-
-    return (
-      <Link
-        key={item.href}
-        to={item.href}
-        className={`flex items-center space-x-2 relative ${location.pathname === item.href ? 'text-primary' : 'hover:text-primary'}`}
-      >
-        {item.icon}
-        <span>{item.label}</span>
-        {item.badge && (
-          <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
-            {item.badge}
-          </span>
-        )}
-      </Link>
-    );
-  };
-
-  // Toggle submenu visibility
-  const toggleSubMenu = (label: string) => {
-    if (activeSubMenu === label) {
-      setActiveSubMenu(null);
-    } else {
-      setActiveSubMenu(label);
-    }
-  };
-
   return (
     <div className="container flex h-16 items-center justify-between">
       <Link to={isAuthenticated ? "/dashboard" : "/"} className="font-bold text-xl">
         Findry
       </Link>
 
-      {/* Desktop Navigation */}
-      <div className="hidden md:flex items-center space-x-6">
-        {navItems.map((item) => (
-          <div key={item.href}>
-            {renderNavItem(item)}
-          </div>
-        ))}
+      {/* Desktop Navigation - Simplified with dropdowns */}
+      <div className="hidden md:flex items-center space-x-4">
+        {isAuthenticated && (
+          <Link
+            to="/dashboard"
+            className={`flex items-center space-x-2 ${location.pathname === '/dashboard' ? 'text-primary' : 'hover:text-primary'}`}
+          >
+            <LayoutDashboard className="h-5 w-5" />
+            <span>Dashboard</span>
+          </Link>
+        )}
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="flex items-center space-x-2"
+            >
+              <Compass className="h-5 w-5" />
+              <span>Discover</span>
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuGroup>
+              <DropdownMenuItem asChild>
+                <Link to="/discover" className="w-full cursor-pointer">All Content</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/artists" className="w-full cursor-pointer">Artists</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/venues" className="w-full cursor-pointer">Venues</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/resources" className="w-full cursor-pointer">Resources</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/projects" className="w-full cursor-pointer">Projects</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/brands" className="w-full cursor-pointer">Brands</Link>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="flex items-center space-x-2"
+            >
+              <Calendar className="h-5 w-5" />
+              <span>Events</span>
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuGroup>
+              <DropdownMenuItem asChild>
+                <Link to="/events" className="w-full cursor-pointer">All Events</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/events/calendar" className="w-full cursor-pointer">Calendar</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/events/interested" className="w-full cursor-pointer">Interested</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/events/upcoming" className="w-full cursor-pointer">Upcoming</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link to="/events/create" className="w-full cursor-pointer">Create Event</Link>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="flex items-center space-x-2"
+            >
+              <MessageSquare className="h-5 w-5" />
+              <span>Connect</span>
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuGroup>
+              <DropdownMenuItem asChild>
+                <Link to="/communities" className="w-full cursor-pointer">Communities</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/chats" className="w-full cursor-pointer">Chats</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/collaboration" className="w-full cursor-pointer">Collaboration</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/meetings" className="w-full cursor-pointer">Meetings</Link>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        
+        <Link
+          to="/shops"
+          className={`flex items-center space-x-2 ${location.pathname === '/shops' ? 'text-primary' : 'hover:text-primary'}`}
+        >
+          <span>Shops</span>
+        </Link>
       </div>
 
       {/* Auth Buttons */}
@@ -359,40 +274,31 @@ const Navbar: React.FC = () => {
               </div>
               
               <div className="flex-1 space-y-4">
-                {navItems.map((item) => {
-                  if (item.subItems) {
-                    return (
-                      <div key={item.href} className="space-y-2">
-                        <div className="flex items-center space-x-2">
-                          {item.icon}
-                          <span className="font-medium">{item.label}</span>
-                        </div>
-                        <div className="pl-6 space-y-2">
-                          {item.subItems.map((subItem) => (
-                            <MobileNavItem
-                              key={subItem.href}
-                              href={subItem.href}
-                              icon={subItem.icon}
-                              label={subItem.label}
-                              onClick={() => setOpen(false)}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  }
-                  
-                  return (
-                    <MobileNavItem
-                      key={item.href}
-                      href={item.href}
-                      icon={item.icon}
-                      label={item.label}
-                      badge={item.badge}
-                      onClick={() => setOpen(false)}
-                    />
-                  );
-                })}
+                {isAuthenticated && (
+                  <Link to="/dashboard" className="flex items-center space-x-2 py-2 text-sm" onClick={() => setOpen(false)}>
+                    <LayoutDashboard className="h-5 w-5" />
+                    <span>Dashboard</span>
+                  </Link>
+                )}
+                
+                <Link to="/discover" className="flex items-center space-x-2 py-2 text-sm" onClick={() => setOpen(false)}>
+                  <Compass className="h-5 w-5" />
+                  <span>Discover</span>
+                </Link>
+                
+                <Link to="/events" className="flex items-center space-x-2 py-2 text-sm" onClick={() => setOpen(false)}>
+                  <Calendar className="h-5 w-5" />
+                  <span>Events</span>
+                </Link>
+                
+                <Link to="/communities" className="flex items-center space-x-2 py-2 text-sm" onClick={() => setOpen(false)}>
+                  <MessageSquare className="h-5 w-5" />
+                  <span>Communities</span>
+                </Link>
+                
+                <Link to="/shops" className="flex items-center space-x-2 py-2 text-sm" onClick={() => setOpen(false)}>
+                  <span>Shops</span>
+                </Link>
               </div>
               
               {isAuthenticated ? (
@@ -408,18 +314,14 @@ const Navbar: React.FC = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <MobileNavItem
-                      href="/profile"
-                      icon={<UserRound className="h-5 w-5" />}
-                      label="Profile"
-                      onClick={() => setOpen(false)}
-                    />
-                    <MobileNavItem
-                      href="/settings"
-                      icon={<Settings className="h-5 w-5" />}
-                      label="Settings"
-                      onClick={() => setOpen(false)}
-                    />
+                    <Link to="/profile" className="flex items-center space-x-2 py-2 text-sm" onClick={() => setOpen(false)}>
+                      <UserRound className="h-5 w-5" />
+                      <span>Profile</span>
+                    </Link>
+                    <Link to="/settings" className="flex items-center space-x-2 py-2 text-sm" onClick={() => setOpen(false)}>
+                      <Settings className="h-5 w-5" />
+                      <span>Settings</span>
+                    </Link>
                     <Button
                       variant="ghost"
                       className="w-full justify-start"

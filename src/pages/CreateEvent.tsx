@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -14,9 +14,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon, Clock, Image, Plus, Upload } from 'lucide-react';
 import { format } from 'date-fns';
-import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { generateUniqueId } from '@/utils/unique-id';
 
 // Define a simpler event content item type that matches ContentCardProps
 interface EventContentItem {
@@ -58,10 +58,10 @@ const CreateEvent = () => {
   const [registrationRequired, setRegistrationRequired] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Mock data for event components with proper structure
+  // Initialize content items with unique IDs - this will fix the duplicate key warnings
   const [artists, setArtists] = useState<EventContentItem[]>([
     {
-      id: '1',
+      id: generateUniqueId('artist'),
       name: 'DJ Spinmaster',
       image_url: 'https://source.unsplash.com/random/400x400/?dj',
       description: 'Electronic music DJ with 10 years of experience',
@@ -69,7 +69,7 @@ const CreateEvent = () => {
       location: 'New York'
     },
     {
-      id: '2',
+      id: generateUniqueId('artist'),
       name: 'The Groove Band',
       image_url: 'https://source.unsplash.com/random/400x400/?band',
       description: 'A 5-piece funk band with a brass section',
@@ -80,7 +80,7 @@ const CreateEvent = () => {
 
   const [venues, setVenues] = useState<EventContentItem[]>([
     {
-      id: '1',
+      id: generateUniqueId('venue'),
       name: 'Downtown Gallery',
       image_url: 'https://source.unsplash.com/random/400x400/?gallery',
       description: 'Spacious gallery in the heart of downtown',
@@ -88,7 +88,7 @@ const CreateEvent = () => {
       location: 'Chicago'
     },
     {
-      id: '2',
+      id: generateUniqueId('venue'),
       name: 'Riverside Pavilion',
       image_url: 'https://source.unsplash.com/random/400x400/?pavilion',
       description: 'Open-air venue by the river with stunning views',
@@ -99,7 +99,7 @@ const CreateEvent = () => {
 
   const [resources, setResources] = useState<EventContentItem[]>([
     {
-      id: '1',
+      id: generateUniqueId('resource'),
       name: 'Professional Sound System',
       image_url: 'https://source.unsplash.com/random/400x400/?sound',
       description: 'High-quality PA system with subwoofers',
@@ -107,7 +107,7 @@ const CreateEvent = () => {
       location: 'Warehouse'
     },
     {
-      id: '2',
+      id: generateUniqueId('resource'),
       name: 'Stage Lighting Package',
       image_url: 'https://source.unsplash.com/random/400x400/?lighting',
       description: 'Complete stage lighting setup with operator',
@@ -118,7 +118,7 @@ const CreateEvent = () => {
 
   const [brands, setBrands] = useState<EventContentItem[]>([
     {
-      id: '1',
+      id: generateUniqueId('brand'),
       name: 'SoundTech Audio',
       image_url: 'https://source.unsplash.com/random/400x400/?brand',
       description: 'Audio equipment manufacturer',
@@ -126,7 +126,7 @@ const CreateEvent = () => {
       location: 'Global'
     },
     {
-      id: '2',
+      id: generateUniqueId('brand'),
       name: 'UrbanWear Clothing',
       image_url: 'https://source.unsplash.com/random/400x400/?clothing',
       description: 'Streetwear fashion brand',
@@ -137,7 +137,7 @@ const CreateEvent = () => {
 
   const [communities, setCommunities] = useState<EventContentItem[]>([
     {
-      id: '1',
+      id: generateUniqueId('community'),
       name: 'Digital Artists Collective',
       image_url: 'https://source.unsplash.com/random/400x400/?collective',
       description: 'A community of digital artists',
@@ -145,7 +145,7 @@ const CreateEvent = () => {
       location: 'Online'
     },
     {
-      id: '2',
+      id: generateUniqueId('community'),
       name: 'Local Musicians Network',
       image_url: 'https://source.unsplash.com/random/400x400/?musicians',
       description: 'Network of local musicians for collaboration',
@@ -348,6 +348,16 @@ const CreateEvent = () => {
     } else if (communities.some(c => c.id === itemId)) {
       handleCommunitySelection(itemId);
     }
+  };
+
+  // Generate unique keys for TabsContent elements to avoid React warnings
+  const tabKeys = {
+    all: generateUniqueId('tab-all'),
+    artists: generateUniqueId('tab-artists'),
+    venues: generateUniqueId('tab-venues'),
+    resources: generateUniqueId('tab-resources'),
+    brands: generateUniqueId('tab-brands'),
+    communities: generateUniqueId('tab-communities')
   };
 
   return (
@@ -651,7 +661,7 @@ const CreateEvent = () => {
                 <TabsTrigger value="communities" onClick={() => setFilterType("communities")}>Communities</TabsTrigger>
               </TabsList>
               
-              <TabsContent value="all" className="pt-4">
+              <TabsContent value="all" key={tabKeys.all} className="pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {getFilteredContent().map(item => (
                     <ContentCard 
@@ -669,7 +679,7 @@ const CreateEvent = () => {
                 </div>
               </TabsContent>
               
-              <TabsContent value="artists" className="pt-4">
+              <TabsContent value="artists" key={tabKeys.artists} className="pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {artists.map(item => (
                     <ContentCard 
@@ -687,7 +697,7 @@ const CreateEvent = () => {
                 </div>
               </TabsContent>
               
-              <TabsContent value="venues" className="pt-4">
+              <TabsContent value="venues" key={tabKeys.venues} className="pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {venues.map(item => (
                     <ContentCard 
@@ -705,7 +715,7 @@ const CreateEvent = () => {
                 </div>
               </TabsContent>
               
-              <TabsContent value="resources" className="pt-4">
+              <TabsContent value="resources" key={tabKeys.resources} className="pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {resources.map(item => (
                     <ContentCard 
@@ -723,7 +733,7 @@ const CreateEvent = () => {
                 </div>
               </TabsContent>
 
-              <TabsContent value="brands" className="pt-4">
+              <TabsContent value="brands" key={tabKeys.brands} className="pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {brands.map(item => (
                     <ContentCard 
@@ -741,7 +751,7 @@ const CreateEvent = () => {
                 </div>
               </TabsContent>
 
-              <TabsContent value="communities" className="pt-4">
+              <TabsContent value="communities" key={tabKeys.communities} className="pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {communities.map(item => (
                     <ContentCard 
