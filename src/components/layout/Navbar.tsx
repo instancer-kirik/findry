@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -31,9 +32,10 @@ import {
   DropdownMenuTrigger,
   DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
 import { useLocalStorage } from '@/hooks/use-local-storage';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const Navbar: React.FC = () => {
   const location = useLocation();
@@ -46,6 +48,11 @@ const Navbar: React.FC = () => {
     'vite-ui-theme',
     'system'
   );
+
+  // State for mobile collapsible sections
+  const [discoverOpen, setDiscoverOpen] = useState(false);
+  const [eventsOpen, setEventsOpen] = useState(false);
+  const [connectOpen, setConnectOpen] = useState(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -108,7 +115,7 @@ const Navbar: React.FC = () => {
               <ChevronDown className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-56">
+          <DropdownMenuContent align="start" className="w-56 bg-background">
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
                 <Link to="/discover" className="w-full cursor-pointer">All Content</Link>
@@ -143,7 +150,7 @@ const Navbar: React.FC = () => {
               <ChevronDown className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-56">
+          <DropdownMenuContent align="start" className="w-56 bg-background">
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
                 <Link to="/events" className="w-full cursor-pointer">All Events</Link>
@@ -176,7 +183,7 @@ const Navbar: React.FC = () => {
               <ChevronDown className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-56">
+          <DropdownMenuContent align="start" className="w-56 bg-background">
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
                 <Link to="/communities" className="w-full cursor-pointer">Communities</Link>
@@ -216,7 +223,7 @@ const Navbar: React.FC = () => {
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="bg-background">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => handleProfileAction('dashboard')}>
@@ -264,7 +271,7 @@ const Navbar: React.FC = () => {
               <Menu className="h-6 w-6" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left">
+          <SheetContent side="left" className="w-[280px] sm:w-[350px]">
             <div className="flex flex-col h-full">
               <div className="flex items-center justify-between mb-6">
                 <Link to={isAuthenticated ? "/dashboard" : "/"} className="font-bold text-xl" onClick={() => setOpen(false)}>Findry</Link>
@@ -273,30 +280,169 @@ const Navbar: React.FC = () => {
                 </Button>
               </div>
               
-              <div className="flex-1 space-y-4">
+              <div className="flex-1 space-y-1">
                 {isAuthenticated && (
-                  <Link to="/dashboard" className="flex items-center space-x-2 py-2 text-sm" onClick={() => setOpen(false)}>
+                  <Link to="/dashboard" className="flex items-center space-x-2 py-2 text-sm px-2 rounded-md hover:bg-muted" onClick={() => setOpen(false)}>
                     <LayoutDashboard className="h-5 w-5" />
                     <span>Dashboard</span>
                   </Link>
                 )}
                 
-                <Link to="/discover" className="flex items-center space-x-2 py-2 text-sm" onClick={() => setOpen(false)}>
-                  <Compass className="h-5 w-5" />
-                  <span>Discover</span>
-                </Link>
+                {/* Collapsible Discover section */}
+                <Collapsible open={discoverOpen} onOpenChange={setDiscoverOpen} className="w-full">
+                  <CollapsibleTrigger asChild>
+                    <button className="flex items-center justify-between w-full py-2 text-sm px-2 rounded-md hover:bg-muted">
+                      <div className="flex items-center space-x-2">
+                        <Compass className="h-5 w-5" />
+                        <span>Discover</span>
+                      </div>
+                      <ChevronDown className={`h-4 w-4 transition-transform ${discoverOpen ? 'transform rotate-180' : ''}`} />
+                    </button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pl-7 space-y-1">
+                    <Link 
+                      to="/discover" 
+                      className="block py-2 px-2 text-sm rounded-md hover:bg-muted"
+                      onClick={() => setOpen(false)}
+                    >
+                      All Content
+                    </Link>
+                    <Link 
+                      to="/artists" 
+                      className="block py-2 px-2 text-sm rounded-md hover:bg-muted"
+                      onClick={() => setOpen(false)}
+                    >
+                      Artists
+                    </Link>
+                    <Link 
+                      to="/venues" 
+                      className="block py-2 px-2 text-sm rounded-md hover:bg-muted"
+                      onClick={() => setOpen(false)}
+                    >
+                      Venues
+                    </Link>
+                    <Link 
+                      to="/resources" 
+                      className="block py-2 px-2 text-sm rounded-md hover:bg-muted"
+                      onClick={() => setOpen(false)}
+                    >
+                      Resources
+                    </Link>
+                    <Link 
+                      to="/projects" 
+                      className="block py-2 px-2 text-sm rounded-md hover:bg-muted"
+                      onClick={() => setOpen(false)}
+                    >
+                      Projects
+                    </Link>
+                    <Link 
+                      to="/brands" 
+                      className="block py-2 px-2 text-sm rounded-md hover:bg-muted"
+                      onClick={() => setOpen(false)}
+                    >
+                      Brands
+                    </Link>
+                  </CollapsibleContent>
+                </Collapsible>
                 
-                <Link to="/events" className="flex items-center space-x-2 py-2 text-sm" onClick={() => setOpen(false)}>
-                  <Calendar className="h-5 w-5" />
-                  <span>Events</span>
-                </Link>
+                {/* Collapsible Events section */}
+                <Collapsible open={eventsOpen} onOpenChange={setEventsOpen} className="w-full">
+                  <CollapsibleTrigger asChild>
+                    <button className="flex items-center justify-between w-full py-2 text-sm px-2 rounded-md hover:bg-muted">
+                      <div className="flex items-center space-x-2">
+                        <Calendar className="h-5 w-5" />
+                        <span>Events</span>
+                      </div>
+                      <ChevronDown className={`h-4 w-4 transition-transform ${eventsOpen ? 'transform rotate-180' : ''}`} />
+                    </button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pl-7 space-y-1">
+                    <Link 
+                      to="/events" 
+                      className="block py-2 px-2 text-sm rounded-md hover:bg-muted"
+                      onClick={() => setOpen(false)}
+                    >
+                      All Events
+                    </Link>
+                    <Link 
+                      to="/events/calendar" 
+                      className="block py-2 px-2 text-sm rounded-md hover:bg-muted"
+                      onClick={() => setOpen(false)}
+                    >
+                      Calendar
+                    </Link>
+                    <Link 
+                      to="/events/interested" 
+                      className="block py-2 px-2 text-sm rounded-md hover:bg-muted"
+                      onClick={() => setOpen(false)}
+                    >
+                      Interested
+                    </Link>
+                    <Link 
+                      to="/events/upcoming" 
+                      className="block py-2 px-2 text-sm rounded-md hover:bg-muted"
+                      onClick={() => setOpen(false)}
+                    >
+                      Upcoming
+                    </Link>
+                    <Link 
+                      to="/events/create" 
+                      className="block py-2 px-2 text-sm rounded-md hover:bg-muted"
+                      onClick={() => setOpen(false)}
+                    >
+                      Create Event
+                    </Link>
+                  </CollapsibleContent>
+                </Collapsible>
                 
-                <Link to="/communities" className="flex items-center space-x-2 py-2 text-sm" onClick={() => setOpen(false)}>
-                  <MessageSquare className="h-5 w-5" />
-                  <span>Communities</span>
-                </Link>
+                {/* Collapsible Connect section */}
+                <Collapsible open={connectOpen} onOpenChange={setConnectOpen} className="w-full">
+                  <CollapsibleTrigger asChild>
+                    <button className="flex items-center justify-between w-full py-2 text-sm px-2 rounded-md hover:bg-muted">
+                      <div className="flex items-center space-x-2">
+                        <MessageSquare className="h-5 w-5" />
+                        <span>Connect</span>
+                      </div>
+                      <ChevronDown className={`h-4 w-4 transition-transform ${connectOpen ? 'transform rotate-180' : ''}`} />
+                    </button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pl-7 space-y-1">
+                    <Link 
+                      to="/communities" 
+                      className="block py-2 px-2 text-sm rounded-md hover:bg-muted"
+                      onClick={() => setOpen(false)}
+                    >
+                      Communities
+                    </Link>
+                    <Link 
+                      to="/chats" 
+                      className="block py-2 px-2 text-sm rounded-md hover:bg-muted"
+                      onClick={() => setOpen(false)}
+                    >
+                      Chats
+                    </Link>
+                    <Link 
+                      to="/collaboration" 
+                      className="block py-2 px-2 text-sm rounded-md hover:bg-muted"
+                      onClick={() => setOpen(false)}
+                    >
+                      Collaboration
+                    </Link>
+                    <Link 
+                      to="/meetings" 
+                      className="block py-2 px-2 text-sm rounded-md hover:bg-muted"
+                      onClick={() => setOpen(false)}
+                    >
+                      Meetings
+                    </Link>
+                  </CollapsibleContent>
+                </Collapsible>
                 
-                <Link to="/shops" className="flex items-center space-x-2 py-2 text-sm" onClick={() => setOpen(false)}>
+                <Link 
+                  to="/shops" 
+                  className="flex items-center space-x-2 py-2 text-sm px-2 rounded-md hover:bg-muted" 
+                  onClick={() => setOpen(false)}
+                >
                   <span>Shops</span>
                 </Link>
               </div>
@@ -314,17 +460,17 @@ const Navbar: React.FC = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Link to="/profile" className="flex items-center space-x-2 py-2 text-sm" onClick={() => setOpen(false)}>
+                    <Link to="/profile" className="flex items-center space-x-2 py-2 text-sm px-2 rounded-md hover:bg-muted" onClick={() => setOpen(false)}>
                       <UserRound className="h-5 w-5" />
                       <span>Profile</span>
                     </Link>
-                    <Link to="/settings" className="flex items-center space-x-2 py-2 text-sm" onClick={() => setOpen(false)}>
+                    <Link to="/settings" className="flex items-center space-x-2 py-2 text-sm px-2 rounded-md hover:bg-muted" onClick={() => setOpen(false)}>
                       <Settings className="h-5 w-5" />
                       <span>Settings</span>
                     </Link>
                     <Button
                       variant="ghost"
-                      className="w-full justify-start"
+                      className="w-full justify-start rounded-md text-sm"
                       onClick={() => {
                         handleLogout();
                         setOpen(false);

@@ -87,7 +87,7 @@ interface ProjectTaskRecord {
   updated_at?: string;
 }
 
-export const useProjects = () => {
+export const useProject = () => {
   const queryClient = useQueryClient();
   const { user } = useUser();
   
@@ -237,7 +237,7 @@ export const useProjects = () => {
             tags: p.tags || [],
             components: [],
             tasks: [],
-            repoUrl: p.image_url,
+            repoUrl: p.repo_url,
             source: source || (p as any).source || 'projects' // Track source
           };
           

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -5,94 +6,178 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
-import { ShopProduct, Shop } from '@/types/database';
-import { useShop } from '@/hooks/use-shop';
+import { Project } from '@/hooks/use-project';
+import { useProject } from '@/hooks/use-project';
 
-const ProductDetail: React.FC = () => {
-  const { shopId, productId } = useParams<{ shopId: string; productId: string }>();
+const ProjectDetail: React.FC = () => {
+  const { projectId } = useParams<{ projectId: string }>();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { fetchProductById, fetchShopById, isShopOwner, deleteProduct } = useShop();
+  const { useGetProject } = useProject();
   
-  const [product, setProduct] = useState<ShopProduct | null>(null);
-  const [shop, setShop] = useState<Shop | null>(null);
+  const { data: project, isLoading, error } = useGetProject(projectId);
   const [isOwner, setIsOwner] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  
+  // Component management
+  const [showComponentForm, setShowComponentForm] = useState(false);
+  const [editingComponent, setEditingComponent] = useState<null | string>(null);
+  const [newComponent, setNewComponent] = useState({
+    name: '',
+    description: '',
+    status: 'planned',
+    type: 'feature'
+  });
+  
+  // Task management
+  const [showTaskForm, setShowTaskForm] = useState(false);
+  const [editingTask, setEditingTask] = useState<null | string>(null);
+  const [newTask, setNewTask] = useState({
+    title: '',
+    description: '',
+    status: 'pending',
+    priority: 'medium',
+    assignedTo: '',
+    dueDate: ''
+  });
+  
+  const handleDeleteProject = async () => {
+    // Implement delete project functionality
+    toast({
+      title: 'Not implemented',
+      description: 'Project deletion is not yet implemented',
+      variant: 'destructive'
+    });
+  };
+  
+  // Component form handlers
+  const handleToggleComponentForm = () => {
+    setShowComponentForm(!showComponentForm);
+    setEditingComponent(null);
+    setNewComponent({
+      name: '',
+      description: '',
+      status: 'planned',
+      type: 'feature'
+    });
+  };
+  
+  const handleComponentChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    setNewComponent({
+      ...newComponent,
+      [e.target.name]: e.target.value
+    });
+  };
+  
+  const handleSubmitComponent = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // TODO: Implement actual component creation/update
+    toast({
+      title: 'Not implemented',
+      description: 'Component creation is not yet implemented',
+    });
+    
+    handleToggleComponentForm();
+  };
+  
+  const handleEditComponent = (componentId: string) => {
+    if (!project) return;
+    
+    const component = project.components.find(c => c.id === componentId);
+    if (!component) return;
+    
+    setEditingComponent(componentId);
+    setNewComponent({
+      name: component.name,
+      description: component.description || '',
+      status: component.status,
+      type: component.type
+    });
+    setShowComponentForm(true);
+  };
+  
+  // Task form handlers
+  const handleToggleTaskForm = () => {
+    setShowTaskForm(!showTaskForm);
+    setEditingTask(null);
+    setNewTask({
+      title: '',
+      description: '',
+      status: 'pending',
+      priority: 'medium',
+      assignedTo: '',
+      dueDate: ''
+    });
+  };
+  
+  const handleTaskChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    setNewTask({
+      ...newTask,
+      [e.target.name]: e.target.value
+    });
+  };
+  
+  const handleSubmitTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // TODO: Implement actual task creation/update
+    toast({
+      title: 'Not implemented',
+      description: 'Task creation is not yet implemented',
+    });
+    
+    handleToggleTaskForm();
+  };
+  
+  const handleEditTask = (taskId: string) => {
+    if (!project) return;
+    
+    const task = project.tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    setEditingTask(taskId);
+    setNewTask({
+      title: task.title,
+      description: task.description || '',
+      status: task.status,
+      priority: task.priority,
+      assignedTo: task.assignedTo || '',
+      dueDate: task.dueDate || ''
+    });
+    setShowTaskForm(true);
+  };
   
   useEffect(() => {
-    const fetchProductData = async () => {
-      if (!productId || !shopId) return;
-      
-      setIsLoading(true);
-      try {
-        // Fetch product
-        const productData = await fetchProductById(productId);
-        if (!productData) {
-          throw new Error("Product not found");
-        }
-        
-        setProduct(productData);
-        
-        // Get shop data
-        if (shopId) {
-          const shopData = await fetchShopById(shopId);
-          if (!shopData) {
-            throw new Error("Shop not found");
-          }
-          
-          setShop(shopData);
-          
-          // Check if user is the shop owner
-          if (user) {
-            const ownerStatus = await isShopOwner(shopId);
-            setIsOwner(ownerStatus);
-          }
-        }
-      } catch (error: any) {
-        console.error('Error fetching product:', error);
-        setError(error.message || 'Failed to load product details');
-      } finally {
-        setIsLoading(false);
+    // Focus on the first input when forms are shown
+    if (showComponentForm) {
+      const nameInput = document.getElementById('component-name');
+      if (nameInput) {
+        // Use setTimeout to ensure the input is rendered
+        setTimeout(() => {
+          (nameInput as HTMLElement).focus?.();
+        }, 100);
       }
-    };
-    
-    fetchProductData();
-  }, [productId, shopId, user, fetchProductById, fetchShopById, isShopOwner]);
-  
-  const handleDeleteProduct = async () => {
-    if (!user || !product || !productId) return;
-    
-    try {
-      setIsDeleting(true);
-      
-      await deleteProduct(productId);
-      
-      toast({
-        title: 'Product deleted',
-        description: 'The product has been successfully deleted',
-      });
-      
-      navigate(`/shops/${shopId}`);
-    } catch (error: any) {
-      console.error('Error deleting product:', error);
-      toast({
-        title: 'Error deleting product',
-        description: error.message || 'An error occurred while deleting the product',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsDeleting(false);
     }
-  };
+    
+    if (showTaskForm) {
+      const titleInput = document.getElementById('task-title');
+      if (titleInput) {
+        // Use setTimeout to ensure the input is rendered
+        setTimeout(() => {
+          (titleInput as HTMLElement).focus?.();
+        }, 100);
+      }
+    }
+  }, [showComponentForm, showTaskForm]);
   
   if (isLoading) {
     return (
       <Layout>
         <div className="container mx-auto py-8">
           <div className="animate-pulse">
+            <div className="h-12 bg-muted rounded-lg mb-6"></div>
             <div className="h-64 bg-muted rounded-lg mb-6"></div>
             <div className="h-8 w-1/3 bg-muted rounded mb-4"></div>
             <div className="h-4 w-2/3 bg-muted rounded mb-8"></div>
@@ -102,18 +187,20 @@ const ProductDetail: React.FC = () => {
     );
   }
   
-  if (!product || !shop) {
+  if (error || !project) {
     return (
       <Layout>
         <div className="container mx-auto py-8">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Product not found</h1>
-            <p className="text-muted-foreground">This product doesn't exist or has been removed.</p>
+            <h1 className="text-2xl font-bold mb-4">Project not found</h1>
+            <p className="text-muted-foreground">
+              {error ? `Error: ${error}` : "This project doesn't exist or has been removed."}
+            </p>
             <Button 
-              onClick={() => navigate(`/shops/${shopId}`)} 
+              onClick={() => navigate('/projects')} 
               className="mt-4"
             >
-              Return to Shop
+              Back to Projects
             </Button>
           </div>
         </div>
@@ -124,77 +211,431 @@ const ProductDetail: React.FC = () => {
   return (
     <Layout>
       <div className="container mx-auto py-8">
-        <div className="mb-6">
+        <div className="mb-6 flex flex-wrap justify-between items-center">
           <Button 
             variant="ghost" 
-            onClick={() => navigate(`/shops/${shopId}`)}
+            onClick={() => navigate('/projects')}
           >
-            ← Back to {shop.name}
+            ← Back to Projects
           </Button>
+          
+          {isOwner && (
+            <div className="flex gap-2 mt-4 sm:mt-0">
+              <Button variant="outline">Edit Project</Button>
+              <Button 
+                variant="destructive"
+                onClick={handleDeleteProject}
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Project'}
+              </Button>
+            </div>
+          )}
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div>
-            {product.image_url ? (
-              <div className="rounded-lg overflow-hidden h-80">
-                <img 
-                  src={product.image_url} 
-                  alt={product.name} 
-                  className="w-full h-full object-cover"
-                />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <Card className="mb-8">
+              <CardContent className="pt-6">
+                <h1 className="text-3xl font-bold mb-2">{project.name}</h1>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {project.tags && project.tags.map(tag => (
+                    <span key={tag} className="inline-block bg-muted px-2.5 py-1 rounded-full text-xs">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                <div className="text-muted-foreground mb-6">
+                  {project.description}
+                </div>
+                
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                  <div>
+                    <h3 className="text-sm text-muted-foreground mb-1">Status</h3>
+                    <div className="font-medium capitalize">
+                      {project.status}
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-sm text-muted-foreground mb-1">Version</h3>
+                    <div className="font-medium">
+                      {project.version || 'N/A'}
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-sm text-muted-foreground mb-1">Progress</h3>
+                    <div className="font-medium">
+                      {project.progress !== undefined ? `${project.progress}%` : 'N/A'}
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-sm text-muted-foreground mb-1">Repository</h3>
+                    <div className="font-medium truncate">
+                      {project.repoUrl ? (
+                        <a 
+                          href={project.repoUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="text-primary hover:underline"
+                        >
+                          View repo
+                        </a>
+                      ) : 'N/A'}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Components Section */}
+            <div className="mb-8">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Components</h2>
+                {isOwner && (
+                  <Button
+                    size="sm"
+                    onClick={handleToggleComponentForm}
+                    disabled={showComponentForm}
+                  >
+                    Add Component
+                  </Button>
+                )}
               </div>
-            ) : (
-              <div className="bg-muted h-80 rounded-lg flex items-center justify-center">
-                <span className="text-muted-foreground">No image available</span>
+              
+              {showComponentForm && (
+                <Card className="mb-4">
+                  <CardContent className="pt-6">
+                    <form onSubmit={handleSubmitComponent}>
+                      <div className="grid grid-cols-1 gap-4">
+                        <div>
+                          <label htmlFor="component-name" className="block text-sm font-medium mb-1">
+                            Name
+                          </label>
+                          <input
+                            id="component-name"
+                            name="name"
+                            value={newComponent.name}
+                            onChange={handleComponentChange}
+                            className="w-full p-2 border rounded-md"
+                            required
+                          />
+                        </div>
+                        
+                        <div>
+                          <label htmlFor="component-description" className="block text-sm font-medium mb-1">
+                            Description
+                          </label>
+                          <textarea
+                            id="component-description"
+                            name="description"
+                            value={newComponent.description}
+                            onChange={handleComponentChange}
+                            className="w-full p-2 border rounded-md h-24"
+                          />
+                        </div>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label htmlFor="component-status" className="block text-sm font-medium mb-1">
+                              Status
+                            </label>
+                            <select
+                              id="component-status"
+                              name="status"
+                              value={newComponent.status}
+                              onChange={handleComponentChange}
+                              className="w-full p-2 border rounded-md"
+                            >
+                              <option value="planned">Planned</option>
+                              <option value="in-development">In Development</option>
+                              <option value="ready">Ready</option>
+                              <option value="needs-revision">Needs Revision</option>
+                            </select>
+                          </div>
+                          
+                          <div>
+                            <label htmlFor="component-type" className="block text-sm font-medium mb-1">
+                              Type
+                            </label>
+                            <select
+                              id="component-type"
+                              name="type"
+                              value={newComponent.type}
+                              onChange={handleComponentChange}
+                              className="w-full p-2 border rounded-md"
+                            >
+                              <option value="feature">Feature</option>
+                              <option value="ui">UI Component</option>
+                              <option value="integration">Integration</option>
+                              <option value="page">Page</option>
+                            </select>
+                          </div>
+                        </div>
+                        
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={handleToggleComponentForm}
+                          >
+                            Cancel
+                          </Button>
+                          <Button type="submit">
+                            {editingComponent ? 'Update' : 'Create'} Component
+                          </Button>
+                        </div>
+                      </div>
+                    </form>
+                  </CardContent>
+                </Card>
+              )}
+              
+              {project.components && project.components.length > 0 ? (
+                <div className="space-y-4">
+                  {project.components.map(component => (
+                    <Card key={component.id}>
+                      <CardContent className="pt-6">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-semibold">{component.name}</h3>
+                            <div className="text-sm text-muted-foreground mt-1">
+                              {component.description}
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end">
+                            <div className="flex gap-2 mb-1">
+                              <span className={`text-xs px-2 py-1 rounded-full ${
+                                component.status === 'ready' ? 'bg-green-100 text-green-800' :
+                                component.status === 'in-development' ? 'bg-blue-100 text-blue-800' :
+                                component.status === 'needs-revision' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {component.status.replace('-', ' ')}
+                              </span>
+                              <span className="text-xs px-2 py-1 bg-muted rounded-full">
+                                {component.type}
+                              </span>
+                            </div>
+                            {isOwner && (
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => handleEditComponent(component.id)}
+                              >
+                                Edit
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 bg-muted/20 rounded-lg">
+                  <p className="text-muted-foreground">No components added yet.</p>
+                </div>
+              )}
+            </div>
+            
+            {/* Tasks Section */}
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Tasks</h2>
+                {isOwner && (
+                  <Button
+                    size="sm"
+                    onClick={handleToggleTaskForm}
+                    disabled={showTaskForm}
+                  >
+                    Add Task
+                  </Button>
+                )}
               </div>
-            )}
+              
+              {showTaskForm && (
+                <Card className="mb-4">
+                  <CardContent className="pt-6">
+                    <form onSubmit={handleSubmitTask}>
+                      <div className="grid grid-cols-1 gap-4">
+                        <div>
+                          <label htmlFor="task-title" className="block text-sm font-medium mb-1">
+                            Title
+                          </label>
+                          <input
+                            id="task-title"
+                            name="title"
+                            value={newTask.title}
+                            onChange={handleTaskChange}
+                            className="w-full p-2 border rounded-md"
+                            required
+                          />
+                        </div>
+                        
+                        <div>
+                          <label htmlFor="task-description" className="block text-sm font-medium mb-1">
+                            Description
+                          </label>
+                          <textarea
+                            id="task-description"
+                            name="description"
+                            value={newTask.description}
+                            onChange={handleTaskChange}
+                            className="w-full p-2 border rounded-md h-24"
+                          />
+                        </div>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label htmlFor="task-status" className="block text-sm font-medium mb-1">
+                              Status
+                            </label>
+                            <select
+                              id="task-status"
+                              name="status"
+                              value={newTask.status}
+                              onChange={handleTaskChange}
+                              className="w-full p-2 border rounded-md"
+                            >
+                              <option value="pending">Pending</option>
+                              <option value="in-progress">In Progress</option>
+                              <option value="completed">Completed</option>
+                              <option value="blocked">Blocked</option>
+                            </select>
+                          </div>
+                          
+                          <div>
+                            <label htmlFor="task-priority" className="block text-sm font-medium mb-1">
+                              Priority
+                            </label>
+                            <select
+                              id="task-priority"
+                              name="priority"
+                              value={newTask.priority}
+                              onChange={handleTaskChange}
+                              className="w-full p-2 border rounded-md"
+                            >
+                              <option value="low">Low</option>
+                              <option value="medium">Medium</option>
+                              <option value="high">High</option>
+                            </select>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label htmlFor="task-assignedTo" className="block text-sm font-medium mb-1">
+                              Assigned To
+                            </label>
+                            <input
+                              id="task-assignedTo"
+                              name="assignedTo"
+                              value={newTask.assignedTo}
+                              onChange={handleTaskChange}
+                              className="w-full p-2 border rounded-md"
+                            />
+                          </div>
+                          
+                          <div>
+                            <label htmlFor="task-dueDate" className="block text-sm font-medium mb-1">
+                              Due Date
+                            </label>
+                            <input
+                              id="task-dueDate"
+                              name="dueDate"
+                              type="date"
+                              value={newTask.dueDate}
+                              onChange={handleTaskChange}
+                              className="w-full p-2 border rounded-md"
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={handleToggleTaskForm}
+                          >
+                            Cancel
+                          </Button>
+                          <Button type="submit">
+                            {editingTask ? 'Update' : 'Create'} Task
+                          </Button>
+                        </div>
+                      </div>
+                    </form>
+                  </CardContent>
+                </Card>
+              )}
+              
+              {project.tasks && project.tasks.length > 0 ? (
+                <div className="space-y-4">
+                  {project.tasks.map(task => (
+                    <Card key={task.id}>
+                      <CardContent className="pt-6">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-semibold">{task.title}</h3>
+                            <div className="text-sm text-muted-foreground mt-1">
+                              {task.description}
+                            </div>
+                            {task.assignedTo && (
+                              <div className="text-sm mt-2">
+                                <span className="text-muted-foreground">Assigned to: </span>
+                                <span>{task.assignedTo}</span>
+                              </div>
+                            )}
+                            {task.dueDate && (
+                              <div className="text-sm">
+                                <span className="text-muted-foreground">Due: </span>
+                                <span>{task.dueDate}</span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex flex-col items-end">
+                            <div className="flex gap-2 mb-1">
+                              <span className={`text-xs px-2 py-1 rounded-full ${
+                                task.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                task.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+                                task.status === 'blocked' ? 'bg-red-100 text-red-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {task.status.replace('-', ' ')}
+                              </span>
+                              <span className={`text-xs px-2 py-1 rounded-full ${
+                                task.priority === 'high' ? 'bg-red-100 text-red-800' :
+                                task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-green-100 text-green-800'
+                              }`}>
+                                {task.priority}
+                              </span>
+                            </div>
+                            {isOwner && (
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => handleEditTask(task.id)}
+                              >
+                                Edit
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 bg-muted/20 rounded-lg">
+                  <p className="text-muted-foreground">No tasks added yet.</p>
+                </div>
+              )}
+            </div>
           </div>
           
           <div>
-            <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
-            
-            <div className="text-2xl font-semibold mb-4">
-              ${typeof product.price === 'number' ? product.price.toFixed(2) : product.price}
-            </div>
-            
-            {product.description && (
-              <div className="mb-6">
-                <h3 className="text-lg font-medium mb-2">Description</h3>
-                <p className="text-muted-foreground">{product.description}</p>
-              </div>
-            )}
-            
-            {product.category && (
-              <div className="mb-6">
-                <h3 className="text-lg font-medium mb-2">Category</h3>
-                <div className="inline-block bg-muted px-3 py-1 rounded-full text-sm">
-                  {product.category}
-                </div>
-              </div>
-            )}
-            
-            <div className="space-y-4">
-              <Button className="w-full">Add to Cart</Button>
-              <Button variant="outline" className="w-full">Buy Now</Button>
-            </div>
-            
-            {isOwner && (
-              <Card className="mt-8">
-                <CardContent className="pt-6">
-                  <h3 className="font-medium mb-4">Shop Owner Actions</h3>
-                  <div className="flex space-x-4">
-                    <Button variant="outline">Edit Product</Button>
-                    <Button 
-                      variant="destructive"
-                      onClick={handleDeleteProduct}
-                      disabled={isDeleting}
-                    >
-                      {isDeleting ? 'Deleting...' : 'Delete Product'}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            {/* Maybe future sidebar content like related projects, etc. */}
           </div>
         </div>
       </div>
@@ -202,4 +643,4 @@ const ProductDetail: React.FC = () => {
   );
 };
 
-export default ProductDetail;
+export default ProjectDetail;

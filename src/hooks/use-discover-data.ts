@@ -115,142 +115,125 @@ export const useDiscoverData = (
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        let mockData: ContentItemProps[] = [];
+        let data: ContentItemProps[] = [];
+        let table = '';
         
-        if (activeTab === 'artists') {
-          mockData = [
-            {
-              id: generateUniqueId('artist'),
-              name: 'DJ Soundwave',
-              type: 'artist',
-              subtype: 'musician',
-              description: 'Electronic music producer and DJ with a unique sound',
-              location: 'Los Angeles, CA',
-              tags: ['electronic', 'dj', 'producer'],
-              image_url: 'https://source.unsplash.com/random/800x600/?dj'
-              // Removed author property as it's optional
-            },
-            {
-              id: generateUniqueId('artist'),
-              name: 'The Harmonics',
-              type: 'artist',
-              subtype: 'band',
-              description: 'Indie rock band known for their energetic performances',
-              location: 'Austin, TX',
-              tags: ['indie', 'rock', 'band'],
-              image_url: 'https://source.unsplash.com/random/800x600/?band'
-            }
-          ];
-        } else if (activeTab === 'venues') {
-          mockData = [
-            {
-              id: generateUniqueId('venue'),
-              name: 'The Echo Chamber',
-              type: 'venue',
-              subtype: 'gallery',
-              description: 'Contemporary art gallery featuring emerging artists',
-              location: 'New York, NY',
-              tags: ['gallery', 'contemporary', 'art'],
-              image_url: 'https://source.unsplash.com/random/800x600/?gallery'
-            },
-            {
-              id: generateUniqueId('venue'),
-              name: 'Starfield Arena',
-              type: 'venue',
-              subtype: 'outdoor',
-              description: 'Open-air venue perfect for large concerts and festivals',
-              location: 'Nashville, TN',
-              tags: ['outdoor', 'concert', 'festival'],
-              image_url: 'https://source.unsplash.com/random/800x600/?concert'
-            }
-          ];
-        } else if (activeTab === 'resources') {
-          mockData = [
-            {
-              id: generateUniqueId('resource'),
-              name: 'Professional Audio Equipment',
-              type: 'resource',
-              subtype: 'equipment',
-              description: 'High-quality audio equipment available for rent',
-              location: 'Chicago, IL',
-              tags: ['audio', 'equipment', 'rental'],
-              image_url: 'https://source.unsplash.com/random/800x600/?audio'
-            },
-            {
-              id: generateUniqueId('resource'),
-              name: 'Photography Studio',
-              type: 'resource',
-              subtype: 'equipment',
-              description: 'Fully equipped photography studio available for booking',
-              location: 'Miami, FL',
-              tags: ['photography', 'studio', 'booking'],
-              image_url: 'https://source.unsplash.com/random/800x600/?photography'
-            }
-          ];
-        } else if (activeTab === 'brands') {
-          mockData = [
-            {
-              id: generateUniqueId('brand'),
-              name: 'Creative Minds',
-              type: 'brand',
-              subtype: 'sponsor',
-              description: 'Agency supporting creative projects and events',
-              location: 'Seattle, WA',
-              tags: ['agency', 'sponsor', 'creative'],
-              image_url: 'https://source.unsplash.com/random/800x600/?agency'
-            },
-            {
-              id: generateUniqueId('brand'),
-              name: 'Sound Innovations',
-              type: 'brand',
-              subtype: 'partner',
-              description: 'Music technology company partnering with artists',
-              location: 'San Francisco, CA',
-              tags: ['technology', 'music', 'innovation'],
-              image_url: 'https://source.unsplash.com/random/800x600/?technology'
-            }
-          ];
-        } else if (activeTab === 'communities') {
-          mockData = [
-            {
-              id: generateUniqueId('community'),
-              name: 'Digital Artists Collective',
-              type: 'community',
-              subtype: 'community',
-              description: 'A community of digital artists sharing resources and opportunities',
-              location: 'Online',
-              tags: ['digital', 'artists', 'collective'],
-              image_url: 'https://source.unsplash.com/random/800x600/?digital-art'
-            },
-            {
-              id: generateUniqueId('community'),
-              name: 'Musicians Network',
-              type: 'community',
-              subtype: 'community',
-              description: 'Professional network for musicians to connect and collaborate',
-              location: 'Online / Various Locations',
-              tags: ['musicians', 'network', 'collaboration'],
-              image_url: 'https://source.unsplash.com/random/800x600/?musicians'
-            }
-          ];
+        // Map activeTab to appropriate table
+        switch(activeTab) {
+          case 'artists':
+            table = 'artists';
+            break;
+          case 'venues':
+            table = 'venues';
+            break;
+          case 'resources':
+            table = 'resources';
+            break;
+          case 'projects':
+            table = 'projects';
+            break;
+          case 'brands':
+            table = 'brands';
+            break;
+          case 'communities':
+            table = 'communities';
+            break;
+          case 'shops':
+            table = 'shops';
+            break;
+          default:
+            table = 'artists';
         }
         
+        // Fetch data from Supabase
+        let query = supabase.from(table).select('*');
+        
+        // Apply search filter if provided
         if (searchQuery) {
-          const query = searchQuery.toLowerCase();
-          mockData = mockData.filter(item => 
-            item.name.toLowerCase().includes(query) || 
-            item.description?.toLowerCase().includes(query) ||
-            item.tags?.some(tag => tag.toLowerCase().includes(query))
-          );
+          query = query.ilike('name', `%${searchQuery}%`);
         }
         
-        if (selectedTags.length > 0) {
-          mockData = mockData.filter(item => 
-            item.tags && selectedTags.some(tag => item.tags?.includes(tag))
-          );
+        // Apply tag filter if selected
+        if (selectedTags.length > 0 && table !== 'communities') {
+          // For tags stored as arrays
+          query = query.contains('tags', selectedTags);
         }
         
-        setItems(mockData);
+        const { data: responseData, error: responseError } = await query;
+        
+        if (responseError) throw responseError;
+        
+        // Transform the data based on the table/type
+        if (responseData) {
+          data = responseData.map(item => {
+            const commonProps = {
+              id: item.id,
+              name: item.name,
+              type: activeTab.substring(0, activeTab.length - 1), // Remove 's' to get singular
+              location: item.location || 'Unknown location', // Ensure location is not null
+              description: item.description || item.bio || '',
+              image_url: item.image_url || item.logo_url || item.banner_image_url || '',
+              tags: item.tags || [],
+            };
+            
+            // Add specific properties based on the type
+            switch(activeTab) {
+              case 'artists':
+                return {
+                  ...commonProps,
+                  subtype: item.subtype || 'musician',
+                  disciplines: item.disciplines,
+                  styles: item.styles,
+                  multidisciplinary: item.multidisciplinary
+                };
+              case 'venues':
+                return {
+                  ...commonProps,
+                  subtype: item.type || 'venue',
+                  capacity: item.capacity,
+                  amenities: item.amenities
+                };
+              case 'resources':
+                return {
+                  ...commonProps,
+                  subtype: item.subtype || 'equipment',
+                  availability: item.availability
+                };
+              case 'projects':
+                return {
+                  ...commonProps,
+                  status: item.status,
+                  version: item.version,
+                  progress: item.progress,
+                  repoUrl: item.repo_url,
+                  budget: item.budget,
+                  timeline: item.timeline
+                };
+              case 'brands':
+                return {
+                  ...commonProps,
+                  subtype: item.type || 'brand'
+                };
+              case 'communities':
+                return {
+                  ...commonProps,
+                  category: item.category,
+                  created_by: item.created_by
+                };
+              case 'shops':
+                return {
+                  ...commonProps,
+                  website_url: item.website_url,
+                  logo_url: item.logo_url,
+                  banner_image_url: item.banner_image_url
+                };
+              default:
+                return commonProps;
+            }
+          });
+        }
+        
+        setItems(data);
       } catch (err: any) {
         console.error('Error fetching discover data:', err);
         setError(err.message || 'Failed to fetch data');
