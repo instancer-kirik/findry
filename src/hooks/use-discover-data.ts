@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ContentItemProps } from '@/types/content';
@@ -116,9 +115,9 @@ export const useDiscoverData = (
       setIsLoading(true);
       try {
         let data: ContentItemProps[] = [];
-        let table = '';
         
-        // Map activeTab to appropriate table
+        // Map activeTab to appropriate table - use literal types for better safety
+        let table: 'artists' | 'venues' | 'resources' | 'projects' | 'brands' | 'communities' | 'shops';
         switch(activeTab) {
           case 'artists':
             table = 'artists';
@@ -146,34 +145,28 @@ export const useDiscoverData = (
         }
         
         // Fetch data from Supabase
-        let query = supabase.from(table).select('*');
-        
-        // Apply search filter if provided
-        if (searchQuery) {
-          query = query.ilike('name', `%${searchQuery}%`);
-        }
-        
-        // Apply tag filter if selected
-        if (selectedTags.length > 0 && table !== 'communities') {
-          // For tags stored as arrays
-          query = query.contains('tags', selectedTags);
-        }
-        
-        const { data: responseData, error: responseError } = await query;
+        const { data: responseData, error: responseError } = await supabase
+          .from(table)
+          .select('*');
         
         if (responseError) throw responseError;
         
         // Transform the data based on the table/type
-        if (responseData) {
+        if (responseData && Array.isArray(responseData)) {
           data = responseData.map(item => {
-            const commonProps = {
-              id: item.id,
-              name: item.name,
+            // Use type assertion to treat item as a generic object with any properties
+            const typedItem = item as any;
+            
+            // Safely access properties
+            const commonProps: ContentItemProps = {
+              id: String(typedItem.id || ''),
+              name: typedItem.name || 'Unnamed',
               type: activeTab.substring(0, activeTab.length - 1), // Remove 's' to get singular
-              location: item.location || 'Unknown location', // Ensure location is not null
-              description: item.description || item.bio || '',
-              image_url: item.image_url || item.logo_url || item.banner_image_url || '',
-              tags: item.tags || [],
+              location: typedItem.location || 'Unknown location',
+              description: typedItem.description || typedItem.bio || '',
+              image_url: typedItem.image_url || typedItem.logo_url || typedItem.banner_image_url || '',
+              tags: typedItem.tags || [],
+              subtype: typedItem.subtype || typedItem.type || '',
             };
             
             // Add specific properties based on the type
@@ -181,52 +174,46 @@ export const useDiscoverData = (
               case 'artists':
                 return {
                   ...commonProps,
-                  subtype: item.subtype || 'musician',
-                  disciplines: item.disciplines,
-                  styles: item.styles,
-                  multidisciplinary: item.multidisciplinary
-                };
+                  disciplines: typedItem.disciplines,
+                  styles: typedItem.styles,
+                  multidisciplinary: typedItem.multidisciplinary,
+                } as ContentItemProps;
               case 'venues':
                 return {
                   ...commonProps,
-                  subtype: item.type || 'venue',
-                  capacity: item.capacity,
-                  amenities: item.amenities
-                };
+                  capacity: typedItem.capacity,
+                  amenities: typedItem.amenities,
+                } as ContentItemProps;
               case 'resources':
                 return {
                   ...commonProps,
-                  subtype: item.subtype || 'equipment',
-                  availability: item.availability
-                };
+                  availability: typedItem.availability,
+                } as ContentItemProps;
               case 'projects':
                 return {
                   ...commonProps,
-                  status: item.status,
-                  version: item.version,
-                  progress: item.progress,
-                  repoUrl: item.repo_url,
-                  budget: item.budget,
-                  timeline: item.timeline
-                };
+                  status: typedItem.status,
+                  version: typedItem.version,
+                  progress: typedItem.progress,
+                  repoUrl: typedItem.repo_url,
+                  budget: typedItem.budget,
+                  timeline: typedItem.timeline,
+                } as ContentItemProps;
               case 'brands':
-                return {
-                  ...commonProps,
-                  subtype: item.type || 'brand'
-                };
+                return commonProps;
               case 'communities':
                 return {
                   ...commonProps,
-                  category: item.category,
-                  created_by: item.created_by
-                };
+                  category: typedItem.category,
+                  created_by: typedItem.created_by,
+                } as ContentItemProps;
               case 'shops':
                 return {
                   ...commonProps,
-                  website_url: item.website_url,
-                  logo_url: item.logo_url,
-                  banner_image_url: item.banner_image_url
-                };
+                  website_url: typedItem.website_url,
+                  logo_url: typedItem.logo_url,
+                  banner_image_url: typedItem.banner_image_url,
+                } as ContentItemProps;
               default:
                 return commonProps;
             }

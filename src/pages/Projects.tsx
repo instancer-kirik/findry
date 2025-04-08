@@ -1,26 +1,27 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Search, Filter, Plus, FolderOpen, Calendar, Clock, Folder, Tag, Users, CircleUser } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useProjects, Project, ProjectComponent, ProjectTask } from '@/hooks/use-project';
+import { useProjects, Project, ProjectComponent, ProjectTask } from '@/hooks/use-projects';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { format } from 'date-fns';
 import {
   CheckIcon,
   CircleIcon,
-  ClockIcon,
-  CodeIcon,
-  PlusIcon,
   ArrowRightIcon
 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Projects() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
-  const { useGetProjects } = useProjects();
+  const { useGetProjects, createTestProject } = useProjects();
   const { data: projects, isLoading } = useGetProjects();
 
   // Get status color for project status badges
@@ -73,13 +74,13 @@ export default function Projects() {
     }
   };
 
-  // Get icon for task status
+  // Get task status icon
   const getTaskStatusIcon = (status: ProjectTask['status']) => {
     switch (status) {
       case 'completed':
         return <CheckIcon className="h-4 w-4" />;
       case 'in-progress':
-        return <ClockIcon className="h-4 w-4" />;
+        return <Clock className="h-4 w-4" />;
       case 'pending':
         return <CircleIcon className="h-4 w-4" />;
       case 'blocked':
@@ -127,6 +128,15 @@ export default function Projects() {
     );
   };
 
+  // Add a debugging button to create a test project
+  const handleCreateTestProject = async () => {
+    const result = await createTestProject();
+    if (result) {
+      // Refresh the data
+      window.location.reload();
+    }
+  };
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
@@ -137,10 +147,15 @@ export default function Projects() {
               Track the progress of our development projects and components
             </p>
           </div>
-          <Button onClick={() => navigate('/projects/new')}>
-            <PlusIcon className="h-4 w-4 mr-2" />
-            New Project
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => navigate('/projects/new')}>
+              <span className="flex items-center gap-1.5 text-xs font-medium">
+                <Plus className="h-3 w-3" />
+                New Project
+              </span>
+            </Button>
+            <Button variant="outline" onClick={handleCreateTestProject}>Test Project</Button>
+          </div>
         </div>
 
         <Tabs

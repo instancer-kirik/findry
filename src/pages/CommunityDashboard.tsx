@@ -1,81 +1,137 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Calendar, Users, Trophy, Video, MapPin, Clock, MessageSquare, Settings, Bell } from 'lucide-react';
+import { useCommunities } from '@/hooks/use-communities';
+import { useAuth } from '@/hooks/use-auth';
+import CommunityForum from '@/components/communities/CommunityForum';
+import CommunityCalendar from '@/components/communities/CommunityCalendar';
+import CommunityEvents from '@/components/communities/CommunityEvents';
 import CreateEventModal from '@/components/communities/CreateEventModal';
-
-interface Community {
-  id: string;
-  name: string;
-  description: string;
-  image: string;
-  members: number;
-  events: number;
-  posts: number;
-  category: string;
-  tags: string[];
-  isMember: boolean;
-}
-
-interface Event {
-  id: string;
-  title: string;
-  description: string;
-  type: 'meeting' | 'contest' | 'event';
-  date: string;
-  time: string;
-  location: string;
-  participants: number;
-  maxParticipants: number;
-}
+import { toast } from '@/components/ui/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 const CommunityDashboard = () => {
-  const { id } = useParams();
+  const { id: communityId } = useParams<{ id: string }>();
   const [selectedTab, setSelectedTab] = useState('overview');
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const { 
+    useGetCommunity, 
+    useJoinCommunity, 
+    useLeaveCommunity 
+  } = useCommunities();
 
-  // Sample data - replace with actual data from your backend
-  const community: Community = {
-    id: id || '1',
-    name: 'Digital Artists Collective',
-    description: 'A community for digital artists to share their work, get feedback, and collaborate on projects.',
-    image: '/placeholder.svg',
-    members: 1234,
-    events: 45,
-    posts: 789,
-    category: 'Art & Design',
-    tags: ['Digital Art', 'Illustration', 'Design', 'Collaboration'],
-    isMember: true
+  const { data: community, isLoading } = useGetCommunity(communityId);
+  const joinCommunity = useJoinCommunity();
+  const leaveCommunity = useLeaveCommunity();
+
+  const handleJoinCommunity = () => {
+    if (!user) {
+      toast({
+        title: 'Authentication required',
+        description: 'Please sign in to join communities',
+      });
+      return;
+    }
+    
+    if (communityId) {
+      joinCommunity.mutate(communityId, {
+        onSuccess: () => {
+          // Update local state immediately for a more responsive UI
+          queryClient.setQueryData(['community', communityId], (oldData: any) => {
+            if (oldData) {
+              return {
+                ...oldData,
+                isMember: true,
+                members_count: (oldData.members_count || 0) + 1
+              };
+            }
+            return oldData;
+          });
+        }
+      });
+    }
   };
 
-  const events: Event[] = [
-    {
-      id: '1',
-      title: 'Digital Art Workshop',
-      description: 'Join us for a hands-on workshop on digital art techniques',
-      type: 'event',
-      date: '2024-03-25',
-      time: '14:00',
-      location: 'Virtual',
-      participants: 12,
-      maxParticipants: 20
-    },
-    {
-      id: '2',
-      title: 'Monthly Community Meeting',
-      description: 'Regular community meeting to discuss upcoming projects',
-      type: 'meeting',
-      date: '2024-03-28',
-      time: '19:00',
-      location: 'Virtual',
-      participants: 45,
-      maxParticipants: 100
+  const handleLeaveCommunity = () => {
+    if (!user) {
+      toast({
+        title: 'Authentication required',
+        description: 'Please sign in to leave communities',
+      });
+      return;
     }
-  ];
+    
+    if (communityId) {
+      leaveCommunity.mutate(communityId, {
+        onSuccess: () => {
+          // Update local state immediately for a more responsive UI
+          queryClient.setQueryData(['community', communityId], (oldData: any) => {
+            if (oldData) {
+              return {
+                ...oldData,
+                isMember: false,
+                members_count: Math.max((oldData.members_count || 1) - 1, 0)
+              };
+            }
+            return oldData;
+          });
+        }
+      });
+    }
+  };
+
+  const handleRefreshData = () => {
+    if (communityId) {
+      queryClient.invalidateQueries({ queryKey: ['community', communityId] });
+      queryClient.invalidateQueries({ queryKey: ['community-events', communityId] });
+      queryClient.invalidateQueries({ queryKey: ['community-posts', communityId] });
+    }
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center space-x-4 mb-8">
+            <div className="h-20 w-20 rounded-full bg-muted animate-pulse" />
+            <div className="space-y-2">
+              <div className="h-7 w-48 bg-muted animate-pulse rounded" />
+              <div className="h-4 w-32 bg-muted animate-pulse rounded" />
+            </div>
+          </div>
+          <div className="h-24 w-full bg-muted animate-pulse rounded mb-8" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-32 bg-muted animate-pulse rounded" />
+            ))}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Error state
+  if (!community) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8 text-center">
+          <h1 className="text-2xl font-bold mb-4">Community not found</h1>
+          <p className="text-muted-foreground mb-6">
+            The community you're looking for doesn't exist or you don't have access to it.
+          </p>
+          <Button onClick={() => window.history.back()}>Go Back</Button>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -85,31 +141,36 @@ const CommunityDashboard = () => {
           <div className="flex-1">
             <div className="flex items-center gap-4 mb-4">
               <Avatar className="h-20 w-20">
-                <AvatarImage src={community.image} />
+                <AvatarImage src={community.image_url || undefined} />
                 <AvatarFallback>{community.name[0]}</AvatarFallback>
               </Avatar>
               <div>
                 <h1 className="text-3xl font-bold">{community.name}</h1>
-                <p className="text-muted-foreground">{community.category}</p>
+                <p className="text-muted-foreground">{community.category || 'General'}</p>
               </div>
             </div>
-            <p className="text-muted-foreground mb-4">{community.description}</p>
-            <div className="flex flex-wrap gap-2">
-              {community.tags.map((tag) => (
-                <Badge key={tag} variant="secondary">{tag}</Badge>
-              ))}
-            </div>
+            <p className="text-muted-foreground mb-4">{community.description || 'No description available'}</p>
           </div>
           <div className="flex gap-4">
-            <Button variant={community.isMember ? "outline" : "default"}>
-              {community.isMember ? "Leave Community" : "Join Community"}
+            <Button 
+              variant={community.isMember ? "outline" : "default"}
+              onClick={community.isMember ? handleLeaveCommunity : handleJoinCommunity}
+              disabled={joinCommunity.isPending || leaveCommunity.isPending}
+            >
+              {joinCommunity.isPending || leaveCommunity.isPending 
+                ? 'Processing...' 
+                : community.isMember 
+                  ? "Leave Community" 
+                  : "Join Community"}
             </Button>
             <Button variant="outline" size="icon">
               <Bell className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="icon">
-              <Settings className="h-4 w-4" />
-            </Button>
+            {user?.id === community.created_by && (
+              <Button variant="outline" size="icon">
+                <Settings className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </div>
 
@@ -121,7 +182,7 @@ const CommunityDashboard = () => {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{community.members}</div>
+              <div className="text-2xl font-bold">{community.members_count || 0}</div>
             </CardContent>
           </Card>
           <Card>
@@ -130,7 +191,7 @@ const CommunityDashboard = () => {
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{community.events}</div>
+              <div className="text-2xl font-bold">0</div>
             </CardContent>
           </Card>
           <Card>
@@ -139,7 +200,7 @@ const CommunityDashboard = () => {
               <MessageSquare className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{community.posts}</div>
+              <div className="text-2xl font-bold">{community.posts_count || 0}</div>
             </CardContent>
           </Card>
         </div>
@@ -149,134 +210,137 @@ const CommunityDashboard = () => {
           <TabsList className="mb-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
+            <TabsTrigger value="calendar">Calendar</TabsTrigger>
+            <TabsTrigger value="forum">Forum</TabsTrigger>
             <TabsTrigger value="members">Members</TabsTrigger>
-            <TabsTrigger value="posts">Posts</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            {/* Upcoming Events */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Upcoming Events */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Upcoming Events</CardTitle>
+                    <CreateEventModal communityId={communityId} onSuccess={handleRefreshData} />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 overflow-auto">
+                    <CommunityCalendar communityId={communityId || ''} />
+                  </div>
+                  <div className="mt-4 text-center">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setSelectedTab('calendar')}
+                    >
+                      View Calendar
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Recent Posts */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Discussions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 overflow-auto">
+                    {/* We'll only show a preview of the forum here */}
+                    <Card className="mb-2">
+                      <CardHeader className="py-2 px-3">
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-6 w-6">
+                            <AvatarFallback>U</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium">User123</p>
+                            <p className="text-xs text-muted-foreground">2 hours ago</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="py-1 px-3">
+                        <p className="text-sm line-clamp-2">
+                          Has anyone worked on integrating the new API with React? I'm having trouble with authentication.
+                        </p>
+                      </CardContent>
+                      <CardFooter className="py-1 px-3 text-xs text-muted-foreground">
+                        5 replies
+                      </CardFooter>
+                    </Card>
+
+                    <Card>
+                      <CardHeader className="py-2 px-3">
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-6 w-6">
+                            <AvatarFallback>A</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium">Admin</p>
+                            <p className="text-xs text-muted-foreground">Yesterday</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="py-1 px-3">
+                        <p className="text-sm line-clamp-2">
+                          Welcome to our community! Introduce yourself and let us know what you're working on.
+                        </p>
+                      </CardContent>
+                      <CardFooter className="py-1 px-3 text-xs text-muted-foreground">
+                        12 replies
+                      </CardFooter>
+                    </Card>
+                  </div>
+                  <div className="mt-4 text-center">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setSelectedTab('forum')}
+                    >
+                      View All Discussions
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="events">
+            <CommunityEvents communityId={communityId || ''} />
+          </TabsContent>
+
+          <TabsContent value="calendar">
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>Upcoming Events</CardTitle>
-                  <CreateEventModal onSuccess={() => {
-                    // TODO: Implement refresh logic
-                  }} />
+                  <CardTitle>Community Calendar</CardTitle>
+                  <CreateEventModal communityId={communityId} onSuccess={handleRefreshData} />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {events.map((event) => (
-                    <div key={event.id} className="flex items-start justify-between p-4 rounded-lg border">
-                      <div>
-                        <h3 className="font-semibold">{event.title}</h3>
-                        <p className="text-sm text-muted-foreground">{event.description}</p>
-                        <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            <span>{event.date}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            <span>{event.time}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <MapPin className="h-4 w-4" />
-                            <span>{event.location}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <Badge variant="secondary">
-                        {event.participants}/{event.maxParticipants}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Recent Activity */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {/* Add recent activity items here */}
-                  <p className="text-muted-foreground">No recent activity</p>
-                </div>
+                <CommunityCalendar communityId={communityId || ''} />
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="events">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>All Events</CardTitle>
-                  <CreateEventModal onSuccess={() => {
-                    // TODO: Implement refresh logic
-                  }} />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {events.map((event) => (
-                    <Card key={event.id} className="group hover:shadow-lg transition-shadow">
-                      <CardHeader className="p-4">
-                        <CardTitle className="text-lg">{event.title}</CardTitle>
-                        <CardDescription>{event.description}</CardDescription>
-                      </CardHeader>
-                      <CardContent className="p-4 pt-0">
-                        <div className="flex flex-col gap-2 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            <span>{event.date}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4" />
-                            <span>{event.time}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4" />
-                            <span>{event.location}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4" />
-                            <span>{event.participants}/{event.maxParticipants} participants</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                      <CardContent className="p-4 pt-0">
-                        <Button className="w-full">
-                          {event.type === 'contest' ? 'Enter Contest' : 'Join Event'}
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+          <TabsContent value="forum">
+            <CommunityForum communityId={communityId || ''} />
           </TabsContent>
 
           <TabsContent value="members">
             <Card>
               <CardHeader>
                 <CardTitle>Members</CardTitle>
+                <CardDescription>People who have joined this community</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Member list coming soon...</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="posts">
-            <Card>
-              <CardHeader>
-                <CardTitle>Posts</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Posts coming soon...</p>
+                <div className="text-center py-12">
+                  <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium">Member listing coming soon</h3>
+                  <p className="text-muted-foreground mt-2">
+                    We're working on the member directory feature.
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
