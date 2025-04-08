@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Check, X } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import Layout from '@/components/layout/Layout';
-import { supabase } from '@/integrations/supabase/client';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 interface EventbriteTokenResponse {
   access_token: string;
@@ -15,10 +15,23 @@ interface EventbriteTokenResponse {
   refresh_token: string;
 }
 
+interface EventbriteIntegration {
+  user_id: string;
+  access_token: string;
+  refresh_token?: string;
+  expires_at?: string;
+  is_active: boolean;
+  created_at: string;
+  integration_type: string;
+}
+
+const EVENTBRITE_STORAGE_KEY = 'eventbrite_integration';
+
 const EventbriteCallback = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [eventbriteData, setEventbriteData] = useLocalStorage<EventbriteIntegration | null>(EVENTBRITE_STORAGE_KEY, null);
   
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('Connecting to Eventbrite...');
@@ -51,24 +64,18 @@ const EventbriteCallback = () => {
           refresh_token: 'fake_refresh_token_' + Date.now()
         };
         
-        // Store in the database
-        const { error } = await supabase.from('user_integrations').insert({
+        // Store in localStorage
+        const integrationData: EventbriteIntegration = {
           user_id: user.id,
           integration_type: 'eventbrite',
           access_token: fakeTokenResponse.access_token,
           refresh_token: fakeTokenResponse.refresh_token,
           expires_at: new Date(Date.now() + fakeTokenResponse.expires_in * 1000).toISOString(),
           is_active: true,
-          metadata: { 
-            oauth_code: code,
-            token_type: fakeTokenResponse.token_type
-          }
-        });
+          created_at: new Date().toISOString()
+        };
         
-        if (error) {
-          console.error('Error storing Eventbrite integration:', error);
-          throw new Error('Failed to store Eventbrite connection');
-        }
+        setEventbriteData(integrationData);
         
         setStatus('success');
         setMessage('Successfully connected to Eventbrite!');
@@ -80,7 +87,7 @@ const EventbriteCallback = () => {
     };
     
     processAuthCode();
-  }, [location.search, user]);
+  }, [location.search, user, setEventbriteData]);
   
   return (
     <Layout>
