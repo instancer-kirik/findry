@@ -1,47 +1,9 @@
+
 import React, { useEffect, useState } from 'react';
 import AnimatedSection from '../ui-custom/AnimatedSection';
 import { FileText, Users } from 'lucide-react';
-import ScreenshotGallery from './ScreenshotGallery';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-
-const screenshots = [
-  {
-    src: "/screenshots/funnel-1.png",
-    alt: "Main Event",
-    title: "Main Event"
-  },
-  {
-    src: "/screenshots/funnel-2.png",
-    alt: "Create Event",
-    title: "Create Event"
-  },
-  {
-    src: "/screenshots/funnel-3.png",
-    alt: "Discovery",
-    title: "Discovery"
-  },
-  {
-    src: "/screenshots/funnel-4.png",
-    alt: "Discovery Dice Tray",
-    title: "Discovery Dice Tray"
-  },
-  {
-    src: "/screenshots/funnel-5.png",
-    alt: "Collaborator",
-    title: "Collaborator"
-  },
-  {
-    src: "/screenshots/funnel-6.png",
-    alt: "Community+Events",
-    title: "Community+Events"
-  },
-  {
-    src: "/screenshots/funnel-7.png",
-    alt: "Profile Wizard",
-    title: "Profile Wizard"
-  }
-];
 
 const Hero: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -98,18 +60,6 @@ const Hero: React.FC = () => {
           </AnimatedSection>
         </div>
       </div>
-      
-      {/* Screenshot Gallery - only show when not authenticated */}
-      {!isAuthenticated && (
-        <AnimatedSection animation="fade-in-up" delay={600} className="mt-16 md:mt-20 max-w-6xl mx-auto px-4">
-          <div className="relative">
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-blue-50/50 to-purple-50/50 dark:from-blue-900/20 dark:to-purple-900/20 backdrop-blur-lg -z-10"></div>
-            <div className="p-6 bg-white/80 dark:bg-black/80 rounded-2xl shadow-xl border border-white/30 dark:border-white/10">
-              <ScreenshotGallery screenshots={screenshots} />
-            </div>
-          </div>
-        </AnimatedSection>
-      )}
 
       {/* DivvyQueue Section */}
       <AnimatedSection animation="fade-in-up" delay={800} className="mt-20 max-w-4xl mx-auto px-4">

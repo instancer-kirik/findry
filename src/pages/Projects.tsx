@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -6,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProject } from '@/hooks/use-project';
 import { Badge } from "@/components/ui/badge";
-import { FileCode, Star, Calendar, Users, ArrowRight, PlusCircle } from 'lucide-react';
+import { FileCode, Star, Calendar, Users, ArrowRight, PlusCircle, Sparkles } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 
 const Projects = () => {
@@ -23,6 +24,10 @@ const Projects = () => {
     navigate('/projects/create');
   };
 
+  // Filter featured projects (we'll use a simple heuristic for demonstration)
+  // In a real app, you'd have a featured flag in the database
+  const featuredProjects = projects.slice(0, 3); // First 3 projects are featured
+  
   // For now, in this view we'll show all projects as the user's own projects
   // In a real implementation, we would filter based on ownership
   const myProjects = projects;
@@ -35,13 +40,75 @@ const Projects = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold">My Projects</h1>
-            <p className="text-muted-foreground">Manage your personal and collaborative projects</p>
+            <h1 className="text-3xl font-bold">Projects</h1>
+            <p className="text-muted-foreground">Discover featured projects and manage your own</p>
           </div>
           <Button onClick={handleCreateProject}>
             <PlusCircle className="mr-2 h-4 w-4" />
             New Project
           </Button>
+        </div>
+        
+        {/* Featured Projects Section */}
+        <div className="mb-10">
+          <div className="flex items-center gap-2 mb-4">
+            <Sparkles className="h-5 w-5 text-yellow-500" />
+            <h2 className="text-xl font-semibold">Featured Projects</h2>
+          </div>
+          
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[1, 2, 3].map(i => (
+                <Card key={i} className="min-h-[200px] animate-pulse">
+                  <CardHeader className="bg-muted h-24"></CardHeader>
+                  <CardContent className="pt-4">
+                    <div className="h-4 bg-muted rounded mb-2 w-3/4"></div>
+                    <div className="h-3 bg-muted rounded w-1/2"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : featuredProjects.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {featuredProjects.map(project => (
+                <Card key={project.id} className="hover:shadow-md transition-shadow border-t-4 border-t-primary">
+                  <CardHeader>
+                    <CardTitle>{project.name}</CardTitle>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge variant="outline">{project.status || 'Planning'}</Badge>
+                      <Badge variant="outline">v{project.version || '0.1'}</Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground line-clamp-2">{project.description}</p>
+                    <div className="flex items-center gap-6 mt-4">
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <FileCode className="h-4 w-4" />
+                        <span>{project.components?.length || 0} components</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <Calendar className="h-4 w-4" />
+                        <span>{project.tasks?.length || 0} tasks</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-between"
+                      onClick={() => handleViewProject(project.id)}
+                    >
+                      View Details <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 bg-muted/20 rounded-lg">
+              <p className="text-muted-foreground">No featured projects available at this time.</p>
+            </div>
+          )}
         </div>
         
         <Tabs defaultValue="my" className="w-full mb-8">

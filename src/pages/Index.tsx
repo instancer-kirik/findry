@@ -13,6 +13,44 @@ import { ArrowRight, Calendar, Compass, Palette, Store, Users } from 'lucide-rea
 const Landing: React.FC = () => {
   const navigate = useNavigate();
 
+  const platformScreenshots = [
+    {
+      src: "/screenshots/funnel-1.png",
+      alt: "Main Event",
+      title: "Create and discover events in your area"
+    },
+    {
+      src: "/screenshots/funnel-2.png",
+      alt: "Create Event",
+      title: "Easily set up new events with our intuitive form"
+    },
+    {
+      src: "/screenshots/funnel-3.png",
+      alt: "Discovery",
+      title: "Find resources, artists, and events that match your interests"
+    },
+    {
+      src: "/screenshots/funnel-4.png",
+      alt: "Discovery Dice Tray",
+      title: "Use our discovery tools to find new opportunities"
+    },
+    {
+      src: "/screenshots/funnel-5.png",
+      alt: "Collaborator",
+      title: "Connect with collaborators on creative projects"
+    },
+    {
+      src: "/screenshots/funnel-6.png",
+      alt: "Community+Events",
+      title: "Join communities and participate in their events"
+    },
+    {
+      src: "/screenshots/funnel-7.png",
+      alt: "Profile Wizard",
+      title: "Create your personalized profile"
+    }
+  ];
+
   return (
     <Layout>
       <Hero />
@@ -71,25 +109,16 @@ const Landing: React.FC = () => {
       <FeatureSection />
       <EcosystemSection />
       
-      <ScreenshotGallery 
-        screenshots={[
-          {
-            src: "https://source.unsplash.com/random/800x600/?artist",
-            alt: "Artist Discovery",
-            title: "Find and connect with artists in your area"
-          },
-          {
-            src: "https://source.unsplash.com/random/800x600/?event",
-            alt: "Event Management",
-            title: "Create and manage creative events"
-          },
-          {
-            src: "https://source.unsplash.com/random/800x600/?studio",
-            alt: "Resource Marketplace",
-            title: "Find spaces, tools, and services for your projects"
-          }
-        ]}
-      />
+      {/* Platform Screenshots Section */}
+      <div className="bg-muted/20 py-16">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold mb-8 text-center">Platform Preview</h2>
+          <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-10">
+            Take a look at our intuitive interface and powerful features that make creative collaboration easier.
+          </p>
+          <ScreenshotGallery screenshots={platformScreenshots} />
+        </div>
+      </div>
       
       <div className="container mx-auto px-4 py-12 text-center">
         <h2 className="text-3xl font-bold mb-6">Ready to Join the Creative Ecosystem?</h2>

@@ -5,13 +5,10 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
 
 const EmailWaitlist: React.FC = () => {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
-  const [showMessage, setShowMessage] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -63,7 +60,6 @@ const EmailWaitlist: React.FC = () => {
         });
         setEmail('');
         setMessage('');
-        setShowMessage(false);
       }
     } catch (error: any) {
       console.error('Error saving to waitlist:', error);
@@ -100,28 +96,12 @@ const EmailWaitlist: React.FC = () => {
           </Button>
         </div>
         
-        <div className="flex items-center space-x-2">
-          <Checkbox 
-            id="showMessage" 
-            checked={showMessage} 
-            onCheckedChange={(checked) => setShowMessage(checked === true)}
-          />
-          <Label 
-            htmlFor="showMessage" 
-            className="text-sm cursor-pointer text-muted-foreground"
-          >
-            I'd like to include a message with my registration
-          </Label>
-        </div>
-        
-        {showMessage && (
-          <Textarea
-            placeholder="Tell us how you'd like to use the platform or what you're most excited about (optional)"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            className="min-h-[100px]"
-          />
-        )}
+        <Textarea
+          placeholder="Share your thoughts or how you'd like to use the platform (optional)"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          className="min-h-[100px]"
+        />
       </form>
     </div>
   );

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +16,17 @@ interface CommunityCalendarProps {
   communityId: string;
 }
 
+interface EventData {
+  id: string;
+  name: string;
+  description: string;
+  start_date: string;
+  end_date: string;
+  location: string;
+  capacity?: number;
+  community_id: string;
+}
+
 interface CalendarEvent {
   id: string;
   title: string;
@@ -25,10 +37,6 @@ interface CalendarEvent {
   attendees_count?: number;
   max_attendees?: number;
   community_id: string;
-}
-
-interface CustomComponentsOptions {
-  Day?: React.ComponentType<any>;
 }
 
 const CommunityCalendar: React.FC<CommunityCalendarProps> = ({ communityId }) => {
@@ -62,7 +70,7 @@ const CommunityCalendar: React.FC<CommunityCalendarProps> = ({ communityId }) =>
       if (error) throw error;
       
       if (data && data.length > 0) {
-        return data.map(event => ({
+        return data.map((event: EventData) => ({
           id: event.id,
           title: event.name,
           description: event.description || '',
@@ -307,41 +315,27 @@ const CommunityCalendar: React.FC<CommunityCalendarProps> = ({ communityId }) =>
             <Button
               variant="outline"
               size="icon"
-              onClick={() => {
-                if (view === 'month') {
-                  setDate(addDays(date, -30));
-                } else if (view === 'week') {
-                  setDate(addDays(date, -7));
-                } else {
-                  setDate(addDays(date, -1));
-                }
-              }}
+              onClick={navigatePrevious}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <Button
               variant="outline"
               size="icon"
-              onClick={() => {
-                if (view === 'month') {
-                  setDate(addDays(date, 30));
-                } else if (view === 'week') {
-                  setDate(addDays(date, 7));
-                } else {
-                  setDate(addDays(date, 1));
-                }
-              }}
+              onClick={navigateNext}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
             <Button variant="ghost" onClick={() => setDate(new Date())}>Today</Button>
           </div>
           
-          <TabsList>
-            <TabsTrigger value="month" onClick={() => setView('month')}>Month</TabsTrigger>
-            <TabsTrigger value="week" onClick={() => setView('week')}>Week</TabsTrigger>
-            <TabsTrigger value="day" onClick={() => setView('day')}>Day</TabsTrigger>
-          </TabsList>
+          <Tabs defaultValue={view} onValueChange={(value) => setView(value as 'month' | 'week' | 'day')}>
+            <TabsList>
+              <TabsTrigger value="month">Month</TabsTrigger>
+              <TabsTrigger value="week">Week</TabsTrigger>
+              <TabsTrigger value="day">Day</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </div>
 

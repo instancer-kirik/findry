@@ -1,7 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { ZoomIn } from 'lucide-react';
 
 export interface ScreenshotGalleryProps {
   screenshots: Array<{
@@ -23,13 +25,27 @@ const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = ({ screenshots }) =>
               <div className="p-1">
                 <Card>
                   <CardContent className="flex flex-col p-0">
-                    <div className="aspect-video relative overflow-hidden rounded-t-lg">
-                      <img 
-                        src={screenshot.src} 
-                        alt={screenshot.alt}
-                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                      />
-                    </div>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <div className="aspect-video relative overflow-hidden rounded-t-lg group cursor-pointer">
+                          <img 
+                            src={screenshot.src} 
+                            alt={screenshot.alt}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <ZoomIn className="text-white h-8 w-8" />
+                          </div>
+                        </div>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-4xl w-full p-1">
+                        <img 
+                          src={screenshot.src} 
+                          alt={screenshot.alt}
+                          className="w-full h-auto object-contain"
+                        />
+                      </DialogContent>
+                    </Dialog>
                     <div className="p-4">
                       <h3 className="font-semibold">{screenshot.alt}</h3>
                       {screenshot.title && (
