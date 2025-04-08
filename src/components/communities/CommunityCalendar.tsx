@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -42,11 +41,23 @@ const CommunityCalendar: React.FC<CommunityCalendarProps> = ({ communityId }) =>
   const { data: events = [], isLoading } = useQuery({
     queryKey: ['community-events', communityId],
     queryFn: async (): Promise<CalendarEvent[]> => {
-      // In a real app, you'd fetch actual events from the database
+      // First get the event IDs for this community
+      const { data: relationships, error: relError } = await supabase
+        .from('event_community_relationships')
+        .select('event_id')
+        .eq('community_id', communityId);
+      
+      if (relError) throw relError;
+      
+      if (!relationships || relationships.length === 0) {
+        return [];
+      }
+      
+      // Then get the actual events
       const { data, error } = await supabase
         .from('events')
         .select('*')
-        .eq('community_id', communityId);
+        .in('id', relationships.map(rel => rel.event_id));
       
       if (error) throw error;
       
@@ -279,37 +290,6 @@ const CommunityCalendar: React.FC<CommunityCalendarProps> = ({ communityId }) =>
         onSelect={handleDaySelect}
         month={date}
         onMonthChange={setDate}
-        className="rounded-md border"
-        // Custom day rendering to show events
-        components={{
-          Day: ({ date, ...props }) => {
-            const dayEvents = getEventsForDay(date);
-            return (
-              <div 
-                {...props}
-                className={`${props.className} relative`}
-              >
-                {props.children}
-                {dayEvents.length > 0 && (
-                  <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2">
-                    <div className="flex gap-0.5">
-                      {dayEvents.slice(0, 3).map((event, index) => (
-                        <div 
-                          key={index} 
-                          className="h-1.5 w-1.5 rounded-full bg-primary"
-                          title={event.title}
-                        />
-                      ))}
-                      {dayEvents.length > 3 && (
-                        <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground" title="More events" />
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          }
-        }}
       />
     );
   };
@@ -324,22 +304,44 @@ const CommunityCalendar: React.FC<CommunityCalendarProps> = ({ communityId }) =>
         
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            <Button variant="outline" size="icon" onClick={navigatePrevious}>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                if (view === 'month') {
+                  setDate(addDays(date, -30));
+                } else if (view === 'week') {
+                  setDate(addDays(date, -7));
+                } else {
+                  setDate(addDays(date, -1));
+                }
+              }}
+            >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="icon" onClick={navigateNext}>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                if (view === 'month') {
+                  setDate(addDays(date, 30));
+                } else if (view === 'week') {
+                  setDate(addDays(date, 7));
+                } else {
+                  setDate(addDays(date, 1));
+                }
+              }}
+            >
               <ChevronRight className="h-4 w-4" />
             </Button>
             <Button variant="ghost" onClick={() => setDate(new Date())}>Today</Button>
           </div>
           
-          <Tabs defaultValue={view} onValueChange={(value) => setView(value as 'month' | 'week' | 'day')}>
-            <TabsList>
-              <TabsTrigger value="month">Month</TabsTrigger>
-              <TabsTrigger value="week">Week</TabsTrigger>
-              <TabsTrigger value="day">Day</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <TabsList>
+            <TabsTrigger value="month" onClick={() => setView('month')}>Month</TabsTrigger>
+            <TabsTrigger value="week" onClick={() => setView('week')}>Week</TabsTrigger>
+            <TabsTrigger value="day" onClick={() => setView('day')}>Day</TabsTrigger>
+          </TabsList>
         </div>
       </div>
 

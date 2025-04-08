@@ -322,7 +322,7 @@ const Communities = () => {
                         >
                           {joinCommunity.isPending || leaveCommunity.isPending 
                             ? "Processing..." 
-                            : selectedCommunity.isMember 
+                            : community.isMember 
                               ? "Leave Community" 
                               : "Join Community"}
                         </Button>

@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -8,15 +7,17 @@ import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { Project } from '@/hooks/use-project';
 import { useProject } from '@/hooks/use-project';
+import ProjectChat from '@/components/projects/ProjectChat';
 
 const ProjectDetail: React.FC = () => {
-  const { projectId } = useParams<{ projectId: string }>();
+  const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { useGetProject } = useProject();
+  const projectChatRef = useRef<{ addReference: (item: any) => void }>(null);
   
-  const { data: project, isLoading, error } = useGetProject(projectId);
+  const { data: project, isLoading, error } = useGetProject(id);
   const [isOwner, setIsOwner] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   
@@ -50,6 +51,48 @@ const ProjectDetail: React.FC = () => {
       variant: 'destructive'
     });
   };
+
+  // Function to handle component reference in chat
+  const handleComponentReference = (componentId: string) => {
+    const component = project?.components.find(c => c.id === componentId);
+    if (component) {
+      // Scroll to component section
+      document.getElementById(`component-${componentId}`)?.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'center'
+      });
+      
+      // Highlight the component temporarily
+      const element = document.getElementById(`component-${componentId}`);
+      if (element) {
+        element.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+        setTimeout(() => {
+          element.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
+        }, 2000);
+      }
+    }
+  }
+  
+  // Function to handle task reference in chat
+  const handleTaskReference = (taskId: string) => {
+    const task = project?.tasks.find(t => t.id === taskId);
+    if (task) {
+      // Scroll to task section
+      document.getElementById(`task-${taskId}`)?.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'center' 
+      });
+      
+      // Highlight the task temporarily
+      const element = document.getElementById(`task-${taskId}`);
+      if (element) {
+        element.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+        setTimeout(() => {
+          element.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
+        }, 2000);
+      }
+    }
+  }
   
   // Component form handlers
   const handleToggleComponentForm = () => {
@@ -393,7 +436,7 @@ const ProjectDetail: React.FC = () => {
               {project.components && project.components.length > 0 ? (
                 <div className="space-y-4">
                   {project.components.map(component => (
-                    <Card key={component.id}>
+                    <Card key={component.id} id={`component-${component.id}`}>
                       <CardContent className="pt-6">
                         <div className="flex justify-between items-start">
                           <div>
@@ -572,7 +615,7 @@ const ProjectDetail: React.FC = () => {
               {project.tasks && project.tasks.length > 0 ? (
                 <div className="space-y-4">
                   {project.tasks.map(task => (
-                    <Card key={task.id}>
+                    <Card key={task.id} id={`task-${task.id}`}>
                       <CardContent className="pt-6">
                         <div className="flex justify-between items-start">
                           <div>
@@ -635,7 +678,16 @@ const ProjectDetail: React.FC = () => {
           </div>
           
           <div>
-            {/* Maybe future sidebar content like related projects, etc. */}
+            {/* ProjectChat component */}
+            <ProjectChat 
+              ref={projectChatRef}
+              project={project}
+              className="sticky top-4"
+              onReferenceClick={{
+                component: handleComponentReference,
+                task: handleTaskReference
+              }}
+            />
           </div>
         </div>
       </div>
