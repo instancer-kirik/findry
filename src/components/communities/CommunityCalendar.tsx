@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +18,6 @@ interface CommunityCalendarProps {
 
 interface CalendarEvent {
   id: string;
-  community_id: string;
   title: string;
   description: string;
   start_date: string;
@@ -25,6 +25,11 @@ interface CalendarEvent {
   location: string;
   attendees_count?: number;
   max_attendees?: number;
+  community_id: string;
+}
+
+interface CustomComponentsOptions {
+  Day?: React.ComponentType<any>;
 }
 
 const CommunityCalendar: React.FC<CommunityCalendarProps> = ({ communityId }) => {
@@ -44,7 +49,22 @@ const CommunityCalendar: React.FC<CommunityCalendarProps> = ({ communityId }) =>
         .eq('community_id', communityId);
       
       if (error) throw error;
-      return data || [];
+      
+      if (data && data.length > 0) {
+        return data.map(event => ({
+          id: event.id,
+          title: event.name,
+          description: event.description || '',
+          start_date: event.start_date,
+          end_date: event.end_date,
+          location: event.location || '',
+          attendees_count: event.capacity || 0,
+          max_attendees: event.capacity || 0,
+          community_id: communityId
+        }));
+      }
+      
+      return [];
     },
     enabled: !!communityId,
   });
@@ -262,7 +282,7 @@ const CommunityCalendar: React.FC<CommunityCalendarProps> = ({ communityId }) =>
         className="rounded-md border"
         // Custom day rendering to show events
         components={{
-          day: ({ date, ...props }) => {
+          Day: ({ date, ...props }) => {
             const dayEvents = getEventsForDay(date);
             return (
               <div 
@@ -345,4 +365,4 @@ const CommunityCalendar: React.FC<CommunityCalendarProps> = ({ communityId }) =>
   );
 };
 
-export default CommunityCalendar; 
+export default CommunityCalendar;

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,13 +16,31 @@ interface UseEventbriteOptions {
   autoFetch?: boolean;
 }
 
+interface UserIntegration {
+  id: string;
+  user_id: string;
+  provider: string;
+  access_token: string;
+  is_active: boolean;
+  connected_at: string;
+}
+
+interface EventIntegration {
+  id: string;
+  event_id: string;
+  provider: string;
+  provider_event_id: string;
+  user_id: string;
+  synced_at: string;
+}
+
 interface UseEventbriteReturn {
   events: EventbriteEvent[];
   isLoading: boolean;
   error: string | null;
   isConnected: boolean;
   connectToEventbrite: () => Promise<void>;
-  disconnectFromEventbrite: () => Promise<void>;
+  disconnectFromEventbrite: () => Promise<{ success: boolean; error?: string }>;
   syncEventToEventbrite: (event: {
     id: string;
     title: string;
@@ -50,14 +69,37 @@ export const useEventbrite = (options: UseEventbriteOptions = {}): UseEventbrite
     if (!user) return null;
 
     try {
-      const { data, error } = await supabase
-        .from('user_integrations')
+      // Create the user_integrations table if it doesn't exist
+      const { error: createTableError } = await supabase.rpc('table_exists', { 
+        schema_name: 'public', 
+        table_name: 'user_integrations' 
+      });
+
+      if (createTableError) {
+        console.log('Creating user_integrations table...');
+        // We need to create the table
+        await supabase.rpc('execute_sql', {
+          sql: `
+            CREATE TABLE IF NOT EXISTS public.user_integrations (
+              id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+              user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+              provider TEXT NOT NULL,
+              access_token TEXT NOT NULL,
+              is_active BOOLEAN DEFAULT true,
+              connected_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+              UNIQUE(user_id, provider)
+            );
+          `
+        });
+      }
+
+      // Now query the table
+      const { data } = await supabase.from('user_integrations')
         .select('access_token, is_active')
         .eq('user_id', user.id)
         .eq('provider', 'eventbrite')
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
       if (data && data.is_active) {
         setAccessToken(data.access_token);
         setIsConnected(true);
@@ -135,11 +177,33 @@ export const useEventbrite = (options: UseEventbriteOptions = {}): UseEventbrite
 
   // Disconnect from Eventbrite
   const disconnectFromEventbrite = async () => {
-    if (!user) return;
+    if (!user) return { success: false, error: 'Not authenticated' };
 
     try {
-      const { error } = await supabase
-        .from('user_integrations')
+      // Create the user_integrations table if it doesn't exist
+      const { error: createTableError } = await supabase.rpc('table_exists', { 
+        schema_name: 'public', 
+        table_name: 'user_integrations' 
+      });
+
+      if (createTableError) {
+        // We need to create the table
+        await supabase.rpc('execute_sql', {
+          sql: `
+            CREATE TABLE IF NOT EXISTS public.user_integrations (
+              id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+              user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+              provider TEXT NOT NULL,
+              access_token TEXT NOT NULL,
+              is_active BOOLEAN DEFAULT true,
+              connected_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+              UNIQUE(user_id, provider)
+            );
+          `
+        });
+      }
+
+      const { error } = await supabase.from('user_integrations')
         .update({ is_active: false })
         .eq('user_id', user.id)
         .eq('provider', 'eventbrite');
@@ -187,9 +251,31 @@ export const useEventbrite = (options: UseEventbriteOptions = {}): UseEventbrite
       const result = await syncEventToEventbrite(accessToken, event);
       
       if (result.success && result.eventbriteId) {
+        // Create event_integrations table if it doesn't exist
+        const { error: createTableError } = await supabase.rpc('table_exists', { 
+          schema_name: 'public', 
+          table_name: 'event_integrations' 
+        });
+  
+        if (createTableError) {
+          // We need to create the table
+          await supabase.rpc('execute_sql', {
+            sql: `
+              CREATE TABLE IF NOT EXISTS public.event_integrations (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                event_id UUID NOT NULL,
+                provider TEXT NOT NULL,
+                provider_event_id TEXT NOT NULL,
+                user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+                synced_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+                UNIQUE(event_id, provider)
+              );
+            `
+          });
+        }
+
         // Store the relationship between our event and Eventbrite event
-        const { error } = await supabase
-          .from('event_integrations')
+        const { error } = await supabase.from('event_integrations')
           .upsert({
             event_id: event.id,
             provider: 'eventbrite',
@@ -247,20 +333,18 @@ export const useEventbrite = (options: UseEventbriteOptions = {}): UseEventbrite
         const appEvent = convertEventbriteToAppEvent(ebEvent);
         
         // Insert into our events table
-        const { data, error } = await supabase
-          .from('events')
+        const { data, error } = await supabase.from('events')
           .upsert({
-            title: appEvent.title,
+            name: appEvent.title,
             description: appEvent.description,
             location: appEvent.location,
             start_date: appEvent.start_date,
             end_date: appEvent.end_date,
-            poster_url: appEvent.poster_url,
+            image_url: appEvent.poster_url,
             capacity: appEvent.capacity,
-            event_type: appEvent.event_type,
-            created_by: user.id,
-            eventbrite_url: appEvent.eventbrite_url,
-            eventbrite_id: ebEvent.id
+            type: appEvent.event_type,
+            eventbrite_id: ebEvent.id,
+            eventbrite_url: appEvent.eventbrite_url
           })
           .select('id')
           .single();
@@ -270,10 +354,32 @@ export const useEventbrite = (options: UseEventbriteOptions = {}): UseEventbrite
           continue;
         }
 
+        // Create event_integrations table if it doesn't exist
+        const { error: createTableError } = await supabase.rpc('table_exists', { 
+          schema_name: 'public', 
+          table_name: 'event_integrations' 
+        });
+
+        if (createTableError) {
+          // We need to create the table
+          await supabase.rpc('execute_sql', {
+            sql: `
+              CREATE TABLE IF NOT EXISTS public.event_integrations (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                event_id UUID NOT NULL,
+                provider TEXT NOT NULL,
+                provider_event_id TEXT NOT NULL,
+                user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+                synced_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+                UNIQUE(event_id, provider)
+              );
+            `
+          });
+        }
+
         // Record the integration relationship
         if (data?.id) {
-          await supabase
-            .from('event_integrations')
+          await supabase.from('event_integrations')
             .upsert({
               event_id: data.id,
               provider: 'eventbrite',
@@ -320,4 +426,4 @@ export const useEventbrite = (options: UseEventbriteOptions = {}): UseEventbrite
     syncEventToEventbrite: syncToEventbrite,
     importEventsFromEventbrite
   };
-}; 
+};

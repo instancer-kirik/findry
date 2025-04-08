@@ -2,8 +2,13 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ContentItemProps } from '@/types/content';
-import { Artist } from '@/types/database';
-import { generateUniqueId } from '@/utils/unique-id';
+
+// Helper function to safely access a property with type checking
+const safeProp = <T, K extends string>(obj: T, key: K, defaultValue: any = ''): any => {
+  return obj && Object.prototype.hasOwnProperty.call(obj, key) 
+    ? (obj as any)[key] 
+    : defaultValue;
+};
 
 export const useFetchDiscoverContent = () => {
   const [content, setContent] = useState<ContentItemProps[]>([]);
@@ -117,7 +122,7 @@ export const useDiscoverData = (
       try {
         let data: ContentItemProps[] = [];
         
-        // Map activeTab to appropriate table - use literal types for better safety
+        // Map activeTab to appropriate table
         const table = activeTab as 'artists' | 'venues' | 'resources' | 'projects' | 'brands' | 'communities' | 'shops';
         
         // Fetch data from Supabase
@@ -135,60 +140,65 @@ export const useDiscoverData = (
               id: String(item.id || ''),
               name: item.name || 'Unnamed',
               type: activeTab.substring(0, activeTab.length - 1), // Remove 's' to get singular
-              location: item.location || 'Unknown location',
-              description: item.description || item.bio || '',
-              image_url: item.image_url || item.logo_url || item.banner_image_url || '',
-              tags: item.tags || [],
-              subtype: item.subtype || item.type || '',
+              location: safeProp(item, 'location', 'Unknown location'),
+              description: safeProp(item, 'description', safeProp(item, 'bio', '')),
+              image_url: safeProp(item, 'image_url', 
+                safeProp(item, 'logo_url', 
+                  safeProp(item, 'banner_image_url', ''))),
+              tags: safeProp(item, 'tags', []),
+              subtype: safeProp(item, 'subtype', safeProp(item, 'type', '')),
             };
             
             // Add specific properties based on the type
-            switch(activeTab) {
-              case 'artists':
-                return {
-                  ...commonProps,
-                  disciplines: item.disciplines,
-                  styles: item.styles,
-                  multidisciplinary: item.multidisciplinary,
-                } as ContentItemProps;
-              case 'venues':
-                return {
-                  ...commonProps,
-                  capacity: item.capacity,
-                  amenities: item.amenities,
-                } as ContentItemProps;
-              case 'resources':
-                return {
-                  ...commonProps,
-                  availability: item.availability,
-                } as ContentItemProps;
-              case 'projects':
-                return {
-                  ...commonProps,
-                  status: item.status,
-                  version: item.version,
-                  progress: item.progress,
-                  repoUrl: item.repo_url,
-                  budget: item.budget,
-                  timeline: item.timeline,
-                } as ContentItemProps;
-              case 'brands':
-                return commonProps;
-              case 'communities':
-                return {
-                  ...commonProps,
-                  category: item.category,
-                  created_by: item.created_by,
-                } as ContentItemProps;
-              case 'shops':
-                return {
-                  ...commonProps,
-                  website_url: item.website_url,
-                  logo_url: item.logo_url,
-                  banner_image_url: item.banner_image_url,
-                } as ContentItemProps;
-              default:
-                return commonProps;
+            if (activeTab === 'artists') {
+              return {
+                ...commonProps,
+                disciplines: safeProp(item, 'disciplines', []),
+                styles: safeProp(item, 'styles', []),
+                multidisciplinary: safeProp(item, 'multidisciplinary', false),
+              } as ContentItemProps;
+            } 
+            else if (activeTab === 'venues') {
+              return {
+                ...commonProps,
+                capacity: safeProp(item, 'capacity', null),
+                amenities: safeProp(item, 'amenities', []),
+              } as ContentItemProps;
+            }
+            else if (activeTab === 'resources') {
+              return {
+                ...commonProps,
+                availability: safeProp(item, 'availability', null),
+              } as ContentItemProps;
+            }
+            else if (activeTab === 'projects') {
+              return {
+                ...commonProps,
+                status: safeProp(item, 'status', ''),
+                version: safeProp(item, 'version', ''),
+                progress: safeProp(item, 'progress', 0),
+                repo_url: safeProp(item, 'repo_url', ''),
+                budget: safeProp(item, 'budget', ''),
+                timeline: safeProp(item, 'timeline', ''),
+              } as ContentItemProps;
+            }
+            else if (activeTab === 'communities') {
+              return {
+                ...commonProps,
+                category: safeProp(item, 'category', ''),
+                created_by: safeProp(item, 'created_by', ''),
+              } as ContentItemProps;
+            }
+            else if (activeTab === 'shops') {
+              return {
+                ...commonProps,
+                website_url: safeProp(item, 'website_url', ''),
+                logo_url: safeProp(item, 'logo_url', ''),
+                banner_image_url: safeProp(item, 'banner_image_url', ''),
+              } as ContentItemProps;
+            }
+            else {
+              return commonProps;
             }
           });
         }

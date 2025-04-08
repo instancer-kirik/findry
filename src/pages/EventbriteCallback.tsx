@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getEventbriteAccessToken } from '@/integrations/eventbrite';
@@ -56,6 +57,29 @@ const EventbriteCallback = () => {
         
         if (!accessToken) {
           throw new Error('Failed to get access token from Eventbrite.');
+        }
+
+        // Ensure user_integrations table exists
+        const { error: tableExistsError } = await supabase.rpc('table_exists', { 
+          schema_name: 'public', 
+          table_name: 'user_integrations' 
+        });
+
+        if (tableExistsError) {
+          // Create the table if it doesn't exist
+          await supabase.rpc('execute_sql', {
+            sql: `
+              CREATE TABLE IF NOT EXISTS public.user_integrations (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+                provider TEXT NOT NULL,
+                access_token TEXT NOT NULL,
+                is_active BOOLEAN DEFAULT true,
+                connected_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+                UNIQUE(user_id, provider)
+              );
+            `
+          });
         }
         
         // Save the token to database
@@ -131,4 +155,4 @@ const EventbriteCallback = () => {
   );
 };
 
-export default EventbriteCallback; 
+export default EventbriteCallback;
