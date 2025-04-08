@@ -1,293 +1,246 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useAuth } from '@/hooks/use-auth';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { format } from 'date-fns';
-import { toast } from '@/hooks/use-toast';
+import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import { MessageCircle, ThumbsUp, Reply, Flag, Send } from 'lucide-react';
 
-interface PostProfile {
-  username?: string;
-  avatar_url?: string;
+interface ForumPost {
+  id: string;
+  title: string;
+  content: string;
+  author: {
+    id: string;
+    name: string;
+    avatar?: string;
+  };
+  createdAt: string;
+  likes: number;
+  replies: number;
+  tags?: string[];
 }
 
-interface Post {
+// Breaking the recursive type that was causing "type instantiation is excessively deep"
+interface ForumComment {
   id: string;
   content: string;
-  created_at: string;
-  user_id: string;
-  username?: string;
-  avatar_url?: string;
-  reply_to?: string | null;
-  replies?: Post[];
+  author: {
+    id: string;
+    name: string;
+    avatar?: string;
+  };
+  createdAt: string;
+  likes: number;
+  // Instead of recursive comments, use a flag to indicate it has replies
+  hasReplies: boolean;
+  replyCount: number;
 }
 
-interface CommunityForumProps {
-  communityId: string;
-}
+const mockPosts: ForumPost[] = [
+  {
+    id: '1',
+    title: 'Welcome to our community forum!',
+    content: 'This is where we can discuss anything related to our community events and activities.',
+    author: {
+      id: '1',
+      name: 'Admin',
+      avatar: '',
+    },
+    createdAt: '2025-04-05T12:00:00Z',
+    likes: 15,
+    replies: 3,
+    tags: ['Welcome', 'Announcement'],
+  },
+  {
+    id: '2',
+    title: 'Ideas for our next community event',
+    content: 'I was thinking we could organize a workshop on music production. What do you all think?',
+    author: {
+      id: '2',
+      name: 'MusicLover',
+      avatar: '',
+    },
+    createdAt: '2025-04-06T09:15:00Z',
+    likes: 8,
+    replies: 7,
+    tags: ['Event', 'Ideas', 'Workshop'],
+  },
+];
 
-const CommunityForum: React.FC<CommunityForumProps> = ({ communityId }) => {
-  const { user } = useAuth();
+const mockComments: ForumComment[] = [
+  {
+    id: '1',
+    content: 'Great idea! I would love to attend a music production workshop.',
+    author: {
+      id: '3',
+      name: 'Producer123',
+      avatar: '',
+    },
+    createdAt: '2025-04-06T10:30:00Z',
+    likes: 3,
+    hasReplies: true,
+    replyCount: 2
+  },
+  {
+    id: '2',
+    content: 'I could potentially help lead a section on beat-making if needed.',
+    author: {
+      id: '4',
+      name: 'BeatMaster',
+      avatar: '',
+    },
+    createdAt: '2025-04-06T11:45:00Z',
+    likes: 5,
+    hasReplies: false,
+    replyCount: 0
+  },
+];
+
+const CommunityForum: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('discussions');
   const [newPost, setNewPost] = useState('');
-  const queryClient = useQueryClient();
-
-  // Fetch posts for this community
-  const { data: posts = [], isLoading } = useQuery({
-    queryKey: ['community-posts', communityId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('community_posts')
-        .select(`
-          id,
-          content,
-          created_at,
-          user_id,
-          profiles(username, avatar_url)
-        `)
-        .eq('community_id', communityId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      // Transform the data to include username and avatar
-      const transformedPosts: Post[] = (data || []).map(post => {
-        const profileData = post.profiles as PostProfile;
-        return {
-          id: post.id,
-          content: post.content,
-          created_at: post.created_at,
-          user_id: post.user_id,
-          username: profileData?.username || 'Unknown user',
-          avatar_url: profileData?.avatar_url || '',
-          replies: [] as Post[]
-        };
-      });
-
-      // Check if table has a reply_to column by using the get_table_definition function
-      try {
-        const { data: tableInfo } = await supabase.rpc('get_table_definition', {
-          table_name: 'community_posts'
-        });
-        
-        const hasReplyToColumn = Array.isArray(tableInfo) && tableInfo.some((col: any) => 
-          col.column_name === 'reply_to'
-        );
-        
-        if (hasReplyToColumn) {
-          // Fetch replies separately to avoid recursive depth issues
-          for (const post of transformedPosts) {
-            const { data: replies, error: repliesError } = await supabase
-              .from('community_posts')
-              .select(`
-                id,
-                content,
-                created_at,
-                user_id,
-                profiles(username, avatar_url)
-              `)
-              .eq('community_id', communityId)
-              .eq('reply_to', post.id)
-              .order('created_at', { ascending: true });
-
-            if (!repliesError && replies) {
-              post.replies = replies.map((reply: any) => {
-                const replyProfileData = reply.profiles as PostProfile;
-                return {
-                  id: reply.id,
-                  content: reply.content,
-                  created_at: reply.created_at,
-                  user_id: reply.user_id,
-                  username: replyProfileData?.username || 'Unknown user',
-                  avatar_url: replyProfileData?.avatar_url || '',
-                  reply_to: post.id
-                };
-              });
-            }
-          }
-        }
-      } catch (e) {
-        console.error('Error fetching replies:', e);
-        // Continue without replies if there's an error
-      }
-
-      return transformedPosts;
-    },
-    enabled: !!communityId
-  });
-
-  // Add a new post mutation
-  const addPostMutation = useMutation({
-    mutationFn: async (content: string) => {
-      if (!user) throw new Error('You must be logged in to post');
-
-      const { data, error } = await supabase
-        .from('community_posts')
-        .insert({
-          content,
-          user_id: user.id,
-          community_id: communityId
-        })
-        .select();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      setNewPost('');
-      queryClient.invalidateQueries({ queryKey: ['community-posts', communityId] });
-      toast({
-        title: 'Post created',
-        description: 'Your post has been published to the community.',
-      });
-    },
-    onError: (error) => {
-      console.error('Error adding post:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to create your post. Please try again.',
-        variant: 'destructive'
-      });
-    }
-  });
-
-  const handleSubmitPost = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newPost.trim()) return;
-    
-    addPostMutation.mutate(newPost);
-  };
-
-  const formatDate = (dateString: string) => {
-    try {
-      return format(new Date(dateString), 'MMM d, yyyy h:mm a');
-    } catch (e) {
-      return dateString;
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold">Forum</h2>
-        </div>
-        <div className="animate-pulse space-y-4">
-          <div className="h-32 bg-muted rounded-lg"></div>
-          <div className="h-48 bg-muted rounded-lg"></div>
-        </div>
-      </div>
-    );
-  }
+  const [replyText, setReplyText] = useState('');
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Forum</h2>
-      </div>
-
-      {user && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Create a Post</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              if (!newPost.trim()) return;
-              addPostMutation.mutate(newPost);
-            }} className="space-y-4">
-              <Textarea 
-                placeholder="Share something with the community..."
-                value={newPost}
-                onChange={(e) => setNewPost(e.target.value)}
-                className="min-h-[120px]"
-              />
-              <div className="flex justify-end">
-                <Button 
-                  type="submit" 
-                  disabled={!newPost.trim() || addPostMutation.isPending}
-                >
-                  {addPostMutation.isPending ? 'Posting...' : 'Post'}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="space-y-4">
-        {posts.length > 0 ? (
-          posts.map((post) => (
-            <Card key={post.id} className="overflow-hidden">
-              <CardContent className="p-4">
-                <div className="flex items-start gap-4">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={post.avatar_url} alt={post.username} />
-                    <AvatarFallback>{post.username?.substring(0, 2).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center justify-between">
-                      <div className="font-medium">
-                        {post.username} 
-                        {post.user_id === user?.id && (
-                          <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">You</span>
-                        )}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {format(new Date(post.created_at), 'MMM d, yyyy h:mm a')}
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Community Forum</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="discussions">Discussions</TabsTrigger>
+            <TabsTrigger value="new-post">New Post</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="discussions">
+            <div className="space-y-4">
+              {mockPosts.map(post => (
+                <div key={post.id} className="border rounded-lg p-4 space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Avatar>
+                        <AvatarImage src={post.author.avatar} />
+                        <AvatarFallback>{post.author.name.substring(0, 2)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h3 className="font-semibold">{post.title}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Posted by {post.author.name} • {new Date(post.createdAt).toLocaleDateString()}
+                        </p>
                       </div>
                     </div>
-                    <p className="text-sm whitespace-pre-line">{post.content}</p>
-                    
-                    {/* Replies section */}
-                    {post.replies && post.replies.length > 0 && (
-                      <div className="mt-4 space-y-4">
-                        <div className="text-sm font-medium">Replies</div>
-                        <div className="space-y-4 pl-4 border-l-2 border-muted">
-                          {post.replies.map((reply) => (
-                            <div key={reply.id} className="flex items-start gap-3">
-                              <Avatar className="h-8 w-8">
-                                <AvatarImage src={reply.avatar_url} alt={reply.username} />
-                                <AvatarFallback>{reply.username?.substring(0, 2).toUpperCase()}</AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1 space-y-1">
-                                <div className="flex items-center justify-between">
-                                  <div className="font-medium text-sm">
-                                    {reply.username}
-                                    {reply.user_id === user?.id && (
-                                      <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">You</span>
-                                    )}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground">
-                                    {format(new Date(reply.created_at), 'MMM d, yyyy h:mm a')}
-                                  </div>
-                                </div>
-                                <p className="text-sm">{reply.content}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                    <div className="flex space-x-2">
+                      {post.tags?.map(tag => (
+                        <span key={tag} className="bg-muted text-xs px-2 py-1 rounded-full">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <p className="text-sm">{post.content}</p>
+                  
+                  <div className="flex items-center justify-between pt-2">
+                    <div className="flex space-x-4">
+                      <Button variant="ghost" size="sm" className="text-xs flex items-center gap-1">
+                        <ThumbsUp className="h-3.5 w-3.5" />
+                        <span>{post.likes}</span>
+                      </Button>
+                      <Button variant="ghost" size="sm" className="text-xs flex items-center gap-1">
+                        <MessageCircle className="h-3.5 w-3.5" />
+                        <span>{post.replies}</span>
+                      </Button>
+                    </div>
+                    <Button variant="outline" size="sm" className="text-xs">
+                      View Discussion
+                    </Button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))
-        ) : (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <p className="text-muted-foreground">
-                No posts yet. Be the first to start a discussion!
-              </p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    </div>
+              ))}
+              
+              {/* Sample comments section for the second post */}
+              <div className="border rounded-lg p-4 mt-2">
+                <h4 className="font-medium mb-3">Comments</h4>
+                <div className="space-y-4">
+                  {mockComments.map(comment => (
+                    <div key={comment.id} className="pl-4 border-l-2 space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <Avatar className="h-6 w-6">
+                          <AvatarImage src={comment.author.avatar} />
+                          <AvatarFallback>{comment.author.name.substring(0, 2)}</AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm font-medium">{comment.author.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(comment.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="text-sm">{comment.content}</p>
+                      <div className="flex items-center space-x-4">
+                        <Button variant="ghost" size="sm" className="text-xs flex items-center gap-1 h-7 px-2">
+                          <ThumbsUp className="h-3 w-3" />
+                          <span>{comment.likes}</span>
+                        </Button>
+                        <Button variant="ghost" size="sm" className="text-xs flex items-center gap-1 h-7 px-2">
+                          <Reply className="h-3 w-3" />
+                          <span>Reply</span>
+                        </Button>
+                        <Button variant="ghost" size="sm" className="text-xs flex items-center gap-1 h-7 px-2">
+                          <Flag className="h-3 w-3" />
+                          <span>Report</span>
+                        </Button>
+                      </div>
+                      
+                      {comment.hasReplies && (
+                        <Button variant="link" size="sm" className="text-xs p-0">
+                          Show {comment.replyCount} replies
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                
+                <Separator className="my-4" />
+                
+                <div className="flex items-center space-x-2 mt-4">
+                  <Input
+                    placeholder="Write a reply..."
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    className="text-sm"
+                  />
+                  <Button size="sm" className="flex items-center gap-1">
+                    <Send className="h-3.5 w-3.5" />
+                    <span>Reply</span>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="new-post">
+            <div className="space-y-4">
+              <Input placeholder="Post title" className="text-lg font-medium" />
+              <div className="border rounded-md">
+                <textarea
+                  className="w-full p-4 h-40 text-sm resize-none border-0 rounded-md focus:outline-none"
+                  placeholder="What would you like to discuss?"
+                  value={newPost}
+                  onChange={(e) => setNewPost(e.target.value)}
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline">Cancel</Button>
+                <Button>Post Discussion</Button>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 };
 

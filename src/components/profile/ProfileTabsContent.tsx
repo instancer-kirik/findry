@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { TabsContent } from '@/components/ui/tabs';
 import { Profile } from '@/types/profile';
@@ -12,6 +13,8 @@ const ProfileTabsContent: React.FC<ProfileTabsContentProps> = ({
   profile,
   isOwnProfile
 }) => {
+  // Tabs component should wrap TabsContent, but it's already in the parent component (ProfileTabs)
+  // Just return the TabsContent elements which will be used within a Tabs parent
   return (
     <>
       <TabsContent value="overview" className="space-y-6">

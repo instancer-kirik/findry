@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Project } from '@/hooks/use-project';
 import { useProject } from '@/hooks/use-project';
 import ProjectChat from '@/components/projects/ProjectChat';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 
 const ProjectDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,7 +22,6 @@ const ProjectDetail: React.FC = () => {
   const [isOwner, setIsOwner] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   
-  // Component management
   const [showComponentForm, setShowComponentForm] = useState(false);
   const [editingComponent, setEditingComponent] = useState<null | string>(null);
   const [newComponent, setNewComponent] = useState({
@@ -31,7 +31,6 @@ const ProjectDetail: React.FC = () => {
     type: 'feature'
   });
   
-  // Task management
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [editingTask, setEditingTask] = useState<null | string>(null);
   const [newTask, setNewTask] = useState({
@@ -44,7 +43,6 @@ const ProjectDetail: React.FC = () => {
   });
   
   const handleDeleteProject = async () => {
-    // Implement delete project functionality
     toast({
       title: 'Not implemented',
       description: 'Project deletion is not yet implemented',
@@ -52,17 +50,14 @@ const ProjectDetail: React.FC = () => {
     });
   };
 
-  // Function to handle component reference in chat
   const handleComponentReference = (componentId: string) => {
     const component = project?.components.find(c => c.id === componentId);
     if (component) {
-      // Scroll to component section
       document.getElementById(`component-${componentId}`)?.scrollIntoView({ 
         behavior: 'smooth',
         block: 'center'
       });
       
-      // Highlight the component temporarily
       const element = document.getElementById(`component-${componentId}`);
       if (element) {
         element.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
@@ -73,17 +68,14 @@ const ProjectDetail: React.FC = () => {
     }
   }
   
-  // Function to handle task reference in chat
   const handleTaskReference = (taskId: string) => {
     const task = project?.tasks.find(t => t.id === taskId);
     if (task) {
-      // Scroll to task section
       document.getElementById(`task-${taskId}`)?.scrollIntoView({ 
         behavior: 'smooth',
         block: 'center' 
       });
       
-      // Highlight the task temporarily
       const element = document.getElementById(`task-${taskId}`);
       if (element) {
         element.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
@@ -94,7 +86,6 @@ const ProjectDetail: React.FC = () => {
     }
   }
   
-  // Component form handlers
   const handleToggleComponentForm = () => {
     setShowComponentForm(!showComponentForm);
     setEditingComponent(null);
@@ -116,7 +107,6 @@ const ProjectDetail: React.FC = () => {
   const handleSubmitComponent = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // TODO: Implement actual component creation/update
     toast({
       title: 'Not implemented',
       description: 'Component creation is not yet implemented',
@@ -141,7 +131,6 @@ const ProjectDetail: React.FC = () => {
     setShowComponentForm(true);
   };
   
-  // Task form handlers
   const handleToggleTaskForm = () => {
     setShowTaskForm(!showTaskForm);
     setEditingTask(null);
@@ -165,7 +154,6 @@ const ProjectDetail: React.FC = () => {
   const handleSubmitTask = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // TODO: Implement actual task creation/update
     toast({
       title: 'Not implemented',
       description: 'Task creation is not yet implemented',
@@ -193,11 +181,9 @@ const ProjectDetail: React.FC = () => {
   };
   
   useEffect(() => {
-    // Focus on the first input when forms are shown
     if (showComponentForm) {
       const nameInput = document.getElementById('component-name');
       if (nameInput) {
-        // Use setTimeout to ensure the input is rendered
         setTimeout(() => {
           (nameInput as HTMLElement).focus?.();
         }, 100);
@@ -207,7 +193,6 @@ const ProjectDetail: React.FC = () => {
     if (showTaskForm) {
       const titleInput = document.getElementById('task-title');
       if (titleInput) {
-        // Use setTimeout to ensure the input is rendered
         setTimeout(() => {
           (titleInput as HTMLElement).focus?.();
         }, 100);
@@ -330,7 +315,6 @@ const ProjectDetail: React.FC = () => {
               </CardContent>
             </Card>
             
-            {/* Components Section */}
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">Components</h2>
@@ -481,7 +465,6 @@ const ProjectDetail: React.FC = () => {
               )}
             </div>
             
-            {/* Tasks Section */}
             <div>
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">Tasks</h2>
@@ -678,16 +661,17 @@ const ProjectDetail: React.FC = () => {
           </div>
           
           <div>
-            {/* ProjectChat component */}
-            <ProjectChat 
-              ref={projectChatRef}
-              project={project}
-              className="sticky top-4"
-              onReferenceClick={{
-                component: handleComponentReference,
-                task: handleTaskReference
-              }}
-            />
+            <Tabs defaultValue="chat">
+              <ProjectChat 
+                ref={projectChatRef}
+                project={project}
+                className="sticky top-4"
+                onReferenceClick={{
+                  component: handleComponentReference,
+                  task: handleTaskReference
+                }}
+              />
+            </Tabs>
           </div>
         </div>
       </div>
