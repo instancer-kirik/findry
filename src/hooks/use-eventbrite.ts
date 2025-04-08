@@ -11,44 +11,22 @@ export interface EventbriteHookReturn {
   useImportEvents: () => ReturnType<typeof useMutation>;
 }
 
+interface UserIntegration {
+  id: string;
+  user_id: string;
+  integration_type: string;
+  access_token: string;
+  refresh_token?: string;
+  expires_at?: string;
+  is_active: boolean;
+  metadata?: any;
+  created_at: string;
+  updated_at: string;
+}
+
 export const useEventbrite = (): EventbriteHookReturn => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  
-  // Since user_integrations table doesn't seem to exist in the schema,
-  // we'll use a simpler approach with local storage for demo purposes
-  const STORAGE_KEY = 'eventbrite_integration';
-  
-  const saveIntegrationToLocalStorage = (isActive: boolean, token?: string) => {
-    if (!user) return;
-    
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      user_id: user.id,
-      is_active: isActive,
-      access_token: token || 'fake_token_' + Date.now(),
-      timestamp: Date.now()
-    }));
-  };
-  
-  const getIntegrationFromLocalStorage = () => {
-    if (!user) return null;
-    
-    const data = localStorage.getItem(STORAGE_KEY);
-    if (!data) return null;
-    
-    try {
-      const parsed = JSON.parse(data);
-      if (parsed.user_id !== user.id) return null;
-      return parsed;
-    } catch (e) {
-      console.error('Error parsing Eventbrite integration data:', e);
-      return null;
-    }
-  };
-  
-  const removeIntegrationFromLocalStorage = () => {
-    localStorage.removeItem(STORAGE_KEY);
-  };
   
   // Check if user has integrated Eventbrite
   const useHasIntegrated = () => {
@@ -57,9 +35,21 @@ export const useEventbrite = (): EventbriteHookReturn => {
       queryFn: async () => {
         if (!user) return false;
         
-        // Use local storage instead of database
-        const integration = getIntegrationFromLocalStorage();
-        return integration && integration.is_active;
+        // Query the user_integrations table
+        const { data, error } = await supabase
+          .from('user_integrations')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('integration_type', 'eventbrite')
+          .eq('is_active', true)
+          .single();
+        
+        if (error) {
+          console.error('Error checking Eventbrite integration:', error);
+          return false;
+        }
+        
+        return !!data;
       },
       enabled: !!user
     });
@@ -74,15 +64,23 @@ export const useEventbrite = (): EventbriteHookReturn => {
         }
         
         try {
-          // Simply remove from local storage
-          removeIntegrationFromLocalStorage();
+          // Update the is_active flag to false
+          const { error } = await supabase
+            .from('user_integrations')
+            .update({ is_active: false })
+            .eq('user_id', user.id)
+            .eq('integration_type', 'eventbrite');
+          
+          if (error) {
+            throw error;
+          }
           
           toast.success('Eventbrite disconnected successfully');
           return { success: true };
         } catch (error: any) {
           console.error('Error disconnecting Eventbrite:', error);
           toast.error('Failed to disconnect Eventbrite');
-          return { success: false, error: error.message };
+          throw error;
         }
       },
       onSuccess: () => {
@@ -100,22 +98,30 @@ export const useEventbrite = (): EventbriteHookReturn => {
         }
         
         try {
-          // Get the access token from local storage
-          const integration = getIntegrationFromLocalStorage();
+          // Get the access token from the database
+          const { data, error } = await supabase
+            .from('user_integrations')
+            .select('access_token')
+            .eq('user_id', user.id)
+            .eq('integration_type', 'eventbrite')
+            .eq('is_active', true)
+            .single();
           
-          if (!integration || !integration.is_active) {
+          if (error || !data) {
             throw new Error('Could not find active Eventbrite integration');
           }
           
           // In a real implementation, we would fetch events from Eventbrite API here
-          // For now, we'll just return success
+          // using the access_token
+          console.log('Using access token to fetch events:', data.access_token);
           
+          // For demo purposes, we'll just show a success message
           toast.success('Events imported successfully');
           return { success: true };
         } catch (error: any) {
           console.error('Error importing events:', error);
           toast.error(`Failed to import events: ${error.message}`);
-          return { success: false, error: error.message };
+          throw error;
         }
       }
     });

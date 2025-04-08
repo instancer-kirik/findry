@@ -4,8 +4,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, X } from 'lucide-react';
-import { useUser } from '@/hooks/use-user';
+import { useAuth } from '@/hooks/use-auth';
 import Layout from '@/components/layout/Layout';
+import { supabase } from '@/integrations/supabase/client';
 
 interface EventbriteTokenResponse {
   access_token: string;
@@ -17,12 +18,10 @@ interface EventbriteTokenResponse {
 const EventbriteCallback = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useUser();
+  const { user } = useAuth();
   
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('Connecting to Eventbrite...');
-  
-  const STORAGE_KEY = 'eventbrite_integration';
   
   // Process auth code
   useEffect(() => {
@@ -52,16 +51,24 @@ const EventbriteCallback = () => {
           refresh_token: 'fake_refresh_token_' + Date.now()
         };
         
-        // Store in localStorage instead of database
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        // Store in the database
+        const { error } = await supabase.from('user_integrations').insert({
           user_id: user.id,
           integration_type: 'eventbrite',
           access_token: fakeTokenResponse.access_token,
           refresh_token: fakeTokenResponse.refresh_token,
           expires_at: new Date(Date.now() + fakeTokenResponse.expires_in * 1000).toISOString(),
           is_active: true,
-          timestamp: Date.now()
-        }));
+          metadata: { 
+            oauth_code: code,
+            token_type: fakeTokenResponse.token_type
+          }
+        });
+        
+        if (error) {
+          console.error('Error storing Eventbrite integration:', error);
+          throw new Error('Failed to store Eventbrite connection');
+        }
         
         setStatus('success');
         setMessage('Successfully connected to Eventbrite!');

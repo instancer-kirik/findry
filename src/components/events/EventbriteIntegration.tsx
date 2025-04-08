@@ -26,7 +26,7 @@ export const EventbriteIntegration = () => {
     const redirectUri = `${window.location.origin}/eventbrite-callback`;
     
     // Redirect to authorization page
-    window.location.href = `https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`;
+    window.location.href = `https://www.eventbriteapi.com/v3/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`;
   };
 
   const handleDisconnect = async () => {

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,7 +25,11 @@ import ProfileCalendar, { CalendarEvent } from '@/components/profile/ProfileCale
 import { Artist } from '@/types/database';
 
 const ArtistProfile = () => {
-  const { artistId, artistSlug } = useParams<{ artistId?: string; artistSlug?: string }>();
+  // Extract the actual artistId and artistSlug from the URL using useParams
+  const params = useParams<{ artistId?: string; artistSlug?: string }>();
+  const artistId = params.artistId;
+  const artistSlug = params.artistSlug;
+
   const [artist, setArtist] = useState<Artist | null>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,7 +55,7 @@ const ArtistProfile = () => {
         if (artistSlug) {
           query = query.eq('username', artistSlug);
           console.log('Querying by username/slug:', artistSlug);
-        } else {
+        } else if (artistId) {
           query = query.eq('id', artistId);
           console.log('Querying by ID:', artistId);
         }
