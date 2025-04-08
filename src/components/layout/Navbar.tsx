@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -200,7 +199,12 @@ const Navbar: React.FC = () => {
             </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
-        
+        <Link
+          to="/projects"
+          className={`flex items-center space-x-2 ${location.pathname === '/projects' ? 'text-primary' : 'hover:text-primary'}`}
+        >
+          <span>Projects</span>
+        </Link>
         <Link
           to="/shops"
           className={`flex items-center space-x-2 ${location.pathname === '/shops' ? 'text-primary' : 'hover:text-primary'}`}
@@ -437,7 +441,13 @@ const Navbar: React.FC = () => {
                     </Link>
                   </CollapsibleContent>
                 </Collapsible>
-                
+                <Link 
+                  to="/projects" 
+                  className="flex items-center space-x-2 py-2 text-sm px-2 rounded-md hover:bg-muted" 
+                  onClick={() => setOpen(false)}
+                >
+                  <span>Projects</span>
+                </Link>
                 <Link 
                   to="/shops" 
                   className="flex items-center space-x-2 py-2 text-sm px-2 rounded-md hover:bg-muted" 
@@ -445,6 +455,7 @@ const Navbar: React.FC = () => {
                 >
                   <span>Shops</span>
                 </Link>
+                
               </div>
               
               {isAuthenticated ? (

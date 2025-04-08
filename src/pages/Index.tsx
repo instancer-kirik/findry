@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -70,7 +69,7 @@ const Landing: React.FC = () => {
           
           <Button 
             variant="outline" 
-            onClick={() => navigate('/events')}
+            onClick={() => navigate('/discover?tab=events')}
             className="h-auto py-6 flex flex-col items-center gap-2 hover:bg-primary/10"
           >
             <Calendar className="h-8 w-8" />
@@ -79,7 +78,7 @@ const Landing: React.FC = () => {
           
           <Button 
             variant="outline" 
-            onClick={() => navigate('/artists')}
+            onClick={() => navigate('/discover?tab=artists')}
             className="h-auto py-6 flex flex-col items-center gap-2 hover:bg-primary/10"
           >
             <Palette className="h-8 w-8" />
@@ -97,11 +96,11 @@ const Landing: React.FC = () => {
           
           <Button 
             variant="outline" 
-            onClick={() => navigate('/shops')}
+            onClick={() => navigate('/projects')}
             className="h-auto py-6 flex flex-col items-center gap-2 hover:bg-primary/10"
           >
             <Store className="h-8 w-8" />
-            <span>Shops</span>
+            <span>Projects</span>
           </Button>
         </div>
       </div>
@@ -130,7 +129,7 @@ const Landing: React.FC = () => {
             Sign Up Now
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
-          <Button size="lg" variant="outline" onClick={() => navigate('/discover')}>
+          <Button size="lg" variant="outline" onClick={() => navigate('/dashboard')}>
             Explore The Platform
           </Button>
         </div>
