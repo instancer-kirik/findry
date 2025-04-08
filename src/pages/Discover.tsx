@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import Layout from '@/components/layout/Layout';
@@ -11,7 +11,7 @@ import SelectionPanel from '@/components/marketplace/SelectionPanel';
 import { cn } from '@/lib/utils';
 import { artistStyleFilters, disciplinaryFilters, resourceTypes, allTags } from '@/components/discover/DiscoverData';
 import { useDiscoverData } from '@/hooks/use-discover-data';
-import { ContentItemProps } from '@/components/marketplace/ContentCard';
+import { ContentItemProps } from '@/types/content';
 import { Check, Grid, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import DiscoverMobileDrawer from '@/components/discover/DiscoverMobileDrawer';
@@ -19,6 +19,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 const Discover = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const query = searchParams.get('q') || '';
   const typeParam = searchParams.get('type') || '';
   const selectionMode = searchParams.get('select') === 'true';
@@ -117,6 +118,40 @@ const Discover = () => {
 
   const toggleSelectionPanel = () => {
     setIsSelectionMinimized(prev => !prev);
+  };
+
+  const handleItemClick = (item: ContentItemProps) => {
+    if (selectionMode) {
+      handleSelectItem(item);
+      return;
+    }
+    
+    // Navigate to the appropriate detail page based on the item type
+    switch (item.type) {
+      case 'artist':
+        navigate(`/artist/${item.id}`);
+        break;
+      case 'resource':
+        navigate(`/resource/${item.id}`);
+        break;
+      case 'project':
+        navigate(`/project/${item.id}`);
+        break;
+      case 'venue':
+        navigate(`/venue/${item.id}`);
+        break;
+      case 'community':
+        navigate(`/community/${item.id}`);
+        break;
+      case 'brand':
+        navigate(`/brand/${item.id}`);
+        break;
+      case 'shop':
+        navigate(`/shop/${item.id}`);
+        break;
+      default:
+        console.log('No navigation defined for', item.type);
+    }
   };
 
   const availableTabs = ['artists', 'resources', 'projects', 'events', 'venues', 'communities', 'brands'];
@@ -286,7 +321,7 @@ const Discover = () => {
                 <CategoryItemsGrid
                   items={items}
                   title={headerSearchQuery ? `Results for "${headerSearchQuery}"` : `Discover ${getTabLabel(activeTab)}`}
-                  onSelectItem={selectionMode ? handleSelectItem : undefined}
+                  onSelectItem={selectionMode ? handleSelectItem : handleItemClick}
                   selectedItems={selectionMode ? selectedItems : undefined}
                 />
               ) : (

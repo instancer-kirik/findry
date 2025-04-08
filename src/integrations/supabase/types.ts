@@ -245,6 +245,52 @@ export type Database = {
         }
         Relationships: []
       }
+      event_community_relationships: {
+        Row: {
+          community_id: string
+          created_at: string | null
+          created_by: string | null
+          event_id: string
+          id: string
+        }
+        Insert: {
+          community_id: string
+          created_at?: string | null
+          created_by?: string | null
+          event_id: string
+          id?: string
+        }
+        Update: {
+          community_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          event_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_community_relationships_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_community_relationships_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_community_relationships_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           capacity: number | null

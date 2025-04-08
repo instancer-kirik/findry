@@ -48,7 +48,7 @@ const Communities = () => {
   }, [error, toast]);
 
   const handleJoinCommunity = async (communityId: string, e?: React.MouseEvent) => {
-    e?.stopPropagation();
+    if (e) e.stopPropagation();
     
     if (!user) {
       toast({
@@ -59,11 +59,16 @@ const Communities = () => {
       return;
     }
     
-    joinCommunity.mutate(communityId);
+    joinCommunity.mutate(communityId, {
+      onSuccess: () => {
+        // Refetch to update data
+        refetch();
+      }
+    });
   };
 
   const handleLeaveCommunity = async (communityId: string, e?: React.MouseEvent) => {
-    e?.stopPropagation();
+    if (e) e.stopPropagation();
     
     if (!user) {
       toast({
@@ -74,7 +79,12 @@ const Communities = () => {
       return;
     }
     
-    leaveCommunity.mutate(communityId);
+    leaveCommunity.mutate(communityId, {
+      onSuccess: () => {
+        // Refetch to update data
+        refetch();
+      }
+    });
   };
 
   const filteredCommunities = communities.filter(community => {
@@ -197,7 +207,7 @@ const Communities = () => {
           
           <div className="md:col-span-2">
             <div className="flex justify-between items-center mb-6">
-              <Tabs defaultValue="all" className="w-full" onValueChange={setSelectedTab}>
+              <Tabs defaultValue={selectedTab} className="w-full" onValueChange={setSelectedTab}>
                 <TabsList>
                   <TabsTrigger value="all">All Communities</TabsTrigger>
                   <TabsTrigger value="featured">Featured</TabsTrigger>
@@ -308,8 +318,13 @@ const Communities = () => {
                               ? handleLeaveCommunity(community.id, e) 
                               : handleJoinCommunity(community.id, e);
                           }}
+                          disabled={joinCommunity.isPending || leaveCommunity.isPending}
                         >
-                          {community.isMember ? "Leave Community" : "Join Community"}
+                          {joinCommunity.isPending || leaveCommunity.isPending 
+                            ? "Processing..." 
+                            : selectedCommunity.isMember 
+                              ? "Leave Community" 
+                              : "Join Community"}
                         </Button>
                       </CardFooter>
                     </Card>
@@ -381,7 +396,9 @@ const Communities = () => {
           </div>
         </div>
 
-        <Dialog open={!!selectedCommunity} onOpenChange={() => setSelectedCommunity(null)}>
+        <Dialog open={!!selectedCommunity} onOpenChange={(open) => {
+          if (!open) setSelectedCommunity(null);
+        }}>
           <DialogContent className="max-w-2xl">
             {selectedCommunity && (
               <>
@@ -429,8 +446,13 @@ const Communities = () => {
                           ? handleLeaveCommunity(selectedCommunity.id, e) 
                           : handleJoinCommunity(selectedCommunity.id, e);
                       }}
+                      disabled={joinCommunity.isPending || leaveCommunity.isPending}
                     >
-                      {selectedCommunity.isMember ? "Leave Community" : "Join Community"}
+                      {joinCommunity.isPending || leaveCommunity.isPending 
+                        ? "Processing..." 
+                        : selectedCommunity.isMember 
+                          ? "Leave Community" 
+                          : "Join Community"}
                     </Button>
                     <div className="flex gap-2">
                       <Button variant="outline" onClick={() => setSelectedCommunity(null)}>

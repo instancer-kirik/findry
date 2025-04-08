@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ContentItemProps } from '@/types/content';
@@ -117,32 +118,7 @@ export const useDiscoverData = (
         let data: ContentItemProps[] = [];
         
         // Map activeTab to appropriate table - use literal types for better safety
-        let table: 'artists' | 'venues' | 'resources' | 'projects' | 'brands' | 'communities' | 'shops';
-        switch(activeTab) {
-          case 'artists':
-            table = 'artists';
-            break;
-          case 'venues':
-            table = 'venues';
-            break;
-          case 'resources':
-            table = 'resources';
-            break;
-          case 'projects':
-            table = 'projects';
-            break;
-          case 'brands':
-            table = 'brands';
-            break;
-          case 'communities':
-            table = 'communities';
-            break;
-          case 'shops':
-            table = 'shops';
-            break;
-          default:
-            table = 'artists';
-        }
+        const table = activeTab as 'artists' | 'venues' | 'resources' | 'projects' | 'brands' | 'communities' | 'shops';
         
         // Fetch data from Supabase
         const { data: responseData, error: responseError } = await supabase
@@ -154,19 +130,16 @@ export const useDiscoverData = (
         // Transform the data based on the table/type
         if (responseData && Array.isArray(responseData)) {
           data = responseData.map(item => {
-            // Use type assertion to treat item as a generic object with any properties
-            const typedItem = item as any;
-            
-            // Safely access properties
+            // Basic common properties
             const commonProps: ContentItemProps = {
-              id: String(typedItem.id || ''),
-              name: typedItem.name || 'Unnamed',
+              id: String(item.id || ''),
+              name: item.name || 'Unnamed',
               type: activeTab.substring(0, activeTab.length - 1), // Remove 's' to get singular
-              location: typedItem.location || 'Unknown location',
-              description: typedItem.description || typedItem.bio || '',
-              image_url: typedItem.image_url || typedItem.logo_url || typedItem.banner_image_url || '',
-              tags: typedItem.tags || [],
-              subtype: typedItem.subtype || typedItem.type || '',
+              location: item.location || 'Unknown location',
+              description: item.description || item.bio || '',
+              image_url: item.image_url || item.logo_url || item.banner_image_url || '',
+              tags: item.tags || [],
+              subtype: item.subtype || item.type || '',
             };
             
             // Add specific properties based on the type
@@ -174,49 +147,104 @@ export const useDiscoverData = (
               case 'artists':
                 return {
                   ...commonProps,
-                  disciplines: typedItem.disciplines,
-                  styles: typedItem.styles,
-                  multidisciplinary: typedItem.multidisciplinary,
+                  disciplines: item.disciplines,
+                  styles: item.styles,
+                  multidisciplinary: item.multidisciplinary,
                 } as ContentItemProps;
               case 'venues':
                 return {
                   ...commonProps,
-                  capacity: typedItem.capacity,
-                  amenities: typedItem.amenities,
+                  capacity: item.capacity,
+                  amenities: item.amenities,
                 } as ContentItemProps;
               case 'resources':
                 return {
                   ...commonProps,
-                  availability: typedItem.availability,
+                  availability: item.availability,
                 } as ContentItemProps;
               case 'projects':
                 return {
                   ...commonProps,
-                  status: typedItem.status,
-                  version: typedItem.version,
-                  progress: typedItem.progress,
-                  repoUrl: typedItem.repo_url,
-                  budget: typedItem.budget,
-                  timeline: typedItem.timeline,
+                  status: item.status,
+                  version: item.version,
+                  progress: item.progress,
+                  repoUrl: item.repo_url,
+                  budget: item.budget,
+                  timeline: item.timeline,
                 } as ContentItemProps;
               case 'brands':
                 return commonProps;
               case 'communities':
                 return {
                   ...commonProps,
-                  category: typedItem.category,
-                  created_by: typedItem.created_by,
+                  category: item.category,
+                  created_by: item.created_by,
                 } as ContentItemProps;
               case 'shops':
                 return {
                   ...commonProps,
-                  website_url: typedItem.website_url,
-                  logo_url: typedItem.logo_url,
-                  banner_image_url: typedItem.banner_image_url,
+                  website_url: item.website_url,
+                  logo_url: item.logo_url,
+                  banner_image_url: item.banner_image_url,
                 } as ContentItemProps;
               default:
                 return commonProps;
             }
+          });
+        }
+        
+        // Filter results by search query
+        if (searchQuery) {
+          data = data.filter(item => 
+            item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (item.location && item.location.toLowerCase().includes(searchQuery.toLowerCase()))
+          );
+        }
+        
+        // Filter by tags if selected
+        if (selectedTags.length > 0) {
+          data = data.filter(item => 
+            item.tags && item.tags.some(tag => selectedTags.includes(tag))
+          );
+        }
+        
+        // Apply additional filters based on the active tab
+        if (activeTab === 'artists') {
+          // Filter by style if selected
+          if (artistStyle && artistStyle !== 'all') {
+            data = data.filter(item => 
+              item.styles && item.styles.includes(artistStyle)
+            );
+          }
+          
+          // Filter by disciplinary type if selected
+          if (disciplinaryType && disciplinaryType !== 'all') {
+            data = data.filter(item => 
+              item.disciplines && item.disciplines.includes(disciplinaryType)
+            );
+          }
+        }
+        
+        // Filter by resource type if selected
+        if (activeTab === 'resources' && resourceType && resourceType !== 'all') {
+          data = data.filter(item => item.subtype === resourceType);
+        }
+        
+        // Filter by subfilters if any are selected
+        if (selectedSubfilters.length > 0) {
+          data = data.filter(item => {
+            // Check different properties based on the tab
+            if (activeTab === 'artists' && item.disciplines) {
+              return selectedSubfilters.some(filter => item.disciplines?.includes(filter));
+            }
+            if (activeTab === 'resources' && item.subtype) {
+              return selectedSubfilters.includes(item.subtype);
+            }
+            if (activeTab === 'venues' && item.subtype) {
+              return selectedSubfilters.includes(item.subtype);
+            }
+            return false;
           });
         }
         
