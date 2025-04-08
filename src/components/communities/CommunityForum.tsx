@@ -63,32 +63,48 @@ const CommunityForum: React.FC<CommunityForumProps> = ({ communityId }) => {
         };
       }) || [];
 
-      // Get replies for each post
-      for (const post of transformedPosts) {
-        const { data: replies, error: repliesError } = await supabase
-          .from('community_posts')
-          .select(`
-            id,
-            content,
-            created_at,
-            user_id,
-            profiles(username, avatar_url)
-          `)
-          .eq('community_id', communityId)
-          .eq('reply_to', post.id)
-          .order('created_at', { ascending: true });
+      // Get replies for each post - check if reply_to column exists first
+      try {
+        // Check if reply_to column exists
+        const { data: tableInfo } = await supabase.rpc('get_table_definition', {
+          table_name: 'community_posts'
+        });
+        
+        const hasReplyToColumn = tableInfo?.some((col: any) => 
+          col.column_name === 'reply_to'
+        );
+        
+        if (hasReplyToColumn) {
+          for (const post of transformedPosts) {
+            const { data: replies, error: repliesError } = await supabase
+              .from('community_posts')
+              .select(`
+                id,
+                content,
+                created_at,
+                user_id,
+                profiles(username, avatar_url)
+              `)
+              .eq('community_id', communityId)
+              .eq('reply_to', post.id)
+              .order('created_at', { ascending: true });
 
-        if (!repliesError && replies) {
-          post.replies = replies.map(reply => ({
-            id: reply.id,
-            content: reply.content,
-            created_at: reply.created_at,
-            user_id: reply.user_id,
-            username: reply.profiles?.username || 'Unknown user',
-            avatar_url: reply.profiles?.avatar_url || '',
-            reply_to: post.id
-          }));
+            if (!repliesError && replies) {
+              post.replies = replies.map((reply: any) => ({
+                id: reply.id,
+                content: reply.content,
+                created_at: reply.created_at,
+                user_id: reply.user_id,
+                username: reply.profiles?.username || 'Unknown user',
+                avatar_url: reply.profiles?.avatar_url || '',
+                reply_to: post.id
+              }));
+            }
+          }
         }
+      } catch (e) {
+        console.error('Error fetching replies:', e);
+        // Continue without replies if there's an error
       }
 
       return transformedPosts;

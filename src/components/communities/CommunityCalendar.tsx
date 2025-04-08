@@ -25,6 +25,12 @@ interface EventData {
   location: string;
   capacity?: number;
   community_id: string;
+  tags?: string[];
+  type?: string;
+  subtype?: string;
+  image_url?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface CalendarEvent {
@@ -70,7 +76,7 @@ const CommunityCalendar: React.FC<CommunityCalendarProps> = ({ communityId }) =>
       if (error) throw error;
       
       if (data && data.length > 0) {
-        return data.map((event: EventData) => ({
+        return data.map((event: any) => ({
           id: event.id,
           title: event.name,
           description: event.description || '',

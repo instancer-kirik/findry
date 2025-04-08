@@ -48,7 +48,7 @@ const EventbriteCallback = () => {
           table_name: 'user_integrations'
         });
         
-        const tableExists = tableInfo && tableInfo.length > 0;
+        const tableExists = Array.isArray(tableInfo) && tableInfo.length > 0;
         
         if (!tableExists) {
           console.log('user_integrations table does not exist, need to create it first');
@@ -71,27 +71,19 @@ const EventbriteCallback = () => {
           refresh_token: 'fake_refresh_token_' + Date.now()
         };
         
-        // Store the token in Supabase
-        // Using a dynamic SQL approach to handle cases where the table might not exist yet
-        const query = `
-          INSERT INTO user_integrations (
-            user_id, integration_type, access_token, refresh_token, expires_at, is_active
-          ) VALUES (
-            '${user.id}', 'eventbrite', 
-            '${fakeTokenResponse.access_token}', 
-            '${fakeTokenResponse.refresh_token}',
-            NOW() + INTERVAL '${fakeTokenResponse.expires_in} seconds',
-            true
-          )
-          ON CONFLICT (user_id, integration_type) 
-          DO UPDATE SET 
-            access_token = EXCLUDED.access_token,
-            refresh_token = EXCLUDED.refresh_token,
-            expires_at = EXCLUDED.expires_at,
-            is_active = true
-        `;
-        
-        const { error } = await supabase.rpc('execute_sql', { sql_query: query });
+        // Store the token directly using supabase insert/update
+        const { error } = await supabase
+          .from('user_integrations')
+          .upsert({
+            user_id: user.id,
+            integration_type: 'eventbrite',
+            access_token: fakeTokenResponse.access_token,
+            refresh_token: fakeTokenResponse.refresh_token,
+            expires_at: new Date(Date.now() + fakeTokenResponse.expires_in * 1000).toISOString(),
+            is_active: true
+          }, {
+            onConflict: 'user_id,integration_type'
+          });
         
         if (error) {
           console.error('Error storing Eventbrite token:', error);
