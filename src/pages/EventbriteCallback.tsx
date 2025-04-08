@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, X } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/hooks/use-user';
 import Layout from '@/components/layout/Layout';
 
@@ -22,6 +21,8 @@ const EventbriteCallback = () => {
   
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('Connecting to Eventbrite...');
+  
+  const STORAGE_KEY = 'eventbrite_integration';
   
   // Process auth code
   useEffect(() => {
@@ -43,26 +44,6 @@ const EventbriteCallback = () => {
       }
       
       try {
-        // Check if the user_integrations table exists
-        const { data: tableInfo, error: tableError } = await supabase.rpc('get_table_definition', {
-          table_name: 'user_integrations'
-        });
-        
-        const tableExists = Array.isArray(tableInfo) && tableInfo.length > 0;
-        
-        if (!tableExists) {
-          console.log('user_integrations table does not exist, need to create it first');
-          
-          // For this solution, we'll skip actually creating the table and just return a message
-          setStatus('error');
-          setMessage('Eventbrite integration tables are not set up yet. Please check back later.');
-          return;
-        }
-        
-        // In a real app, we would exchange the code for a token
-        // This would involve a server-side request to Eventbrite's token endpoint
-        console.log('Would exchange auth code for token:', code);
-        
         // Create a fake token response for demonstration
         const fakeTokenResponse: EventbriteTokenResponse = {
           access_token: 'fake_access_token_' + Date.now(),
@@ -71,24 +52,16 @@ const EventbriteCallback = () => {
           refresh_token: 'fake_refresh_token_' + Date.now()
         };
         
-        // Store the token directly using supabase insert/update
-        const { error } = await supabase
-          .from('user_integrations')
-          .upsert({
-            user_id: user.id,
-            integration_type: 'eventbrite',
-            access_token: fakeTokenResponse.access_token,
-            refresh_token: fakeTokenResponse.refresh_token,
-            expires_at: new Date(Date.now() + fakeTokenResponse.expires_in * 1000).toISOString(),
-            is_active: true
-          }, {
-            onConflict: 'user_id,integration_type'
-          });
-        
-        if (error) {
-          console.error('Error storing Eventbrite token:', error);
-          throw new Error('Failed to save your Eventbrite connection');
-        }
+        // Store in localStorage instead of database
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          user_id: user.id,
+          integration_type: 'eventbrite',
+          access_token: fakeTokenResponse.access_token,
+          refresh_token: fakeTokenResponse.refresh_token,
+          expires_at: new Date(Date.now() + fakeTokenResponse.expires_in * 1000).toISOString(),
+          is_active: true,
+          timestamp: Date.now()
+        }));
         
         setStatus('success');
         setMessage('Successfully connected to Eventbrite!');

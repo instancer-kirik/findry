@@ -25,7 +25,7 @@ interface EventbriteIntegrationProps {
 
 const EventbriteIntegration: React.FC<EventbriteIntegrationProps> = ({ eventId, eventData }) => {
   const { useHasIntegrated, useDisconnectEventbrite, useImportEvents } = useEventbrite();
-  const { data: isConnected, isLoading } = useHasIntegrated();
+  const { data: isConnected = false, isLoading } = useHasIntegrated();
   const disconnectMutation = useDisconnectEventbrite();
   const importMutation = useImportEvents();
   const { toast } = useToast();

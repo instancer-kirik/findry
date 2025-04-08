@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
+
+interface PostProfile {
+  username?: string;
+  avatar_url?: string;
+}
 
 interface Post {
   id: string;
@@ -44,14 +48,13 @@ const CommunityForum: React.FC<CommunityForumProps> = ({ communityId }) => {
           profiles(username, avatar_url)
         `)
         .eq('community_id', communityId)
-        .is('reply_to', null)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
       // Transform the data to include username and avatar
-      const transformedPosts = data?.map(post => {
-        const profileData = post.profiles;
+      const transformedPosts: Post[] = (data || []).map(post => {
+        const profileData = post.profiles as PostProfile;
         return {
           id: post.id,
           content: post.content,
@@ -61,20 +64,20 @@ const CommunityForum: React.FC<CommunityForumProps> = ({ communityId }) => {
           avatar_url: profileData?.avatar_url || '',
           replies: [] as Post[]
         };
-      }) || [];
+      });
 
-      // Get replies for each post - check if reply_to column exists first
+      // Check if table has a reply_to column by using the get_table_definition function
       try {
-        // Check if reply_to column exists
         const { data: tableInfo } = await supabase.rpc('get_table_definition', {
           table_name: 'community_posts'
         });
         
-        const hasReplyToColumn = tableInfo?.some((col: any) => 
+        const hasReplyToColumn = Array.isArray(tableInfo) && tableInfo.some((col: any) => 
           col.column_name === 'reply_to'
         );
         
         if (hasReplyToColumn) {
+          // Fetch replies separately to avoid recursive depth issues
           for (const post of transformedPosts) {
             const { data: replies, error: repliesError } = await supabase
               .from('community_posts')
@@ -90,15 +93,18 @@ const CommunityForum: React.FC<CommunityForumProps> = ({ communityId }) => {
               .order('created_at', { ascending: true });
 
             if (!repliesError && replies) {
-              post.replies = replies.map((reply: any) => ({
-                id: reply.id,
-                content: reply.content,
-                created_at: reply.created_at,
-                user_id: reply.user_id,
-                username: reply.profiles?.username || 'Unknown user',
-                avatar_url: reply.profiles?.avatar_url || '',
-                reply_to: post.id
-              }));
+              post.replies = replies.map((reply: any) => {
+                const replyProfileData = reply.profiles as PostProfile;
+                return {
+                  id: reply.id,
+                  content: reply.content,
+                  created_at: reply.created_at,
+                  user_id: reply.user_id,
+                  username: replyProfileData?.username || 'Unknown user',
+                  avatar_url: replyProfileData?.avatar_url || '',
+                  reply_to: post.id
+                };
+              });
             }
           }
         }
@@ -188,7 +194,11 @@ const CommunityForum: React.FC<CommunityForumProps> = ({ communityId }) => {
             <CardTitle className="text-lg">Create a Post</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmitPost} className="space-y-4">
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (!newPost.trim()) return;
+              addPostMutation.mutate(newPost);
+            }} className="space-y-4">
               <Textarea 
                 placeholder="Share something with the community..."
                 value={newPost}
@@ -227,7 +237,7 @@ const CommunityForum: React.FC<CommunityForumProps> = ({ communityId }) => {
                         )}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {formatDate(post.created_at)}
+                        {format(new Date(post.created_at), 'MMM d, yyyy h:mm a')}
                       </div>
                     </div>
                     <p className="text-sm whitespace-pre-line">{post.content}</p>
@@ -252,7 +262,7 @@ const CommunityForum: React.FC<CommunityForumProps> = ({ communityId }) => {
                                     )}
                                   </div>
                                   <div className="text-xs text-muted-foreground">
-                                    {formatDate(reply.created_at)}
+                                    {format(new Date(reply.created_at), 'MMM d, yyyy h:mm a')}
                                   </div>
                                 </div>
                                 <p className="text-sm">{reply.content}</p>
