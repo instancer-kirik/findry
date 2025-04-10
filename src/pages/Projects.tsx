@@ -48,7 +48,7 @@ const Projects = () => {
             New Project
           </Button>
         </div>
-        
+
         {/* Featured Projects Section */}
         <div className="mb-10">
           <div className="flex items-center gap-2 mb-4">
@@ -147,15 +147,15 @@ const Projects = () => {
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <FileCode className="h-4 w-4" />
                           <span>{project.components?.length || 0} components</span>
-                        </div>
+                    </div>
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Calendar className="h-4 w-4" />
                           <span>{project.tasks?.length || 0} tasks</span>
-                        </div>
+                    </div>
                       </div>
                     </CardContent>
                     <CardFooter>
-                      <Button 
+                      <Button
                         variant="ghost" 
                         className="w-full justify-between"
                         onClick={() => handleViewProject(project.id)}
