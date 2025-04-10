@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import Hero from '@/components/home/Hero';
@@ -8,14 +8,9 @@ import ScreenshotGallery from '@/components/home/ScreenshotGallery';
 import EmailWaitlist from '@/components/home/EmailWaitlist';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Calendar, Compass, Palette, Store, Users } from 'lucide-react';
-import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
-import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { ZoomIn } from 'lucide-react';
 
 const Landing: React.FC = () => {
   const navigate = useNavigate();
-  const divvyQueueRef = useRef<HTMLDivElement>(null);
 
   const platformScreenshots = [
     {
@@ -55,34 +50,12 @@ const Landing: React.FC = () => {
     }
   ];
 
-  const scrollToDivvyQueue = () => {
-    divvyQueueRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   return (
     <Layout>
-      {/* Waitlist Section at the top */}
-      <div className="container mx-auto px-4 pt-8">
-        <EmailWaitlist />
-      </div>
-      
-      {/* Hero Section */}
       <Hero />
       
-      {/* Screenshots Section */}
-      <div className="bg-muted/20 py-16">
-        <div className="container mx-auto px-4">
-          
-          <ScreenshotGallery screenshots={platformScreenshots} />
-        </div>
-      </div>
-      
-      {/* Info Sections */}
-      <FeatureSection />
-      <EcosystemSection />
-      
-      {/* Quick Links Section
-      <div className="container mx-auto px-4 py-12">
+      {/* Quick Links Section */}
+      <div className="container mx-auto px-4 py-8 mb-8">
         <h2 className="text-2xl font-bold mb-6 text-center">Explore Findry</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           <Button 
@@ -132,8 +105,21 @@ const Landing: React.FC = () => {
         </div>
       </div>
       
-      {/* Party/Community Call to Action 
-      <div className="container mx-auto px-4 py-12 text-center bg-muted/10 rounded-lg">
+      <FeatureSection />
+      <EcosystemSection />
+      
+      {/* Platform Screenshots Section */}
+      <div className="bg-muted/20 py-16">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold mb-8 text-center">Platform Preview</h2>
+          <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-10">
+            Take a look at our intuitive interface and powerful features that make creative collaboration easier.
+          </p>
+          <ScreenshotGallery screenshots={platformScreenshots} />
+        </div>
+      </div>
+      
+      <div className="container mx-auto px-4 py-12 text-center">
         <h2 className="text-3xl font-bold mb-6">Ready to Join the Creative Ecosystem?</h2>
         <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
           Connect with artists, venues, and resources to make your creative projects come to life.
@@ -148,288 +134,9 @@ const Landing: React.FC = () => {
           </Button>
         </div>
       </div>
-       */}
-      {/* DivvyQueue Section with Ref for Scrolling */}
-      <div ref={divvyQueueRef} className="bg-muted/30 py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold mb-4 text-center">DivvyQueue</h2>
-          <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-8">
-            Our multiparty contract system streamlining complex agreements between collaborators
-          </p>
-          
-          <Carousel className="w-full max-w-5xl mx-auto">
-            <CarouselContent>
-              {[
-                {
-                  src: "/screenshots/divvyqueue-1.png",
-                  alt: "Contracts List",
-                  title: "Contracts List"
-                },
-                {
-                  src: "/screenshots/divvyqueue-2.png",
-                  alt: "Contract Editor",
-                  title: "Contract Editor"
-                },
-                {
-                  src: "/screenshots/divvyqueue-3.png",
-                  alt: "Templates",
-                  title: "Templates"
-                },
-                {
-                  src: "/screenshots/divvyqueue-4.png",
-                  alt: "Mobile Experience",
-                  title: "Mobile Experience"
-                },
-                {
-                  src: "/screenshots/divvyqueue-5.png",
-                  alt: "Activity and progress tracking",
-                  title: "Activity and progress tracking"
-                },
-                {
-                  src: "/screenshots/divvyqueue-6.png",
-                  alt: "Document Editor",
-                  title: "Document Editor"
-                },
-                {
-                  src: "/screenshots/divvyqueue-7.png",
-                  alt: "Ambiguituous tool",
-                  title: "Ambiguituous tool"
-                },
-                {
-                  src: "/screenshots/divvyqueue-8.png",
-                  alt: "Breach Resolution",
-                  title: "Breach Resolution"
-                }
-              ].map((screenshot, index) => (
-                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                  <div className="p-1">
-                    <Card>
-                      <CardContent className="flex flex-col p-0">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <div className="aspect-video relative overflow-hidden rounded-t-lg group cursor-pointer">
-                              <img 
-                                src={screenshot.src} 
-                                alt={screenshot.alt}
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                loading="lazy"
-                                decoding="async"
-                                width="640"
-                                height="360"
-                              />
-                              <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <ZoomIn className="text-white h-8 w-8" />
-                              </div>
-                            </div>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-4xl w-full p-1">
-                            <img 
-                              src={screenshot.src} 
-                              alt={screenshot.alt}
-                              className="w-full h-auto object-contain"
-                              loading="eager"
-                            />
-                          </DialogContent>
-                        </Dialog>
-                        <div className="p-4">
-                          <h3 className="font-semibold">{screenshot.alt}</h3>
-                          {screenshot.title && (
-                            <p className="text-sm text-muted-foreground mt-1">{screenshot.title}</p>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="absolute left-0 -translate-x-1/2" />
-            <CarouselNext className="absolute right-0 translate-x-1/2" />
-          </Carousel>
-          
-          <div className="mt-8 text-center">
-            <Button size="lg" onClick={() => navigate('/divvyqueue')}>
-              Learn More About DivvyQueue
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-      </div>
       
-      {/* DivvyQueue Card with Click-to-Scroll */}
       <div className="container mx-auto px-4 py-12">
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={scrollToDivvyQueue}>
-          <CardContent className="p-6 flex flex-col md:flex-row items-center gap-6">
-            <div className="md:w-1/3">
-              <img 
-                src="/screenshots/divvyqueue-1.png" 
-                alt="DivvyQueue" 
-                className="rounded-lg object-cover w-full aspect-video"
-                loading="lazy"
-                decoding="async"
-                width="640"
-                height="360"
-              />
-            </div>
-            <div className="md:w-2/3 space-y-4">
-              <h3 className="text-2xl font-bold">DivvyQueue</h3>
-              <p className="text-muted-foreground">
-                Streamline complex agreements and distribute resources efficiently with our multiparty contract management system. Perfect for creative collaborations, revenue sharing, and any project requiring transparent resource allocation between multiple parties.
-              </p>
-              <Button variant="outline" className="mt-4">
-                View Screenshots
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      
-      {/* Developer Wishlist Section */}
-      <div className="container mx-auto px-4 py-12 bg-muted/10 rounded-lg my-8">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold mb-6 text-center">Developer Wishlist</h2>
-          <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-8">
-            Resources we're seeking to expand our creative projects and collaborative space
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                title: "Workshop Space",
-                description: "Indoor/outdoor venue for creative workshops and collaborative sessions",
-                icon: "🏗️",
-                type: "space"
-              },
-              {
-                title: "Food Truck",
-                description: "Mobile food service for events and community gatherings",
-                icon: "🚚",
-                type: "food"
-              },
-              {
-                title: "Robot Parts",
-                description: "Components for robotics projects and interactive installations",
-                icon: "🤖",
-                type: "electronics"
-              },
-              {
-                title: "Storage Devices and Servers",
-                description: "External hard drives, SSDs, and NAS systems for project archiving and media storage",
-                icon: "💾",
-                type: "equipment"
-              },
-              
-              {
-                title: "Lighting Equipment",
-                description: "Professional lighting for events, performances and installations",
-                icon: "💡",
-                type: "equipment"
-              },
-              {
-                title: "Sound System",
-                description: "Audio equipment for events, performances and interactive experiences",
-                icon: "🔊",
-                type: "equipment"
-              },
-              {
-                title: "Camera Gear",
-                description: "Photography and video equipment for documentation and content creation",
-                icon: "📷",
-                type: "equipment"
-              },
-              {
-                title: "Hard Gear",
-                description: "Tools, machines, and equipment for building and repairing projects",
-                icon: "🔧",
-                type: "equipment"
-              },
-              {
-                title: "Developers and Fabricators",
-                description: "Many projects, free to join.",
-                icon: "👩‍💻",
-                type: "offerer"
-              },
-              {
-                title: "Project Materials Fund",
-                description: "Financial support for components for endorsed projects",
-                icon: "💰",
-                type: "funding"
-              },
-              {
-                title: "Transportation",
-                description: "Vehicles, trailers, and boats, Earth-movers, etc.",
-                icon: "🚐",
-                type: "vehicle"
-              }
-            ].map((item, index) => (
-              <Card key={index} className="hover:shadow-md transition-shadow flex flex-col">
-                <CardContent className="p-6 flex flex-col h-full">
-                  <div className="text-4xl mb-4">{item.icon}</div>
-                  <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-                  <p className="text-muted-foreground mb-auto">{item.description}</p>
-                  <Button 
-                    variant="outline" 
-                    className="w-full mt-4"
-                    onClick={() => {
-                      // Store the selected resource in localStorage to pre-fill the form
-                      localStorage.setItem('prefillResource', JSON.stringify({
-                        name: item.title,
-                        description: item.description,
-                        type: item.type,
-                        tags: ["wishlist", "community project"]
-                      }));
-                      
-                      // Navigate to the resource form
-                      navigate('/profile/resources');
-                    }}
-                  >
-                    Contribute
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          
-          <div className="text-center mt-10">
-            <Button size="lg" onClick={() => navigate('/contact')}>
-              I Can Help With Something
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-      </div>
-      
-      {/* Funding and Contact Section */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-2xl mx-auto text-center space-y-6">
-          <h2 className="text-2xl font-bold">Support the Project</h2>
-          <p className="text-muted-foreground">
-            Help us continue building and improving Findry by supporting the project.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button 
-              variant="outline" 
-              className="w-full sm:w-auto"
-              onClick={() => window.open('https://cash.app/$Instancer', '_blank')}
-            >
-              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="currentColor"/>
-                <path d="M12 6C8.69 6 6 8.69 6 12C6 15.31 8.69 18 12 18C15.31 18 18 15.31 18 12C18 8.69 15.31 6 12 6ZM12 16C9.79 16 8 14.21 8 12C8 9.79 9.79 8 12 8C14.21 8 16 9.79 16 12C16 14.21 14.21 16 12 16Z" fill="currentColor"/>
-              </svg>
-              Cash App: $Instancer
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full sm:w-auto"
-              onClick={() => window.open('mailto:instance.select@gmail.com', '_blank')}
-            >
-              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z" fill="currentColor"/>
-              </svg>
-              instance.select@gmail.com
-            </Button>
-          </div>
-        </div>
+        <EmailWaitlist />
       </div>
     </Layout>
   );

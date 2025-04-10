@@ -16,6 +16,7 @@ export interface ScreenshotGalleryProps {
 const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = ({ screenshots }) => {
   return (
     <div className="container mx-auto px-4 py-12">
+      <h2 className="text-3xl font-bold mb-8 text-center">Platform Features</h2>
       
       <Carousel className="w-full max-w-5xl mx-auto">
         <CarouselContent>
@@ -60,7 +61,7 @@ const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = ({ screenshots }) =>
         <CarouselPrevious className="absolute left-0 -translate-x-1/2" />
         <CarouselNext className="absolute right-0 translate-x-1/2" />
       </Carousel>
-    </div>  
+    </div>
   );
 };
 

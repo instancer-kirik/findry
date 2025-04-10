@@ -37,7 +37,7 @@ const EventDetail: React.FC = () => {
   const [attendeeCount, setAttendeeCount] = useState<number>(0);
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   useEffect(() => {
     const fetchEvent = async () => {
       setLoading(true);
@@ -76,8 +76,8 @@ const EventDetail: React.FC = () => {
 
   const handleRSVP = () => {
     setAttending(!attending);
-
-      toast({
+    
+    toast({
       title: attending ? "RSVP Cancelled" : "RSVP Confirmed",
       description: attending 
         ? "You are no longer attending this event" 
@@ -141,17 +141,17 @@ const EventDetail: React.FC = () => {
     );
   }
 
-        return (
+  return (
     <Layout>
       <div className="container mx-auto py-8 max-w-5xl">
         <div className="mb-6">
-                      <Button 
-                        variant="ghost" 
+          <Button 
+            variant="ghost" 
             onClick={() => navigate('/discover?type=events')}
-                      >
+          >
             ← Back to Events
-                      </Button>
-                  </div>
+          </Button>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2">
@@ -180,8 +180,8 @@ const EventDetail: React.FC = () => {
               <h2 className="text-xl font-semibold mb-2">About This Event</h2>
               <p className="whitespace-pre-line">{event.description}</p>
             </div>
-            </div>
-            
+          </div>
+          
           <div className="space-y-4">
             <Card>
               <CardContent className="pt-6">
@@ -221,7 +221,7 @@ const EventDetail: React.FC = () => {
                       </p>
                     </div>
                   </div>
-              </div>
+                </div>
                 
                 <div className="mt-6 space-y-3">
                   <Button
@@ -249,21 +249,21 @@ const EventDetail: React.FC = () => {
                   </Button>
 
                   {event.eventbrite_url && (
-                      <Button 
+                    <Button 
                       className="w-full" 
                       variant="secondary"
                       onClick={() => window.open(event.eventbrite_url, '_blank')}
                     >
                       <ExternalLink className="h-4 w-4 mr-2" />
                       View on Eventbrite
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+            
             <Card>
-                <CardContent className="pt-6">
+              <CardContent className="pt-6">
                 <h3 className="font-medium mb-2">Organized by</h3>
                 <div className="flex items-center">
                   <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mr-3">
@@ -271,7 +271,7 @@ const EventDetail: React.FC = () => {
                   </div>
                   <div>
                     <p className="font-medium">Event Organizer</p>
-                              <Button
+                    <Button 
                       variant="link" 
                       className="p-0 h-auto text-muted-foreground"
                       onClick={() => {
@@ -280,10 +280,10 @@ const EventDetail: React.FC = () => {
                       }}
                     >
                       View Profile
-                              </Button>
+                    </Button>
                   </div>
-                          </div>
-                </CardContent>
+                </div>
+              </CardContent>
             </Card>
           </div>
         </div>

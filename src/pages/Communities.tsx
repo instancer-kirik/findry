@@ -265,9 +265,9 @@ const Communities = () => {
                 ))}
               </div>
             ) : filteredCommunities.length > 0 ? (
-            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'space-y-4'}>
-              {filteredCommunities.map((community) => (
-                viewMode === 'grid' ? (
+              <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'space-y-4'}>
+                {filteredCommunities.map((community) => (
+                  viewMode === 'grid' ? (
                     <Card 
                       key={community.id} 
                       className="group hover:shadow-lg transition-shadow cursor-pointer"
@@ -379,9 +379,9 @@ const Communities = () => {
                         </div>
                       </CardContent>
                     </Card>
-                )
-              ))}
-            </div>
+                  )
+                ))}
+              </div>
             ) : (
               <div className="text-center py-12 bg-muted rounded-md">
                 <h3 className="text-lg font-medium mb-2">No communities found</h3>
@@ -455,12 +455,12 @@ const Communities = () => {
                           : "Join Community"}
                     </Button>
                     <div className="flex gap-2">
-                    <Button variant="outline" onClick={() => setSelectedCommunity(null)}>
-                      Close
-                    </Button>
-                    <Button onClick={() => handleViewFullProfile(selectedCommunity.id)}>
-                      View Full Profile
-                    </Button>
+                      <Button variant="outline" onClick={() => setSelectedCommunity(null)}>
+                        Close
+                      </Button>
+                      <Button onClick={() => handleViewFullProfile(selectedCommunity.id)}>
+                        View Full Profile
+                      </Button>
                     </div>
                   </div>
                 </div>

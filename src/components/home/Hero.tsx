@@ -61,9 +61,74 @@ const Hero: React.FC = () => {
         </div>
       </div>
 
-     
+      {/* DivvyQueue Section */}
+      <AnimatedSection animation="fade-in-up" delay={800} className="mt-20 max-w-4xl mx-auto px-4">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold mb-4">Powerful Tools for Creative Teams</h2>
+          <p className="text-muted-foreground">
+            Streamline your workflow with our integrated tools
+          </p>
+        </div>
+        
+        <div className="grid md:grid-cols-2 gap-8">
+          <div className="p-6 rounded-xl bg-white/80 dark:bg-black/80 shadow-xl border border-white/30 dark:border-white/10">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <h3 className="text-xl font-semibold">DivvyQueue</h3>
+            </div>
+            <p className="text-muted-foreground mb-4">
+              Streamline your multiparty contracts with our intuitive contract management tool. Split payments, track milestones, and manage deliverables all in one place.
+            </p>
+          </div>
+          
+          <div className="p-6 rounded-xl bg-white/80 dark:bg-black/80 shadow-xl border border-white/30 dark:border-white/10">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                <Users className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+              </div>
+              <h3 className="text-xl font-semibold">Collaboration Hub</h3>
+            </div>
+            <p className="text-muted-foreground mb-4">
+              Connect with your team, share resources, and manage projects efficiently with our built-in collaboration tools.
+            </p>
+          </div>
+        </div>
+      </AnimatedSection>
 
-     
+      {/* Funding and Contact Section */}
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-2xl mx-auto text-center space-y-6">
+          <h2 className="text-2xl font-bold">Support the Project</h2>
+          <p className="text-muted-foreground">
+            Help us continue building and improving Findry by supporting the project.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button 
+              variant="outline" 
+              className="w-full sm:w-auto"
+              onClick={() => window.open('https://cash.app/$Instancer', '_blank')}
+            >
+              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="currentColor"/>
+                <path d="M12 6C8.69 6 6 8.69 6 12C6 15.31 8.69 18 12 18C15.31 18 18 15.31 18 12C18 8.69 15.31 6 12 6ZM12 16C9.79 16 8 14.21 8 12C8 9.79 9.79 8 12 8C14.21 8 16 9.79 16 12C16 14.21 14.21 16 12 16Z" fill="currentColor"/>
+              </svg>
+              Cash App: $Instancer
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full sm:w-auto"
+              onClick={() => window.open('mailto:instance.select@gmail.com', '_blank')}
+            >
+              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z" fill="currentColor"/>
+              </svg>
+              instance.select@gmail.com
+            </Button>
+          </div>
+        </div>
+      </div>
     </section>
   );
 };
