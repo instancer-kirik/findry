@@ -36,6 +36,9 @@ import ResourceDetail from './pages/ResourceDetail'
 import BrandDetail from './pages/BrandDetail'
 import EventbriteCallback from './pages/EventbriteCallback'
 import EventbriteOrders from './pages/EventbriteOrders'
+import ResourcerProfile from './pages/ResourcerProfile'
+import Contact from './pages/Contact'
+import About from './pages/About'
 
 import './App.css'
 
@@ -105,6 +108,9 @@ function App() {
             <Route path="/meetings" element={<MeetingScheduler />} />
             <Route path="/profile/:username" element={<ProfilePage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/profile/resources" element={<ResourcerProfile />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Toaster />
