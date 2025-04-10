@@ -81,7 +81,7 @@ const Landing: React.FC = () => {
       <FeatureSection />
       <EcosystemSection />
       
-      {/* Quick Links Section */}
+      {/* Quick Links Section
       <div className="container mx-auto px-4 py-12">
         <h2 className="text-2xl font-bold mb-6 text-center">Explore Findry</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -132,7 +132,7 @@ const Landing: React.FC = () => {
         </div>
       </div>
       
-      {/* Party/Community Call to Action */}
+      {/* Party/Community Call to Action 
       <div className="container mx-auto px-4 py-12 text-center bg-muted/10 rounded-lg">
         <h2 className="text-3xl font-bold mb-6">Ready to Join the Creative Ecosystem?</h2>
         <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
@@ -148,13 +148,13 @@ const Landing: React.FC = () => {
           </Button>
         </div>
       </div>
-      
+       */}
       {/* DivvyQueue Section with Ref for Scrolling */}
       <div ref={divvyQueueRef} className="bg-muted/30 py-16">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-4 text-center">DivvyQueue</h2>
           <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-8">
-            Our digital queue management system ready to streamline your event experience
+            Our multiparty contract system streamlining complex agreements between collaborators
           </p>
           
           <Carousel className="w-full max-w-5xl mx-auto">
@@ -162,28 +162,43 @@ const Landing: React.FC = () => {
               {[
                 {
                   src: "/screenshots/divvyqueue-1.png",
-                  alt: "DivvyQueue Dashboard",
-                  title: "Real-time queue management dashboard"
+                  alt: "Contracts List",
+                  title: "Contracts List"
                 },
                 {
                   src: "/screenshots/divvyqueue-2.png",
-                  alt: "Queue Entry",
-                  title: "Easy sign-up for attendees"
+                  alt: "Contract Editor",
+                  title: "Contract Editor"
                 },
                 {
                   src: "/screenshots/divvyqueue-3.png",
-                  alt: "Admin Controls",
-                  title: "Powerful admin controls for event staff"
+                  alt: "Templates",
+                  title: "Templates"
                 },
                 {
                   src: "/screenshots/divvyqueue-4.png",
                   alt: "Mobile Experience",
-                  title: "Fully responsive mobile experience"
+                  title: "Mobile Experience"
                 },
                 {
                   src: "/screenshots/divvyqueue-5.png",
-                  alt: "Queue Analytics",
-                  title: "Comprehensive queue analytics"
+                  alt: "Activity and progress tracking",
+                  title: "Activity and progress tracking"
+                },
+                {
+                  src: "/screenshots/divvyqueue-6.png",
+                  alt: "Document Editor",
+                  title: "Document Editor"
+                },
+                {
+                  src: "/screenshots/divvyqueue-7.png",
+                  alt: "Ambiguituous tool",
+                  title: "Ambiguituous tool"
+                },
+                {
+                  src: "/screenshots/divvyqueue-8.png",
+                  alt: "Breach Resolution",
+                  title: "Breach Resolution"
                 }
               ].map((screenshot, index) => (
                 <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
@@ -197,6 +212,10 @@ const Landing: React.FC = () => {
                                 src={screenshot.src} 
                                 alt={screenshot.alt}
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                loading="lazy"
+                                decoding="async"
+                                width="640"
+                                height="360"
                               />
                               <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                 <ZoomIn className="text-white h-8 w-8" />
@@ -208,6 +227,7 @@ const Landing: React.FC = () => {
                               src={screenshot.src} 
                               alt={screenshot.alt}
                               className="w-full h-auto object-contain"
+                              loading="eager"
                             />
                           </DialogContent>
                         </Dialog>
@@ -245,12 +265,16 @@ const Landing: React.FC = () => {
                 src="/screenshots/divvyqueue-1.png" 
                 alt="DivvyQueue" 
                 className="rounded-lg object-cover w-full aspect-video"
+                loading="lazy"
+                decoding="async"
+                width="640"
+                height="360"
               />
             </div>
             <div className="md:w-2/3 space-y-4">
               <h3 className="text-2xl font-bold">DivvyQueue</h3>
               <p className="text-muted-foreground">
-                Streamline your event check-ins and manage queues efficiently with our digital queue management system. Perfect for festivals, conferences, and any event with attendee flow management needs.
+                Streamline complex agreements and distribute resources efficiently with our multiparty contract management system. Perfect for creative collaborations, revenue sharing, and any project requiring transparent resource allocation between multiple parties.
               </p>
               <Button variant="outline" className="mt-4">
                 View Screenshots
@@ -278,7 +302,7 @@ const Landing: React.FC = () => {
               },
               {
                 title: "Food Truck",
-                description: "I make recipes.",
+                description: "Mobile food service for events and community gatherings",
                 icon: "🚚",
                 type: "food"
               },
@@ -288,6 +312,13 @@ const Landing: React.FC = () => {
                 icon: "🤖",
                 type: "electronics"
               },
+              {
+                title: "Storage Devices and Servers",
+                description: "External hard drives, SSDs, and NAS systems for project archiving and media storage",
+                icon: "💾",
+                type: "equipment"
+              },
+              
               {
                 title: "Lighting Equipment",
                 description: "Professional lighting for events, performances and installations",
@@ -320,7 +351,7 @@ const Landing: React.FC = () => {
               },
               {
                 title: "Project Materials Fund",
-                description: "Financial support for components for community projects",
+                description: "Financial support for components for endorsed projects",
                 icon: "💰",
                 type: "funding"
               },
@@ -331,11 +362,11 @@ const Landing: React.FC = () => {
                 type: "vehicle"
               }
             ].map((item, index) => (
-              <Card key={index} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
+              <Card key={index} className="hover:shadow-md transition-shadow flex flex-col">
+                <CardContent className="p-6 flex flex-col h-full">
                   <div className="text-4xl mb-4">{item.icon}</div>
                   <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-                  <p className="text-muted-foreground">{item.description}</p>
+                  <p className="text-muted-foreground mb-auto">{item.description}</p>
                   <Button 
                     variant="outline" 
                     className="w-full mt-4"

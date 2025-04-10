@@ -134,7 +134,7 @@ const ResourcerProfile: React.FC = () => {
     }));
   };
   
-  const handleSelectChange = (name: string, value: string) => {
+  const handleSelectChange = (name: string, value: any) => {
     setCurrentResource(prev => ({
       ...prev,
       [name]: value
