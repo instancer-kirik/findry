@@ -12,6 +12,8 @@ export interface EventSlot {
   artistId?: string;
   resource?: ContentItemProps;
   resourceId?: string;
+  venue?: ContentItemProps;
+  venueId?: string;
   status: 'available' | 'reserved' | 'confirmed' | 'canceled' | 'requested';
   slotType: 'performance' | 'setup' | 'breakdown' | 'break' | 'other';
   notes?: string;
@@ -67,4 +69,4 @@ export interface EventFormValues {
   communityId?: string;
   isPublic: boolean;
   slots?: EventSlot[];
-} 
+}

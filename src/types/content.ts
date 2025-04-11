@@ -25,6 +25,9 @@ export interface ContentItemProps {
   multidisciplinary?: boolean;
   styles?: string[];
   disciplines?: string[];
+  email?: string;     // Added for contact information
+  link?: string;      // Added for external links
+  isRequestOnly?: boolean; // Added for requested resources
 }
 
 export interface ContentOwnershipProps {

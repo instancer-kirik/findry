@@ -19,7 +19,9 @@ import { Switch } from '@/components/ui/switch';
 import { generateUniqueId } from '@/utils/unique-id';
 import EventComponentGroups from '@/components/events/EventComponentGroups';
 import EventSharingDialog from '@/components/events/EventSharingDialog';
-import EventSlotManager, { EventSlot } from '@/components/events/EventSlotManager';
+import EventSlotManager from '@/components/events/EventSlotManager';
+import { EventSlot } from '@/types/event';
+import { ContentItemProps } from '@/types/content';
 
 interface EventContentItem {
   id: string;

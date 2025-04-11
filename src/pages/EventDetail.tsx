@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import EventSharingDialog from '@/components/events/EventSharingDialog';
-import { EventSlot } from '@/components/events/EventSlotManager';
+import { EventSlot } from '@/types/event';
 
 interface EventProps {
   id: string;

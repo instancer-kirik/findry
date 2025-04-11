@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2, Plus, Calendar, Clock, Search, User, Wrench, X, MapPin, UserPlus, Landmark, SquarePlus, Mail, Link } from 'lucide-react';
@@ -27,7 +26,7 @@ import {
   DialogFooter
 } from '@/components/ui/dialog';
 import { toast } from "sonner";
-import { ContentItemProps } from '@/components/marketplace/ContentCard';
+import { ContentItemProps } from '@/types/content';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { EventSlot } from '@/types/event';
@@ -35,7 +34,6 @@ import { EventSlot } from '@/types/event';
 // Extend ContentItemProps to include isNew flag
 interface ExtendedContentItemProps extends ContentItemProps {
   isNew?: boolean;
-  isRequestOnly?: boolean;
 }
 
 export interface EventSlotManagerProps {
