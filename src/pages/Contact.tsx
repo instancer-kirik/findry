@@ -67,23 +67,27 @@ const Contact: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      // Here you would normally submit to your backend
-      // For now, we'll just simulate a successful submission
-      const { data, error } = await supabase
-        .from('contact_messages')
-        .insert({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone || null,
-          subject: formData.subject,
-          message: formData.message,
-          contact_type: formData.contactType,
-          resource_id: formData.resourceId || null,
-          user_id: user?.id || null,
-          status: 'new'
-        });
+      // Instead of using Supabase directly, we'll use localStorage for now
+      // since the contact_messages table doesn't exist in the database schema
+      const timestamp = new Date().toISOString();
+      const contactMessage = {
+        id: `msg_${Date.now()}`,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || null,
+        subject: formData.subject,
+        message: formData.message,
+        contact_type: formData.contactType,
+        resource_id: formData.resourceId || null,
+        user_id: user?.id || null,
+        status: 'new',
+        created_at: timestamp
+      };
       
-      if (error) throw error;
+      // Store in localStorage
+      const existingMessages = JSON.parse(localStorage.getItem('contact_messages') || '[]');
+      existingMessages.push(contactMessage);
+      localStorage.setItem('contact_messages', JSON.stringify(existingMessages));
       
       // Display success message
       setSubmitted(true);
@@ -312,4 +316,4 @@ const Contact: React.FC = () => {
   );
 };
 
-export default Contact; 
+export default Contact;

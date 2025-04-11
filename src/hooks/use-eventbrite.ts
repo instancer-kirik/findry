@@ -9,6 +9,11 @@ interface EventbriteToken {
   refresh_token: string;
 }
 
+interface EventbriteMetadata {
+  organization_id?: string;
+  [key: string]: any;
+}
+
 export const useEventbrite = (userId?: string) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [eventbriteData, setEventbriteData] = useState<{
@@ -32,35 +37,46 @@ export const useEventbrite = (userId?: string) => {
         }
         
         // If we have Supabase access, try to get data from there
-        const { data, error } = await supabase
-          .from('user_integrations')
-          .select('*')
-          .eq('user_id', userId)
-          .eq('integration_type', 'eventbrite')
-          .eq('is_active', true)
-          .single();
+        // Since the table might not exist in the database schema yet,
+        // we'll use localStorage first as a fallback
+        try {
+          const { data, error } = await supabase
+            .from('user_integrations')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('integration_type', 'eventbrite')
+            .eq('is_active', true)
+            .single();
 
-        if (error) {
-          console.error('Error fetching Eventbrite integration:', error);
-          setIsAuthenticated(false);
-          return;
-        }
+          if (error) {
+            console.error('Error fetching Eventbrite integration:', error);
+            setIsAuthenticated(false);
+            return;
+          }
 
-        if (data) {
-          setEventbriteData({
-            access_token: data.access_token,
-            refresh_token: data.refresh_token,
-            organization_id: data.metadata?.organization_id
-          });
-          setIsAuthenticated(true);
-          
-          // Save to localStorage as a fallback
-          localStorage.setItem(`eventbrite_integration_${userId}`, JSON.stringify({
-            access_token: data.access_token,
-            refresh_token: data.refresh_token,
-            organization_id: data.metadata?.organization_id
-          }));
-        } else {
+          if (data) {
+            // Safely access metadata properties
+            const metadata = data.metadata as EventbriteMetadata || {};
+            const organization_id = metadata.organization_id || null;
+            
+            setEventbriteData({
+              access_token: data.access_token,
+              refresh_token: data.refresh_token,
+              organization_id: organization_id
+            });
+            setIsAuthenticated(true);
+            
+            // Save to localStorage as a fallback
+            localStorage.setItem(`eventbrite_integration_${userId}`, JSON.stringify({
+              access_token: data.access_token,
+              refresh_token: data.refresh_token,
+              organization_id: organization_id
+            }));
+          } else {
+            setIsAuthenticated(false);
+          }
+        } catch (dbError) {
+          console.error('Database error:', dbError);
           setIsAuthenticated(false);
         }
       } catch (error) {
@@ -72,7 +88,7 @@ export const useEventbrite = (userId?: string) => {
     checkEventbriteAuth();
   }, [userId]);
 
-  const getAuthUrl = async (userId: string): Promise<string> => {
+  const getAuthUrl = (userId: string): string => {
     try {
       // Generate a random state to verify the callback
       const state = Math.random().toString(36).substring(2, 15);

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Trash2, Plus, Calendar, Clock, ArrowUpDown, Save } from 'lucide-react';
+import { Trash2, Plus, Calendar, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Popover,
@@ -22,7 +23,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter
 } from '@/components/ui/dialog';
 import { toast } from "sonner";
@@ -60,17 +60,8 @@ const TimePicker: React.FC<{
   className
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [hours, setHours] = useState<string>('00');
-  const [minutes, setMinutes] = useState<string>('00');
-
-  // Parse value into hours and minutes
-  useEffect(() => {
-    if (value) {
-      const [hour, minute] = value.split(':');
-      setHours(hour || '00');
-      setMinutes(minute || '00');
-    }
-  }, [value]);
+  const [hours, setHours] = useState<string>(value ? value.split(':')[0] : '00');
+  const [minutes, setMinutes] = useState<string>(value ? value.split(':')[1] : '00');
 
   // Generate hours and minutes options
   const hoursOptions = Array.from({ length: 24 }, (_, i) => 
@@ -154,117 +145,6 @@ const TimePicker: React.FC<{
   );
 };
 
-// Saved slot templates dialog
-const SavedTemplatesDialog: React.FC<{
-  onApplyTemplate: (slots: EventSlot[]) => void;
-}> = ({ onApplyTemplate }) => {
-  const [templates, setTemplates] = useState<{name: string, slots: EventSlot[]}[]>([]);
-  const [newTemplateName, setNewTemplateName] = useState("");
-  
-  useEffect(() => {
-    // Load templates from localStorage
-    const savedTemplates = localStorage.getItem('event-slot-templates');
-    if (savedTemplates) {
-      try {
-        setTemplates(JSON.parse(savedTemplates));
-      } catch (e) {
-        console.error("Failed to parse saved templates:", e);
-      }
-    }
-  }, []);
-  
-  const handleSaveTemplate = (name: string, slots: EventSlot[]) => {
-    const newTemplates = [...templates, {name, slots}];
-    setTemplates(newTemplates);
-    localStorage.setItem('event-slot-templates', JSON.stringify(newTemplates));
-    setNewTemplateName("");
-    toast.success("Template saved successfully");
-  };
-  
-  const handleDeleteTemplate = (index: number) => {
-    const newTemplates = templates.filter((_, i) => i !== index);
-    setTemplates(newTemplates);
-    localStorage.setItem('event-slot-templates', JSON.stringify(newTemplates));
-    toast.success("Template deleted");
-  };
-  
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="h-7 px-2 ml-2">
-          <Save className="h-3.5 w-3.5 mr-1" />
-          Templates
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Slot Templates</DialogTitle>
-        </DialogHeader>
-        
-        <div className="max-h-[300px] overflow-y-auto my-4">
-          {templates.length === 0 ? (
-            <p className="text-center text-muted-foreground py-4">No saved templates</p>
-          ) : (
-            <div className="space-y-2">
-              {templates.map((template, index) => (
-                <div key={index} className="flex items-center justify-between border rounded-md p-3">
-                  <div>
-                    <h4 className="font-medium">{template.name}</h4>
-                    <p className="text-xs text-muted-foreground">
-                      {template.slots.length} slot{template.slots.length !== 1 ? 's' : ''}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => onApplyTemplate(template.slots)}
-                    >
-                      Apply
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="destructive"
-                      onClick={() => handleDeleteTemplate(index)}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        
-        <div className="flex items-end gap-2">
-          <div className="flex-1">
-            <Label htmlFor="template-name">Save current slots as template</Label>
-            <Input 
-              id="template-name" 
-              placeholder="Template name" 
-              value={newTemplateName}
-              onChange={(e) => setNewTemplateName(e.target.value)}
-            />
-          </div>
-          <Button 
-            onClick={() => {
-              if (!newTemplateName.trim()) {
-                toast.error("Please enter a template name");
-                return;
-              }
-              // This will be handled by the parent component
-              onApplyTemplate([]);
-            }}
-            disabled={!newTemplateName.trim()}
-          >
-            Save
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
 const SlotTypeSelector: React.FC<{
   value: string | undefined;
   onChange: (value: string) => void;
@@ -302,7 +182,7 @@ const EventSlotManager: React.FC<EventSlotManagerProps> = ({
   const [editingSlot, setEditingSlot] = useState<EventSlot | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     setLocalSlots(slots);
   }, [slots]);
 
@@ -374,35 +254,6 @@ const EventSlotManager: React.FC<EventSlotManagerProps> = ({
     toast.success("Slots sorted by start time");
   };
 
-  const handleSaveTemplate = (name: string) => {
-    const templates = JSON.parse(localStorage.getItem('event-slot-templates') || '[]');
-    templates.push({ name, slots: localSlots });
-    localStorage.setItem('event-slot-templates', JSON.stringify(templates));
-    toast.success("Template saved successfully");
-  };
-  
-  const handleApplyTemplate = (templateSlots: EventSlot[]) => {
-    // If the array is empty, this is a call to save the current slots
-    if (templateSlots.length === 0) {
-      // This will be handled by the template dialog's save button
-      const name = document.getElementById('template-name') as HTMLInputElement;
-      if (name && name.value) {
-        handleSaveTemplate(name.value);
-      }
-      return;
-    }
-    
-    // Otherwise, apply the template
-    const newSlots = templateSlots.map(slot => ({
-      ...slot,
-      id: `slot_${Date.now()}_${Math.random().toString(36).substr(2, 9)}` // Ensure unique IDs
-    }));
-    
-    setLocalSlots(newSlots);
-    onSlotsChange(newSlots);
-    toast.success("Template applied");
-  };
-
   const getSlotTypeBadgeStyles = (type?: string) => {
     switch (type) {
       case 'performance':
@@ -445,12 +296,10 @@ const EventSlotManager: React.FC<EventSlotManagerProps> = ({
                 className="h-7 px-2 ml-2"
                 onClick={handleSortSlots}
               >
-                <ArrowUpDown className="h-3.5 w-3.5 mr-1" />
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>
                 Sort
               </Button>
             )}
-            
-            <SavedTemplatesDialog onApplyTemplate={handleApplyTemplate} />
           </div>
         )}
       </div>
