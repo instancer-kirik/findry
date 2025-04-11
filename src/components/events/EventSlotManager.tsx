@@ -1,7 +1,6 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Trash2, Plus, Calendar, Clock } from 'lucide-react';
+import { Edit, Trash2, Plus, Calendar, Clock, Search, User, Wrench, X, MapPin, UserPlus, Landmark, SquarePlus, Mail, Link } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Popover,
@@ -17,6 +16,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { 
   Dialog,
@@ -26,25 +26,39 @@ import {
   DialogFooter
 } from '@/components/ui/dialog';
 import { toast } from "sonner";
+import { ContentItemProps } from '@/components/marketplace/ContentCard';
+import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
+
+// Extend ContentItemProps to include isNew flag
+interface ExtendedContentItemProps extends ContentItemProps {
+  isNew?: boolean;
+}
 
 export interface EventSlot {
   id: string;
+  title: string;
+  description: string;
   startTime: string;
   endTime: string;
-  title?: string;
-  description?: string;
-  isBooked?: boolean;
-  isPending?: boolean;
-  type?: 'performance' | 'setup' | 'breakdown' | 'break' | 'other';
+  artist: ContentItemProps | null;
+  resource: ContentItemProps | null;
+  venue: ContentItemProps | null;
+  status: 'available' | 'reserved' | 'confirmed' | 'canceled' | 'unbooked';
+  isSearching?: boolean;
+  searchQuery?: string;
 }
 
 export interface EventSlotManagerProps {
   slots: EventSlot[];
-  onSlotsChange: (newSlots: EventSlot[]) => void;
+  onSlotsChange: (slots: EventSlot[]) => void;
   eventStartTime: string;
   eventEndTime: string;
   eventDate: Date;
   readOnly?: boolean;
+  availableArtists: ContentItemProps[];
+  availableResources: ContentItemProps[];
+  availableVenues: ContentItemProps[];
 }
 
 // Internal time picker component definition
@@ -170,306 +184,491 @@ const SlotTypeSelector: React.FC<{
   );
 };
 
-const EventSlotManager: React.FC<EventSlotManagerProps> = ({
+export function EventSlotManager({
   slots,
   onSlotsChange,
   eventStartTime,
   eventEndTime,
   eventDate,
-  readOnly = false
-}) => {
+  availableArtists,
+  availableResources,
+  availableVenues
+}: EventSlotManagerProps) {
   const [localSlots, setLocalSlots] = useState<EventSlot[]>(slots);
   const [editingSlot, setEditingSlot] = useState<EventSlot | null>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedObject, setSelectedObject] = useState<{
+    type: 'artist' | 'resource' | 'venue';
+    item: ContentItemProps | null;
+  }>({
+    type: 'artist',
+    item: null
+  });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<ContentItemProps[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
+  const [newItem, setNewItem] = useState({
+    name: '',
+    email: '',
+    link: '',
+    location: '',
+    locationSource: '',
+    eventLocation: ''
+  });
 
-  React.useEffect(() => {
+  useEffect(() => {
     setLocalSlots(slots);
   }, [slots]);
 
+  useEffect(() => {
+    onSlotsChange(localSlots);
+  }, [localSlots, onSlotsChange]);
+
+  const inferTitle = (slot: EventSlot) => {
+    if (slot.artist) return `${slot.artist.name}'s Performance`;
+    if (slot.resource) return `${slot.resource.name} Setup`;
+    if (slot.venue) return `Venue: ${slot.venue.name}`;
+    return 'Unbooked Slot';
+  };
+
   const handleAddSlot = () => {
-    const newId = `slot_${Date.now()}`;
-    const defaultStartTime = eventStartTime;
-    const defaultEndTime = eventEndTime;
-    
     const newSlot: EventSlot = {
-      id: newId,
-      startTime: defaultStartTime,
-      endTime: defaultEndTime,
-      isBooked: false,
-      isPending: false,
-      type: 'other'
+      id: Date.now().toString(),
+      title: '',
+      description: '',
+      startTime: eventStartTime,
+      endTime: eventEndTime,
+      artist: null,
+      resource: null,
+      venue: null,
+      status: 'unbooked'
     };
-    
-    const updatedSlots = [...localSlots, newSlot];
-    setLocalSlots(updatedSlots);
-    onSlotsChange(updatedSlots);
+    setLocalSlots([...localSlots, newSlot]);
+    setEditingSlot(newSlot);
   };
 
-  const handleRemoveSlot = (slotId: string) => {
-    const updatedSlots = localSlots.filter(slot => slot.id !== slotId);
-    setLocalSlots(updatedSlots);
-    onSlotsChange(updatedSlots);
-  };
-
-  const handleTimeChange = (slotId: string, field: 'startTime' | 'endTime', value: string) => {
-    const updatedSlots = localSlots.map(slot => {
-      if (slot.id === slotId) {
-        return { ...slot, [field]: value };
-      }
-      return slot;
-    });
-    
-    setLocalSlots(updatedSlots);
-    onSlotsChange(updatedSlots);
+  const handleRemoveSlot = (id: string) => {
+    setLocalSlots(localSlots.filter(slot => slot.id !== id));
   };
 
   const handleEditSlot = (slot: EventSlot) => {
-    setEditingSlot({...slot});
-    setIsEditDialogOpen(true);
-  };
-
-  const handleSaveSlot = () => {
-    if (!editingSlot) return;
-    
-    const updatedSlots = localSlots.map(slot => 
-      slot.id === editingSlot.id ? editingSlot : slot
-    );
-    
-    setLocalSlots(updatedSlots);
-    onSlotsChange(updatedSlots);
-    setIsEditDialogOpen(false);
-    setEditingSlot(null);
-  };
-
-  const handleSortSlots = () => {
-    const sorted = [...localSlots].sort((a, b) => {
-      // Convert time strings to comparable format
-      const aTime = a.startTime.replace(':', '');
-      const bTime = b.startTime.replace(':', '');
-      return parseInt(aTime) - parseInt(bTime);
+    setEditingSlot(slot);
+    setSelectedObject({
+      type: 'artist',
+      item: slot.artist
     });
-    
-    setLocalSlots(sorted);
-    onSlotsChange(sorted);
-    toast.success("Slots sorted by start time");
   };
 
-  const getSlotTypeBadgeStyles = (type?: string) => {
-    switch (type) {
-      case 'performance':
-        return "bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300";
-      case 'setup':
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300";
-      case 'breakdown':
-        return "bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300";
-      case 'break':
-        return "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300";
+  const handleSaveSlot = (updatedSlot: EventSlot) => {
+    const slotWithTitle = {
+      ...updatedSlot,
+      title: inferTitle(updatedSlot)
+    };
+    setLocalSlots(localSlots.map(slot => 
+      slot.id === updatedSlot.id ? slotWithTitle : slot
+    ));
+    setEditingSlot(null);
+    setSelectedObject({
+      type: 'artist',
+      item: null
+    });
+  };
+
+  const handleSearch = async (type: 'artist' | 'resource' | 'venue') => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const { data, error } = await supabase
+        .from(type === 'artist' ? 'artists' : type === 'resource' ? 'resources' : 'venues')
+        .select('*')
+        .ilike('name', `%${searchQuery}%`)
+        .limit(10);
+
+      if (error) throw error;
+      setSearchResults(data || []);
+    } catch (error) {
+      console.error('Error searching:', error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleObjectSelect = (type: 'artist' | 'resource' | 'venue', item: ContentItemProps) => {
+    setSelectedObject({ type, item });
+    if (editingSlot) {
+      const updatedSlot = { ...editingSlot };
+      if (type === 'artist') {
+        updatedSlot.artist = item;
+        updatedSlot.status = 'reserved';
+      } else if (type === 'resource') {
+        updatedSlot.resource = item;
+      } else if (type === 'venue') {
+        updatedSlot.venue = item;
+      }
+      setEditingSlot(updatedSlot);
+    }
+  };
+
+  const handleCreateNewItem = async () => {
+    if (!newItem.name.trim()) {
+      toast.error('Please enter a name');
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from(selectedObject.type === 'artist' ? 'artists' : selectedObject.type === 'resource' ? 'resources' : 'venues')
+        .insert([{
+          name: newItem.name,
+          email: newItem.email,
+          link: newItem.link,
+          location: newItem.location
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      if (editingSlot) {
+        const updatedSlot = { ...editingSlot };
+        if (selectedObject.type === 'artist') {
+          updatedSlot.artist = data;
+          updatedSlot.status = 'reserved';
+        } else if (selectedObject.type === 'resource') {
+          updatedSlot.resource = data;
+        } else if (selectedObject.type === 'venue') {
+          updatedSlot.venue = data;
+        }
+        handleSaveSlot(updatedSlot);
+      }
+
+      setIsCreatingNew(false);
+      setNewItem({
+        name: '',
+        email: '',
+        link: '',
+        location: '',
+        locationSource: '',
+        eventLocation: ''
+      });
+      toast.success(`${selectedObject.type} created successfully`);
+    } catch (error) {
+      console.error('Error creating item:', error);
+      toast.error('Failed to create item');
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'unbooked':
+        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Unbooked</Badge>;
+      case 'reserved':
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Reserved</Badge>;
+      case 'confirmed':
+        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Confirmed</Badge>;
+      case 'canceled':
+        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Canceled</Badge>;
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300";
+        return <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">Available</Badge>;
     }
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium flex items-center gap-1">
-          <Calendar className="h-4 w-4" />
-          Time Slots
-        </h3>
-        
-        {!readOnly && (
-          <div className="flex">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="h-7 px-2"
-              onClick={handleAddSlot}
-            >
-              <Plus className="h-3.5 w-3.5 mr-1" />
-              Add Slot
-            </Button>
-            
-            {localSlots.length > 1 && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 px-2 ml-2"
-                onClick={handleSortSlots}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>
-                Sort
-              </Button>
-            )}
-          </div>
-        )}
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-medium">Time Slots</h3>
+        <Button onClick={handleAddSlot}>
+          <Plus className="w-4 h-4 mr-2" />
+          Add Slot
+        </Button>
       </div>
-      
-      {localSlots.length === 0 ? (
-        <div className="text-sm text-muted-foreground p-4 text-center border rounded-md">
-          No time slots defined
-        </div>
-      ) : (
-        <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-          {localSlots.map(slot => (
-            <div 
-              key={slot.id} 
-              className={cn(
-                "p-3 border rounded-md",
-                slot.isBooked ? "border-amber-300 bg-amber-50 dark:bg-amber-950/20" : "",
-                slot.isPending ? "border-blue-300 bg-blue-50 dark:bg-blue-950/20" : "",
-                "hover:border-gray-300 transition-colors"
-              )}
-            >
-              <div className="flex items-center justify-between mb-2">
+
+      <div className="space-y-4">
+        {localSlots.map(slot => (
+          <div key={slot.id} className="border rounded-lg p-4">
+            <div className="flex justify-between items-start">
+              <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  {slot.type && (
-                    <Badge className={cn("text-xs", getSlotTypeBadgeStyles(slot.type))}>
-                      {slot.type.charAt(0).toUpperCase() + slot.type.slice(1)}
-                    </Badge>
-                  )}
-                  {slot.title && <span className="font-medium">{slot.title}</span>}
+                  <h4 className="font-medium">{inferTitle(slot)}</h4>
+                  {getStatusBadge(slot.status)}
                 </div>
-                
-                {!readOnly && !slot.isBooked && !slot.isPending && (
-                  <div className="flex items-center gap-1">
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      className="h-7 w-7" 
-                      onClick={() => handleEditSlot(slot)}
-                    >
-                      <span className="sr-only">Edit slot</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg>
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      className="h-7 w-7" 
-                      onClick={() => handleRemoveSlot(slot.id)}
-                    >
-                      <span className="sr-only">Remove slot</span>
-                      <Trash2 className="h-4 w-4 text-muted-foreground" />
-                    </Button>
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <Clock className="w-4 h-4" />
+                  {slot.startTime} - {slot.endTime}
+                </div>
+                {slot.description && (
+                  <p className="text-sm text-gray-500">{slot.description}</p>
+                )}
+                <div className="flex flex-wrap gap-2">
+                  {slot.artist && (
+                    <div className="flex items-center gap-1 text-sm">
+                      <User className="w-4 h-4 text-gray-500" />
+                      <span>{slot.artist.name}</span>
+                      {slot.artist.email && (
+                        <a href={`mailto:${slot.artist.email}`} className="text-blue-500 hover:underline">
+                          <Mail className="w-4 h-4" />
+                        </a>
+                      )}
+                      {slot.artist.link && (
+                        <a href={slot.artist.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                          <Link className="w-4 h-4" />
+                        </a>
+                      )}
+                    </div>
+                  )}
+                  {slot.venue && (
+                    <div className="flex items-center gap-1 text-sm">
+                      <MapPin className="w-4 h-4 text-gray-500" />
+                      <span>{slot.venue.name}</span>
+                      {slot.venue.email && (
+                        <a href={`mailto:${slot.venue.email}`} className="text-blue-500 hover:underline">
+                          <Mail className="w-4 h-4" />
+                        </a>
+                      )}
+                      {slot.venue.link && (
+                        <a href={slot.venue.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                          <Link className="w-4 h-4" />
+                        </a>
+                      )}
+                    </div>
+                  )}
+                  {slot.resource && (
+                    <div className="flex items-center gap-1 text-sm">
+                      <Wrench className="w-4 h-4 text-gray-500" />
+                      <span>{slot.resource.name}</span>
+                      {slot.resource.email && (
+                        <a href={`mailto:${slot.resource.email}`} className="text-blue-500 hover:underline">
+                          <Mail className="w-4 h-4" />
+                        </a>
+                      )}
+                      {slot.resource.link && (
+                        <a href={slot.resource.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                          <Link className="w-4 h-4" />
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleEditSlot(slot)}
+                >
+                  <Edit className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleRemoveSlot(slot.id)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {editingSlot && (
+        <Dialog open={!!editingSlot} onOpenChange={() => setEditingSlot(null)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit Slot</DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <Label>Select Type</Label>
+                <Select
+                  value={selectedObject.type}
+                  onValueChange={(value) => {
+                    setSelectedObject({ ...selectedObject, type: value as 'artist' | 'resource' | 'venue' });
+                    setSearchQuery('');
+                    setSearchResults([]);
+                    setIsCreatingNew(false);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select object type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="artist">Artist</SelectItem>
+                    <SelectItem value="resource">Resource</SelectItem>
+                    <SelectItem value="venue">Venue</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    className="pl-10"
+                    placeholder={`Add or search for ${selectedObject.type}s...`}
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      handleSearch(selectedObject.type);
+                    }}
+                  />
+                </div>
+
+                {isCreatingNew ? (
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Name</Label>
+                      <Input
+                        placeholder="Enter name"
+                        value={newItem.name}
+                        onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>Location</Label>
+                      <Input
+                        placeholder="Enter location"
+                        value={newItem.location}
+                        onChange={(e) => setNewItem({ ...newItem, location: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>Location Source (optional)</Label>
+                      <Input
+                        placeholder="e.g. Google Maps, Website, etc."
+                        value={newItem.locationSource}
+                        onChange={(e) => setNewItem({ ...newItem, locationSource: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>Event Location (optional)</Label>
+                      <Input
+                        placeholder="e.g. Second floor, Room 201, etc."
+                        value={newItem.eventLocation}
+                        onChange={(e) => setNewItem({ ...newItem, eventLocation: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>Email (optional)</Label>
+                      <Input
+                        placeholder="Enter email"
+                        value={newItem.email}
+                        onChange={(e) => setNewItem({ ...newItem, email: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>Link (optional)</Label>
+                      <Input
+                        placeholder="Enter link"
+                        value={newItem.link}
+                        onChange={(e) => setNewItem({ ...newItem, link: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-4 max-h-60 overflow-y-auto">
+                    {searchQuery && (
+                      <div
+                        className="border rounded-lg p-4 cursor-pointer border-dashed hover:border-primary"
+                        onClick={() => {
+                          setNewItem({ ...newItem, name: searchQuery });
+                          setIsCreatingNew(true);
+                        }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Plus className="w-4 h-4 text-primary" />
+                          <h4 className="font-medium">Create "{searchQuery}"</h4>
+                        </div>
+                        <p className="text-sm text-gray-500 mt-1">Add as new {selectedObject.type}</p>
+                      </div>
+                    )}
+                    {searchResults.map(item => (
+                      <div
+                        key={item.id}
+                        className={`border rounded-lg p-4 cursor-pointer ${
+                          selectedObject.item?.id === item.id ? 'border-primary' : ''
+                        }`}
+                        onClick={() => handleObjectSelect(selectedObject.type, item)}
+                      >
+                        <h4 className="font-medium">{item.name}</h4>
+                        <p className="text-sm text-gray-500">{item.location}</p>
+                      </div>
+                    ))}
                   </div>
                 )}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Start Time</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start text-left font-normal"
+                        >
+                          <Clock className="mr-2 h-4 w-4" />
+                          {editingSlot.startTime}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Input
+                          type="time"
+                          value={editingSlot.startTime}
+                          onChange={(e) => setEditingSlot({ ...editingSlot, startTime: e.target.value })}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div>
+                    <Label>End Time</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start text-left font-normal"
+                        >
+                          <Clock className="mr-2 h-4 w-4" />
+                          {editingSlot.endTime}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Input
+                          type="time"
+                          value={editingSlot.endTime}
+                          onChange={(e) => setEditingSlot({ ...editingSlot, endTime: e.target.value })}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
               </div>
-              
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="text-xs text-muted-foreground">Start</label>
-                  <TimePicker
-                    value={slot.startTime}
-                    onChange={(value) => handleTimeChange(slot.id, 'startTime', value)}
-                    disabled={readOnly || slot.isBooked || slot.isPending}
-                    className="h-8"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-muted-foreground">End</label>
-                  <TimePicker
-                    value={slot.endTime}
-                    onChange={(value) => handleTimeChange(slot.id, 'endTime', value)}
-                    disabled={readOnly || slot.isBooked || slot.isPending}
-                    className="h-8"
-                  />
-                </div>
-              </div>
-              
-              {slot.description && (
-                <div className="mt-2">
-                  <p className="text-xs text-muted-foreground">{slot.description}</p>
-                </div>
-              )}
-              
-              {slot.isBooked && (
-                <div className="mt-2">
-                  <Badge className="text-xs font-medium px-2 py-1 bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">
-                    Booked
-                  </Badge>
-                </div>
-              )}
-              
-              {slot.isPending && (
-                <div className="mt-2">
-                  <Badge className="text-xs font-medium px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
-                    Pending
-                  </Badge>
-                </div>
-              )}
             </div>
-          ))}
-        </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEditingSlot(null)}>
+                Cancel
+              </Button>
+              {isCreatingNew ? (
+                <Button onClick={handleCreateNewItem}>
+                  Create & Save
+                </Button>
+              ) : (
+                <Button onClick={() => handleSaveSlot(editingSlot)}>
+                  Save
+                </Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
-      
-      {/* Edit Slot Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Edit Time Slot</DialogTitle>
-          </DialogHeader>
-          
-          {editingSlot && (
-            <div className="space-y-4 py-2">
-              <div>
-                <Label htmlFor="slot-title">Title</Label>
-                <Input 
-                  id="slot-title" 
-                  value={editingSlot.title || ''} 
-                  onChange={(e) => setEditingSlot({...editingSlot, title: e.target.value})}
-                  placeholder="Slot title"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="slot-type">Type</Label>
-                <SlotTypeSelector 
-                  value={editingSlot.type}
-                  onChange={(value) => setEditingSlot({...editingSlot, type: value as any})}
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label htmlFor="slot-start-time">Start Time</Label>
-                  <TimePicker
-                    value={editingSlot.startTime}
-                    onChange={(value) => setEditingSlot({...editingSlot, startTime: value})}
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="slot-end-time">End Time</Label>
-                  <TimePicker
-                    value={editingSlot.endTime}
-                    onChange={(value) => setEditingSlot({...editingSlot, endTime: value})}
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <Label htmlFor="slot-description">Description</Label>
-                <Input
-                  id="slot-description"
-                  value={editingSlot.description || ''}
-                  onChange={(e) => setEditingSlot({...editingSlot, description: e.target.value})}
-                  placeholder="Details about this time slot"
-                />
-              </div>
-            </div>
-          )}
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSaveSlot}>
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
-};
+}
 
 export default EventSlotManager;

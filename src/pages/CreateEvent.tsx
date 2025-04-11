@@ -58,6 +58,15 @@ const CreateEvent = () => {
   const [registrationRequired, setRegistrationRequired] = useState(false);
   const [loading, setLoading] = useState(false);
   const [eventSlots, setEventSlots] = useState<EventSlot[]>([]);
+  const [selectedObjects, setSelectedObjects] = useState<{
+    artists: ContentItemProps[];
+    resources: ContentItemProps[];
+    venues: ContentItemProps[];
+  }>({
+    artists: [],
+    resources: [],
+    venues: []
+  });
 
   const [artists, setArtists] = useState<EventContentItem[]>([
     {
@@ -700,6 +709,18 @@ const CreateEvent = () => {
               </div>
             </div>
           </section>
+          <div className="mt-6 border rounded-lg p-4 bg-background">
+            <EventSlotManager 
+              slots={eventSlots}
+              onSlotsChange={setEventSlots}
+              eventStartTime={startTime || "09:00"}
+              eventEndTime={endTime || "17:00"}
+              eventDate={startDate || new Date()}
+              availableArtists={selectedObjects.artists}
+              availableResources={selectedObjects.resources}
+              availableVenues={selectedObjects.venues}
+            />
+          </div>
           
           <section className="space-y-4">
             <div className="flex justify-between items-center">
@@ -838,16 +859,7 @@ const CreateEvent = () => {
             </Tabs>
           </section>
           
-          <div className="mt-6 border rounded-lg p-4 bg-background">
-            <EventSlotManager 
-              slots={eventSlots}
-              onSlotsChange={setEventSlots}
-              eventStartTime={startTime || "09:00"}
-              eventEndTime={endTime || "17:00"}
-              eventDate={startDate || new Date()}
-            />
-          </div>
-          
+         
           <div className="flex justify-end space-x-4">
             <Button type="button" variant="outline" onClick={() => navigate('/events')}>
               Cancel
