@@ -1,129 +1,125 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from "@/hooks/use-auth";
 import { useEventbrite } from '@/hooks/use-eventbrite';
-import { toast } from 'sonner';
+import { ExternalLink } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
-export const EventbriteIntegration = () => {
-  const [isImporting, setIsImporting] = useState(false);
+const EventbriteIntegration: React.FC = () => {
+  const { user } = useAuth();
   const { 
-    useHasIntegrated, 
-    useDisconnectEventbrite, 
-    useImportEvents 
-  } = useEventbrite();
-  
-  // Use the hooks
-  const { data: isIntegrated, isLoading: isIntegratedLoading } = useHasIntegrated();
-  const disconnectMutation = useDisconnectEventbrite();
-  const importEventsMutation = useImportEvents();
+    isAuthenticated, 
+    getAuthUrl, 
+    disconnectEventbrite 
+  } = useEventbrite(user?.id);
+  const [authenticating, setAuthenticating] = useState(false);
+  const { toast } = useToast();
 
-  // Create real Eventbrite OAuth URL
-  const handleConnect = () => {
-    // In a real app, you would redirect to the Eventbrite OAuth page
-    const clientId = import.meta.env.VITE_EVENTBRITE_CLIENT_ID || 'mock-client-id';
-    const redirectUri = `${window.location.origin}/eventbrite-callback`;
-    
-    // Redirect to authorization page
-    window.location.href = `https://www.eventbriteapi.com/v3/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`;
+  const handleConnect = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to connect your Eventbrite account"
+      });
+      return;
+    }
+
+    try {
+      setAuthenticating(true);
+      const authUrl = await getAuthUrl(user.id);
+      if (authUrl) {
+        window.location.href = authUrl;
+      } else {
+        throw new Error("Could not generate Eventbrite authentication URL");
+      }
+    } catch (error) {
+      console.error("Error connecting to Eventbrite:", error);
+      toast({
+        title: "Connection Error",
+        description: "Failed to connect to Eventbrite. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setAuthenticating(false);
+    }
   };
 
   const handleDisconnect = async () => {
+    if (!user) return;
+    
     try {
-      await disconnectMutation.mutateAsync();
+      await disconnectEventbrite(user.id);
+      toast({
+        title: "Success",
+        description: "Eventbrite integration disconnected successfully"
+      });
     } catch (error) {
-      console.error('Error disconnecting from Eventbrite:', error);
-      toast.error('Failed to disconnect from Eventbrite');
+      console.error("Error disconnecting Eventbrite:", error);
+      toast({
+        title: "Error",
+        description: "Failed to disconnect Eventbrite integration",
+        variant: "destructive"
+      });
     }
   };
-
-  const handleImportEvents = async () => {
-    try {
-      setIsImporting(true);
-      await importEventsMutation.mutateAsync();
-      toast.success('Events imported successfully!');
-    } catch (error) {
-      console.error('Error importing events:', error);
-      toast.error('Failed to import events from Eventbrite');
-    } finally {
-      setIsImporting(false);
-    }
-  };
-
-  if (isIntegratedLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Eventbrite Integration</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex justify-center py-6">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Eventbrite Integration</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {isIntegrated ? (
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Your account is connected to Eventbrite. You can import your events or disconnect your account.
-            </p>
-            
-            <Tabs defaultValue="import">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="import">Import Events</TabsTrigger>
-                <TabsTrigger value="disconnect">Disconnect</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="import" className="space-y-4 pt-4">
-                <p className="text-sm">
-                  Import your events from Eventbrite to manage them within our platform.
-                </p>
-                <Button 
-                  onClick={handleImportEvents} 
-                  disabled={isImporting || importEventsMutation.isPending}
-                  className="w-full"
-                >
-                  {isImporting || importEventsMutation.isPending ? 'Importing...' : 'Import Events'}
-                </Button>
-              </TabsContent>
-              
-              <TabsContent value="disconnect" className="space-y-4 pt-4">
-                <p className="text-sm">
-                  Disconnecting will remove access to your Eventbrite account from our platform.
-                </p>
-                <Button 
-                  variant="destructive" 
-                  onClick={handleDisconnect} 
-                  disabled={disconnectMutation.isPending}
-                  className="w-full"
-                >
-                  {disconnectMutation.isPending ? 'Disconnecting...' : 'Disconnect from Eventbrite'}
-                </Button>
-              </TabsContent>
-            </Tabs>
+    <div className="rounded-lg border p-4 space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <div className="h-10 w-10 flex items-center justify-center rounded-full bg-orange-100">
+            <img 
+              src="https://www.eventbrite.com/favicon.ico" 
+              alt="Eventbrite" 
+              className="h-6 w-6"
+            />
           </div>
-        ) : (
-          <div className="space-y-4">
+          
+          <div>
+            <h3 className="font-medium">Eventbrite Integration</h3>
             <p className="text-sm text-muted-foreground">
-              Connect your Eventbrite account to import and manage your events directly from our platform.
+              {isAuthenticated 
+                ? "Your Eventbrite account is connected" 
+                : "Connect to import and manage your Eventbrite events"}
             </p>
-            <Button onClick={handleConnect} className="w-full">
-              Connect to Eventbrite
+          </div>
+        </div>
+        
+        {isAuthenticated ? (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDisconnect}
+          >
+            Disconnect
+          </Button>
+        ) : (
+          <Button
+            onClick={handleConnect}
+            disabled={authenticating}
+          >
+            {authenticating ? "Connecting..." : "Connect"}
+          </Button>
+        )}
+      </div>
+      
+      {isAuthenticated && (
+        <div className="space-y-3">
+          <div className="border-t pt-3">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full"
+              onClick={() => window.location.href = "/eventbrite/orders"}
+            >
+              <ExternalLink className="h-4 w-4 mr-2" />
+              View Eventbrite Orders
             </Button>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </div>
+      )}
+    </div>
   );
 };
 

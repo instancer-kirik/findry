@@ -1,114 +1,144 @@
 
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
-import { useAuth } from '@/hooks/use-auth';
-import { useLocalStorage } from '@/hooks/use-local-storage';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
-export interface EventbriteHookReturn {
-  useHasIntegrated: () => ReturnType<typeof useQuery>;
-  useDisconnectEventbrite: () => ReturnType<typeof useMutation>;
-  useImportEvents: () => ReturnType<typeof useMutation>;
-}
-
-interface EventbriteIntegration {
-  user_id: string;
+interface EventbriteToken {
   access_token: string;
-  refresh_token?: string;
-  expires_at?: string;
-  is_active: boolean;
-  created_at: string;
-  integration_type: string;
+  token_type: string;
+  expires_in: number;
+  refresh_token: string;
 }
 
-const EVENTBRITE_STORAGE_KEY = 'eventbrite_integration';
+export const useEventbrite = (userId?: string) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [eventbriteData, setEventbriteData] = useState<{
+    access_token?: string;
+    refresh_token?: string;
+    organization_id?: string;
+  } | null>(null);
 
-export const useEventbrite = (): EventbriteHookReturn => {
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
-  const [eventbriteData, setEventbriteData] = useLocalStorage<EventbriteIntegration | null>(EVENTBRITE_STORAGE_KEY, null);
-  
-  // Check if user has integrated Eventbrite
-  const useHasIntegrated = () => {
-    return useQuery({
-      queryKey: ['user-eventbrite-integration', user?.id],
-      queryFn: async () => {
-        if (!user) return false;
-        
-        // Check localStorage for integration data
-        return eventbriteData && 
-               eventbriteData.user_id === user.id && 
-               eventbriteData.is_active === true;
-      },
-      enabled: !!user
-    });
-  };
-  
-  // Disconnect Eventbrite integration
-  const useDisconnectEventbrite = () => {
-    return useMutation({
-      mutationFn: async () => {
-        if (!user) {
-          throw new Error('User must be logged in to disconnect Eventbrite');
+  useEffect(() => {
+    if (!userId) return;
+    
+    const checkEventbriteAuth = async () => {
+      try {
+        // First try to get data from localStorage as a fallback
+        const storedData = localStorage.getItem(`eventbrite_integration_${userId}`);
+        if (storedData) {
+          const parsedData = JSON.parse(storedData);
+          setEventbriteData(parsedData);
+          setIsAuthenticated(!!parsedData.access_token);
+          return;
         }
         
-        try {
-          // Update the local storage data
-          if (eventbriteData && eventbriteData.user_id === user.id) {
-            const updatedData = { ...eventbriteData, is_active: false };
-            setEventbriteData(updatedData);
-          }
+        // If we have Supabase access, try to get data from there
+        const { data, error } = await supabase
+          .from('user_integrations')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('integration_type', 'eventbrite')
+          .eq('is_active', true)
+          .single();
+
+        if (error) {
+          console.error('Error fetching Eventbrite integration:', error);
+          setIsAuthenticated(false);
+          return;
+        }
+
+        if (data) {
+          setEventbriteData({
+            access_token: data.access_token,
+            refresh_token: data.refresh_token,
+            organization_id: data.metadata?.organization_id
+          });
+          setIsAuthenticated(true);
           
-          toast.success('Eventbrite disconnected successfully');
-          return { success: true };
-        } catch (error: any) {
-          console.error('Error disconnecting Eventbrite:', error);
-          toast.error('Failed to disconnect Eventbrite');
-          throw error;
+          // Save to localStorage as a fallback
+          localStorage.setItem(`eventbrite_integration_${userId}`, JSON.stringify({
+            access_token: data.access_token,
+            refresh_token: data.refresh_token,
+            organization_id: data.metadata?.organization_id
+          }));
+        } else {
+          setIsAuthenticated(false);
         }
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['user-eventbrite-integration'] });
+      } catch (error) {
+        console.error('Error checking Eventbrite auth:', error);
+        setIsAuthenticated(false);
       }
-    });
+    };
+
+    checkEventbriteAuth();
+  }, [userId]);
+
+  const getAuthUrl = async (userId: string): Promise<string> => {
+    try {
+      // Generate a random state to verify the callback
+      const state = Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('eventbrite_auth_state', state);
+      
+      // Store the user ID to associate with the integration
+      localStorage.setItem('eventbrite_auth_user_id', userId);
+      
+      // Your Eventbrite client ID would come from environment variables
+      const clientId = 'DEMO_CLIENT_ID';
+      
+      // The redirect URI should be the callback endpoint in your application
+      const redirectUri = `${window.location.origin}/eventbrite/callback`;
+      
+      // Build the authorization URL
+      const authUrl = `https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`;
+      
+      return authUrl;
+    } catch (error) {
+      console.error('Error generating auth URL:', error);
+      throw error;
+    }
   };
-  
-  // Import events from Eventbrite
-  const useImportEvents = () => {
-    return useMutation({
-      mutationFn: async () => {
-        if (!user) {
-          throw new Error('User must be logged in to import Eventbrite events');
+
+  const disconnectEventbrite = async (userId: string): Promise<void> => {
+    try {
+      // First, try to disconnect via Supabase
+      try {
+        const { error } = await supabase
+          .from('user_integrations')
+          .update({ is_active: false })
+          .eq('user_id', userId)
+          .eq('integration_type', 'eventbrite');
+      
+        if (error) {
+          console.error('Error disconnecting Eventbrite integration from database:', error);
+          // Continue to localStorage fallback even if database update fails
         }
-        
-        try {
-          // Get the access token from local storage
-          if (!eventbriteData || !eventbriteData.access_token || eventbriteData.user_id !== user.id) {
-            throw new Error('Could not find active Eventbrite integration');
-          }
-          
-          // In a real implementation, we would fetch events from Eventbrite API here
-          // using the access_token
-          console.log('Using access token to fetch events:', eventbriteData.access_token);
-          
-          // For demo purposes, we'll just show a success message
-          toast.success('Events imported successfully');
-          return { success: true };
-        } catch (error: any) {
-          console.error('Error importing events:', error);
-          toast.error(`Failed to import events: ${error.message}`);
-          throw error;
-        }
+      } catch (dbError) {
+        console.error('Database error when disconnecting Eventbrite:', dbError);
+        // Continue to localStorage fallback
       }
-    });
+      
+      // Always clear localStorage as well
+      localStorage.removeItem(`eventbrite_integration_${userId}`);
+      setEventbriteData(null);
+      setIsAuthenticated(false);
+    } catch (error) {
+      console.error('Error disconnecting Eventbrite:', error);
+      throw error;
+    }
   };
-  
-  // Return the hooks
+
+  const getEventbriteToken = (): string | null => {
+    return eventbriteData?.access_token || null;
+  };
+
+  const getEventbriteOrganizationId = (): string | null => {
+    return eventbriteData?.organization_id || null;
+  };
+
   return {
-    useHasIntegrated,
-    useDisconnectEventbrite,
-    useImportEvents
+    isAuthenticated,
+    getAuthUrl,
+    disconnectEventbrite,
+    getEventbriteToken,
+    getEventbriteOrganizationId
   };
 };
-
-export default useEventbrite;

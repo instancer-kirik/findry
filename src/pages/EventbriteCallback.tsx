@@ -1,133 +1,145 @@
 
-import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, X } from 'lucide-react';
-import { useAuth } from '@/hooks/use-auth';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { useLocalStorage } from '@/hooks/use-local-storage';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
-interface EventbriteTokenResponse {
-  access_token: string;
-  token_type: string;
-  expires_in: number;
-  refresh_token: string;
-}
-
-interface EventbriteIntegration {
-  user_id: string;
-  access_token: string;
-  refresh_token?: string;
-  expires_at?: string;
-  is_active: boolean;
-  created_at: string;
-  integration_type: string;
-}
-
-const EVENTBRITE_STORAGE_KEY = 'eventbrite_integration';
-
-const EventbriteCallback = () => {
-  const location = useLocation();
+const EventbriteCallback: React.FC = () => {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [eventbriteData, setEventbriteData] = useLocalStorage<EventbriteIntegration | null>(EVENTBRITE_STORAGE_KEY, null);
-  
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [message, setMessage] = useState('Connecting to Eventbrite...');
-  
-  // Process auth code
+  const { toast } = useToast();
+
   useEffect(() => {
-    const processAuthCode = async () => {
-      // Get code from URL query params
-      const params = new URLSearchParams(location.search);
-      const code = params.get('code');
-      
-      if (!code) {
-        setStatus('error');
-        setMessage('No authorization code received from Eventbrite');
-        return;
-      }
-      
-      if (!user) {
-        setStatus('error');
-        setMessage('You must be logged in to connect your Eventbrite account');
-        return;
-      }
-      
+    const processEventbriteCallback = async () => {
       try {
-        // Create a fake token response for demonstration
-        const fakeTokenResponse: EventbriteTokenResponse = {
-          access_token: 'fake_access_token_' + Date.now(),
+        // Get the code and state from the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const state = urlParams.get('state');
+        const storedState = localStorage.getItem('eventbrite_auth_state');
+        
+        // Check if state matches to prevent CSRF attacks
+        if (!state || state !== storedState) {
+          throw new Error('Invalid state parameter');
+        }
+        
+        // Make sure we have the code
+        if (!code) {
+          throw new Error('No authorization code received');
+        }
+        
+        // Get the user ID we stored before the auth flow
+        const userId = localStorage.getItem('eventbrite_auth_user_id');
+        if (!userId) {
+          throw new Error('No user ID found');
+        }
+        
+        // Exchange the code for tokens
+        // In a real implementation, this would be done server-side
+        // For demo purposes, we'll simulate a successful response
+        const mockTokenResponse = {
+          access_token: `demo_access_token_${Date.now()}`,
           token_type: 'bearer',
           expires_in: 3600,
-          refresh_token: 'fake_refresh_token_' + Date.now()
+          refresh_token: `demo_refresh_token_${Date.now()}`,
         };
         
-        // Store in localStorage
-        const integrationData: EventbriteIntegration = {
-          user_id: user.id,
-          integration_type: 'eventbrite',
-          access_token: fakeTokenResponse.access_token,
-          refresh_token: fakeTokenResponse.refresh_token,
-          expires_at: new Date(Date.now() + fakeTokenResponse.expires_in * 1000).toISOString(),
-          is_active: true,
-          created_at: new Date().toISOString()
-        };
+        // Get organization details (simulated)
+        const mockOrganizationId = `demo_organization_${Date.now()}`;
         
-        setEventbriteData(integrationData);
+        // Store the integration data
+        try {
+          // Try to store in Supabase if available
+          const { error } = await supabase
+            .from('user_integrations')
+            .upsert({
+              user_id: userId,
+              integration_type: 'eventbrite',
+              access_token: mockTokenResponse.access_token,
+              refresh_token: mockTokenResponse.refresh_token,
+              expires_at: new Date(Date.now() + (mockTokenResponse.expires_in * 1000)).toISOString(),
+              is_active: true,
+              metadata: { organization_id: mockOrganizationId }
+            });
+          
+          if (error) {
+            console.error('Error storing Eventbrite integration:', error);
+            // Fall back to localStorage if database storage fails
+          }
+        } catch (dbError) {
+          console.error('Database error when storing Eventbrite integration:', dbError);
+          // Fall back to localStorage
+        }
         
-        setStatus('success');
-        setMessage('Successfully connected to Eventbrite!');
+        // Always store in localStorage as well for backup
+        localStorage.setItem(`eventbrite_integration_${userId}`, JSON.stringify({
+          access_token: mockTokenResponse.access_token,
+          refresh_token: mockTokenResponse.refresh_token,
+          organization_id: mockOrganizationId
+        }));
+        
+        // Clean up the auth flow data
+        localStorage.removeItem('eventbrite_auth_state');
+        localStorage.removeItem('eventbrite_auth_user_id');
+        
+        toast({
+          title: "Success",
+          description: "Eventbrite account connected successfully"
+        });
+        
+        // Wait a moment to show success
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1500);
+        
       } catch (error: any) {
-        console.error('Error in Eventbrite callback:', error);
-        setStatus('error');
-        setMessage(error.message || 'Failed to connect to Eventbrite');
+        console.error('Error processing Eventbrite callback:', error);
+        setError(error.message || 'Failed to connect Eventbrite account');
+        toast({
+          title: "Error",
+          description: error.message || 'Failed to connect Eventbrite account',
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
       }
     };
-    
-    processAuthCode();
-  }, [location.search, user, setEventbriteData]);
-  
+
+    processEventbriteCallback();
+  }, [navigate, toast]);
+
   return (
     <Layout>
-      <div className="container max-w-lg mx-auto px-4 py-12">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-center">
-              Eventbrite Connection
-            </CardTitle>
-            <CardDescription className="text-center">
-              {status === 'loading' ? 'Processing your Eventbrite connection...' : 
-              status === 'success' ? 'Your Eventbrite account is now connected!' :
-              'There was a problem connecting your Eventbrite account'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-center py-6">
-            {status === 'loading' ? (
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-            ) : status === 'success' ? (
-              <div className="rounded-full bg-green-100 p-3 dark:bg-green-900/20">
-                <Check className="h-10 w-10 text-green-600 dark:text-green-500" />
-              </div>
-            ) : (
-              <div className="rounded-full bg-red-100 p-3 dark:bg-red-900/20">
-                <X className="h-10 w-10 text-red-600 dark:text-red-500" />
-              </div>
-            )}
-          </CardContent>
-          <CardContent className="text-center">
-            <p>{message}</p>
-          </CardContent>
-          <CardFooter className="flex justify-center">
-            <Button 
-              onClick={() => navigate('/events')}
-              disabled={status === 'loading'}
-            >
-              {status === 'success' ? 'Go to Events' : 'Back to Events'}
+      <div className="container mx-auto py-16 text-center">
+        {loading ? (
+          <div className="space-y-4">
+            <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
+            <h2 className="text-2xl font-bold">Connecting your Eventbrite account...</h2>
+            <p className="text-muted-foreground">Please wait while we complete the authorization.</p>
+          </div>
+        ) : error ? (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-destructive">Connection Failed</h2>
+            <p className="text-muted-foreground max-w-md mx-auto">{error}</p>
+            <Button onClick={() => navigate('/dashboard')}>
+              Back to Dashboard
             </Button>
-          </CardFooter>
-        </Card>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-primary">Eventbrite Connected Successfully!</h2>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              Your Eventbrite account has been connected. You can now manage your Eventbrite events.
+            </p>
+            <Button onClick={() => navigate('/dashboard')}>
+              Back to Dashboard
+            </Button>
+          </div>
+        )}
       </div>
     </Layout>
   );

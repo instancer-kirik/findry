@@ -17,8 +17,10 @@ import { format } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { generateUniqueId } from '@/utils/unique-id';
+import EventComponentGroups from '@/components/events/EventComponentGroups';
+import EventSharingDialog from '@/components/events/EventSharingDialog';
+import { EventSlot } from '@/components/events/EventSlotManager';
 
-// Define a simpler event content item type that matches ContentCardProps
 interface EventContentItem {
   id: string;
   name: string;
@@ -30,10 +32,8 @@ interface EventContentItem {
   selected?: boolean;
 }
 
-// Define the possible filter types for events
 type FilterType = "resources" | "artists" | "venues" | "brands" | "communities" | "all";
 
-// Define recurrence options
 type RecurrenceType = "none" | "daily" | "weekly" | "monthly" | "custom";
 
 const CreateEvent = () => {
@@ -57,8 +57,8 @@ const CreateEvent = () => {
   const [ticketUrl, setTicketUrl] = useState('');
   const [registrationRequired, setRegistrationRequired] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [eventSlots, setEventSlots] = useState<EventSlot[]>([]);
 
-  // Initialize content items with unique IDs - this will fix the duplicate key warnings
   const [artists, setArtists] = useState<EventContentItem[]>([
     {
       id: generateUniqueId('artist'),
@@ -184,6 +184,71 @@ const CreateEvent = () => {
     ));
   };
 
+  const handleApplyComponentGroup = (group: any) => {
+    const updatedArtists = [...artists];
+    const updatedVenues = [...venues];
+    const updatedResources = [...resources];
+    const updatedBrands = [...brands];
+    const updatedCommunities = [...communities];
+    
+    group.components.forEach((component: any) => {
+      if (component.type === 'artists') {
+        component.items.forEach((item: any) => {
+          const existingIndex = updatedArtists.findIndex(a => a.id === item.id);
+          if (existingIndex >= 0) {
+            updatedArtists[existingIndex] = { ...updatedArtists[existingIndex], selected: true };
+          } else {
+            updatedArtists.push({ ...item, selected: true });
+          }
+        });
+      } else if (component.type === 'venues') {
+        component.items.forEach((item: any) => {
+          const existingIndex = updatedVenues.findIndex(v => v.id === item.id);
+          if (existingIndex >= 0) {
+            updatedVenues[existingIndex] = { ...updatedVenues[existingIndex], selected: true };
+          } else {
+            updatedVenues.push({ ...item, selected: true });
+          }
+        });
+      } else if (component.type === 'resources') {
+        component.items.forEach((item: any) => {
+          const existingIndex = updatedResources.findIndex(r => r.id === item.id);
+          if (existingIndex >= 0) {
+            updatedResources[existingIndex] = { ...updatedResources[existingIndex], selected: true };
+          } else {
+            updatedResources.push({ ...item, selected: true });
+          }
+        });
+      } else if (component.type === 'brands') {
+        component.items.forEach((item: any) => {
+          const existingIndex = updatedBrands.findIndex(b => b.id === item.id);
+          if (existingIndex >= 0) {
+            updatedBrands[existingIndex] = { ...updatedBrands[existingIndex], selected: true };
+          } else {
+            updatedBrands.push({ ...item, selected: true });
+          }
+        });
+      } else if (component.type === 'communities') {
+        component.items.forEach((item: any) => {
+          const existingIndex = updatedCommunities.findIndex(c => c.id === item.id);
+          if (existingIndex >= 0) {
+            updatedCommunities[existingIndex] = { ...updatedCommunities[existingIndex], selected: true };
+          } else {
+            updatedCommunities.push({ ...item, selected: true });
+          }
+        });
+      }
+    });
+    
+    setArtists(updatedArtists);
+    setVenues(updatedVenues);
+    setResources(updatedResources);
+    setBrands(updatedBrands);
+    setCommunities(updatedCommunities);
+    
+    toast.success("Component group applied successfully!");
+  };
+
   const handlePosterUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files || event.target.files.length === 0) {
       return;
@@ -192,7 +257,6 @@ const CreateEvent = () => {
     const file = event.target.files[0];
     setPosterImage(file);
     
-    // Create a preview URL for the image
     const url = URL.createObjectURL(file);
     setPosterUrl(url);
   };
@@ -248,20 +312,17 @@ const CreateEvent = () => {
     setLoading(true);
 
     try {
-      // Upload poster image if present
       let posterImageUrl = null;
       if (posterImage) {
         posterImageUrl = await uploadPosterToStorage();
       }
 
-      // Get selected components
       const selectedArtists = artists.filter(a => a.selected);
       const selectedVenues = venues.filter(v => v.selected);
       const selectedResources = resources.filter(r => r.selected);
       const selectedBrands = brands.filter(b => b.selected);
       const selectedCommunities = communities.filter(c => c.selected);
 
-      // Format the full date time strings
       const startDateTime = startDate && startTime 
         ? new Date(`${format(startDate, 'yyyy-MM-dd')}T${startTime}`)
         : null;
@@ -272,7 +333,6 @@ const CreateEvent = () => {
           ? new Date(`${format(startDate, 'yyyy-MM-dd')}T${endTime}`)
           : null;
 
-      // Create the event object
       const eventData = {
         title: eventName,
         description,
@@ -288,10 +348,10 @@ const CreateEvent = () => {
         ticket_url: ticketUrl,
         registration_required: registrationRequired,
         created_by: user.id,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        slots: eventSlots
       };
 
-      // In a real implementation, we would save this to the database
       console.log("Event data:", eventData);
       console.log("Selected components:", {
         artists: selectedArtists,
@@ -302,7 +362,14 @@ const CreateEvent = () => {
       });
 
       toast.success("Event created successfully!");
-      navigate('/events');
+      
+      const mockEventId = `event_${Date.now()}`;
+      
+      if (window.confirm("Event created successfully! Would you like to share it with others?")) {
+        navigate(`/events/${mockEventId}`);
+      } else {
+        navigate('/events');
+      }
     } catch (error) {
       console.error('Error creating event:', error);
       toast.error("Failed to create event. Please try again.");
@@ -311,7 +378,6 @@ const CreateEvent = () => {
     }
   };
 
-  // Filter content based on the selected filter type
   const getFilteredContent = () => {
     switch (filterType) {
       case 'artists':
@@ -350,7 +416,6 @@ const CreateEvent = () => {
     }
   };
 
-  // Generate unique keys for TabsContent elements to avoid React warnings
   const tabKeys = {
     all: generateUniqueId('tab-all'),
     artists: generateUniqueId('tab-artists'),
@@ -366,7 +431,6 @@ const CreateEvent = () => {
         <h1 className="text-3xl font-bold mb-6">Create New Event</h1>
         
         <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Basic Information */}
           <section className="space-y-6">
             <h2 className="text-xl font-semibold">Event Details</h2>
             
@@ -436,7 +500,6 @@ const CreateEvent = () => {
             </div>
           </section>
 
-          {/* Event Poster */}
           <section className="space-y-4">
             <h2 className="text-xl font-semibold">Event Poster</h2>
             
@@ -488,12 +551,10 @@ const CreateEvent = () => {
             </div>
           </section>
           
-          {/* Scheduling */}
           <section className="space-y-6">
             <h2 className="text-xl font-semibold">Event Schedule</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Start Date */}
               <div>
                 <Label>Start Date*</Label>
                 <Popover>
@@ -517,7 +578,6 @@ const CreateEvent = () => {
                 </Popover>
               </div>
               
-              {/* Start Time */}
               <div>
                 <Label htmlFor="startTime">Start Time*</Label>
                 <div className="flex items-center">
@@ -532,7 +592,6 @@ const CreateEvent = () => {
                 </div>
               </div>
               
-              {/* End Date */}
               <div>
                 <Label>End Date</Label>
                 <Popover>
@@ -556,7 +615,6 @@ const CreateEvent = () => {
                 </Popover>
               </div>
               
-              {/* End Time */}
               <div>
                 <Label htmlFor="endTime">End Time</Label>
                 <div className="flex items-center">
@@ -591,7 +649,6 @@ const CreateEvent = () => {
             </div>
           </section>
           
-          {/* Additional Settings */}
           <section className="space-y-6">
             <h2 className="text-xl font-semibold">Additional Settings</h2>
             
@@ -644,9 +701,19 @@ const CreateEvent = () => {
             </div>
           </section>
           
-          {/* Event Components */}
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold">Event Components</h2>
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Event Components</h2>
+              
+              <EventComponentGroups
+                selectedArtists={artists.filter(a => a.selected)}
+                selectedVenues={venues.filter(v => v.selected)}
+                selectedResources={resources.filter(r => r.selected)}
+                selectedBrands={brands.filter(b => b.selected)}
+                selectedCommunities={communities.filter(c => c.selected)}
+                onApplyGroup={handleApplyComponentGroup}
+              />
+            </div>
             <p className="text-muted-foreground">
               Select artists, venues, resources, brands and communities for your event
             </p>
@@ -770,6 +837,16 @@ const CreateEvent = () => {
               </TabsContent>
             </Tabs>
           </section>
+          
+          <div className="mt-6 border rounded-lg p-4 bg-background">
+            <EventSlotManager 
+              slots={eventSlots}
+              onSlotsChange={setEventSlots}
+              eventStartTime={startTime || "09:00"}
+              eventEndTime={endTime || "17:00"}
+              eventDate={startDate || new Date()}
+            />
+          </div>
           
           <div className="flex justify-end space-x-4">
             <Button type="button" variant="outline" onClick={() => navigate('/events')}>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -9,6 +8,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import EventSharingDialog from '@/components/events/EventSharingDialog';
+import { EventSlot } from '@/components/events/EventSlotManager';
 
 interface EventProps {
   id: string;
@@ -26,6 +27,7 @@ interface EventProps {
   updated_at: string;
   eventbrite_id?: string;
   eventbrite_url?: string;
+  slots?: EventSlot[];
 }
 
 const EventDetail: React.FC = () => {
@@ -58,7 +60,6 @@ const EventDetail: React.FC = () => {
 
         if (data) {
           setEvent(data as EventProps);
-          // Set a sample attendee count if not available
           setAttendeeCount(Math.floor(Math.random() * data.capacity) || 15);
         } else {
           setError("Event not found");
@@ -77,7 +78,7 @@ const EventDetail: React.FC = () => {
   const handleRSVP = () => {
     setAttending(!attending);
 
-      toast({
+    toast({
       title: attending ? "RSVP Cancelled" : "RSVP Confirmed",
       description: attending 
         ? "You are no longer attending this event" 
@@ -141,17 +142,17 @@ const EventDetail: React.FC = () => {
     );
   }
 
-        return (
+  return (
     <Layout>
       <div className="container mx-auto py-8 max-w-5xl">
         <div className="mb-6">
-                      <Button 
-                        variant="ghost" 
+          <Button 
+            variant="ghost" 
             onClick={() => navigate('/discover?type=events')}
-                      >
+          >
             ← Back to Events
-                      </Button>
-                  </div>
+          </Button>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2">
@@ -180,7 +181,35 @@ const EventDetail: React.FC = () => {
               <h2 className="text-xl font-semibold mb-2">About This Event</h2>
               <p className="whitespace-pre-line">{event.description}</p>
             </div>
-            </div>
+
+            {event.slots && event.slots.length > 0 && (
+              <div className="mt-8">
+                <h2 className="text-xl font-semibold mb-4">Event Schedule</h2>
+                <div className="space-y-3">
+                  {event.slots.map((slot, index) => (
+                    <div key={index} className="border rounded-md p-3">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h3 className="font-medium">{slot.title || `Slot ${index + 1}`}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {slot.startTime} - {slot.endTime}
+                          </p>
+                        </div>
+                        {slot.type && (
+                          <Badge variant="outline" className="capitalize">
+                            {slot.type}
+                          </Badge>
+                        )}
+                      </div>
+                      {slot.description && (
+                        <p className="text-sm mt-2">{slot.description}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
             
           <div className="space-y-4">
             <Card>
@@ -221,7 +250,7 @@ const EventDetail: React.FC = () => {
                       </p>
                     </div>
                   </div>
-              </div>
+                </div>
                 
                 <div className="mt-6 space-y-3">
                   <Button
@@ -232,38 +261,28 @@ const EventDetail: React.FC = () => {
                     {attending ? "Cancel RSVP" : "RSVP Now"}
                   </Button>
                   
-                  <Button 
-                    className="w-full" 
-                    variant="outline"
-                    onClick={() => {
-                      // In a real app, this would copy a shareable link
-                      navigator.clipboard.writeText(window.location.href);
-                      toast({
-                        title: "Link Copied",
-                        description: "Event link copied to clipboard",
-                      });
-                    }}
-                  >
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Share Event
-                  </Button>
+                  <EventSharingDialog 
+                    eventName={event.name}
+                    eventDate={formatDate(event.start_date)}
+                    eventId={event.id}
+                  />
 
                   {event.eventbrite_url && (
-                      <Button 
+                    <Button 
                       className="w-full" 
                       variant="secondary"
                       onClick={() => window.open(event.eventbrite_url, '_blank')}
                     >
                       <ExternalLink className="h-4 w-4 mr-2" />
                       View on Eventbrite
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
 
             <Card>
-                <CardContent className="pt-6">
+              <CardContent className="pt-6">
                 <h3 className="font-medium mb-2">Organized by</h3>
                 <div className="flex items-center">
                   <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mr-3">
@@ -271,19 +290,18 @@ const EventDetail: React.FC = () => {
                   </div>
                   <div>
                     <p className="font-medium">Event Organizer</p>
-                              <Button
+                    <Button
                       variant="link" 
                       className="p-0 h-auto text-muted-foreground"
                       onClick={() => {
-                        // In a real app, this would navigate to the organizer's profile
                         navigate('/profile');
                       }}
                     >
                       View Profile
-                              </Button>
+                    </Button>
                   </div>
-                          </div>
-                </CardContent>
+                </div>
+              </CardContent>
             </Card>
           </div>
         </div>
