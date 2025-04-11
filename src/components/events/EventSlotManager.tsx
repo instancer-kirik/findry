@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2, Plus, Calendar, Clock, Search, User, Wrench, X, MapPin, UserPlus, Landmark, SquarePlus, Mail, Link } from 'lucide-react';
@@ -29,24 +30,12 @@ import { toast } from "sonner";
 import { ContentItemProps } from '@/components/marketplace/ContentCard';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { EventSlot } from '@/types/event';
 
 // Extend ContentItemProps to include isNew flag
 interface ExtendedContentItemProps extends ContentItemProps {
   isNew?: boolean;
-}
-
-export interface EventSlot {
-  id: string;
-  title: string;
-  description: string;
-  startTime: string;
-  endTime: string;
-  artist: ContentItemProps | null;
-  resource: ContentItemProps | null;
-  venue: ContentItemProps | null;
-  status: 'available' | 'reserved' | 'confirmed' | 'canceled' | 'unbooked';
-  isSearching?: boolean;
-  searchQuery?: string;
+  isRequestOnly?: boolean;
 }
 
 export interface EventSlotManagerProps {
@@ -238,10 +227,11 @@ export function EventSlotManager({
       description: '',
       startTime: eventStartTime,
       endTime: eventEndTime,
-      artist: null,
-      resource: null,
-      venue: null,
-      status: 'unbooked'
+      artist: undefined,
+      resource: undefined,
+      venue: undefined,
+      status: 'available',
+      slotType: 'performance'
     };
     setLocalSlots([...localSlots, newSlot]);
     setEditingSlot(newSlot);
@@ -320,47 +310,42 @@ export function EventSlotManager({
       return;
     }
 
-    try {
-      const { data, error } = await supabase
-        .from(selectedObject.type === 'artist' ? 'artists' : selectedObject.type === 'resource' ? 'resources' : 'venues')
-        .insert([{
-          name: newItem.name,
-          email: newItem.email,
-          link: newItem.link,
-          location: newItem.location
-        }])
-        .select()
-        .single();
+    // Instead of actually saving to the database, we'll create a local object
+    // with an isRequestOnly flag to indicate this is a requested resource
+    const tempId = `temp_${Date.now()}`;
+    const newRequestedItem: ExtendedContentItemProps = {
+      id: tempId,
+      name: newItem.name,
+      email: newItem.email,
+      link: newItem.link,
+      location: newItem.location,
+      isRequestOnly: true,
+      isNew: true
+    };
 
-      if (error) throw error;
-
-      if (editingSlot) {
-        const updatedSlot = { ...editingSlot };
-        if (selectedObject.type === 'artist') {
-          updatedSlot.artist = data;
-          updatedSlot.status = 'reserved';
-        } else if (selectedObject.type === 'resource') {
-          updatedSlot.resource = data;
-        } else if (selectedObject.type === 'venue') {
-          updatedSlot.venue = data;
-        }
-        handleSaveSlot(updatedSlot);
+    if (editingSlot) {
+      const updatedSlot = { ...editingSlot };
+      if (selectedObject.type === 'artist') {
+        updatedSlot.artist = newRequestedItem;
+        updatedSlot.status = 'requested';
+      } else if (selectedObject.type === 'resource') {
+        updatedSlot.resource = newRequestedItem;
+      } else if (selectedObject.type === 'venue') {
+        updatedSlot.venue = newRequestedItem;
       }
-
-      setIsCreatingNew(false);
-      setNewItem({
-        name: '',
-        email: '',
-        link: '',
-        location: '',
-        locationSource: '',
-        eventLocation: ''
-      });
-      toast.success(`${selectedObject.type} created successfully`);
-    } catch (error) {
-      console.error('Error creating item:', error);
-      toast.error('Failed to create item');
+      handleSaveSlot(updatedSlot);
     }
+
+    setIsCreatingNew(false);
+    setNewItem({
+      name: '',
+      email: '',
+      link: '',
+      location: '',
+      locationSource: '',
+      eventLocation: ''
+    });
+    toast.success(`${selectedObject.type} request added to event`);
   };
 
   const getStatusBadge = (status: string) => {
@@ -373,6 +358,8 @@ export function EventSlotManager({
         return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Confirmed</Badge>;
       case 'canceled':
         return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Canceled</Badge>;
+      case 'requested':
+        return <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">Requested</Badge>;
       default:
         return <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">Available</Badge>;
     }
@@ -396,6 +383,9 @@ export function EventSlotManager({
                 <div className="flex items-center gap-2">
                   <h4 className="font-medium">{inferTitle(slot)}</h4>
                   {getStatusBadge(slot.status)}
+                  {(slot.artist?.isRequestOnly || slot.resource?.isRequestOnly || slot.venue?.isRequestOnly) && (
+                    <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200">Seeking provider</Badge>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   <Clock className="w-4 h-4" />
@@ -409,6 +399,7 @@ export function EventSlotManager({
                     <div className="flex items-center gap-1 text-sm">
                       <User className="w-4 h-4 text-gray-500" />
                       <span>{slot.artist.name}</span>
+                      {slot.artist.isRequestOnly && <span className="text-xs text-indigo-500">(requested)</span>}
                       {slot.artist.email && (
                         <a href={`mailto:${slot.artist.email}`} className="text-blue-500 hover:underline">
                           <Mail className="w-4 h-4" />
@@ -425,6 +416,7 @@ export function EventSlotManager({
                     <div className="flex items-center gap-1 text-sm">
                       <MapPin className="w-4 h-4 text-gray-500" />
                       <span>{slot.venue.name}</span>
+                      {slot.venue.isRequestOnly && <span className="text-xs text-indigo-500">(requested)</span>}
                       {slot.venue.email && (
                         <a href={`mailto:${slot.venue.email}`} className="text-blue-500 hover:underline">
                           <Mail className="w-4 h-4" />
@@ -441,6 +433,7 @@ export function EventSlotManager({
                     <div className="flex items-center gap-1 text-sm">
                       <Wrench className="w-4 h-4 text-gray-500" />
                       <span>{slot.resource.name}</span>
+                      {slot.resource.isRequestOnly && <span className="text-xs text-indigo-500">(requested)</span>}
                       {slot.resource.email && (
                         <a href={`mailto:${slot.resource.email}`} className="text-blue-500 hover:underline">
                           <Mail className="w-4 h-4" />
@@ -570,6 +563,13 @@ export function EventSlotManager({
                         onChange={(e) => setNewItem({ ...newItem, link: e.target.value })}
                       />
                     </div>
+                    
+                    <div className="bg-yellow-50 p-3 rounded-md border border-yellow-200">
+                      <p className="text-sm text-yellow-800">
+                        <strong>Note:</strong> This will add the {selectedObject.type} as a requested resource. 
+                        Someone else will need to confirm they can provide it.
+                      </p>
+                    </div>
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-4 max-h-60 overflow-y-auto">
@@ -583,9 +583,9 @@ export function EventSlotManager({
                       >
                         <div className="flex items-center gap-2">
                           <Plus className="w-4 h-4 text-primary" />
-                          <h4 className="font-medium">Create "{searchQuery}"</h4>
+                          <h4 className="font-medium">Request "{searchQuery}"</h4>
                         </div>
-                        <p className="text-sm text-gray-500 mt-1">Add as new {selectedObject.type}</p>
+                        <p className="text-sm text-gray-500 mt-1">Add as requested {selectedObject.type}</p>
                       </div>
                     )}
                     {searchResults.map(item => (
@@ -647,6 +647,59 @@ export function EventSlotManager({
                     </Popover>
                   </div>
                 </div>
+                
+                <div>
+                  <Label>Status</Label>
+                  <Select
+                    value={editingSlot.status}
+                    onValueChange={(value) => setEditingSlot({ 
+                      ...editingSlot, 
+                      status: value as 'available' | 'reserved' | 'confirmed' | 'canceled' | 'requested'
+                    })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="available">Available</SelectItem>
+                      <SelectItem value="reserved">Reserved</SelectItem>
+                      <SelectItem value="confirmed">Confirmed</SelectItem>
+                      <SelectItem value="canceled">Canceled</SelectItem>
+                      <SelectItem value="requested">Requested</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label>Slot Type</Label>
+                  <Select
+                    value={editingSlot.slotType}
+                    onValueChange={(value) => setEditingSlot({ 
+                      ...editingSlot, 
+                      slotType: value as 'performance' | 'setup' | 'breakdown' | 'break' | 'other'
+                    })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select slot type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="performance">Performance</SelectItem>
+                      <SelectItem value="setup">Setup</SelectItem>
+                      <SelectItem value="breakdown">Breakdown</SelectItem>
+                      <SelectItem value="break">Break</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label>Notes</Label>
+                  <Textarea
+                    placeholder="Additional notes about this slot..."
+                    value={editingSlot.notes || ''}
+                    onChange={(e) => setEditingSlot({ ...editingSlot, notes: e.target.value })}
+                  />
+                </div>
               </div>
             </div>
 
@@ -656,7 +709,7 @@ export function EventSlotManager({
               </Button>
               {isCreatingNew ? (
                 <Button onClick={handleCreateNewItem}>
-                  Create & Save
+                  Request & Save
                 </Button>
               ) : (
                 <Button onClick={() => handleSaveSlot(editingSlot)}>

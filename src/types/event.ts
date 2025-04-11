@@ -1,3 +1,4 @@
+
 import { ContentItemProps } from "@/components/marketplace/ContentCard";
 import { Profile } from "./profile";
 
@@ -11,9 +12,10 @@ export interface EventSlot {
   artistId?: string;
   resource?: ContentItemProps;
   resourceId?: string;
-  status: 'available' | 'reserved' | 'confirmed' | 'canceled';
+  status: 'available' | 'reserved' | 'confirmed' | 'canceled' | 'requested';
   slotType: 'performance' | 'setup' | 'breakdown' | 'break' | 'other';
   notes?: string;
+  isRequestOnly?: boolean;
 }
 
 export interface Event {
