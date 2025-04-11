@@ -182,7 +182,7 @@ const EventDetail: React.FC = () => {
               <p className="whitespace-pre-line">{event.description}</p>
             </div>
 
-            {event.slots && event.slots.length > 0 && (
+            {event?.slots && event.slots.length > 0 && (
               <div className="mt-8">
                 <h2 className="text-xl font-semibold mb-4">Event Schedule</h2>
                 <div className="space-y-3">
@@ -195,9 +195,9 @@ const EventDetail: React.FC = () => {
                             {slot.startTime} - {slot.endTime}
                           </p>
                         </div>
-                        {slot.type && (
+                        {slot.slotType && (
                           <Badge variant="outline" className="capitalize">
-                            {slot.type}
+                            {slot.slotType}
                           </Badge>
                         )}
                       </div>

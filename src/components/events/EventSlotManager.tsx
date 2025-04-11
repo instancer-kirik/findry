@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2, Plus, Calendar, Clock, Search, User, Wrench, X, MapPin, UserPlus, Landmark, SquarePlus, Mail, Link } from 'lucide-react';
@@ -23,7 +24,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter
+  DialogFooter,
+  DialogDescription
 } from '@/components/ui/dialog';
 import { toast } from "sonner";
 import { ContentItemProps } from '@/types/content';
@@ -199,8 +201,7 @@ export function EventSlotManager({
     email: '',
     link: '',
     location: '',
-    locationSource: '',
-    eventLocation: ''
+    notes: ''
   });
 
   useEffect(() => {
@@ -292,11 +293,13 @@ export function EventSlotManager({
       const updatedSlot = { ...editingSlot };
       if (type === 'artist') {
         updatedSlot.artist = item;
-        updatedSlot.status = 'reserved';
+        updatedSlot.status = item.isRequestOnly ? 'requested' : 'reserved';
       } else if (type === 'resource') {
         updatedSlot.resource = item;
+        updatedSlot.status = item.isRequestOnly ? 'requested' : 'reserved';
       } else if (type === 'venue') {
         updatedSlot.venue = item;
+        updatedSlot.status = item.isRequestOnly ? 'requested' : 'reserved';
       }
       setEditingSlot(updatedSlot);
     }
@@ -308,8 +311,7 @@ export function EventSlotManager({
       return;
     }
 
-    // Instead of actually saving to the database, we'll create a local object
-    // with an isRequestOnly flag to indicate this is a requested resource
+    // Create a local object with an isRequestOnly flag
     const tempId = `temp_${Date.now()}`;
     const newRequestedItem: ExtendedContentItemProps = {
       id: tempId,
@@ -317,6 +319,7 @@ export function EventSlotManager({
       email: newItem.email,
       link: newItem.link,
       location: newItem.location,
+      type: selectedObject.type, // Required field for ContentItemProps
       isRequestOnly: true,
       isNew: true
     };
@@ -328,10 +331,12 @@ export function EventSlotManager({
         updatedSlot.status = 'requested';
       } else if (selectedObject.type === 'resource') {
         updatedSlot.resource = newRequestedItem;
+        updatedSlot.status = 'requested';
       } else if (selectedObject.type === 'venue') {
         updatedSlot.venue = newRequestedItem;
+        updatedSlot.status = 'requested';
       }
-      handleSaveSlot(updatedSlot);
+      setEditingSlot(updatedSlot);
     }
 
     setIsCreatingNew(false);
@@ -340,16 +345,15 @@ export function EventSlotManager({
       email: '',
       link: '',
       location: '',
-      locationSource: '',
-      eventLocation: ''
+      notes: ''
     });
     toast.success(`${selectedObject.type} request added to event`);
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'unbooked':
-        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Unbooked</Badge>;
+      case 'available':
+        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Available</Badge>;
       case 'reserved':
         return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Reserved</Badge>;
       case 'confirmed':
@@ -468,10 +472,13 @@ export function EventSlotManager({
       </div>
 
       {editingSlot && (
-        <Dialog open={!!editingSlot} onOpenChange={() => setEditingSlot(null)}>
-          <DialogContent className="sm:max-w-md">
+        <Dialog open={!!editingSlot} onOpenChange={(open) => !open && setEditingSlot(null)}>
+          <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Edit Slot</DialogTitle>
+              <DialogDescription>
+                Add or request a provider for this time slot
+              </DialogDescription>
             </DialogHeader>
             
             <div className="space-y-4">
@@ -530,22 +537,6 @@ export function EventSlotManager({
                       />
                     </div>
                     <div>
-                      <Label>Location Source (optional)</Label>
-                      <Input
-                        placeholder="e.g. Google Maps, Website, etc."
-                        value={newItem.locationSource}
-                        onChange={(e) => setNewItem({ ...newItem, locationSource: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label>Event Location (optional)</Label>
-                      <Input
-                        placeholder="e.g. Second floor, Room 201, etc."
-                        value={newItem.eventLocation}
-                        onChange={(e) => setNewItem({ ...newItem, eventLocation: e.target.value })}
-                      />
-                    </div>
-                    <div>
                       <Label>Email (optional)</Label>
                       <Input
                         placeholder="Enter email"
@@ -559,6 +550,14 @@ export function EventSlotManager({
                         placeholder="Enter link"
                         value={newItem.link}
                         onChange={(e) => setNewItem({ ...newItem, link: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>Notes</Label>
+                      <Textarea
+                        placeholder="Add any additional notes or requirements"
+                        value={newItem.notes}
+                        onChange={(e) => setNewItem({ ...newItem, notes: e.target.value })}
                       />
                     </div>
                     
@@ -654,16 +653,17 @@ export function EventSlotManager({
                       ...editingSlot, 
                       status: value as 'available' | 'reserved' | 'confirmed' | 'canceled' | 'requested'
                     })}
+                    defaultValue="requested"
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="requested">Requested</SelectItem>
                       <SelectItem value="available">Available</SelectItem>
                       <SelectItem value="reserved">Reserved</SelectItem>
                       <SelectItem value="confirmed">Confirmed</SelectItem>
                       <SelectItem value="canceled">Canceled</SelectItem>
-                      <SelectItem value="requested">Requested</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -706,7 +706,7 @@ export function EventSlotManager({
                 Cancel
               </Button>
               {isCreatingNew ? (
-                <Button onClick={handleCreateNewItem}>
+                <Button onClick={handleCreateNewItem} variant="request">
                   Request & Save
                 </Button>
               ) : (

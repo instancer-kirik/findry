@@ -345,25 +345,21 @@ const CreateEvent = () => {
           : null;
 
       const eventData = {
-        title: eventName,
+        name: eventName,
         description,
         location,
         start_date: startDateTime?.toISOString(),
         end_date: endDateTime?.toISOString(),
         capacity: capacity ? parseInt(capacity) : null,
-        poster_url: posterImageUrl,
-        event_type: eventType,
-        recurrence_type: recurrenceType,
+        image_url: posterImageUrl,
+        type: eventType,
         is_private: isPrivate,
-        ticket_price: ticketPrice,
-        ticket_url: ticketUrl,
-        registration_required: registrationRequired,
         created_by: user.id,
         created_at: new Date().toISOString(),
-        slots: eventSlots
+        tags: ticketPrice ? ['paid'] : ['free']
       };
 
-      console.log("Event data:", eventData);
+      console.log("Creating event with data:", eventData);
       console.log("Selected components:", {
         artists: selectedArtists,
         venues: selectedVenues,
@@ -371,16 +367,12 @@ const CreateEvent = () => {
         brands: selectedBrands,
         communities: selectedCommunities
       });
+      console.log("Event slots:", eventSlots);
 
-      toast.success("Event created successfully!");
-      
       const mockEventId = `event_${Date.now()}`;
       
-      if (window.confirm("Event created successfully! Would you like to share it with others?")) {
-        navigate(`/events/${mockEventId}`);
-      } else {
-        navigate('/events');
-      }
+      toast.success("Event created successfully!");
+      navigate(`/events/${mockEventId}`);
     } catch (error) {
       console.error('Error creating event:', error);
       toast.error("Failed to create event. Please try again.");
