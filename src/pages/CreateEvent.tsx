@@ -19,7 +19,7 @@ import { Switch } from '@/components/ui/switch';
 import { generateUniqueId } from '@/utils/unique-id';
 import EventComponentGroups from '@/components/events/EventComponentGroups';
 import EventSharingDialog from '@/components/events/EventSharingDialog';
-import { EventSlot } from '@/components/events/EventSlotManager';
+import EventSlotManager, { EventSlot } from '@/components/events/EventSlotManager';
 
 interface EventContentItem {
   id: string;
