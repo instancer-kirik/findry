@@ -8,7 +8,9 @@ import { useToast } from '@/hooks/use-toast';
 import { Project } from '@/hooks/use-project';
 import { useProject } from '@/hooks/use-project';
 import ProjectChat from '@/components/projects/ProjectChat';
-import { Tabs, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import DocumentViewer from '@/components/common/DocumentViewer';
+import { roadmapContent } from '@/data/roadmap';
 
 const ProjectDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -315,363 +317,379 @@ const ProjectDetail: React.FC = () => {
               </CardContent>
             </Card>
             
-            <div className="mb-8">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Components</h2>
-                {isOwner && (
-                  <Button
-                    size="sm"
-                    onClick={handleToggleComponentForm}
-                    disabled={showComponentForm}
-                  >
-                    Add Component
-                  </Button>
+            <Tabs defaultValue="components" className="mb-8">
+              <TabsList className="mb-4">
+                <TabsTrigger value="components">Components</TabsTrigger>
+                <TabsTrigger value="tasks">Tasks</TabsTrigger>
+                {project.name === "Findry" && (
+                  <TabsTrigger value="roadmap">Roadmap</TabsTrigger>
                 )}
-              </div>
+              </TabsList>
               
-              {showComponentForm && (
-                <Card className="mb-4">
-                  <CardContent className="pt-6">
-                    <form onSubmit={handleSubmitComponent}>
-                      <div className="grid grid-cols-1 gap-4">
-                        <div>
-                          <label htmlFor="component-name" className="block text-sm font-medium mb-1">
-                            Name
-                          </label>
-                          <input
-                            id="component-name"
-                            name="name"
-                            value={newComponent.name}
-                            onChange={handleComponentChange}
-                            className="w-full p-2 border rounded-md"
-                            required
-                          />
-                        </div>
-                        
-                        <div>
-                          <label htmlFor="component-description" className="block text-sm font-medium mb-1">
-                            Description
-                          </label>
-                          <textarea
-                            id="component-description"
-                            name="description"
-                            value={newComponent.description}
-                            onChange={handleComponentChange}
-                            className="w-full p-2 border rounded-md h-24"
-                          />
-                        </div>
-                        
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label htmlFor="component-status" className="block text-sm font-medium mb-1">
-                              Status
-                            </label>
-                            <select
-                              id="component-status"
-                              name="status"
-                              value={newComponent.status}
-                              onChange={handleComponentChange}
-                              className="w-full p-2 border rounded-md"
-                            >
-                              <option value="planned">Planned</option>
-                              <option value="in-development">In Development</option>
-                              <option value="ready">Ready</option>
-                              <option value="needs-revision">Needs Revision</option>
-                            </select>
-                          </div>
-                          
-                          <div>
-                            <label htmlFor="component-type" className="block text-sm font-medium mb-1">
-                              Type
-                            </label>
-                            <select
-                              id="component-type"
-                              name="type"
-                              value={newComponent.type}
-                              onChange={handleComponentChange}
-                              className="w-full p-2 border rounded-md"
-                            >
-                              <option value="feature">Feature</option>
-                              <option value="ui">UI Component</option>
-                              <option value="integration">Integration</option>
-                              <option value="page">Page</option>
-                            </select>
-                          </div>
-                        </div>
-                        
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={handleToggleComponentForm}
-                          >
-                            Cancel
-                          </Button>
-                          <Button type="submit">
-                            {editingComponent ? 'Update' : 'Create'} Component
-                          </Button>
-                        </div>
-                      </div>
-                    </form>
-                  </CardContent>
-                </Card>
-              )}
-              
-              {project.components && project.components.length > 0 ? (
-                <div className="space-y-4">
-                  {project.components.map(component => (
-                    <Card key={component.id} id={`component-${component.id}`}>
-                      <CardContent className="pt-6">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="font-semibold">{component.name}</h3>
-                            <div className="text-sm text-muted-foreground mt-1">
-                              {component.description}
-                            </div>
-                          </div>
-                          <div className="flex flex-col items-end">
-                            <div className="flex gap-2 mb-1">
-                              <span className={`text-xs px-2 py-1 rounded-full ${
-                                component.status === 'ready' ? 'bg-green-100 text-green-800' :
-                                component.status === 'in-development' ? 'bg-blue-100 text-blue-800' :
-                                component.status === 'needs-revision' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-gray-100 text-gray-800'
-                              }`}>
-                                {component.status.replace('-', ' ')}
-                              </span>
-                              <span className="text-xs px-2 py-1 bg-muted rounded-full">
-                                {component.type}
-                              </span>
-                            </div>
-                            {isOwner && (
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                onClick={() => handleEditComponent(component.id)}
-                              >
-                                Edit
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+              <TabsContent value="components">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold">Components</h2>
+                  {isOwner && (
+                    <Button
+                      size="sm"
+                      onClick={handleToggleComponentForm}
+                      disabled={showComponentForm}
+                    >
+                      Add Component
+                    </Button>
+                  )}
                 </div>
-              ) : (
-                <div className="text-center py-8 bg-muted/20 rounded-lg">
-                  <p className="text-muted-foreground">No components added yet.</p>
-                </div>
-              )}
-            </div>
-            
-            <div>
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Tasks</h2>
-                {isOwner && (
-                  <Button
-                    size="sm"
-                    onClick={handleToggleTaskForm}
-                    disabled={showTaskForm}
-                  >
-                    Add Task
-                  </Button>
-                )}
-              </div>
-              
-              {showTaskForm && (
-                <Card className="mb-4">
-                  <CardContent className="pt-6">
-                    <form onSubmit={handleSubmitTask}>
-                      <div className="grid grid-cols-1 gap-4">
-                        <div>
-                          <label htmlFor="task-title" className="block text-sm font-medium mb-1">
-                            Title
-                          </label>
-                          <input
-                            id="task-title"
-                            name="title"
-                            value={newTask.title}
-                            onChange={handleTaskChange}
-                            className="w-full p-2 border rounded-md"
-                            required
-                          />
-                        </div>
-                        
-                        <div>
-                          <label htmlFor="task-description" className="block text-sm font-medium mb-1">
-                            Description
-                          </label>
-                          <textarea
-                            id="task-description"
-                            name="description"
-                            value={newTask.description}
-                            onChange={handleTaskChange}
-                            className="w-full p-2 border rounded-md h-24"
-                          />
-                        </div>
-                        
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                
+                {showComponentForm && (
+                  <Card className="mb-4">
+                    <CardContent className="pt-6">
+                      <form onSubmit={handleSubmitComponent}>
+                        <div className="grid grid-cols-1 gap-4">
                           <div>
-                            <label htmlFor="task-status" className="block text-sm font-medium mb-1">
-                              Status
-                            </label>
-                            <select
-                              id="task-status"
-                              name="status"
-                              value={newTask.status}
-                              onChange={handleTaskChange}
-                              className="w-full p-2 border rounded-md"
-                            >
-                              <option value="pending">Pending</option>
-                              <option value="in-progress">In Progress</option>
-                              <option value="completed">Completed</option>
-                              <option value="blocked">Blocked</option>
-                            </select>
-                          </div>
-                          
-                          <div>
-                            <label htmlFor="task-priority" className="block text-sm font-medium mb-1">
-                              Priority
-                            </label>
-                            <select
-                              id="task-priority"
-                              name="priority"
-                              value={newTask.priority}
-                              onChange={handleTaskChange}
-                              className="w-full p-2 border rounded-md"
-                            >
-                              <option value="low">Low</option>
-                              <option value="medium">Medium</option>
-                              <option value="high">High</option>
-                            </select>
-                          </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label htmlFor="task-assignedTo" className="block text-sm font-medium mb-1">
-                              Assigned To
+                            <label htmlFor="component-name" className="block text-sm font-medium mb-1">
+                              Name
                             </label>
                             <input
-                              id="task-assignedTo"
-                              name="assignedTo"
-                              value={newTask.assignedTo}
-                              onChange={handleTaskChange}
+                              id="component-name"
+                              name="name"
+                              value={newComponent.name}
+                              onChange={handleComponentChange}
                               className="w-full p-2 border rounded-md"
+                              required
                             />
                           </div>
                           
                           <div>
-                            <label htmlFor="task-dueDate" className="block text-sm font-medium mb-1">
-                              Due Date
+                            <label htmlFor="component-description" className="block text-sm font-medium mb-1">
+                              Description
                             </label>
-                            <input
-                              id="task-dueDate"
-                              name="dueDate"
-                              type="date"
-                              value={newTask.dueDate}
-                              onChange={handleTaskChange}
-                              className="w-full p-2 border rounded-md"
+                            <textarea
+                              id="component-description"
+                              name="description"
+                              value={newComponent.description}
+                              onChange={handleComponentChange}
+                              className="w-full p-2 border rounded-md h-24"
                             />
                           </div>
-                        </div>
-                        
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={handleToggleTaskForm}
-                          >
-                            Cancel
-                          </Button>
-                          <Button type="submit">
-                            {editingTask ? 'Update' : 'Create'} Task
-                          </Button>
-                        </div>
-                      </div>
-                    </form>
-                  </CardContent>
-                </Card>
-              )}
-              
-              {project.tasks && project.tasks.length > 0 ? (
-                <div className="space-y-4">
-                  {project.tasks.map(task => (
-                    <Card key={task.id} id={`task-${task.id}`}>
-                      <CardContent className="pt-6">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="font-semibold">{task.title}</h3>
-                            <div className="text-sm text-muted-foreground mt-1">
-                              {task.description}
-                            </div>
-                            {task.assignedTo && (
-                              <div className="text-sm mt-2">
-                                <span className="text-muted-foreground">Assigned to: </span>
-                                <span>{task.assignedTo}</span>
-                              </div>
-                            )}
-                            {task.dueDate && (
-                              <div className="text-sm">
-                                <span className="text-muted-foreground">Due: </span>
-                                <span>{task.dueDate}</span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex flex-col items-end">
-                            <div className="flex gap-2 mb-1">
-                              <span className={`text-xs px-2 py-1 rounded-full ${
-                                task.status === 'completed' ? 'bg-green-100 text-green-800' :
-                                task.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
-                                task.status === 'blocked' ? 'bg-red-100 text-red-800' :
-                                'bg-gray-100 text-gray-800'
-                              }`}>
-                                {task.status.replace('-', ' ')}
-                              </span>
-                              <span className={`text-xs px-2 py-1 rounded-full ${
-                                task.priority === 'high' ? 'bg-red-100 text-red-800' :
-                                task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-green-100 text-green-800'
-                              }`}>
-                                {task.priority}
-                              </span>
-                            </div>
-                            {isOwner && (
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                onClick={() => handleEditTask(task.id)}
+                          
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label htmlFor="component-status" className="block text-sm font-medium mb-1">
+                                Status
+                              </label>
+                              <select
+                                id="component-status"
+                                name="status"
+                                value={newComponent.status}
+                                onChange={handleComponentChange}
+                                className="w-full p-2 border rounded-md"
                               >
-                                Edit
-                              </Button>
-                            )}
+                                <option value="planned">Planned</option>
+                                <option value="in-development">In Development</option>
+                                <option value="ready">Ready</option>
+                                <option value="needs-revision">Needs Revision</option>
+                              </select>
+                            </div>
+                            
+                            <div>
+                              <label htmlFor="component-type" className="block text-sm font-medium mb-1">
+                                Type
+                              </label>
+                              <select
+                                id="component-type"
+                                name="type"
+                                value={newComponent.type}
+                                onChange={handleComponentChange}
+                                className="w-full p-2 border rounded-md"
+                              >
+                                <option value="feature">Feature</option>
+                                <option value="ui">UI Component</option>
+                                <option value="integration">Integration</option>
+                                <option value="page">Page</option>
+                              </select>
+                            </div>
+                          </div>
+                          
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={handleToggleComponentForm}
+                            >
+                              Cancel
+                            </Button>
+                            <Button type="submit">
+                              {editingComponent ? 'Update' : 'Create'} Component
+                            </Button>
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                      </form>
+                    </CardContent>
+                  </Card>
+                )}
+                
+                {project.components && project.components.length > 0 ? (
+                  <div className="space-y-4">
+                    {project.components.map(component => (
+                      <Card key={component.id} id={`component-${component.id}`}>
+                        <CardContent className="pt-6">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="font-semibold">{component.name}</h3>
+                              <div className="text-sm text-muted-foreground mt-1">
+                                {component.description}
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end">
+                              <div className="flex gap-2 mb-1">
+                                <span className={`text-xs px-2 py-1 rounded-full ${
+                                  component.status === 'ready' ? 'bg-green-100 text-green-800' :
+                                  component.status === 'in-development' ? 'bg-blue-100 text-blue-800' :
+                                  component.status === 'needs-revision' ? 'bg-yellow-100 text-yellow-800' :
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {component.status.replace('-', ' ')}
+                                </span>
+                                <span className="text-xs px-2 py-1 bg-muted rounded-full">
+                                  {component.type}
+                                </span>
+                              </div>
+                              {isOwner && (
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => handleEditComponent(component.id)}
+                                >
+                                  Edit
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 bg-muted/20 rounded-lg">
+                    <p className="text-muted-foreground">No components added yet.</p>
+                  </div>
+                )}
+              </TabsContent>
+              
+              <TabsContent value="tasks">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold">Tasks</h2>
+                  {isOwner && (
+                    <Button
+                      size="sm"
+                      onClick={handleToggleTaskForm}
+                      disabled={showTaskForm}
+                    >
+                      Add Task
+                    </Button>
+                  )}
                 </div>
-              ) : (
-                <div className="text-center py-8 bg-muted/20 rounded-lg">
-                  <p className="text-muted-foreground">No tasks added yet.</p>
-                </div>
+                
+                {showTaskForm && (
+                  <Card className="mb-4">
+                    <CardContent className="pt-6">
+                      <form onSubmit={handleSubmitTask}>
+                        <div className="grid grid-cols-1 gap-4">
+                          <div>
+                            <label htmlFor="task-title" className="block text-sm font-medium mb-1">
+                              Title
+                            </label>
+                            <input
+                              id="task-title"
+                              name="title"
+                              value={newTask.title}
+                              onChange={handleTaskChange}
+                              className="w-full p-2 border rounded-md"
+                              required
+                            />
+                          </div>
+                          
+                          <div>
+                            <label htmlFor="task-description" className="block text-sm font-medium mb-1">
+                              Description
+                            </label>
+                            <textarea
+                              id="task-description"
+                              name="description"
+                              value={newTask.description}
+                              onChange={handleTaskChange}
+                              className="w-full p-2 border rounded-md h-24"
+                            />
+                          </div>
+                          
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label htmlFor="task-status" className="block text-sm font-medium mb-1">
+                                Status
+                              </label>
+                              <select
+                                id="task-status"
+                                name="status"
+                                value={newTask.status}
+                                onChange={handleTaskChange}
+                                className="w-full p-2 border rounded-md"
+                              >
+                                <option value="pending">Pending</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                                <option value="blocked">Blocked</option>
+                              </select>
+                            </div>
+                            
+                            <div>
+                              <label htmlFor="task-priority" className="block text-sm font-medium mb-1">
+                                Priority
+                              </label>
+                              <select
+                                id="task-priority"
+                                name="priority"
+                                value={newTask.priority}
+                                onChange={handleTaskChange}
+                                className="w-full p-2 border rounded-md"
+                              >
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                              </select>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label htmlFor="task-assignedTo" className="block text-sm font-medium mb-1">
+                                Assigned To
+                              </label>
+                              <input
+                                id="task-assignedTo"
+                                name="assignedTo"
+                                value={newTask.assignedTo}
+                                onChange={handleTaskChange}
+                                className="w-full p-2 border rounded-md"
+                              />
+                            </div>
+                            
+                            <div>
+                              <label htmlFor="task-dueDate" className="block text-sm font-medium mb-1">
+                                Due Date
+                              </label>
+                              <input
+                                id="task-dueDate"
+                                name="dueDate"
+                                type="date"
+                                value={newTask.dueDate}
+                                onChange={handleTaskChange}
+                                className="w-full p-2 border rounded-md"
+                              />
+                            </div>
+                          </div>
+                          
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={handleToggleTaskForm}
+                            >
+                              Cancel
+                            </Button>
+                            <Button type="submit">
+                              {editingTask ? 'Update' : 'Create'} Task
+                            </Button>
+                          </div>
+                        </div>
+                      </form>
+                    </CardContent>
+                  </Card>
+                )}
+                
+                {project.tasks && project.tasks.length > 0 ? (
+                  <div className="space-y-4">
+                    {project.tasks.map(task => (
+                      <Card key={task.id} id={`task-${task.id}`}>
+                        <CardContent className="pt-6">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="font-semibold">{task.title}</h3>
+                              <div className="text-sm text-muted-foreground mt-1">
+                                {task.description}
+                              </div>
+                              {task.assignedTo && (
+                                <div className="text-sm mt-2">
+                                  <span className="text-muted-foreground">Assigned to: </span>
+                                  <span>{task.assignedTo}</span>
+                                </div>
+                              )}
+                              {task.dueDate && (
+                                <div className="text-sm">
+                                  <span className="text-muted-foreground">Due: </span>
+                                  <span>{task.dueDate}</span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex flex-col items-end">
+                              <div className="flex gap-2 mb-1">
+                                <span className={`text-xs px-2 py-1 rounded-full ${
+                                  task.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                  task.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+                                  task.status === 'blocked' ? 'bg-red-100 text-red-800' :
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {task.status.replace('-', ' ')}
+                                </span>
+                                <span className={`text-xs px-2 py-1 rounded-full ${
+                                  task.priority === 'high' ? 'bg-red-100 text-red-800' :
+                                  task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                                  'bg-green-100 text-green-800'
+                                }`}>
+                                  {task.priority}
+                                </span>
+                              </div>
+                              {isOwner && (
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => handleEditTask(task.id)}
+                                >
+                                  Edit
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 bg-muted/20 rounded-lg">
+                    <p className="text-muted-foreground">No tasks added yet.</p>
+                  </div>
+                )}
+              </TabsContent>
+              
+              {project.name === "Findry" && (
+                <TabsContent value="roadmap">
+                  <DocumentViewer 
+                    content={roadmapContent} 
+                    title="Findry Project Roadmap" 
+                  />
+                </TabsContent>
               )}
-            </div>
+            </Tabs>
           </div>
           
           <div>
-            <Tabs defaultValue="chat">
-              <ProjectChat 
-                ref={projectChatRef}
-                project={project}
-                className="sticky top-4"
-                onReferenceClick={{
-                  component: handleComponentReference,
-                  task: handleTaskReference
-                }}
-              />
-            </Tabs>
+            <ProjectChat 
+              project={project} 
+              onReferenceClick={{
+                component: handleComponentReference,
+                task: handleTaskReference
+              }}
+              ref={projectChatRef}
+            />
           </div>
         </div>
       </div>

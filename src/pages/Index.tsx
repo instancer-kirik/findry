@@ -7,7 +7,7 @@ import EcosystemSection from '@/components/home/EcosystemSection';
 import ScreenshotGallery from '@/components/home/ScreenshotGallery';
 import EmailWaitlist from '@/components/home/EmailWaitlist';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Calendar, Compass, Palette, Store, Users } from 'lucide-react';
+import { ArrowRight, Calendar, Compass, Palette, Store, Users, ChevronDown } from 'lucide-react';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
@@ -68,6 +68,13 @@ const Landing: React.FC = () => {
       
       {/* Hero Section */}
       <Hero />
+      
+      {/* Scroll Indicator */}
+      <div className="flex justify-center pb-8 -mt-8 relative z-10">
+        <div className="animate-bounce bg-primary/10 p-2 rounded-full">
+          <ChevronDown className="h-6 w-6 text-primary" />
+        </div>
+      </div>
       
       {/* Screenshots Section */}
       <div className="bg-muted/20 py-16">
