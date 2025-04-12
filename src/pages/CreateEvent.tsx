@@ -519,17 +519,17 @@ const CreateEvent = () => {
         tags: eventTags,
         slots: JSON.parse(JSON.stringify(processedSlots)),
         requested_items: JSON.parse(JSON.stringify(requestedItems)),
-        created_by: user?.id
+        created_by: user.id
       };
       
-      const { error: eventError } = await supabase.from('events').insert(eventData);
+      console.log("Attempting to insert event with data:", eventData);
+      
+      const { error: eventError } = await supabase
+        .from('events')
+        .insert(eventData);
       
       if (eventError) {
         console.error('Error creating event:', eventError);
-        await supabase
-          .from('content_ownership')
-          .delete()
-          .match({ content_id: eventId, content_type: 'event' });
         throw new Error(eventError.message);
       }
       

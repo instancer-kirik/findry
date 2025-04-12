@@ -63,13 +63,13 @@ const EventDetail: React.FC = () => {
         if (error) throw error;
 
         if (data) {
-          setEvent(data as EventProps);
+          const eventData = data as unknown as EventProps;
+          setEvent(eventData);
           
           if (data.slots) {
             try {
-              const parsedSlots = Array.isArray(data.slots) 
-                ? data.slots 
-                : typeof data.slots === 'string' 
+              const parsedSlots = 
+                typeof data.slots === 'string' 
                   ? JSON.parse(data.slots) 
                   : data.slots;
               
@@ -81,9 +81,8 @@ const EventDetail: React.FC = () => {
           
           if (data.requested_items) {
             try {
-              const parsedItems = Array.isArray(data.requested_items) 
-                ? data.requested_items 
-                : typeof data.requested_items === 'string' 
+              const parsedItems = 
+                typeof data.requested_items === 'string' 
                   ? JSON.parse(data.requested_items) 
                   : data.requested_items;
               
