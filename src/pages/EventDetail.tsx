@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -11,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import EventSharingDialog from '@/components/events/EventSharingDialog';
 import { EventSlot } from '@/types/event';
+import { Json } from '@/integrations/supabase/types';
 
 interface EventProps {
   id: string;
@@ -28,13 +28,15 @@ interface EventProps {
   updated_at: string;
   eventbrite_id?: string;
   eventbrite_url?: string;
-  slots?: EventSlot[];
-  requested_items?: any[];
+  slots?: Json;
+  requested_items?: Json;
 }
 
 const EventDetail: React.FC = () => {
   const { eventId } = useParams<{ eventId: string }>();
   const [event, setEvent] = useState<EventProps | null>(null);
+  const [eventSlots, setEventSlots] = useState<EventSlot[]>([]);
+  const [requestedItems, setRequestedItems] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [attending, setAttending] = useState<boolean>(false);
@@ -62,7 +64,36 @@ const EventDetail: React.FC = () => {
 
         if (data) {
           setEvent(data as EventProps);
-          setAttendeeCount(Math.floor(Math.random() * data.capacity) || 15);
+          
+          if (data.slots) {
+            try {
+              const parsedSlots = Array.isArray(data.slots) 
+                ? data.slots 
+                : typeof data.slots === 'string' 
+                  ? JSON.parse(data.slots) 
+                  : data.slots;
+              
+              setEventSlots(parsedSlots as EventSlot[]);
+            } catch (err) {
+              console.error("Error parsing event slots:", err);
+            }
+          }
+          
+          if (data.requested_items) {
+            try {
+              const parsedItems = Array.isArray(data.requested_items) 
+                ? data.requested_items 
+                : typeof data.requested_items === 'string' 
+                  ? JSON.parse(data.requested_items) 
+                  : data.requested_items;
+              
+              setRequestedItems(parsedItems);
+            } catch (err) {
+              console.error("Error parsing requested items:", err);
+            }
+          }
+          
+          setAttendeeCount(Math.floor(Math.random() * (data.capacity || 50)) || 15);
         } else {
           setError("Event not found");
         }
@@ -158,9 +189,9 @@ const EventDetail: React.FC = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2">
-            <h1 className="text-3xl font-bold mb-4">{event.name}</h1>
+            <h1 className="text-3xl font-bold mb-4">{event?.name}</h1>
             
-            {event.image_url && (
+            {event?.image_url && (
               <div className="aspect-video w-full overflow-hidden rounded-lg mb-6">
                 <img 
                   src={event.image_url} 
@@ -171,24 +202,24 @@ const EventDetail: React.FC = () => {
             )}
             
             <div className="flex flex-wrap gap-2 mb-4">
-              {event.tags && event.tags.map(tag => (
+              {event?.tags && event.tags.map(tag => (
                 <Badge key={tag} variant="outline">{tag}</Badge>
               ))}
-              {event.type && (
+              {event?.type && (
                 <Badge variant="secondary">{event.type}</Badge>
               )}
             </div>
             
             <div className="prose max-w-none mb-8 dark:prose-invert">
               <h2 className="text-xl font-semibold mb-2">About This Event</h2>
-              <p className="whitespace-pre-line">{event.description}</p>
+              <p className="whitespace-pre-line">{event?.description}</p>
             </div>
 
-            {event?.slots && event.slots.length > 0 && (
+            {eventSlots && eventSlots.length > 0 && (
               <div className="mt-8">
                 <h2 className="text-xl font-semibold mb-4">Event Schedule</h2>
                 <div className="space-y-3">
-                  {event.slots.map((slot, index) => (
+                  {eventSlots.map((slot, index) => (
                     <div key={slot.id || index} className="border rounded-md p-3">
                       <div className="flex justify-between items-center">
                         <div>
@@ -223,11 +254,11 @@ const EventDetail: React.FC = () => {
               </div>
             )}
 
-            {event?.requested_items && event.requested_items.length > 0 && (
+            {requestedItems && requestedItems.length > 0 && (
               <div className="mt-8">
                 <h2 className="text-xl font-semibold mb-4">Requested Items</h2>
                 <div className="space-y-3">
-                  {event.requested_items.map((item, index) => (
+                  {requestedItems.map((item, index) => (
                     <div key={item.id || index} className="border rounded-md p-3">
                       <div className="flex justify-between items-center">
                         <div>
@@ -267,7 +298,7 @@ const EventDetail: React.FC = () => {
                     <Calendar className="h-5 w-5 mr-3 text-muted-foreground flex-shrink-0 mt-0.5" />
                     <div>
                       <h3 className="font-medium">Date</h3>
-                      <p className="text-muted-foreground">{formatDate(event.start_date)}</p>
+                      <p className="text-muted-foreground">{event && formatDate(event.start_date)}</p>
                     </div>
                   </div>
                   
@@ -276,7 +307,7 @@ const EventDetail: React.FC = () => {
                     <div>
                       <h3 className="font-medium">Time</h3>
                       <p className="text-muted-foreground">
-                        {formatTime(event.start_date)} - {formatTime(event.end_date)}
+                        {event && formatTime(event.start_date)} - {event && event.end_date && formatTime(event.end_date)}
                       </p>
                     </div>
                   </div>
@@ -285,7 +316,7 @@ const EventDetail: React.FC = () => {
                     <MapPin className="h-5 w-5 mr-3 text-muted-foreground flex-shrink-0 mt-0.5" />
                     <div>
                       <h3 className="font-medium">Location</h3>
-                      <p className="text-muted-foreground">{event.location}</p>
+                      <p className="text-muted-foreground">{event?.location}</p>
                     </div>
                   </div>
                   
@@ -294,7 +325,7 @@ const EventDetail: React.FC = () => {
                     <div>
                       <h3 className="font-medium">Attendees</h3>
                       <p className="text-muted-foreground">
-                        {attendeeCount} of {event.capacity} spots filled
+                        {attendeeCount} of {event?.capacity || 'unlimited'} spots filled
                       </p>
                     </div>
                   </div>
@@ -309,13 +340,15 @@ const EventDetail: React.FC = () => {
                     {attending ? "Cancel RSVP" : "RSVP Now"}
                   </Button>
                   
-                  <EventSharingDialog 
-                    eventName={event.name}
-                    eventDate={formatDate(event.start_date)}
-                    eventId={event.id}
-                  />
+                  {event && (
+                    <EventSharingDialog 
+                      eventName={event.name}
+                      eventDate={formatDate(event.start_date)}
+                      eventId={event.id}
+                    />
+                  )}
 
-                  {event.eventbrite_url && (
+                  {event?.eventbrite_url && (
                     <Button 
                       className="w-full" 
                       variant="secondary"

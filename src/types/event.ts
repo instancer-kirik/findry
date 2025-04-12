@@ -1,6 +1,7 @@
 
 import { Profile } from "./profile";
 import { ContentItemProps } from "@/types/content";
+import { Json } from "@/integrations/supabase/types";
 
 export interface EventSlot {
   id: string;

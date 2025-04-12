@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -512,8 +511,8 @@ const CreateEvent = () => {
         capacity: capacity ? parseInt(capacity) : null,
         image_url: posterUrl,
         tags: eventTags,
-        slots: processedSlots,
-        requested_items: requestedItems,
+        slots: JSON.parse(JSON.stringify(processedSlots)),
+        requested_items: JSON.parse(JSON.stringify(requestedItems)),
         created_by: user?.id
       };
       
