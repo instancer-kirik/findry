@@ -390,10 +390,24 @@ const CreateEvent = () => {
         }
       }
       
+      // Process slots and extract requested items
+      const requestedItems = [];
       const processedSlots = eventSlots.map(slot => {
         const processedSlot = { ...slot };
         
         if (slot.artist?.isNew) {
+          const requestedArtist = {
+            id: slot.artist.id,
+            name: slot.artist.name,
+            type: 'artist',
+            status: 'requested',
+            email: slot.artist.email,
+            link: slot.artist.link,
+            location: slot.artist.location
+          };
+          
+          requestedItems.push(requestedArtist);
+          
           const requestNote = `Requested artist: ${slot.artist.name}`;
           processedSlot.notes = processedSlot.notes 
             ? `${processedSlot.notes}\n${requestNote}` 
@@ -414,6 +428,18 @@ const CreateEvent = () => {
         }
         
         if (slot.resource?.isNew) {
+          const requestedResource = {
+            id: slot.resource.id,
+            name: slot.resource.name,
+            type: 'resource',
+            status: 'requested',
+            email: slot.resource.email,
+            link: slot.resource.link,
+            location: slot.resource.location
+          };
+          
+          requestedItems.push(requestedResource);
+          
           const requestNote = `Requested resource: ${slot.resource.name}`;
           processedSlot.notes = processedSlot.notes 
             ? `${processedSlot.notes}\n${requestNote}` 
@@ -434,6 +460,18 @@ const CreateEvent = () => {
         }
         
         if (slot.venue?.isNew) {
+          const requestedVenue = {
+            id: slot.venue.id,
+            name: slot.venue.name,
+            type: 'venue',
+            status: 'requested',
+            email: slot.venue.email,
+            link: slot.venue.link,
+            location: slot.venue.location
+          };
+          
+          requestedItems.push(requestedVenue);
+          
           const requestNote = `Requested venue: ${slot.venue.name}`;
           processedSlot.notes = processedSlot.notes 
             ? `${processedSlot.notes}\n${requestNote}` 
@@ -479,21 +517,10 @@ const CreateEvent = () => {
         capacity: capacity ? parseInt(capacity) : null,
         image_url: posterUrl,
         tags: eventTags,
-        slots: processedSlots
+        slots: JSON.parse(JSON.stringify(processedSlots)),
+        requested_items: JSON.parse(JSON.stringify(requestedItems)),
+        created_by: user?.id
       };
-      
-      const { error: ownershipError } = await supabase
-        .from('content_ownership')
-        .insert({
-          content_id: eventId,
-          content_type: 'event',
-          owner_id: user.id
-        });
-        
-      if (ownershipError) {
-        console.error('Error creating content ownership:', ownershipError);
-        throw new Error('Failed to establish event ownership. ' + ownershipError.message);
-      }
       
       const { error: eventError } = await supabase.from('events').insert(eventData);
       

@@ -1,6 +1,7 @@
 
 import { Profile } from "./profile";
 import { ContentItemProps } from "@/types/content";
+import { Json } from "@/integrations/supabase/types";
 
 export interface EventSlot {
   id: string;
@@ -40,6 +41,7 @@ export interface Event {
   attending?: boolean;
   interested?: boolean;
   slots?: EventSlot[];
+  requested_items?: any[];
   artists?: ContentItemProps[];
   resources?: ContentItemProps[];
   venueId?: string;
@@ -69,4 +71,5 @@ export interface EventFormValues {
   communityId?: string;
   isPublic: boolean;
   slots?: EventSlot[];
+  requested_items?: any[];
 }

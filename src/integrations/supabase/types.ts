@@ -301,6 +301,8 @@ export type Database = {
           image_url: string | null
           location: string | null
           name: string
+          requested_items: Json | null
+          slots: Json | null
           start_date: string | null
           subtype: string | null
           tags: string[] | null
@@ -316,6 +318,8 @@ export type Database = {
           image_url?: string | null
           location?: string | null
           name: string
+          requested_items?: Json | null
+          slots?: Json | null
           start_date?: string | null
           subtype?: string | null
           tags?: string[] | null
@@ -331,6 +335,8 @@ export type Database = {
           image_url?: string | null
           location?: string | null
           name?: string
+          requested_items?: Json | null
+          slots?: Json | null
           start_date?: string | null
           subtype?: string | null
           tags?: string[] | null

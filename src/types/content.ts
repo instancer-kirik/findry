@@ -29,6 +29,7 @@ export interface ContentItemProps {
   link?: string;      // Added for external links
   isRequestOnly?: boolean; // Added for requested resources
   isNew?: boolean;    // Added to track newly created items
+  status?: string;    // Added for tracking request status
 }
 
 export interface ContentOwnershipProps {
