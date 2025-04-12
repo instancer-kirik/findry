@@ -40,6 +40,7 @@ export interface Event {
   attending?: boolean;
   interested?: boolean;
   slots?: EventSlot[];
+  requested_items?: any[];
   artists?: ContentItemProps[];
   resources?: ContentItemProps[];
   venueId?: string;
@@ -69,4 +70,5 @@ export interface EventFormValues {
   communityId?: string;
   isPublic: boolean;
   slots?: EventSlot[];
+  requested_items?: any[];
 }

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -384,10 +385,24 @@ const CreateEvent = () => {
         }
       }
       
+      // Process slots and extract requested items
+      const requestedItems = [];
       const processedSlots = eventSlots.map(slot => {
         const processedSlot = { ...slot };
         
         if (slot.artist?.isNew) {
+          const requestedArtist = {
+            id: slot.artist.id,
+            name: slot.artist.name,
+            type: 'artist',
+            status: 'requested',
+            email: slot.artist.email,
+            link: slot.artist.link,
+            location: slot.artist.location
+          };
+          
+          requestedItems.push(requestedArtist);
+          
           const requestNote = `Requested artist: ${slot.artist.name}`;
           processedSlot.notes = processedSlot.notes 
             ? `${processedSlot.notes}\n${requestNote}` 
@@ -408,6 +423,18 @@ const CreateEvent = () => {
         }
         
         if (slot.resource?.isNew) {
+          const requestedResource = {
+            id: slot.resource.id,
+            name: slot.resource.name,
+            type: 'resource',
+            status: 'requested',
+            email: slot.resource.email,
+            link: slot.resource.link,
+            location: slot.resource.location
+          };
+          
+          requestedItems.push(requestedResource);
+          
           const requestNote = `Requested resource: ${slot.resource.name}`;
           processedSlot.notes = processedSlot.notes 
             ? `${processedSlot.notes}\n${requestNote}` 
@@ -428,6 +455,18 @@ const CreateEvent = () => {
         }
         
         if (slot.venue?.isNew) {
+          const requestedVenue = {
+            id: slot.venue.id,
+            name: slot.venue.name,
+            type: 'venue',
+            status: 'requested',
+            email: slot.venue.email,
+            link: slot.venue.link,
+            location: slot.venue.location
+          };
+          
+          requestedItems.push(requestedVenue);
+          
           const requestNote = `Requested venue: ${slot.venue.name}`;
           processedSlot.notes = processedSlot.notes 
             ? `${processedSlot.notes}\n${requestNote}` 
@@ -474,6 +513,7 @@ const CreateEvent = () => {
         image_url: posterUrl,
         tags: eventTags,
         slots: processedSlots,
+        requested_items: requestedItems,
         created_by: user?.id
       };
       

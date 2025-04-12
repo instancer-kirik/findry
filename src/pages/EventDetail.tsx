@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -28,6 +29,7 @@ interface EventProps {
   eventbrite_id?: string;
   eventbrite_url?: string;
   slots?: EventSlot[];
+  requested_items?: any[];
 }
 
 const EventDetail: React.FC = () => {
@@ -187,7 +189,7 @@ const EventDetail: React.FC = () => {
                 <h2 className="text-xl font-semibold mb-4">Event Schedule</h2>
                 <div className="space-y-3">
                   {event.slots.map((slot, index) => (
-                    <div key={index} className="border rounded-md p-3">
+                    <div key={slot.id || index} className="border rounded-md p-3">
                       <div className="flex justify-between items-center">
                         <div>
                           <h3 className="font-medium">{slot.title || `Slot ${index + 1}`}</h3>
@@ -203,6 +205,52 @@ const EventDetail: React.FC = () => {
                       </div>
                       {slot.description && (
                         <p className="text-sm mt-2">{slot.description}</p>
+                      )}
+                      {slot.isRequestOnly && (
+                        <Badge variant="outline" className="mt-2 bg-yellow-100/10">
+                          Request Only
+                        </Badge>
+                      )}
+                      {slot.notes && (
+                        <div className="mt-2 text-sm text-muted-foreground">
+                          <p className="font-medium">Notes:</p>
+                          <p className="whitespace-pre-line">{slot.notes}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {event?.requested_items && event.requested_items.length > 0 && (
+              <div className="mt-8">
+                <h2 className="text-xl font-semibold mb-4">Requested Items</h2>
+                <div className="space-y-3">
+                  {event.requested_items.map((item, index) => (
+                    <div key={item.id || index} className="border rounded-md p-3">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h3 className="font-medium">{item.name}</h3>
+                          {item.location && (
+                            <p className="text-sm text-muted-foreground">
+                              Location: {item.location}
+                            </p>
+                          )}
+                        </div>
+                        <Badge variant="outline" className="capitalize">
+                          {item.type}
+                        </Badge>
+                      </div>
+                      {item.email && (
+                        <p className="text-sm mt-2">Contact: {item.email}</p>
+                      )}
+                      {item.link && (
+                        <p className="text-sm mt-1">
+                          <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline flex items-center">
+                            <ExternalLink className="h-3 w-3 mr-1" /> Link
+                          </a>
+                        </p>
                       )}
                     </div>
                   ))}
