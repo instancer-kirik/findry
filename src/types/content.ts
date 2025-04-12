@@ -28,7 +28,7 @@ export interface ContentItemProps {
   email?: string;     // Added for contact information
   link?: string;      // Added for external links
   isRequestOnly?: boolean; // Added for requested resources
-  isNew?: boolean;
+  isNew?: boolean;    // Added to track newly created items
 }
 
 export interface ContentOwnershipProps {

@@ -172,6 +172,7 @@ export function EventSlotManager({
   eventStartTime,
   eventEndTime,
   eventDate,
+  readOnly = false,
   availableArtists,
   availableResources,
   availableVenues
@@ -242,7 +243,6 @@ export function EventSlotManager({
   };
 
   const handleSaveSlot = (updatedSlot: EventSlot) => {
-    // First close the dialog to prevent multiple actions
     setEditingSlot(null);
     setSelectedObject({
       type: 'artist',
@@ -250,13 +250,11 @@ export function EventSlotManager({
     });
     setIsCreatingNew(false);
     
-    // Then update the slot in the local state
     const slotWithTitle = {
       ...updatedSlot,
       title: inferTitle(updatedSlot)
     };
     
-    // Finally update the slots array
     setLocalSlots(localSlots.map(slot => 
       slot.id === updatedSlot.id ? slotWithTitle : slot
     ));
@@ -311,7 +309,6 @@ export function EventSlotManager({
       return;
     }
 
-    // Create a local object with an isRequestOnly flag
     const tempId = `temp_${Date.now()}`;
     const newRequestedItem: ExtendedContentItemProps = {
       id: tempId,
@@ -338,7 +335,6 @@ export function EventSlotManager({
       }
       console.log('Creating new requested item:', { type: selectedObject.type, item: newRequestedItem, status: updatedSlot.status });
       
-      // Clean up states first to prevent double saves
       setNewItem({
         name: '',
         email: '',
@@ -347,14 +343,20 @@ export function EventSlotManager({
         notes: ''
       });
       
-      // Reset dialog state
       setIsCreatingNew(false);
       
-      // Show success message
       toast.success(`${selectedObject.type} request added to event`);
       
-      // Finally call handleSaveSlot with the updated slot
-      handleSaveSlot(updatedSlot);
+      setEditingSlot(null);
+      
+      const slotWithTitle = {
+        ...updatedSlot,
+        title: inferTitle(updatedSlot)
+      };
+      
+      setLocalSlots(localSlots.map(slot => 
+        slot.id === updatedSlot.id ? slotWithTitle : slot
+      ));
     }
   };
 

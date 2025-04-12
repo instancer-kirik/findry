@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon, Clock, Image, Plus, Upload } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { generateUniqueId } from '@/utils/unique-id';
@@ -22,6 +22,7 @@ import EventSharingDialog from '@/components/events/EventSharingDialog';
 import EventSlotManager from '@/components/events/EventSlotManager';
 import { EventSlot } from '@/types/event';
 import { ContentItemProps } from '@/types/content';
+import { v4 as uuidv4 } from 'uuid';
 
 interface EventContentItem {
   id: string;
@@ -41,6 +42,9 @@ type RecurrenceType = "none" | "daily" | "weekly" | "monthly" | "custom";
 const CreateEvent = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const communityId = searchParams.get('communityId');
+  
   const [eventName, setEventName] = useState('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
@@ -164,6 +168,35 @@ const CreateEvent = () => {
       location: 'Boston'
     }
   ]);
+
+  useEffect(() => {
+    setSelectedObjects({
+      artists: artists.filter(a => a.selected).map(a => ({
+        id: a.id,
+        name: a.name,
+        type: a.type,
+        location: a.location,
+        image_url: a.image_url,
+        description: a.description
+      })),
+      resources: resources.filter(r => r.selected).map(r => ({
+        id: r.id,
+        name: r.name,
+        type: r.type,
+        location: r.location,
+        image_url: r.image_url,
+        description: r.description
+      })),
+      venues: venues.filter(v => v.selected).map(v => ({
+        id: v.id,
+        name: v.name,
+        type: v.type,
+        location: v.location,
+        image_url: v.image_url,
+        description: v.description
+      }))
+    });
+  }, [artists, resources, venues]);
 
   const handleArtistSelection = (id: string) => {
     setArtists(artists.map(artist => 
@@ -298,11 +331,9 @@ const CreateEvent = () => {
   };
 
   const handleCreateEvent = async () => {
-    // Add ID to avoid duplicate processing
     const processingId = Date.now();
     console.log(`Create button clicked (ID: ${processingId}), starting event creation process`);
     
-    // Immediately set loading to prevent multiple clicks
     if (loading) {
       console.log(`Already in loading state, preventing duplicate submission (ID: ${processingId})`);
       return;
@@ -312,39 +343,199 @@ const CreateEvent = () => {
     console.log(`Set loading state to true (ID: ${processingId})`);
     
     try {
-      // Basic validation
       if (!eventName) {
         toast.error("Event name is required");
         setLoading(false);
         return;
       }
 
-      // Log the attempt
-      console.log(`Bypassing database, showing success message (ID: ${processingId})`);
+      if (!startDate) {
+        toast.error("Start date is required");
+        setLoading(false);
+        return;
+      }
+
+      if (!startTime) {
+        toast.error("Start time is required");
+        setLoading(false);
+        return;
+      }
+
+      if (!location) {
+        toast.error("Location is required");
+        setLoading(false);
+        return;
+      }
+
+      const eventId = uuidv4();
       
-      // Wait for 1 second to simulate processing
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const formattedStartDate = startDate ? new Date(startDate) : new Date();
+      if (startTime) {
+        const [hours, minutes] = startTime.split(':').map(Number);
+        formattedStartDate.setHours(hours, minutes);
+      }
       
-      // Show success message
-      toast.success("Event creation simulated successfully!");
+      let formattedEndDate = null;
+      if (endDate) {
+        formattedEndDate = new Date(endDate);
+        if (endTime) {
+          const [hours, minutes] = endTime.split(':').map(Number);
+          formattedEndDate.setHours(hours, minutes);
+        }
+      }
       
-      // Navigate after toast
+      const processedSlots = eventSlots.map(slot => {
+        const processedSlot = { ...slot };
+        
+        if (slot.artist?.isNew) {
+          const requestNote = `Requested artist: ${slot.artist.name}`;
+          processedSlot.notes = processedSlot.notes 
+            ? `${processedSlot.notes}\n${requestNote}` 
+            : requestNote;
+          
+          if (slot.artist.email) {
+            processedSlot.notes += `\nEmail: ${slot.artist.email}`;
+          }
+          if (slot.artist.link) {
+            processedSlot.notes += `\nLink: ${slot.artist.link}`;
+          }
+          if (slot.artist.location) {
+            processedSlot.notes += `\nLocation: ${slot.artist.location}`;
+          }
+          
+          processedSlot.artist = undefined;
+          processedSlot.isRequestOnly = true;
+        }
+        
+        if (slot.resource?.isNew) {
+          const requestNote = `Requested resource: ${slot.resource.name}`;
+          processedSlot.notes = processedSlot.notes 
+            ? `${processedSlot.notes}\n${requestNote}` 
+            : requestNote;
+          
+          if (slot.resource.email) {
+            processedSlot.notes += `\nEmail: ${slot.resource.email}`;
+          }
+          if (slot.resource.link) {
+            processedSlot.notes += `\nLink: ${slot.resource.link}`;
+          }
+          if (slot.resource.location) {
+            processedSlot.notes += `\nLocation: ${slot.resource.location}`;
+          }
+          
+          processedSlot.resource = undefined;
+          processedSlot.isRequestOnly = true;
+        }
+        
+        if (slot.venue?.isNew) {
+          const requestNote = `Requested venue: ${slot.venue.name}`;
+          processedSlot.notes = processedSlot.notes 
+            ? `${processedSlot.notes}\n${requestNote}` 
+            : requestNote;
+          
+          if (slot.venue.email) {
+            processedSlot.notes += `\nEmail: ${slot.venue.email}`;
+          }
+          if (slot.venue.link) {
+            processedSlot.notes += `\nLink: ${slot.venue.link}`;
+          }
+          if (slot.venue.location) {
+            processedSlot.notes += `\nLocation: ${slot.venue.location}`;
+          }
+          
+          processedSlot.venue = undefined;
+          processedSlot.isRequestOnly = true;
+        }
+        
+        return processedSlot;
+      });
+      
+      let posterUrl = '';
+      if (posterImage) {
+        posterUrl = await uploadPosterToStorage() || '';
+      }
+      
+      const eventTags = [
+        ...artists.filter(a => a.selected).map(a => a.type || 'artist'),
+        ...resources.filter(r => r.selected).map(r => r.type || 'resource'),
+        ...venues.filter(v => v.selected).map(v => v.type || 'venue'),
+        eventType
+      ].filter(Boolean);
+      
+      const eventData = {
+        id: eventId,
+        name: eventName,
+        description: description,
+        type: eventType,
+        start_date: formattedStartDate.toISOString(),
+        end_date: formattedEndDate ? formattedEndDate.toISOString() : null,
+        location: location,
+        capacity: capacity ? parseInt(capacity) : null,
+        image_url: posterUrl,
+        tags: eventTags,
+        slots: processedSlots,
+        created_by: user?.id,
+        is_public: !isPrivate
+      };
+      
+      const { error: eventError } = await supabase.from('events').insert(eventData);
+      
+      if (eventError) {
+        console.error('Error creating event:', eventError);
+        throw new Error(eventError.message);
+      }
+      
+      if (communityId && user) {
+        try {
+          const { error: relationshipError } = await supabase
+            .from('event_community_relationships')
+            .insert({
+              event_id: eventId,
+              community_id: communityId,
+              created_by: user.id
+            });
+            
+          if (relationshipError) {
+            console.error('Error creating relationship:', relationshipError);
+          }
+        } catch (relationshipError) {
+          console.error('Failed to store event relationship:', relationshipError);
+        }
+      }
+      
+      if (user) {
+        try {
+          const { error: ownershipError } = await supabase
+            .from('content_ownership')
+            .insert({
+              content_id: eventId,
+              content_type: 'event',
+              owner_id: user.id
+            });
+            
+          if (ownershipError) {
+            console.error('Error creating content ownership:', ownershipError);
+          }
+        } catch (ownershipError) {
+          console.error('Failed to store content ownership:', ownershipError);
+        }
+      }
+      
+      toast.success("Event created successfully!");
+      
       setTimeout(() => {
-        console.log(`Navigating to events page (ID: ${processingId})...`);
-        navigate('/events');
+        navigate(`/events/${eventId}`);
       }, 1000);
     } catch (error: any) {
       console.error(`Error in create event process (ID: ${processingId}):`, error);
-      toast.error(`Error: ${error?.message || 'Unknown error'}`);
+      toast.error(error.message || "Failed to create event");
     } finally {
-      console.log(`Set loading state to false (ID: ${processingId})`);
       setLoading(false);
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Don't do anything here - we'll use the button click instead
   };
 
   const getFilteredContent = () => {
