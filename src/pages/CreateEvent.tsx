@@ -367,6 +367,12 @@ const CreateEvent = () => {
         return;
       }
 
+      if (!user) {
+        toast.error("You need to be logged in to create an event");
+        setLoading(false);
+        return;
+      }
+
       const eventId = uuidv4();
       
       const formattedStartDate = startDate ? new Date(startDate) : new Date();
@@ -473,14 +479,30 @@ const CreateEvent = () => {
         capacity: capacity ? parseInt(capacity) : null,
         image_url: posterUrl,
         tags: eventTags,
-        slots: processedSlots,
-        created_by: user?.id
+        slots: processedSlots
       };
+      
+      const { error: ownershipError } = await supabase
+        .from('content_ownership')
+        .insert({
+          content_id: eventId,
+          content_type: 'event',
+          owner_id: user.id
+        });
+        
+      if (ownershipError) {
+        console.error('Error creating content ownership:', ownershipError);
+        throw new Error('Failed to establish event ownership. ' + ownershipError.message);
+      }
       
       const { error: eventError } = await supabase.from('events').insert(eventData);
       
       if (eventError) {
         console.error('Error creating event:', eventError);
+        await supabase
+          .from('content_ownership')
+          .delete()
+          .match({ content_id: eventId, content_type: 'event' });
         throw new Error(eventError.message);
       }
       
@@ -499,24 +521,6 @@ const CreateEvent = () => {
           }
         } catch (relationshipError) {
           console.error('Failed to store event relationship:', relationshipError);
-        }
-      }
-      
-      if (user) {
-        try {
-          const { error: ownershipError } = await supabase
-            .from('content_ownership')
-            .insert({
-              content_id: eventId,
-              content_type: 'event',
-              owner_id: user.id
-            });
-            
-          if (ownershipError) {
-            console.error('Error creating content ownership:', ownershipError);
-          }
-        } catch (ownershipError) {
-          console.error('Failed to store content ownership:', ownershipError);
         }
       }
       
