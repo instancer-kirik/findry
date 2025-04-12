@@ -1,6 +1,8 @@
-
 import { ContentItemProps } from "@/components/marketplace/ContentCard";
 import { Profile } from "./profile";
+
+// Update to use ContentItemProps from types/content instead of marketplace/ContentCard
+import { ContentItemProps as ContentItem } from "@/types/content";
 
 export interface EventSlot {
   id: string;
@@ -8,11 +10,11 @@ export interface EventSlot {
   description?: string;
   startTime: string;
   endTime: string;
-  artist?: ContentItemProps;
+  artist?: ContentItem;
   artistId?: string;
-  resource?: ContentItemProps;
+  resource?: ContentItem;
   resourceId?: string;
-  venue?: ContentItemProps;
+  venue?: ContentItem;
   venueId?: string;
   status: 'available' | 'reserved' | 'confirmed' | 'canceled' | 'requested';
   slotType: 'performance' | 'setup' | 'breakdown' | 'break' | 'other';

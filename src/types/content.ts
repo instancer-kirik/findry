@@ -1,4 +1,3 @@
-
 import { ContentType } from './database';
 import { Profile } from './profile';
 
@@ -28,6 +27,7 @@ export interface ContentItemProps {
   email?: string;     // Added for contact information
   link?: string;      // Added for external links
   isRequestOnly?: boolean; // Added for requested resources
+  isNew?: boolean;
 }
 
 export interface ContentOwnershipProps {

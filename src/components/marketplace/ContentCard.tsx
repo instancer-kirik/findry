@@ -56,44 +56,47 @@ const ContentCard: React.FC<ContentCardProps> = ({
   const navigate = useNavigate();
   const [isSaved, setIsSaved] = React.useState(false);
   
-  // Get profile path based on content type
   const getProfilePath = () => {
-    let path;
+    // Map content types to their base types
+    const typeMap: Record<string, string> = {
+      'Band': 'artist',
+      'DJ': 'artist',
+      'Gallery': 'venue',
+      'Outdoor': 'venue',
+      'Equipment': 'resource',
+      'Sponsor': 'brand',
+      'Partner': 'brand',
+      'Community': 'community'
+    };
+
+    const baseType = typeMap[type] || type.toLowerCase();
     
-    switch (type) {
+    switch (baseType) {
       case 'artist':
-        // Check if this is a UUID format, which indicates it's from the profiles table
-        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
-        
-        // Log the ID format for debugging
-        console.log(`Artist ID: ${id}, UUID format: ${isUuid}`);
-        
-        // Use explicit path to avoid routing conflicts
-        path = `/artist-profile/${id}`;
-        break;
+        return `/profile/artist-${id}`;
       case 'venue':
-        path = `/venues/${id}`;
-        break;
+        return `/profile/venue-${id}`;
       case 'resource':
-      case 'space':
-      case 'tool':
-        path = `/resources/${id}`;
-        break;
+        return `/profile/resource-${id}`;
       case 'brand':
-        path = `/brands/${id}`;
-        break;
-      case 'event':
-        path = `/events/${id}`;
-        break;
-      case 'project':
-        path = `/projects/${id}`;
-        break;
+        return `/profile/brand-${id}`;
+      case 'community':
+        return `/profile/community-${id}`;
       default:
-        path = `/profile/${id}`;
+        console.warn(`Unknown content type: ${type}`);
+        return '/';
     }
-    
+  };
+
+  const handleClick = () => {
+    if (selectionMode) {
+      onClick();
+      return;
+    }
+
+    const path = getProfilePath();
     console.log(`ContentCard: Navigating to ${path} for ${type} with ID ${id}`);
-    return path;
+    navigate(path);
   };
 
   const handleSave = (e: React.MouseEvent) => {
@@ -114,13 +117,11 @@ const ContentCard: React.FC<ContentCardProps> = ({
     }
     
     // Otherwise navigate to the profile page
-    const path = getProfilePath();
-    console.log(`ContentCard: Click handler navigating to ${path}`);
-    navigate(path);
+    handleClick();
     
     // Update window location to ensure proper URL is displayed in browser
     // This is important for SEO and sharing links
-    window.history.pushState({}, '', path);
+    window.history.pushState({}, '', getProfilePath());
   };
 
   const handleAddToCollection = (e: React.MouseEvent, collectionName: string) => {

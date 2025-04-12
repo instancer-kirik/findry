@@ -300,10 +300,26 @@ const CreateEvent = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log("Submit button clicked, starting event creation process");
+    
     if (!user) {
       toast.error("Please log in to create an event");
       return;
     }
+    
+    console.log("User authenticated:", user.id);
+    console.log("Form data:", { 
+      eventName, 
+      description, 
+      startDate, 
+      startTime, 
+      endDate, 
+      endTime, 
+      location, 
+      capacity, 
+      eventType,
+      eventSlots: eventSlots.length
+    });
     
     if (!eventName) {
       toast.error("Event name is required");
@@ -321,6 +337,7 @@ const CreateEvent = () => {
     }
 
     setLoading(true);
+    console.log("Set loading state to true");
 
     try {
       let posterImageUrl = null;
@@ -344,6 +361,93 @@ const CreateEvent = () => {
           ? new Date(`${format(startDate, 'yyyy-MM-dd')}T${endTime}`)
           : null;
 
+      // Process event slots to handle requested items
+      const processedSlots = eventSlots.map(slot => {
+        // Create a clean version without circular references and simplify structure
+        // Use index signature to allow adding additional properties
+        const cleanSlot: {
+          id: string;
+          title: string;
+          description: string;
+          startTime: string;
+          endTime: string;
+          status: 'available' | 'reserved' | 'confirmed' | 'canceled' | 'requested';
+          slotType: 'performance' | 'setup' | 'breakdown' | 'break' | 'other';
+          notes: string;
+          [key: string]: any; // Allow any additional properties
+        } = {
+          id: slot.id,
+          title: slot.title || '',
+          description: slot.description || '',
+          startTime: slot.startTime,
+          endTime: slot.endTime,
+          status: slot.status,
+          slotType: slot.slotType,
+          notes: slot.notes || ''
+        };
+        
+        // Check for temporary requested items that need special handling
+        if (slot.artist?.isNew && slot.artist?.isRequestOnly) {
+          // For requested artists, store their information in notes
+          cleanSlot.notes += `\nRequested Artist: ${slot.artist.name}\nEmail: ${slot.artist.email || 'Not provided'}\nLink: ${slot.artist.link || 'Not provided'}\nLocation: ${slot.artist.location || 'Not provided'}`;
+          // Instead of storing the full artist object, just store basic info
+          cleanSlot.artistName = slot.artist.name;
+          cleanSlot.artistRequestDetails = {
+            name: slot.artist.name,
+            email: slot.artist.email,
+            link: slot.artist.link,
+            location: slot.artist.location
+          };
+        } else if (slot.artist) {
+          cleanSlot.artistId = slot.artist.id;
+          cleanSlot.artistName = slot.artist.name;
+        }
+        
+        if (slot.resource?.isNew && slot.resource?.isRequestOnly) {
+          // For requested resources, store their information in notes
+          cleanSlot.notes += `\nRequested Resource: ${slot.resource.name}\nEmail: ${slot.resource.email || 'Not provided'}\nLink: ${slot.resource.link || 'Not provided'}\nLocation: ${slot.resource.location || 'Not provided'}`;
+          // Instead of storing the full resource object, just store basic info
+          cleanSlot.resourceName = slot.resource.name;
+          cleanSlot.resourceRequestDetails = {
+            name: slot.resource.name,
+            email: slot.resource.email,
+            link: slot.resource.link,
+            location: slot.resource.location
+          };
+        } else if (slot.resource) {
+          cleanSlot.resourceId = slot.resource.id;
+          cleanSlot.resourceName = slot.resource.name;
+        }
+        
+        if (slot.venue?.isNew && slot.venue?.isRequestOnly) {
+          // For requested venues, store their information in notes
+          cleanSlot.notes += `\nRequested Venue: ${slot.venue.name}\nEmail: ${slot.venue.email || 'Not provided'}\nLink: ${slot.venue.link || 'Not provided'}\nLocation: ${slot.venue.location || 'Not provided'}`;
+          // Instead of storing the full venue object, just store basic info
+          cleanSlot.venueName = slot.venue.name;
+          cleanSlot.venueRequestDetails = {
+            name: slot.venue.name,
+            email: slot.venue.email,
+            link: slot.venue.link,
+            location: slot.venue.location
+          };
+        } else if (slot.venue) {
+          cleanSlot.venueId = slot.venue.id;
+          cleanSlot.venueName = slot.venue.name;
+        }
+        
+        return cleanSlot;
+      });
+
+      // Simplify the components data structure to avoid potential circular references
+      const simpleComponents = {
+        artists: selectedArtists.map(a => ({ id: a.id, name: a.name })),
+        venues: selectedVenues.map(v => ({ id: v.id, name: v.name })),
+        resources: selectedResources.map(r => ({ id: r.id, name: r.name })),
+        brands: selectedBrands.map(b => ({ id: b.id, name: b.name })),
+        communities: selectedCommunities.map(c => ({ id: c.id, name: c.name }))
+      };
+
+      // Create a simplified event object to save
       const eventData = {
         name: eventName,
         description,
@@ -356,28 +460,47 @@ const CreateEvent = () => {
         is_private: isPrivate,
         created_by: user.id,
         created_at: new Date().toISOString(),
-        tags: ticketPrice ? ['paid'] : ['free']
+        tags: ticketPrice ? ['paid'] : ['free'],
+        event_location: location,
+        recurrence_type: recurrenceType,
+        poster_url: posterImageUrl,
+        event_type: eventType,
+        ticket_price: ticketPrice,
+        ticket_url: ticketUrl,
+        registration_required: registrationRequired,
+        slots: processedSlots,
+        components: simpleComponents,
+        has_requested_items: eventSlots.some(slot => 
+          (slot.artist?.isNew && slot.artist?.isRequestOnly) || 
+          (slot.resource?.isNew && slot.resource?.isRequestOnly) || 
+          (slot.venue?.isNew && slot.venue?.isRequestOnly)
+        )
       };
 
       console.log("Creating event with data:", eventData);
-      console.log("Selected components:", {
-        artists: selectedArtists,
-        venues: selectedVenues,
-        resources: selectedResources,
-        brands: selectedBrands,
-        communities: selectedCommunities
-      });
-      console.log("Event slots:", eventSlots);
+      
+      console.log("Submitting to Supabase...");
+      const { data: event, error } = await supabase
+        .from('events')
+        .insert([eventData])
+        .select('id')
+        .single();
 
-      const mockEventId = `event_${Date.now()}`;
+      if (error) {
+        console.error('Error creating event:', error);
+        throw error;
+      }
+
+      console.log("Event created successfully with ID:", event.id);
       
       toast.success("Event created successfully!");
-      navigate(`/events/${mockEventId}`);
+      navigate(`/events/${event.id}`);
     } catch (error) {
       console.error('Error creating event:', error);
       toast.error("Failed to create event. Please try again.");
     } finally {
       setLoading(false);
+      console.log("Set loading state to false");
     }
   };
 

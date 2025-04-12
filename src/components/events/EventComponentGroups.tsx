@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -7,7 +6,8 @@ import {
   DialogHeader, 
   DialogTitle, 
   DialogTrigger,
-  DialogFooter
+  DialogFooter,
+  DialogDescription
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -159,6 +159,9 @@ const EventComponentGroups: React.FC<EventComponentGroupsProps> = ({
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Save Component Group</DialogTitle>
+              <DialogDescription>
+                Save your current selection of artists, venues, and resources as a reusable group.
+              </DialogDescription>
             </DialogHeader>
             
             <div className="grid gap-4 py-4">
@@ -239,6 +242,9 @@ const EventComponentGroups: React.FC<EventComponentGroupsProps> = ({
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Manage Component Groups</DialogTitle>
+              <DialogDescription>
+                View, apply, or delete your saved component groups.
+              </DialogDescription>
             </DialogHeader>
             
             <div className="max-h-[400px] overflow-y-auto py-4">

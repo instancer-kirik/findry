@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2, Plus, Calendar, Clock, Search, User, Wrench, X, MapPin, UserPlus, Landmark, SquarePlus, Mail, Link } from 'lucide-react';
@@ -33,10 +32,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { EventSlot } from '@/types/event';
 
-// Extend ContentItemProps to include isNew flag
-interface ExtendedContentItemProps extends ContentItemProps {
-  isNew?: boolean;
-}
+// Extend ContentItemProps to include isNew flag - this is already defined in types/content.ts
+// But we'll use the type from there instead of redefining
+type ExtendedContentItemProps = ContentItemProps;
 
 export interface EventSlotManagerProps {
   slots: EventSlot[];
@@ -301,6 +299,7 @@ export function EventSlotManager({
         updatedSlot.venue = item;
         updatedSlot.status = item.isRequestOnly ? 'requested' : 'reserved';
       }
+      console.log('Updating slot with new item:', { type, item, status: updatedSlot.status });
       setEditingSlot(updatedSlot);
     }
   };
@@ -319,7 +318,7 @@ export function EventSlotManager({
       email: newItem.email,
       link: newItem.link,
       location: newItem.location,
-      type: selectedObject.type, // Required field for ContentItemProps
+      type: selectedObject.type,
       isRequestOnly: true,
       isNew: true
     };
@@ -336,6 +335,7 @@ export function EventSlotManager({
         updatedSlot.venue = newRequestedItem;
         updatedSlot.status = 'requested';
       }
+      console.log('Creating new requested item:', { type: selectedObject.type, item: newRequestedItem, status: updatedSlot.status });
       setEditingSlot(updatedSlot);
     }
 
