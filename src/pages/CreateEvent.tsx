@@ -23,6 +23,7 @@ import EventSlotManager from '@/components/events/EventSlotManager';
 import { EventSlot } from '@/types/event';
 import { ContentItemProps } from '@/types/content';
 import { v4 as uuidv4 } from 'uuid';
+import { convertToJson } from '@/types/supabase';
 
 interface EventContentItem {
   id: string;
@@ -340,7 +341,6 @@ const CreateEvent = () => {
       return;
     }
     
-    // Set a local loading state to prevent race conditions
     let isProcessing = true;
     setLoading(true);
     console.log(`Set loading state to true (ID: ${processingId})`);
@@ -406,7 +406,6 @@ const CreateEvent = () => {
         }
       }
       
-      // Process slots and extract requested items
       const requestedItems = [];
       const processedSlots = eventSlots.map(slot => {
         const processedSlot = { ...slot };
@@ -542,8 +541,8 @@ const CreateEvent = () => {
         capacity: capacity ? parseInt(capacity) : null,
         image_url: posterUrl,
         tags: eventTags,
-        slots: JSON.parse(JSON.stringify(processedSlots)),
-        requested_items: JSON.parse(JSON.stringify(requestedItems)),
+        slots: convertToJson(processedSlots),
+        requested_items: convertToJson(requestedItems),
         created_by: user.id
       };
       
@@ -554,7 +553,6 @@ const CreateEvent = () => {
           return;
         }
         
-        // First create the content ownership record
         const { error: ownershipError } = await supabase
           .from('content_ownership')
           .insert({
@@ -574,15 +572,12 @@ const CreateEvent = () => {
         }
         
         console.log("Step 2: Content ownership created, inserting event...");
-        // Then insert the actual event
         const { error: eventError } = await supabase
           .from('events')
           .insert(eventData);
         
         if (eventError) {
           console.error('Error creating event:', eventError);
-          // Clean up the ownership record
-          console.log("Step 2 failed: Cleaning up content ownership record");
           await supabase
             .from('content_ownership')
             .delete()
@@ -597,7 +592,6 @@ const CreateEvent = () => {
         
         console.log("Step 3: Event created successfully");
         
-        // If there's a community link, create that relationship
         if (communityId && user) {
           console.log("Step 4: Creating community relationship");
           try {
