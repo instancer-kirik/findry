@@ -179,31 +179,37 @@ const Landing: React.FC = () => {
                 },
                 {
                   src: "/screenshots/divvyqueue-3.png",
+                  alt: "Contract Editor",
+                  title: "Contract Editor"
+                },
+                {
+                
+                  src: "/screenshots/divvyqueue-templates.png",
                   alt: "Templates",
                   title: "Templates"
                 },
                 {
-                  src: "/screenshots/divvyqueue-4.png",
-                  alt: "Mobile Experience",
-                  title: "Mobile Experience"
+                  src: "/screenshots/divvyqueue-invoice.png",
+                  alt: "Invoice",
+                  title: "Invoice"
                 },
                 {
-                  src: "/screenshots/divvyqueue-5.png",
+                  src: "/screenshots/divvyqueue-activity.png",
                   alt: "Activity and progress tracking",
                   title: "Activity and progress tracking"
                 },
                 {
-                  src: "/screenshots/divvyqueue-6.png",
+                  src: "/screenshots/divvyqueue-document.png",
                   alt: "Document Editor",
                   title: "Document Editor"
                 },
                 {
-                  src: "/screenshots/divvyqueue-7.png",
+                  src: "/screenshots/divvyqueue-ambiguous.png",
                   alt: "Ambiguituous tool",
                   title: "Ambiguituous tool"
                 },
                 {
-                  src: "/screenshots/divvyqueue-8.png",
+                  src: "/screenshots/divvyqueue-ambiguous.png",
                   alt: "Breach Resolution",
                   title: "Breach Resolution"
                 }
@@ -263,33 +269,6 @@ const Landing: React.FC = () => {
         </div>
       </div>
       
-      {/* DivvyQueue Card with Click-to-Scroll */}
-      <div className="container mx-auto px-4 py-12">
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={scrollToDivvyQueue}>
-          <CardContent className="p-6 flex flex-col md:flex-row items-center gap-6">
-            <div className="md:w-1/3">
-              <img 
-                src="/screenshots/divvyqueue-1.png" 
-                alt="DivvyQueue" 
-                className="rounded-lg object-cover w-full aspect-video"
-                loading="lazy"
-                decoding="async"
-                width="640"
-                height="360"
-              />
-            </div>
-            <div className="md:w-2/3 space-y-4">
-              <h3 className="text-2xl font-bold">DivvyQueue</h3>
-              <p className="text-muted-foreground">
-                Streamline complex agreements and distribute resources efficiently with our multiparty contract management system. Perfect for creative collaborations, revenue sharing, and any project requiring transparent resource allocation between multiple parties.
-              </p>
-              <Button variant="outline" className="mt-4">
-                View Screenshots
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
       
       {/* Developer Wishlist Section */}
       <div className="container mx-auto px-4 py-12 bg-muted/10 rounded-lg my-8">

@@ -474,8 +474,7 @@ const CreateEvent = () => {
         image_url: posterUrl,
         tags: eventTags,
         slots: processedSlots,
-        created_by: user?.id,
-        is_public: !isPrivate
+        created_by: user?.id
       };
       
       const { error: eventError } = await supabase.from('events').insert(eventData);
