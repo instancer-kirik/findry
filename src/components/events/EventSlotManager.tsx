@@ -32,8 +32,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { EventSlot } from '@/types/event';
 
-// Extend ContentItemProps to include isNew flag - this is already defined in types/content.ts
-// But we'll use the type from there instead of redefining
 type ExtendedContentItemProps = ContentItemProps;
 
 export interface EventSlotManagerProps {
@@ -48,7 +46,6 @@ export interface EventSlotManagerProps {
   availableVenues: ContentItemProps[];
 }
 
-// Internal time picker component definition
 const TimePicker: React.FC<{
   value: string;
   onChange: (value: string) => void;
@@ -64,7 +61,6 @@ const TimePicker: React.FC<{
   const [hours, setHours] = useState<string>(value ? value.split(':')[0] : '00');
   const [minutes, setMinutes] = useState<string>(value ? value.split(':')[1] : '00');
 
-  // Generate hours and minutes options
   const hoursOptions = Array.from({ length: 24 }, (_, i) => 
     i.toString().padStart(2, '0')
   );
@@ -73,7 +69,6 @@ const TimePicker: React.FC<{
     (i * 5).toString().padStart(2, '0')
   );
 
-  // Update time when selection changes
   const handleTimeChange = (type: 'hours' | 'minutes', newValue: string) => {
     if (type === 'hours') {
       setHours(newValue);
@@ -310,7 +305,6 @@ export function EventSlotManager({
       return;
     }
 
-    // Create a local object with an isRequestOnly flag
     const tempId = `temp_${Date.now()}`;
     const newRequestedItem: ExtendedContentItemProps = {
       id: tempId,
@@ -336,7 +330,8 @@ export function EventSlotManager({
         updatedSlot.status = 'requested';
       }
       console.log('Creating new requested item:', { type: selectedObject.type, item: newRequestedItem, status: updatedSlot.status });
-      setEditingSlot(updatedSlot);
+      
+      handleSaveSlot(updatedSlot);
     }
 
     setIsCreatingNew(false);

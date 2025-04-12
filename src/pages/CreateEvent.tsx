@@ -364,18 +364,7 @@ const CreateEvent = () => {
       // Process event slots to handle requested items
       const processedSlots = eventSlots.map(slot => {
         // Create a clean version without circular references and simplify structure
-        // Use index signature to allow adding additional properties
-        const cleanSlot: {
-          id: string;
-          title: string;
-          description: string;
-          startTime: string;
-          endTime: string;
-          status: 'available' | 'reserved' | 'confirmed' | 'canceled' | 'requested';
-          slotType: 'performance' | 'setup' | 'breakdown' | 'break' | 'other';
-          notes: string;
-          [key: string]: any; // Allow any additional properties
-        } = {
+        const cleanSlot: Record<string, any> = {
           id: slot.id,
           title: slot.title || '',
           description: slot.description || '',
@@ -388,15 +377,11 @@ const CreateEvent = () => {
         
         // Check for temporary requested items that need special handling
         if (slot.artist?.isNew && slot.artist?.isRequestOnly) {
-          // For requested artists, store their information in notes
-          cleanSlot.notes += `\nRequested Artist: ${slot.artist.name}\nEmail: ${slot.artist.email || 'Not provided'}\nLink: ${slot.artist.link || 'Not provided'}\nLocation: ${slot.artist.location || 'Not provided'}`;
-          // Instead of storing the full artist object, just store basic info
-          cleanSlot.artistName = slot.artist.name;
-          cleanSlot.artistRequestDetails = {
+          cleanSlot.requestedArtist = {
             name: slot.artist.name,
-            email: slot.artist.email,
-            link: slot.artist.link,
-            location: slot.artist.location
+            email: slot.artist.email || '',
+            link: slot.artist.link || '',
+            location: slot.artist.location || ''
           };
         } else if (slot.artist) {
           cleanSlot.artistId = slot.artist.id;
@@ -404,15 +389,11 @@ const CreateEvent = () => {
         }
         
         if (slot.resource?.isNew && slot.resource?.isRequestOnly) {
-          // For requested resources, store their information in notes
-          cleanSlot.notes += `\nRequested Resource: ${slot.resource.name}\nEmail: ${slot.resource.email || 'Not provided'}\nLink: ${slot.resource.link || 'Not provided'}\nLocation: ${slot.resource.location || 'Not provided'}`;
-          // Instead of storing the full resource object, just store basic info
-          cleanSlot.resourceName = slot.resource.name;
-          cleanSlot.resourceRequestDetails = {
+          cleanSlot.requestedResource = {
             name: slot.resource.name,
-            email: slot.resource.email,
-            link: slot.resource.link,
-            location: slot.resource.location
+            email: slot.resource.email || '',
+            link: slot.resource.link || '',
+            location: slot.resource.location || ''
           };
         } else if (slot.resource) {
           cleanSlot.resourceId = slot.resource.id;
@@ -420,15 +401,11 @@ const CreateEvent = () => {
         }
         
         if (slot.venue?.isNew && slot.venue?.isRequestOnly) {
-          // For requested venues, store their information in notes
-          cleanSlot.notes += `\nRequested Venue: ${slot.venue.name}\nEmail: ${slot.venue.email || 'Not provided'}\nLink: ${slot.venue.link || 'Not provided'}\nLocation: ${slot.venue.location || 'Not provided'}`;
-          // Instead of storing the full venue object, just store basic info
-          cleanSlot.venueName = slot.venue.name;
-          cleanSlot.venueRequestDetails = {
+          cleanSlot.requestedVenue = {
             name: slot.venue.name,
-            email: slot.venue.email,
-            link: slot.venue.link,
-            location: slot.venue.location
+            email: slot.venue.email || '',
+            link: slot.venue.link || '',
+            location: slot.venue.location || ''
           };
         } else if (slot.venue) {
           cleanSlot.venueId = slot.venue.id;
@@ -461,7 +438,6 @@ const CreateEvent = () => {
         created_by: user.id,
         created_at: new Date().toISOString(),
         tags: ticketPrice ? ['paid'] : ['free'],
-        event_location: location,
         recurrence_type: recurrenceType,
         poster_url: posterImageUrl,
         event_type: eventType,
@@ -491,10 +467,10 @@ const CreateEvent = () => {
         throw error;
       }
 
-      console.log("Event created successfully with ID:", event.id);
+      console.log("Event created successfully with ID:", event?.id);
       
       toast.success("Event created successfully!");
-      navigate(`/events/${event.id}`);
+      navigate(`/events/${event?.id}`);
     } catch (error) {
       console.error('Error creating event:', error);
       toast.error("Failed to create event. Please try again.");
