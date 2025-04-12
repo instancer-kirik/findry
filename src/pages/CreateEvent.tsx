@@ -336,44 +336,60 @@ const CreateEvent = () => {
     
     if (loading) {
       console.log(`Already in loading state, preventing duplicate submission (ID: ${processingId})`);
+      toast.error("Please wait, event creation in progress");
       return;
     }
     
+    // Set a local loading state to prevent race conditions
+    let isProcessing = true;
     setLoading(true);
     console.log(`Set loading state to true (ID: ${processingId})`);
     
     try {
+      console.log("DEBUG: Starting validation checks");
       if (!eventName) {
+        console.log("DEBUG: Event name missing");
         toast.error("Event name is required");
         setLoading(false);
+        isProcessing = false;
         return;
       }
 
       if (!startDate) {
+        console.log("DEBUG: Start date missing");
         toast.error("Start date is required");
         setLoading(false);
+        isProcessing = false;
         return;
       }
 
       if (!startTime) {
+        console.log("DEBUG: Start time missing");
         toast.error("Start time is required");
         setLoading(false);
+        isProcessing = false;
         return;
       }
 
       if (!location) {
+        console.log("DEBUG: Location missing");
         toast.error("Location is required");
         setLoading(false);
+        isProcessing = false;
         return;
       }
 
       if (!user) {
+        console.log("DEBUG: User not logged in");
         toast.error("You need to be logged in to create an event");
         setLoading(false);
+        isProcessing = false;
         return;
       }
 
+      console.log("DEBUG: All validation passed, creating event data");
       const eventId = uuidv4();
+      console.log(`DEBUG: Generated event ID: ${eventId}`);
       
       const formattedStartDate = startDate ? new Date(startDate) : new Date();
       if (startTime) {
@@ -505,6 +521,15 @@ const CreateEvent = () => {
         ...venues.filter(v => v.selected).map(v => v.type || 'venue'),
         eventType
       ].filter(Boolean);
+
+      console.log("DEBUG: Event data prepared", { 
+        id: eventId,
+        name: eventName,
+        type: eventType,
+        start_date: formattedStartDate.toISOString(),
+        slots: processedSlots.length,
+        requested_items: requestedItems.length
+      });
       
       const eventData = {
         id: eventId,
@@ -522,45 +547,103 @@ const CreateEvent = () => {
         created_by: user.id
       };
       
-      console.log("Attempting to insert event with data:", eventData);
-      
-      const { error: eventError } = await supabase
-        .from('events')
-        .insert(eventData);
-      
-      if (eventError) {
-        console.error('Error creating event:', eventError);
-        throw new Error(eventError.message);
-      }
-      
-      if (communityId && user) {
-        try {
-          const { error: relationshipError } = await supabase
-            .from('event_community_relationships')
-            .insert({
-              event_id: eventId,
-              community_id: communityId,
-              created_by: user.id
-            });
-            
-          if (relationshipError) {
-            console.error('Error creating relationship:', relationshipError);
-          }
-        } catch (relationshipError) {
-          console.error('Failed to store event relationship:', relationshipError);
+      console.log("Step 1: Creating content ownership record...", eventId);
+      try {
+        if (!isProcessing) {
+          console.log("DEBUG: Process aborted, no longer processing");
+          return;
         }
+        
+        // First create the content ownership record
+        const { error: ownershipError } = await supabase
+          .from('content_ownership')
+          .insert({
+            content_id: eventId,
+            content_type: 'event',
+            owner_id: user.id
+          });
+          
+        if (ownershipError) {
+          console.error('Error creating content ownership:', ownershipError);
+          throw new Error('Failed to establish event ownership. ' + ownershipError.message);
+        }
+        
+        if (!isProcessing) {
+          console.log("DEBUG: Process aborted after ownership creation");
+          return;
+        }
+        
+        console.log("Step 2: Content ownership created, inserting event...");
+        // Then insert the actual event
+        const { error: eventError } = await supabase
+          .from('events')
+          .insert(eventData);
+        
+        if (eventError) {
+          console.error('Error creating event:', eventError);
+          // Clean up the ownership record
+          console.log("Step 2 failed: Cleaning up content ownership record");
+          await supabase
+            .from('content_ownership')
+            .delete()
+            .match({ content_id: eventId, content_type: 'event' });
+          throw new Error(eventError.message);
+        }
+        
+        if (!isProcessing) {
+          console.log("DEBUG: Process aborted after event creation");
+          return;
+        }
+        
+        console.log("Step 3: Event created successfully");
+        
+        // If there's a community link, create that relationship
+        if (communityId && user) {
+          console.log("Step 4: Creating community relationship");
+          try {
+            const { error: relationshipError } = await supabase
+              .from('event_community_relationships')
+              .insert({
+                event_id: eventId,
+                community_id: communityId,
+                created_by: user.id
+              });
+              
+            if (relationshipError) {
+              console.error('Error creating relationship:', relationshipError);
+            } else {
+              console.log("Step 4: Community relationship created successfully");
+            }
+          } catch (relationshipError) {
+            console.error('Failed to store event relationship:', relationshipError);
+          }
+        }
+        
+        console.log("Step 5: All done - showing success message");
+        toast.success("Event created successfully!");
+        
+        setTimeout(() => {
+          if (isProcessing) {
+            console.log("Step 6: Navigating to event page", eventId);
+            navigate(`/events/${eventId}`);
+          }
+        }, 1000);
+        
+      } catch (error: any) {
+        isProcessing = false;
+        console.error(`Error in event creation process (ID: ${processingId}):`, error);
+        toast.error(error.message || "Failed to create event");
       }
-      
-      toast.success("Event created successfully!");
-      
-      setTimeout(() => {
-        navigate(`/events/${eventId}`);
-      }, 1000);
-    } catch (error: any) {
-      console.error(`Error in create event process (ID: ${processingId}):`, error);
-      toast.error(error.message || "Failed to create event");
+    } catch (outerError: any) {
+      isProcessing = false;
+      console.error(`Error in create event process (ID: ${processingId}):`, outerError);
+      toast.error(outerError.message || "Failed to create event");
     } finally {
-      setLoading(false);
+      if (isProcessing) {
+        isProcessing = false;
+        setLoading(false);
+        console.log(`Set loading state to false (ID: ${processingId})`);
+      }
     }
   };
 
