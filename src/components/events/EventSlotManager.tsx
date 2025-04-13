@@ -207,9 +207,41 @@ export function EventSlotManager({
   }, [localSlots, onSlotsChange]);
 
   const inferTitle = (slot: EventSlot) => {
+    // Default to slot's title if it's been manually set
+    if (slot.title && !slot.title.includes('Unbooked Slot')) return slot.title;
+    
+    // For requested or confirmed items, show status in the title
+    if (slot.status === 'requested') {
+      if (slot.artist) return `Requested: ${slot.artist.name}`;
+      if (slot.resource) return `Requested: ${slot.resource.name}`;
+      if (slot.venue) return `Requested: ${slot.venue.name}`;
+      return 'Requested Slot';
+    }
+    
+    if (slot.status === 'confirmed') {
+      if (slot.artist) return `${slot.artist.name}'s Performance`;
+      if (slot.resource) return `${slot.resource.name} Setup`;
+      if (slot.venue) return `Venue: ${slot.venue.name}`;
+      return 'Confirmed Slot';
+    }
+    
+    if (slot.status === 'reserved') {
+      if (slot.artist) return `Reserved: ${slot.artist.name}`;
+      if (slot.resource) return `Reserved: ${slot.resource.name}`;
+      if (slot.venue) return `Reserved: ${slot.venue.name}`;
+      return 'Reserved Slot';
+    }
+    
+    if (slot.status === 'canceled') {
+      return 'Canceled Slot';
+    }
+    
+    // Default titles for items with no special status
     if (slot.artist) return `${slot.artist.name}'s Performance`;
     if (slot.resource) return `${slot.resource.name} Setup`;
     if (slot.venue) return `Venue: ${slot.venue.name}`;
+    
+    // Default fallback
     return 'Unbooked Slot';
   };
 

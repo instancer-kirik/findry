@@ -137,6 +137,9 @@ const Discover = () => {
       case 'project':
         navigate(`/project/${item.id}`);
         break;
+      case 'event':
+        navigate(`/events/${item.id}`);
+        break;
       case 'venue':
         navigate(`/venue/${item.id}`);
         break;

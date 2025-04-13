@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Toaster } from '@/components/ui/toaster'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -39,6 +40,7 @@ import EventbriteOrders from './pages/EventbriteOrders'
 import ResourcerProfile from './pages/ResourcerProfile'
 import Contact from './pages/Contact'
 import About from './pages/About'
+import EditEvent from './pages/events/EditEvent'
 
 import './App.css'
 
@@ -66,6 +68,7 @@ function App() {
             <Route path="/artists" element={<Discover />} />
             
             <Route path="/events/create" element={<CreateEvent />} />
+            <Route path="/events/edit/:eventId" element={<EditEvent />} />
             <Route path="/events/interested" element={<EventsInterested />} />
             <Route path="/events/calendar" element={<Discover />} />
             <Route path="/events/upcoming" element={<EventsUpcoming />} />

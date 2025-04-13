@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Dialog, 
@@ -32,7 +31,9 @@ const EventSharingDialog: React.FC<EventSharingDialogProps> = ({
   const [email, setEmail] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
-  const shareUrl = `${window.location.origin}/events/${eventId}`;
+  // Ensure we have a valid event ID
+  const validEventId = eventId && eventId !== 'demo-event-id' ? eventId : 'demo-event-id';
+  const shareUrl = `${window.location.origin}/events/${validEventId}`;
   
   const copyToClipboard = () => {
     navigator.clipboard.writeText(shareUrl);
@@ -42,14 +43,28 @@ const EventSharingDialog: React.FC<EventSharingDialogProps> = ({
   };
   
   const sendInvite = () => {
-    if (!email.trim() || !email.includes('@')) {
-      toast.error('Please enter a valid email address');
+    if (!email.trim()) {
+      toast.error('Please enter at least one email address');
       return;
     }
     
-    // Mock sending an invite
-    console.log(`Sending invite to ${email} for event ${eventId}`);
-    toast.success(`Invitation sent to ${email}`);
+    const emails = email.split(',').map(e => e.trim());
+    const invalidEmails = emails.filter(e => !e.includes('@'));
+    
+    if (invalidEmails.length > 0) {
+      toast.error(`Invalid email address${invalidEmails.length > 1 ? 'es' : ''}: ${invalidEmails.join(', ')}`);
+      return;
+    }
+    
+    // Mock sending invites to multiple recipients
+    console.log(`Sending invites to ${emails.join(', ')} for event ${validEventId}`);
+    
+    if (emails.length === 1) {
+      toast.success(`Invitation sent to ${emails[0]}`);
+    } else {
+      toast.success(`Invitations sent to ${emails.length} recipients`);
+    }
+    
     setEmail('');
   };
   
@@ -61,9 +76,14 @@ const EventSharingDialog: React.FC<EventSharingDialogProps> = ({
         url: shareUrl,
       })
       .then(() => toast.success('Shared successfully'))
-      .catch((error) => console.log('Error sharing', error));
+      .catch((error) => {
+        console.log('Error sharing', error);
+        // Fall back to clipboard if Web Share API fails
+        copyToClipboard();
+      });
     } else {
       copyToClipboard();
+      toast.info('Share link copied to clipboard - paste it in your preferred app or message');
     }
   };
 
@@ -108,7 +128,7 @@ const EventSharingDialog: React.FC<EventSharingDialogProps> = ({
               <Input 
                 id="share-email" 
                 type="email" 
-                placeholder="Enter email address" 
+                placeholder="Enter email addresses (comma separated)" 
                 value={email} 
                 onChange={(e) => setEmail(e.target.value)}
                 className="flex-1"

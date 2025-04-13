@@ -35,6 +35,7 @@ export interface Project {
   progress: number;
   tags: string[];
   source?: string;  // Added to track where the project came from (discover or projects)
+  timeline?: string; // Added to track project timeline
   contributors?: {
     id: string;
     name: string;

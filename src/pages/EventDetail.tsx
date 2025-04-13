@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { Calendar, Clock, MapPin, Users, Share2, ExternalLink } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, Share2, ExternalLink, Edit, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from "@/hooks/use-auth";
 import EventSharingDialog from '@/components/events/EventSharingDialog';
 import { EventSlot } from '@/types/event';
 import { Json } from '@/integrations/supabase/types';
+import { convertFromJson } from '@/types/supabase';
 
 interface EventProps {
   id: string;
@@ -26,6 +28,7 @@ interface EventProps {
   subtype: string;
   created_at: string;
   updated_at: string;
+  created_by?: string;
   eventbrite_id?: string;
   eventbrite_url?: string;
   slots?: Json;
@@ -41,6 +44,8 @@ const EventDetail: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [attending, setAttending] = useState<boolean>(false);
   const [attendeeCount, setAttendeeCount] = useState<number>(0);
+  const [isOrganizer, setIsOrganizer] = useState<boolean>(false);
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -64,16 +69,14 @@ const EventDetail: React.FC = () => {
 
         if (data) {
           const eventData = data as unknown as EventProps;
+          console.log("Full event data:", data);
           setEvent(eventData);
           
           if (data.slots) {
             try {
-              const parsedSlots = 
-                typeof data.slots === 'string' 
-                  ? JSON.parse(data.slots) 
-                  : data.slots;
-              
-              setEventSlots(parsedSlots as EventSlot[]);
+              const parsedSlots = convertFromJson<EventSlot[]>(data.slots);
+              setEventSlots(parsedSlots || []);
+              console.log("Parsed slots:", parsedSlots);
             } catch (err) {
               console.error("Error parsing event slots:", err);
             }
@@ -81,18 +84,44 @@ const EventDetail: React.FC = () => {
           
           if (data.requested_items) {
             try {
-              const parsedItems = 
-                typeof data.requested_items === 'string' 
-                  ? JSON.parse(data.requested_items) 
-                  : data.requested_items;
-              
-              setRequestedItems(parsedItems);
+              const parsedItems = convertFromJson<any[]>(data.requested_items);
+              setRequestedItems(parsedItems || []);
+              console.log("Parsed requested items:", parsedItems);
             } catch (err) {
               console.error("Error parsing requested items:", err);
             }
           }
           
           setAttendeeCount(Math.floor(Math.random() * (data.capacity || 50)) || 15);
+          
+          // Check if user is the organizer by checking content_ownership
+          if (user) {
+            try {
+              const { data: ownershipData, error: ownershipError } = await supabase
+                .from('content_ownership')
+                .select('*')
+                .eq('content_id', eventId)
+                .eq('content_type', 'event')
+                .eq('owner_id', user.id)
+                .single();
+                
+              if (!ownershipError && ownershipData) {
+                console.log("User is the owner via content_ownership");
+                setIsOrganizer(true);
+              } else {
+                // Fallback check if the user is the creator
+                console.log("Not found in content_ownership, checking created_by...");
+                if (data.created_by === user.id) {
+                  console.log("User is the creator:", data.created_by);
+                  setIsOrganizer(true);
+                } else {
+                  console.log("User is not the creator. User:", user.id, "Creator:", data.created_by);
+                }
+              }
+            } catch (err) {
+              console.error("Error checking ownership:", err);
+            }
+          }
         } else {
           setError("Event not found");
         }
@@ -105,7 +134,7 @@ const EventDetail: React.FC = () => {
     };
 
     fetchEvent();
-  }, [eventId]);
+  }, [eventId, user]);
 
   const handleRSVP = () => {
     setAttending(!attending);
@@ -122,6 +151,10 @@ const EventDetail: React.FC = () => {
     } else {
       setAttendeeCount(prev => prev + 1);
     }
+  };
+  
+  const handleEditEvent = () => {
+    navigate(`/events/edit/${eventId}`);
   };
 
   const formatDate = (dateString: string) => {
@@ -177,18 +210,35 @@ const EventDetail: React.FC = () => {
   return (
     <Layout>
       <div className="container mx-auto py-8 max-w-5xl">
-        <div className="mb-6">
+        <div className="mb-6 flex justify-between items-center">
           <Button 
             variant="ghost" 
             onClick={() => navigate('/discover?type=events')}
           >
             ← Back to Events
           </Button>
+          
+          {isOrganizer && (
+            <Button
+              variant="outline"
+              onClick={handleEditEvent}
+            >
+              <Pencil className="h-4 w-4 mr-2" />
+              Edit Event
+            </Button>
+          )}
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2">
-            <h1 className="text-3xl font-bold mb-4">{event?.name}</h1>
+            <div className="flex justify-between items-start mb-4">
+              <h1 className="text-3xl font-bold">{event?.name}</h1>
+              {isOrganizer && (
+                <Badge variant="outline" className="bg-blue-100/10 text-blue-600 dark:text-blue-400">
+                  You are the organizer
+                </Badge>
+              )}
+            </div>
             
             {event?.image_url && (
               <div className="aspect-video w-full overflow-hidden rounded-lg mb-6">
@@ -331,13 +381,26 @@ const EventDetail: React.FC = () => {
                 </div>
                 
                 <div className="mt-6 space-y-3">
-                  <Button
-                    className="w-full"
-                    onClick={handleRSVP}
-                    variant={attending ? "outline" : "default"}
-                  >
-                    {attending ? "Cancel RSVP" : "RSVP Now"}
-                  </Button>
+                  {!isOrganizer && (
+                    <Button
+                      className="w-full"
+                      onClick={handleRSVP}
+                      variant={attending ? "outline" : "default"}
+                    >
+                      {attending ? "Cancel RSVP" : "RSVP Now"}
+                    </Button>
+                  )}
+                  
+                  {isOrganizer && (
+                    <Button
+                      className="w-full"
+                      onClick={handleEditEvent}
+                      variant="default"
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Manage Event
+                    </Button>
+                  )}
                   
                   {event && (
                     <EventSharingDialog 

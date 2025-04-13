@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ContentItemProps } from '@/types/content';
@@ -123,7 +122,7 @@ export const useDiscoverData = (
         let data: ContentItemProps[] = [];
         
         // Map activeTab to appropriate table
-        const table = activeTab as 'artists' | 'venues' | 'resources' | 'projects' | 'brands' | 'communities' | 'shops';
+        const table = activeTab as 'artists' | 'venues' | 'resources' | 'projects' | 'brands' | 'communities' | 'shops' | 'events';
         
         // Fetch data from Supabase
         const { data: responseData, error: responseError } = await supabase
@@ -139,7 +138,7 @@ export const useDiscoverData = (
             const commonProps: ContentItemProps = {
               id: String(item.id || ''),
               name: item.name || 'Unnamed',
-              type: activeTab.substring(0, activeTab.length - 1), // Remove 's' to get singular
+              type: activeTab === 'events' ? 'event' : activeTab.substring(0, activeTab.length - 1), // Special case for events
               location: safeProp(item, 'location', 'Unknown location'),
               description: safeProp(item, 'description', safeProp(item, 'bio', '')),
               image_url: safeProp(item, 'image_url', 
@@ -180,6 +179,14 @@ export const useDiscoverData = (
                 repo_url: safeProp(item, 'repo_url', ''),
                 budget: safeProp(item, 'budget', ''),
                 timeline: safeProp(item, 'timeline', ''),
+              } as ContentItemProps;
+            }
+            else if (activeTab === 'events') {
+              return {
+                ...commonProps,
+                start_date: safeProp(item, 'start_date', ''),
+                end_date: safeProp(item, 'end_date', ''),
+                capacity: safeProp(item, 'capacity', null),
               } as ContentItemProps;
             }
             else if (activeTab === 'communities') {
