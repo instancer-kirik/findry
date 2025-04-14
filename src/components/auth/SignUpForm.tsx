@@ -18,6 +18,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Link } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { sendVerificationEmail } from '@/lib/email-templates';
 
 // Define the form schema with Zod
 const signUpSchema = z.object({
@@ -62,10 +63,14 @@ const SignUpForm: React.FC = () => {
           data: {
             full_name: values.name,
           },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
       
       if (authError) {
+        if (authError.message.includes('User already registered')) {
+          throw new Error('This email is already registered. Please try logging in or use a different email.');
+        }
         throw authError;
       }
 
@@ -86,21 +91,46 @@ const SignUpForm: React.FC = () => {
 
       if (profileError) {
         console.error('Error creating profile:', profileError);
+        if (profileError.code === '42501') {
+          throw new Error('Unable to create profile due to security restrictions. Please try again or contact support.');
+        }
         throw profileError;
       }
 
+      // Send verification email
+      await sendVerificationEmail(values.email);
+
       toast({
         title: 'Account created!',
-        description: 'Please check your email to verify your account. You can continue using the app while waiting for verification.',
+        description: (
+          <div className="space-y-2">
+            <p>We've sent a verification email to {values.email}.</p>
+            <p className="text-sm text-muted-foreground">
+              Please check your inbox and click the verification link to complete your registration.
+            </p>
+          </div>
+        ),
       });
 
       // Navigate to dashboard instead of profile setup
       navigate('/dashboard');
     } catch (error) {
       console.error('Sign up error:', error);
+      let errorMessage = 'Failed to create account';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('User already registered')) {
+          errorMessage = 'This email is already registered. Please try logging in or use a different email.';
+        } else if (error.message.includes('security restrictions')) {
+          errorMessage = 'Unable to create profile due to security restrictions. Please try again or contact support.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to create account',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
