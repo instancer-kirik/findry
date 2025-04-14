@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation, Link } from 'react-router-dom';
 import Index from './pages/Index';
@@ -16,7 +17,7 @@ import ResourceDetail from './pages/ResourceDetail';
 import ResourceIndexPage from './pages/ResourceIndexPage';
 import CreateEvent from './pages/CreateEvent';
 import EventDetail from './pages/EventDetail';
-import EditEvent from './pages/EditEvent';
+import EditEvent from './pages/events/EditEvent'; // Fixed path
 import EventsUpcoming from './pages/EventsUpcoming';
 import EventsInterested from './pages/EventsInterested';
 import EventbriteCallback from './pages/EventbriteCallback';
@@ -35,15 +36,15 @@ import MeetingScheduler from './pages/MeetingScheduler';
 import Offers from './pages/Offers';
 import Items from './pages/Items';
 import NotFound from './pages/NotFound';
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "@/components/ui/theme-provider"; // Fixed import path
 import { Toaster } from "@/components/ui/toaster"
 import { useAuth } from '@/hooks/use-auth';
 import { Profile } from '@/types/profile';
 import { updateEmailTemplates } from '@/lib/email-templates';
-import { ShopDetail } from './pages/ShopDetail';
-import { ProductDetail } from './pages/ProductDetail';
-import { TandemXShop } from './pages/TandemXShop';
-import { ResourcerProfile } from './pages/ResourcerProfile';
+import ShopDetail from './pages/ShopDetail'; // Fixed import
+import ProductDetail from './pages/ProductDetail'; // Fixed import
+import TandemXShop from './pages/TandemXShop'; // Fixed import
+import ResourcerProfile from './pages/ResourcerProfile'; // Fixed import
 import Grouper from './pages/Grouper';
 
 function App() {
@@ -62,7 +63,6 @@ function App() {
           full_name: user.user_metadata.full_name || 'Full Name',
           avatar_url: user.user_metadata.avatar_url || '',
           bio: user.user_metadata.bio || '',
-          capabilities: [],
           created_at: '',
           updated_at: '',
           role_attributes: {},

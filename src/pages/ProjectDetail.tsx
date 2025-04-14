@@ -21,6 +21,21 @@ const ProjectDetail: React.FC = () => {
   const { useGetProject, useUpdateProject, useCreateProjectComponent, useUpdateProjectComponent, useCreateProjectTask, useUpdateProjectTask } = useProject();
   const projectChatRef = useRef<{ addReference: (item: any) => void }>(null);
   
+  const handleSuccess = (message: string) => {
+    toast({
+      title: "Success",
+      description: message,
+    });
+  };
+  
+  const handleError = (error: any) => {
+    toast({
+      title: "Error",
+      description: error.message || "An error occurred",
+      variant: "destructive"
+    });
+  };
+  
   const { data: project, isLoading, error } = useGetProject(id);
   const [isOwner, setIsOwner] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -62,7 +77,6 @@ const ProjectDetail: React.FC = () => {
   const createProjectTask = useCreateProjectTask();
   const updateProjectTask = useUpdateProjectTask();
   
-  // Check if user is owner of the project
   useEffect(() => {
     if (!user || !id) return;
     
@@ -92,7 +106,6 @@ const ProjectDetail: React.FC = () => {
     checkOwnership();
   }, [user, id]);
   
-  // Set initial values for project edit form when project data is loaded
   useEffect(() => {
     if (project) {
       setProjectUpdates({
@@ -110,18 +123,13 @@ const ProjectDetail: React.FC = () => {
   
   const handleDeleteProject = async () => {
     if (!isOwner || !id || !user) {
-      toast({
-        title: 'Permission denied',
-        description: 'You do not have permission to delete this project',
-        variant: 'destructive'
-      });
+      handleError('Permission denied');
       return;
     }
     
     if (confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
       setIsDeleting(true);
       try {
-        // First delete all components and tasks
         const { error: componentsError } = await supabase
           .from('project_components')
           .delete()
@@ -136,7 +144,6 @@ const ProjectDetail: React.FC = () => {
           
         if (tasksError) throw tasksError;
         
-        // Then delete the project itself
         const { error: projectError } = await supabase
           .from('projects')
           .delete()
@@ -144,7 +151,6 @@ const ProjectDetail: React.FC = () => {
           
         if (projectError) throw projectError;
         
-        // Finally delete the ownership record
         const { error: ownershipError } = await supabase
           .from('content_ownership')
           .delete()
@@ -153,11 +159,11 @@ const ProjectDetail: React.FC = () => {
           
         if (ownershipError) throw ownershipError;
         
-        toast.success('Project deleted successfully');
+        handleSuccess('Project deleted successfully');
         navigate('/projects');
       } catch (err: any) {
         console.error('Error deleting project:', err);
-        toast.error(`Failed to delete project: ${err.message}`);
+        handleError(`Failed to delete project: ${err.message}`);
       } finally {
         setIsDeleting(false);
       }
@@ -172,11 +178,9 @@ const ProjectDetail: React.FC = () => {
     const { name, value } = e.target;
     
     if (name === 'progress') {
-      // Ensure progress is a number between 0 and 100
       const progress = Math.min(100, Math.max(0, parseInt(value) || 0));
       setProjectUpdates(prev => ({ ...prev, progress }));
     } else if (name === 'tags') {
-      // Split comma-separated tags into an array
       const tags = value.split(',').map(tag => tag.trim()).filter(Boolean);
       setProjectUpdates(prev => ({ ...prev, tags }));
     } else {
@@ -188,11 +192,7 @@ const ProjectDetail: React.FC = () => {
     e.preventDefault();
     
     if (!id || !isOwner) {
-      toast({
-        title: "Permission Denied",
-        description: 'You do not have permission to update this project',
-        variant: "destructive"
-      });
+      handleError("Permission Denied");
       return;
     }
     
@@ -212,17 +212,10 @@ const ProjectDetail: React.FC = () => {
       });
       
       setShowEditProjectForm(false);
-      toast({
-        title: "Success",
-        description: "Project updated successfully"
-      });
+      handleSuccess("Project updated successfully");
     } catch (err: any) {
       console.error('Error updating project:', err);
-      toast({
-        title: "Update Failed",
-        description: err.message || "Failed to update project",
-        variant: "destructive"
-      });
+      handleError(err.message || "Failed to update project");
     }
   };
 
@@ -284,11 +277,7 @@ const ProjectDetail: React.FC = () => {
     e.preventDefault();
     
     if (!id || !isOwner) {
-      toast({
-        title: "Permission Denied",
-        description: 'You do not have permission to modify this project',
-        variant: "destructive"
-      });
+      handleError("Permission Denied");
       return;
     }
     
@@ -319,11 +308,7 @@ const ProjectDetail: React.FC = () => {
       handleToggleComponentForm();
     } catch (err: any) {
       console.error('Error with component:', err);
-      toast({
-        title: "Action Failed",
-        description: err.message || "Failed to save component",
-        variant: "destructive"
-      });
+      handleError("Action Failed");
     }
   };
   
@@ -367,11 +352,7 @@ const ProjectDetail: React.FC = () => {
     e.preventDefault();
     
     if (!id || !isOwner) {
-      toast({
-        title: "Permission Denied",
-        description: 'You do not have permission to modify this project',
-        variant: "destructive"
-      });
+      handleError("Permission Denied");
       return;
     }
     
@@ -406,11 +387,7 @@ const ProjectDetail: React.FC = () => {
       handleToggleTaskForm();
     } catch (err: any) {
       console.error('Error with task:', err);
-      toast({
-        title: "Action Failed",
-        description: err.message || "Failed to save task",
-        variant: "destructive"
-      });
+      handleError("Action Failed");
     }
   };
   

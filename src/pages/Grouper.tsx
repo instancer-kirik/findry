@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge"; // Added missing import
 import { Plus, Search, Folder, Package, Users, Calendar, Tag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import GrouperCard from '@/components/grouper/GrouperCard';

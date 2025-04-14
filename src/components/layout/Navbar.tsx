@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
@@ -11,8 +12,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
-import { useTheme } from "@/components/ui/theme-provider";
+import { MoonIcon, SunIcon } from "lucide-react"; // Changed from @radix-ui/react-icons to lucide-react
+import { useTheme } from "@/components/ui/theme-provider"; // This should be provided by shadcn
 import { AlignJustify } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
