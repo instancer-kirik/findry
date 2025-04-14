@@ -54,11 +54,11 @@ const About: React.FC = () => {
               <Card>
                 <CardHeader className="pb-2">
                   <Users className="h-8 w-8 mb-2 text-primary" />
-                  <CardTitle>Dig First</CardTitle>
+                  <CardTitle>Affordable Culture</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    To plant a tree, we must dig. This assumes you have a tree to plant.
+                    We believe that one's desired culture should be accessible.
                   </p>
                 </CardContent>
               </Card>
