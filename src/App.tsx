@@ -1,126 +1,161 @@
-import React, { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { Toaster } from '@/components/ui/toaster'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-
-// Pages
-import Landing from './pages/Index'
-import Dashboard from './pages/Dashboard'
-import Discover from './pages/Discover'
-import Login from './pages/Login'
-import SignUp from './pages/SignUp'
-import NotFound from './pages/NotFound'
-import ProfileSetup from './pages/ProfileSetup'
-import CreateEvent from './pages/CreateEvent'
-import EventDetail from './pages/EventDetail'
-import EventsInterested from './pages/EventsInterested'
-import EventsUpcoming from './pages/EventsUpcoming'
-import Collaboration from './pages/Collaboration'
-import ProjectDetail from './pages/ProjectDetail'
-import Projects from './pages/Projects'
-import CreateProject from './pages/CreateProject'
-import MeetingScheduler from './pages/MeetingScheduler'
-import Communities from './pages/Communities'
-import Chats from './pages/Chats'
-import ProfilePage from './pages/ProfilePage'
-import CommunityDashboard from '@/pages/CommunityDashboard'
-import CommunityEvents from '@/pages/CommunityEvents'
-import ArtistProfile from './pages/ArtistProfile'
-import ResourceIndexPage from './pages/ResourceIndexPage'
-import ShopDetail from './pages/ShopDetail'
-import Shops from './pages/Shops'
-import CreateShop from './pages/CreateShop'
-import ProductDetail from './pages/ProductDetail'
-import TandemXShop from './pages/TandemXShop'
-import VenueDetail from './pages/VenueDetail'
-import ResourceDetail from './pages/ResourceDetail'
-import BrandDetail from './pages/BrandDetail'
-import EventbriteCallback from './pages/EventbriteCallback'
-import EventbriteOrders from './pages/EventbriteOrders'
-import ResourcerProfile from './pages/ResourcerProfile'
-import Contact from './pages/Contact'
-import About from './pages/About'
-import EditEvent from './pages/events/EditEvent'
-
-import './App.css'
-
-// Create a client
-const queryClient = new QueryClient()
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, useLocation, Link } from 'react-router-dom';
+import Index from './pages/Index';
+import About from './pages/About';
+import Dashboard from './pages/Dashboard';
+import Contact from './pages/Contact';
+import ProfilePage from './pages/ProfilePage';
+import ProfileSetup from './pages/ProfileSetup';
+import SignUp from './pages/SignUp';
+import Login from './pages/Login';
+import Discover from './pages/Discover';
+import ArtistProfile from './pages/ArtistProfile';
+import VenueDetail from './pages/VenueDetail';
+import BrandDetail from './pages/BrandDetail';
+import ResourceDetail from './pages/ResourceDetail';
+import ResourceIndexPage from './pages/ResourceIndexPage';
+import CreateEvent from './pages/CreateEvent';
+import EventDetail from './pages/EventDetail';
+import EditEvent from './pages/EditEvent';
+import EventsUpcoming from './pages/EventsUpcoming';
+import EventsInterested from './pages/EventsInterested';
+import EventbriteCallback from './pages/EventbriteCallback';
+import EventbriteOrders from './pages/EventbriteOrders';
+import Communities from './pages/Communities';
+import CommunityDashboard from './pages/CommunityDashboard';
+import CommunityEvents from './pages/CommunityEvents';
+import Projects from './pages/Projects';
+import CreateProject from './pages/CreateProject';
+import ProjectDetail from './pages/ProjectDetail';
+import Shops from './pages/Shops';
+import CreateShop from './pages/CreateShop';
+import Collaboration from './pages/Collaboration';
+import Chats from './pages/Chats';
+import MeetingScheduler from './pages/MeetingScheduler';
+import Offers from './pages/Offers';
+import Items from './pages/Items';
+import NotFound from './pages/NotFound';
+import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/toaster"
+import { useAuth } from '@/hooks/use-auth';
+import { Profile } from '@/types/profile';
+import { updateEmailTemplates } from '@/lib/email-templates';
+import { ShopDetail } from './pages/ShopDetail';
+import { ProductDetail } from './pages/ProductDetail';
+import { TandemXShop } from './pages/TandemXShop';
+import { ResourcerProfile } from './pages/ResourcerProfile';
+import Grouper from './pages/Grouper';
 
 function App() {
+  const { session, user } = useAuth();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (user) {
+        // Fetch the profile data here
+        console.log('Fetching profile for user:', user);
+        setProfile({
+          id: user.id,
+          username: user.user_metadata.user_name || user.email?.split('@')[0] || 'Unknown',
+          full_name: user.user_metadata.full_name || 'Full Name',
+          avatar_url: user.user_metadata.avatar_url || '',
+          bio: user.user_metadata.bio || '',
+          capabilities: [],
+          created_at: '',
+          updated_at: '',
+          role_attributes: {},
+          profile_types: []
+        });
+      } else {
+        setProfile(null);
+      }
+    };
+
+    fetchProfile();
+  }, [user, session]);
+
+  useEffect(() => {
+    const initializeEmailTemplates = async () => {
+      try {
+        await updateEmailTemplates();
+        console.log('Email templates initialized/updated successfully.');
+      } catch (error) {
+        console.error('Failed to initialize email templates:', error);
+      }
+    };
+
+    initializeEmailTemplates();
+  }, []);
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <div className="min-h-screen w-full overflow-x-hidden">
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/discover" element={<Discover />} />
-            
-            {/* Specific routes first */}
-            <Route path="/projects/create" element={<CreateProject />} />
-            <Route path="/projects/:id" element={<ProjectDetail />} />
-            <Route path="/projects" element={<Projects />} />
-            
-            <Route path="/artist-profile/:artistId" element={<ArtistProfile />} />
-            <Route path="/artist/:artistSlug" element={<ArtistProfile />} />
-            <Route path="/artists/:artistId" element={<ArtistProfile />} />
-            <Route path="/artists" element={<Discover />} />
-            
-            <Route path="/events/create" element={<CreateEvent />} />
-            <Route path="/events/edit/:eventId" element={<EditEvent />} />
-            <Route path="/events/interested" element={<EventsInterested />} />
-            <Route path="/events/calendar" element={<Discover />} />
-            <Route path="/events/upcoming" element={<EventsUpcoming />} />
-            <Route path="/events/:eventId" element={<EventDetail />} />
-            <Route path="/events" element={<Discover />} />
-            
-            {/* Eventbrite integration routes */}
-            <Route path="/eventbrite/callback" element={<EventbriteCallback />} />
-            <Route path="/eventbrite/orders" element={<EventbriteOrders />} />
-            
-            <Route path="/resources/index" element={<ResourceIndexPage />} />
-            <Route path="/resources/:resourceId" element={<ResourceDetail />} />
-            <Route path="/resources" element={<Discover />} />
-            
-            <Route path="/venues/:venueId" element={<VenueDetail />} />
-            <Route path="/venues" element={<Discover />} />
-            
-            <Route path="/community/:id" element={<CommunityDashboard />} />
-            <Route path="/community/events" element={<CommunityEvents />} />
-            <Route path="/communities" element={<Communities />} />
-            
-            <Route path="/chats/new" element={<Chats />} />
-            <Route path="/chats" element={<Chats />} />
-            
-            <Route path="/brands/:brandId" element={<BrandDetail />} />
-            <Route path="/brands" element={<Discover />} />
-            
-            <Route path="/shops/create" element={<CreateShop />} />
-            <Route path="/shops/:id" element={<ShopDetail />} />
-            <Route path="/shops/:shopId/products/:productId" element={<ProductDetail />} />
-            <Route path="/shops" element={<Shops />} />
-            
-            <Route path="/integrations/tandemx" element={<TandemXShop />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/profile-setup" element={<ProfileSetup />} />
-            <Route path="/collaboration" element={<Collaboration />} />
-            <Route path="/meetings/schedule" element={<MeetingScheduler />} />
-            <Route path="/meetings/:meetingId" element={<MeetingScheduler />} />
-            <Route path="/meetings" element={<MeetingScheduler />} />
-            <Route path="/profile/:username" element={<ProfilePage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/profile/resources" element={<ResourcerProfile />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/about" element={<About />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Toaster />
-        </div>
-      </Router>
-    </QueryClientProvider>
-  )
+    <Router>
+      <ThemeProvider defaultTheme="system" storageKey="theme-preference">
+        <Toaster />
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/profile/:username" element={<ProfilePage />} />
+          <Route path="/profile-setup" element={<ProfileSetup />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/login" element={<Login />} />
+          
+          {/* Discover Routes */}
+          <Route path="/discover" element={<Discover />} />
+          <Route path="/artist-profile/:artistId" element={<ArtistProfile />} />
+          <Route path="/venue-detail/:venueId" element={<VenueDetail />} />
+          <Route path="/brand-detail/:brandId" element={<BrandDetail />} />
+          <Route path="/resource-detail/:resourceId" element={<ResourceDetail />} />
+          <Route path="/shop-detail/:shopId" element={<ShopDetail />} />
+          <Route path="/product-detail/:productId" element={<ProductDetail />} />
+          
+          {/* Resources */}
+          <Route path="/resources" element={<ResourceIndexPage />} />
+          <Route path="/resourcer-profile/:resourcerId" element={<ResourcerProfile />} />
+          
+          {/* Events */}
+          <Route path="/create-event" element={<CreateEvent />} />
+          <Route path="/event/:eventId" element={<EventDetail />} />
+          <Route path="/events/edit/:eventId" element={<EditEvent />} />
+          <Route path="/events/upcoming" element={<EventsUpcoming />} />
+          <Route path="/events/interested" element={<EventsInterested />} />
+          <Route path="/eventbrite/callback" element={<EventbriteCallback />} />
+          <Route path="/eventbrite/orders" element={<EventbriteOrders />} />
+          
+          {/* Communities */}
+          <Route path="/communities" element={<Communities />} />
+          <Route path="/community/:id" element={<CommunityDashboard />} />
+          <Route path="/community/events" element={<CommunityEvents />} />
+          
+          {/* Projects */}
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/create-project" element={<CreateProject />} />
+          <Route path="/project/:projectId" element={<ProjectDetail />} />
+          
+          {/* Shops */}
+          <Route path="/shops" element={<Shops />} />
+          <Route path="/create-shop" element={<CreateShop />} />
+          <Route path="/tandemx" element={<TandemXShop />} />
+          
+          {/* Collaboration */}
+          <Route path="/collaboration" element={<Collaboration />} />
+          <Route path="/chats" element={<Chats />} />
+          <Route path="/meetings" element={<MeetingScheduler />} />
+          <Route path="/offers" element={<Offers />} />
+          <Route path="/items" element={<Items />} />
+          
+          {/* New Grouper System */}
+          <Route path="/grouper" element={<Grouper />} />
+          
+          {/* 404 Route */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </ThemeProvider>
+    </Router>
+  );
 }
 
-export default App
+export default App;
