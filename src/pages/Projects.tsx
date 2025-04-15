@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useProject } from '@/hooks/use-project';
+import { useProjects } from '@/hooks/use-projects';
 import { Badge } from "@/components/ui/badge";
 import { FileCode, Star, Calendar, Users, ArrowRight, PlusCircle, Sparkles } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
@@ -13,27 +12,35 @@ import { useAuth } from '@/hooks/use-auth';
 const Projects = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { useGetProjects } = useProject();
-  const { data: projects = [], isLoading } = useGetProjects();
+  const projects = useProjects();
+  const { data: projectsData = [], isLoading } = projects.useGetProjects();
   
   const handleViewProject = (projectId: string) => {
-    navigate(`/projects/${projectId}`);
+    navigate(`/project/${projectId}`);
   };
 
   const handleCreateProject = () => {
     navigate('/projects/create');
   };
 
-  // Filter featured projects (we'll use a simple heuristic for demonstration)
-  // In a real app, you'd have a featured flag in the database
-  const featuredProjects = projects.slice(0, 3); // First 3 projects are featured
+  // Featured project IDs
+  const FEATURED_PROJECT_IDS = [
+    'a1b2c3d4-e5f6-7890-abcd-ef1234567890', // Findry Core
+    '9d0e1f23-4567-8901-2345-67890123456a', // Artist Platform
+    '7b8c9d0e-1f23-4567-8901-234567890123'  // DivvyQueue
+  ];
+
+  // Filter featured projects based on specific IDs
+  const featuredProjects = projectsData.filter(project => 
+    FEATURED_PROJECT_IDS.includes(project.id)
+  );
   
   // For now, in this view we'll show all projects as the user's own projects
   // In a real implementation, we would filter based on ownership
-  const myProjects = projects;
+  const myProjects = projectsData;
   
   // For now, we don't have a starring mechanism
-  const starredProjects: typeof projects = [];
+  const starredProjects: typeof projectsData = [];
 
   return (
     <Layout>
@@ -147,11 +154,11 @@ const Projects = () => {
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <FileCode className="h-4 w-4" />
                           <span>{project.components?.length || 0} components</span>
-                    </div>
+                        </div>
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Calendar className="h-4 w-4" />
                           <span>{project.tasks?.length || 0} tasks</span>
-                    </div>
+                        </div>
                       </div>
                     </CardContent>
                     <CardFooter>
@@ -232,11 +239,8 @@ const Projects = () => {
               <div className="text-center py-12">
                 <h3 className="text-lg font-medium mb-2">No starred projects</h3>
                 <p className="text-muted-foreground mb-4">
-                  Star projects you want to access quickly
+                  Star projects to keep track of them here
                 </p>
-                <Button variant="outline" onClick={() => navigate('/discover?type=projects')}>
-                  Browse Projects
-                </Button>
               </div>
             )}
           </TabsContent>
