@@ -1,28 +1,71 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
 import { toast } from 'sonner';
 import { useProject } from '@/hooks/use-project';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Project } from '@/types/project';
+import { Project, ProjectComponent, ProjectTask } from '@/types/project';
 import { supabase } from '@/integrations/supabase/client';
 import ProjectChat, { ReferenceItem } from '@/components/projects/ProjectChat';
 import ProjectInteractionProgress from '@/components/projects/ProjectInteractionProgress';
 import { useProjectInteractions } from '@/hooks/use-project-interactions';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { PlusCircle, Edit } from 'lucide-react';
 
 const ProjectDetail: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { useGetProject } = useProject();
-  const { data: project, isLoading, error } = useGetProject(projectId);
+  const { data: project, isLoading, error, refetch } = useGetProject(projectId);
   const [isOwner, setIsOwner] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const chatRef = useRef<{ addReference: (item: ReferenceItem) => void }>(null);
-  const { updateProjectStatus } = useProjectInteractions({ projectId: projectId || '' });
+  const { 
+    updateProjectStatus, 
+    addProjectComponent, 
+    updateProjectComponent,
+    addProjectTask,
+    updateProjectTask,
+    updateProjectProgress,
+    isAddingComponent, 
+    isAddingTask, 
+    isEditingComponent, 
+    isEditingTask 
+  } = useProjectInteractions({ projectId: projectId || '' });
+
+  // Component dialog state
+  const [componentDialogOpen, setComponentDialogOpen] = useState(false);
+  const [editingComponent, setEditingComponent] = useState<ProjectComponent | null>(null);
+  const [newComponent, setNewComponent] = useState<Partial<ProjectComponent>>({
+    name: '',
+    description: '',
+    type: '',
+    status: 'pending'
+  });
+
+  // Task dialog state
+  const [taskDialogOpen, setTaskDialogOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<ProjectTask | null>(null);
+  const [newTask, setNewTask] = useState<Partial<ProjectTask>>({
+    title: '',
+    description: '',
+    status: 'pending',
+    priority: 'medium'
+  });
+
+  // Progress dialog state
+  const [progressDialogOpen, setProgressDialogOpen] = useState(false);
+  const [newProgress, setNewProgress] = useState<number>(0);
 
   useEffect(() => {
     if (!user || !projectId) return;
@@ -52,6 +95,12 @@ const ProjectDetail: React.FC = () => {
     
     checkOwnership();
   }, [user, projectId]);
+
+  useEffect(() => {
+    if (project) {
+      setNewProgress(project.progress || 0);
+    }
+  }, [project]);
 
   const handleStatusChange = async (newStatus: Project['status']): Promise<boolean> => {
     if (!project) return false;
@@ -94,6 +143,131 @@ const ProjectDetail: React.FC = () => {
 
   const addReferenceToChat = (item: ReferenceItem) => {
     chatRef.current?.addReference(item);
+  };
+
+  const handleOpenComponentDialog = (component?: ProjectComponent) => {
+    if (component) {
+      setEditingComponent(component);
+      setNewComponent({
+        name: component.name,
+        description: component.description || '',
+        type: component.type,
+        status: component.status
+      });
+    } else {
+      setEditingComponent(null);
+      setNewComponent({
+        name: '',
+        description: '',
+        type: '',
+        status: 'pending'
+      });
+    }
+    setComponentDialogOpen(true);
+  };
+
+  const handleOpenTaskDialog = (task?: ProjectTask) => {
+    if (task) {
+      setEditingTask(task);
+      setNewTask({
+        title: task.title || task.name,
+        description: task.description || '',
+        status: task.status,
+        priority: task.priority,
+        assignedTo: task.assignedTo || '',
+        dueDate: task.dueDate || ''
+      });
+    } else {
+      setEditingTask(null);
+      setNewTask({
+        title: '',
+        description: '',
+        status: 'pending',
+        priority: 'medium',
+        assignedTo: '',
+        dueDate: ''
+      });
+    }
+    setTaskDialogOpen(true);
+  };
+
+  const handleSaveComponent = async () => {
+    if (!newComponent.name || !newComponent.type) {
+      toast.error('Component name and type are required');
+      return;
+    }
+
+    let success = false;
+    
+    if (editingComponent) {
+      success = await updateProjectComponent({
+        ...editingComponent,
+        name: newComponent.name || editingComponent.name,
+        description: newComponent.description,
+        type: newComponent.type || editingComponent.type,
+        status: newComponent.status as 'pending' | 'in_progress' | 'completed' || editingComponent.status
+      });
+    } else {
+      success = await addProjectComponent({
+        name: newComponent.name!,
+        description: newComponent.description,
+        type: newComponent.type!,
+        status: newComponent.status as 'pending' | 'in_progress' | 'completed'
+      });
+    }
+
+    if (success) {
+      setComponentDialogOpen(false);
+      refetch();
+    }
+  };
+
+  const handleSaveTask = async () => {
+    if (!newTask.title) {
+      toast.error('Task title is required');
+      return;
+    }
+
+    let success = false;
+    
+    if (editingTask) {
+      success = await updateProjectTask({
+        ...editingTask,
+        title: newTask.title || editingTask.title || editingTask.name,
+        name: newTask.title || editingTask.title || editingTask.name,
+        description: newTask.description,
+        status: newTask.status as 'pending' | 'in_progress' | 'completed' || editingTask.status,
+        priority: newTask.priority as 'low' | 'medium' | 'high' || editingTask.priority,
+        assignedTo: newTask.assignedTo,
+        dueDate: newTask.dueDate
+      });
+    } else {
+      success = await addProjectTask({
+        title: newTask.title,
+        name: newTask.title,
+        description: newTask.description,
+        status: newTask.status as 'pending' | 'in_progress' | 'completed',
+        priority: newTask.priority as 'low' | 'medium' | 'high',
+        assignedTo: newTask.assignedTo,
+        dueDate: newTask.dueDate
+      });
+    }
+
+    if (success) {
+      setTaskDialogOpen(false);
+      refetch();
+    }
+  };
+
+  const handleSaveProgress = async () => {
+    if (!project) return;
+    
+    const success = await updateProjectProgress(project, newProgress);
+    
+    if (success) {
+      setProgressDialogOpen(false);
+      refetch();
+    }
   };
 
   if (isLoading) {
@@ -145,6 +319,44 @@ const ProjectDetail: React.FC = () => {
           
           {isOwner && (
             <div className="flex gap-2 mt-4 sm:mt-0">
+              <Dialog open={progressDialogOpen} onOpenChange={setProgressDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    Update Progress
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Update Project Progress</DialogTitle>
+                    <DialogDescription>
+                      Set the overall completion percentage for this project.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="py-4">
+                    <div className="mb-4">
+                      <Label htmlFor="progress">Progress: {newProgress}%</Label>
+                      <Slider
+                        id="progress"
+                        min={0}
+                        max={100}
+                        step={1}
+                        value={[newProgress]}
+                        onValueChange={(values) => setNewProgress(values[0])}
+                        className="mt-2"
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setProgressDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleSaveProgress}>
+                      Save Progress
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+              
               <Button variant="outline">
                 Edit Project
               </Button>
@@ -217,9 +429,77 @@ const ProjectDetail: React.FC = () => {
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold">Components</h2>
                   {isOwner && (
-                    <Button size="sm">
-                      Add Component
-                    </Button>
+                    <Dialog open={componentDialogOpen} onOpenChange={setComponentDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button size="sm" onClick={() => handleOpenComponentDialog()}>
+                          <PlusCircle className="h-4 w-4 mr-2" />
+                          Add Component
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>{editingComponent ? 'Edit Component' : 'Add Component'}</DialogTitle>
+                          <DialogDescription>
+                            {editingComponent ? 'Update the details of this component.' : 'Add a new component to your project.'}
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="py-4 space-y-4">
+                          <div>
+                            <Label htmlFor="name">Component Name</Label>
+                            <Input 
+                              id="name" 
+                              value={newComponent.name || ''} 
+                              onChange={(e) => setNewComponent({...newComponent, name: e.target.value})}
+                              className="mt-1"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="description">Description</Label>
+                            <Textarea 
+                              id="description" 
+                              value={newComponent.description || ''} 
+                              onChange={(e) => setNewComponent({...newComponent, description: e.target.value})}
+                              className="mt-1"
+                              rows={3}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="type">Component Type</Label>
+                            <Input 
+                              id="type" 
+                              value={newComponent.type || ''} 
+                              onChange={(e) => setNewComponent({...newComponent, type: e.target.value})}
+                              className="mt-1"
+                              placeholder="e.g., UI, Backend, Database"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="status">Status</Label>
+                            <Select 
+                              value={newComponent.status} 
+                              onValueChange={(value) => setNewComponent({...newComponent, status: value as 'pending' | 'in_progress' | 'completed'})}
+                            >
+                              <SelectTrigger id="status" className="mt-1">
+                                <SelectValue placeholder="Select status" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pending">Pending</SelectItem>
+                                <SelectItem value="in_progress">In Progress</SelectItem>
+                                <SelectItem value="completed">Completed</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button variant="outline" onClick={() => setComponentDialogOpen(false)}>
+                            Cancel
+                          </Button>
+                          <Button onClick={handleSaveComponent} disabled={isAddingComponent || isEditingComponent}>
+                            {isAddingComponent || isEditingComponent ? 'Saving...' : 'Save Component'}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   )}
                 </div>
                 
@@ -250,7 +530,12 @@ const ProjectDetail: React.FC = () => {
                               </div>
                               <div className="flex gap-2">
                                 {isOwner && (
-                                  <Button variant="ghost" size="sm">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm"
+                                    onClick={() => handleOpenComponentDialog(component)}
+                                  >
+                                    <Edit className="h-3.5 w-3.5 mr-1.5" />
                                     Edit
                                   </Button>
                                 )}
@@ -284,9 +569,104 @@ const ProjectDetail: React.FC = () => {
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold">Tasks</h2>
                   {isOwner && (
-                    <Button size="sm">
-                      Add Task
-                    </Button>
+                    <Dialog open={taskDialogOpen} onOpenChange={setTaskDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button size="sm" onClick={() => handleOpenTaskDialog()}>
+                          <PlusCircle className="h-4 w-4 mr-2" />
+                          Add Task
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>{editingTask ? 'Edit Task' : 'Add Task'}</DialogTitle>
+                          <DialogDescription>
+                            {editingTask ? 'Update the details of this task.' : 'Add a new task to your project.'}
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="py-4 space-y-4">
+                          <div>
+                            <Label htmlFor="title">Task Title</Label>
+                            <Input 
+                              id="title" 
+                              value={newTask.title || ''} 
+                              onChange={(e) => setNewTask({...newTask, title: e.target.value})}
+                              className="mt-1"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="description">Description</Label>
+                            <Textarea 
+                              id="description" 
+                              value={newTask.description || ''} 
+                              onChange={(e) => setNewTask({...newTask, description: e.target.value})}
+                              className="mt-1"
+                              rows={3}
+                            />
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="status">Status</Label>
+                              <Select 
+                                value={newTask.status} 
+                                onValueChange={(value) => setNewTask({...newTask, status: value as 'pending' | 'in_progress' | 'completed'})}
+                              >
+                                <SelectTrigger id="status" className="mt-1">
+                                  <SelectValue placeholder="Select status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="pending">Pending</SelectItem>
+                                  <SelectItem value="in_progress">In Progress</SelectItem>
+                                  <SelectItem value="completed">Completed</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label htmlFor="priority">Priority</Label>
+                              <Select 
+                                value={newTask.priority} 
+                                onValueChange={(value) => setNewTask({...newTask, priority: value as 'low' | 'medium' | 'high'})}
+                              >
+                                <SelectTrigger id="priority" className="mt-1">
+                                  <SelectValue placeholder="Select priority" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="low">Low</SelectItem>
+                                  <SelectItem value="medium">Medium</SelectItem>
+                                  <SelectItem value="high">High</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="assignedTo">Assigned To</Label>
+                            <Input 
+                              id="assignedTo" 
+                              value={newTask.assignedTo || ''} 
+                              onChange={(e) => setNewTask({...newTask, assignedTo: e.target.value})}
+                              className="mt-1"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="dueDate">Due Date</Label>
+                            <Input 
+                              id="dueDate" 
+                              type="date"
+                              value={newTask.dueDate || ''} 
+                              onChange={(e) => setNewTask({...newTask, dueDate: e.target.value})}
+                              className="mt-1"
+                            />
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button variant="outline" onClick={() => setTaskDialogOpen(false)}>
+                            Cancel
+                          </Button>
+                          <Button onClick={handleSaveTask} disabled={isAddingTask || isEditingTask}>
+                            {isAddingTask || isEditingTask ? 'Saving...' : 'Save Task'}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   )}
                 </div>
                 
@@ -333,7 +713,12 @@ const ProjectDetail: React.FC = () => {
                               </div>
                               <div className="flex gap-2">
                                 {isOwner && (
-                                  <Button variant="ghost" size="sm">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm"
+                                    onClick={() => handleOpenTaskDialog(task)}
+                                  >
+                                    <Edit className="h-3.5 w-3.5 mr-1.5" />
                                     Edit
                                   </Button>
                                 )}
