@@ -57,7 +57,8 @@ export const useGetProject = (projectId?: string) => {
           })) : [],
           tasks: tasksData ? tasksData.map((t: any) => ({
             id: t.id,
-            name: t.title || t.name,
+            name: t.name || t.title, // Support both name and title
+            title: t.title || t.name, // Support both name and title
             description: t.description || '',
             status: t.status || 'pending',
             assignedTo: t.assigned_to,
@@ -68,7 +69,7 @@ export const useGetProject = (projectId?: string) => {
           ownerId: data.owner_id || '',
           createdAt: data.created_at,
           updatedAt: data.updated_at,
-          // Add additional fields from the database schema
+          // Additional fields from the database schema
           budget: data.budget || '',
           location: data.location || '',
           timeline: data.timeline || '',
@@ -113,7 +114,14 @@ export const useGetProjects = () => {
           ownerType: p.owner_type || 'personal',
           ownerId: p.owner_id || '',
           createdAt: p.created_at,
-          updatedAt: p.updated_at
+          updatedAt: p.updated_at,
+          // Additional fields
+          budget: p.budget || '',
+          location: p.location || '',
+          timeline: p.timeline || '',
+          type: p.type || '',
+          image_url: p.image_url || '',
+          repo_url: p.repo_url || ''
         }));
       } catch (error: any) {
         console.error('Error fetching projects:', error);

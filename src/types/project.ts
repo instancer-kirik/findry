@@ -15,6 +15,13 @@ export interface Project {
   ownerId: string;
   createdAt: string;
   updatedAt: string;
+  // Additional fields from the database schema
+  budget?: string;
+  location?: string;
+  timeline?: string;
+  type?: string;
+  image_url?: string;
+  repo_url?: string;
 }
 
 export interface ProjectComponent {
@@ -30,6 +37,7 @@ export interface ProjectComponent {
 export interface ProjectTask {
   id: string;
   name: string;
+  title?: string; // Adding title property as it's used in ProjectChat.tsx
   description?: string;
   status: 'pending' | 'in_progress' | 'completed';
   assignedTo?: string;
