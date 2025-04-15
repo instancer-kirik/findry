@@ -54,11 +54,11 @@ const About: React.FC = () => {
               <Card>
                 <CardHeader className="pb-2">
                   <Users className="h-8 w-8 mb-2 text-primary" />
-                  <CardTitle>Accessible Culture</CardTitle>
+                  <CardTitle>Affordable Culture</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    One's desired culture should be accessible, and the resources to create it should be too.
+                    We believe that one's desired culture should be accessible.
                   </p>
                 </CardContent>
               </Card>
@@ -66,11 +66,12 @@ const About: React.FC = () => {
               <Card>
                 <CardHeader className="pb-2">
                   <Lightbulb className="h-8 w-8 mb-2 text-primary" />
-                  <CardTitle>Sustainable Culture</CardTitle>
+                  <CardTitle>Enabling Creativity</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    Utilization, reutilization, and creation of resources should be sustainable.
+                    Our platform is designed to remove obstacles and provide tools that enable 
+                    creators to focus on their craft and bring their ideas to reality.
                   </p>
                 </CardContent>
               </Card>
@@ -78,11 +79,12 @@ const About: React.FC = () => {
               <Card>
                 <CardHeader className="pb-2">
                   <Heart className="h-8 w-8 mb-2 text-primary" />
-                  <CardTitle>Epicer Software</CardTitle>
+                  <CardTitle>Inclusive Innovation</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    The awesome thing about me making this, is that I want and make fantastic software.
+                    We're committed to building a platform that serves diverse creative communities 
+                    and ensures that resources are accessible.
                   </p>
                 </CardContent>
               </Card>
