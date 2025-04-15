@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from '@/hooks/use-auth';
 import { useProjectChat, ProjectMessage } from '@/hooks/use-project-chat';
-import { Project, ProjectComponent, ProjectTask } from '@/hooks/use-project';
+import { Project, ProjectComponent, ProjectTask } from '@/types/project';
 import { toast } from 'sonner';
 import {
   Popover,
@@ -40,10 +40,8 @@ interface ReferenceItem {
   status: string;
 }
 
-// Export the ReferenceItem type for use in other components
 export type { ReferenceItem };
 
-// Use forwardRef to expose methods to parent components
 const ProjectChat = forwardRef<
   { addReference: (item: ReferenceItem) => void },
   ProjectChatProps
@@ -56,22 +54,18 @@ const ProjectChat = forwardRef<
   const inputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   
-  // Expose methods to parent component
   useImperativeHandle(ref, () => ({
     addReference: (item: ReferenceItem) => {
-      // Check if already selected to avoid duplicates
       if (!selectedReferences.some(ref => ref.id === item.id && ref.type === item.type)) {
         setSelectedReferences(prev => [...prev, item]);
       }
       
-      // Focus the input
       setTimeout(() => {
         inputRef.current?.focus();
       }, 100);
     }
   }));
   
-  // Use our custom project chat hook
   const { 
     messages, 
     loading, 
@@ -83,7 +77,6 @@ const ProjectChat = forwardRef<
     projectName: project.name 
   });
   
-  // Create a list of referenceable items (components and tasks)
   const referenceableItems: ReferenceItem[] = [
     ...(project.components || []).map(component => ({
       id: component.id,
@@ -99,85 +92,68 @@ const ProjectChat = forwardRef<
     }))
   ];
   
-  // Scroll to bottom when new messages arrive
   React.useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
   
-  // Handle sending new message
   const handleSendMessage = async () => {
     if ((!newMessage.trim() && selectedReferences.length === 0) || !user) return;
     
-    // Create the message content, including any references
     let messageContent = newMessage;
     
     if (selectedReferences.length > 0) {
-      // Add references to the message
       messageContent += '\n\nReferences:';
       selectedReferences.forEach(ref => {
         messageContent += `\n• [${ref.type.charAt(0).toUpperCase() + ref.type.slice(1)}: ${ref.name}](#${ref.type}/${ref.id})`;
       });
     }
     
-    // Send the message using our hook
     await sendMessage(messageContent);
     
-    // Clear input and references
     setNewMessage('');
     setSelectedReferences([]);
   };
   
-  // Handle selecting a reference
   const handleSelectReference = (item: ReferenceItem) => {
-    // Check if already selected to avoid duplicates
     if (!selectedReferences.some(ref => ref.id === item.id && ref.type === item.type)) {
       setSelectedReferences(prev => [...prev, item]);
     }
     setOpenReferencePopover(false);
     
-    // Focus the input after selection
     inputRef.current?.focus();
   };
   
-  // Remove a reference
   const handleRemoveReference = (item: ReferenceItem) => {
     setSelectedReferences(prev => 
       prev.filter(ref => !(ref.id === item.id && ref.type === item.type))
     );
   };
   
-  // Format timestamp to readable time
   const formatMessageTime = (timestamp: string) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + 
            ' ' + date.toLocaleDateString([], { day: 'numeric', month: 'short' });
   };
   
-  // Format message content with clickable references
   const formatMessageWithReferences = (content: string) => {
-    // Check if message has references (basic detection)
     if (!content.includes('References:')) {
       return <p>{content}</p>;
     }
     
-    // Split into regular content and references
     const parts = content.split('\n\nReferences:');
     const regularContent = parts[0];
     const references = parts[1];
     
-    // Find and format reference links
     const referenceRegex = /• \[(Component|Task): (.+?)\]\(#(component|task)\/(.+?)\)/g;
     let formattedReferences: JSX.Element[] = [];
     let match;
     let lastIndex = 0;
     
-    // Create array of regular text and links
     while ((match = referenceRegex.exec(references)) !== null) {
-      const type = match[3]; // component or task
-      const id = match[4]; // actual id
-      const name = match[2]; // display name
+      const type = match[3];
+      const id = match[4];
+      const name = match[2];
       
-      // Add the text before this match
       if (match.index > lastIndex) {
         formattedReferences.push(
           <span key={`text-${lastIndex}`}>
@@ -186,7 +162,6 @@ const ProjectChat = forwardRef<
         );
       }
       
-      // Add the link
       formattedReferences.push(
         <Badge 
           key={`ref-${type}-${id}`} 
@@ -201,7 +176,6 @@ const ProjectChat = forwardRef<
       lastIndex = match.index + match[0].length;
     }
     
-    // Add any remaining text
     if (lastIndex < references.length) {
       formattedReferences.push(
         <span key={`text-end`}>
@@ -223,15 +197,12 @@ const ProjectChat = forwardRef<
     );
   };
   
-  // Handle clicking on a reference
   const handleReferenceClick = (type: string, id: string) => {
-    // Check if we have handlers for the reference types
     if (type === 'component' && onReferenceClick?.component) {
       onReferenceClick.component(id);
     } else if (type === 'task' && onReferenceClick?.task) {
       onReferenceClick.task(id);
     } else {
-      // Fallback for when we don't have handlers
       console.log(`Navigate to ${type} with id ${id}`);
       toast.info(`Clicked on ${type} with id ${id}`);
     }
@@ -303,7 +274,6 @@ const ProjectChat = forwardRef<
                   </div>
                 </CardContent>
                 
-                {/* Selected references display */}
                 {selectedReferences.length > 0 && (
                   <div className="px-4 py-2 border-t flex flex-wrap gap-1">
                     {selectedReferences.map(ref => (
@@ -429,7 +399,6 @@ const ProjectChat = forwardRef<
   );
 });
 
-// Add display name for debugging
 ProjectChat.displayName = "ProjectChat";
 
 export default ProjectChat;

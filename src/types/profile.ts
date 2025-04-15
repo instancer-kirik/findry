@@ -1,3 +1,4 @@
+
 export interface Profile {
   id: string;
   username: string;
@@ -8,6 +9,15 @@ export interface Profile {
   updated_at: string;
   role_attributes: Record<string, any>;
   profile_types: string[];
+}
+
+export interface ProfileFormValues {
+  username: string;
+  full_name: string;
+  avatar_url: string;
+  bio: string;
+  profile_types: string[];
+  role_attributes: Record<string, any>;
 }
 
 export interface ProfileTypeOption {

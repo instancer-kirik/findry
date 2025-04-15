@@ -67,7 +67,14 @@ export const useGetProject = (projectId?: string) => {
           ownerType: data.owner_type || 'personal',
           ownerId: data.owner_id || '',
           createdAt: data.created_at,
-          updatedAt: data.updated_at
+          updatedAt: data.updated_at,
+          // Add additional fields from the database schema
+          budget: data.budget || '',
+          location: data.location || '',
+          timeline: data.timeline || '',
+          type: data.type || '',
+          image_url: data.image_url || '',
+          repo_url: data.repo_url || ''
         };
         
         return project;
