@@ -1,355 +1,167 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Database } from '@/integrations/supabase/types';
+import { Project, ProjectComponent, ProjectTask } from '@/types/project';
 import { toast } from 'sonner';
 import { useUser } from '@/hooks/use-user';
 
-// Types from database schema
-type ProjectRecord = Database['public']['Tables']['projects']['Row'];
-type ProjectComponentRecord = Database['public']['Tables']['project_components']['Row'];
-type ProjectTaskRecord = Database['public']['Tables']['project_tasks']['Row'];
-
-// Application types that match our UI needs
-export interface ProjectComponent {
-  id: string;
-  name: string;
-  description: string;
-  status: 'in_progress' | 'completed' | 'pending';
-  type: 'ui' | 'feature' | 'integration' | 'page';
-}
-
-export interface ProjectTask {
-  id: string;
-  name: string;
-  description: string;
-  status: 'in_progress' | 'completed' | 'pending';
-  priority: 'low' | 'medium' | 'high';
-  assignedTo?: string;
-  dueDate?: string;
-}
-
-export interface Project {
-  id: string;
-  name: string;
-  description: string;
-  status: 'planning' | 'development' | 'testing' | 'released' | 'maintenance';
-  version: string;
-  components: ProjectComponent[];
-  tasks: ProjectTask[];
-  progress: number;
-  tags: string[];
-  source?: string;
-  timeline?: {
-    start_date: string;
-    end_date: string;
-    milestones: {
-      date: string;
-      description: string;
-    }[];
-  };
-  contributors?: {
-    id: string;
-    name: string;
-    role: string;
-    avatar?: string;
-  }[];
-  created_at: string;
-  updated_at: string;
-}
-
-export const useCreateProject = () => {
-  return useMutation({
-    mutationFn: async (project: Omit<Project, 'id' | 'created_at' | 'updated_at'>) => {
-      const { data, error } = await supabase
-        .from('projects')
-        .insert({
-          name: project.name,
-          description: project.description,
-          status: project.status,
-          version: project.version,
-          progress: project.progress,
-          tags: project.tags
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-  });
-};
-
-export const useUpdateProject = () => {
-  return useMutation({
-    mutationFn: async ({ id, ...project }: Partial<Project> & { id: string }) => {
-      const { data, error } = await supabase
-        .from('projects')
-        .update({
-          name: project.name,
-          description: project.description,
-          status: project.status,
-          version: project.version,
-          progress: project.progress,
-          tags: project.tags
-        })
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-  });
-};
-
-export const useDeleteProject = () => {
-  return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('projects')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-    },
-  });
-};
-
-export const useGetProject = (id: string) => {
+export const useGetProject = (projectId?: string) => {
   return useQuery({
-    queryKey: ['project', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('projects')
-        .select(`
-          *,
-          components:project_components(*),
-          tasks:project_tasks(*)
-        `)
-        .eq('id', id)
-        .single();
-
-      if (error) throw error;
-
-      // Transform database records to our application types
-      const components = (data.components || []).map((c: ProjectComponentRecord) => ({
-        id: c.id,
-        name: c.name,
-        description: c.description || '',
-        status: c.status as 'in_progress' | 'completed' | 'pending',
-        type: c.type as 'ui' | 'feature' | 'integration' | 'page'
-      }));
-
-      const tasks = (data.tasks || []).map((t: ProjectTaskRecord) => ({
-        id: t.id,
-        name: t.title,
-        description: t.description || '',
-        status: t.status as 'in_progress' | 'completed' | 'pending',
-        priority: t.priority as 'low' | 'medium' | 'high',
-        assignedTo: t.assigned_to,
-        dueDate: t.due_date
-      }));
-
-      // Parse timeline if it exists
-      const timeline = data.timeline ? JSON.parse(data.timeline) : undefined;
-
-      return {
-        ...data,
-        components,
-        tasks,
-        timeline
-      } as Project;
+    queryKey: ['project', projectId],
+    queryFn: async (): Promise<Project | null> => {
+      if (!projectId) return null;
+      
+      try {
+        // Get the project data
+        const { data, error } = await supabase
+          .from('projects')
+          .select('*')
+          .eq('id', projectId)
+          .single();
+          
+        if (error) throw error;
+        if (!data) return null;
+        
+        // Get components
+        const { data: componentsData, error: componentsError } = await supabase
+          .from('project_components')
+          .select('*')
+          .eq('project_id', projectId);
+          
+        if (componentsError) throw componentsError;
+        
+        // Get tasks
+        const { data: tasksData, error: tasksError } = await supabase
+          .from('project_tasks')
+          .select('*')
+          .eq('project_id', projectId);
+          
+        if (tasksError) throw tasksError;
+        
+        const project: Project = {
+          id: data.id,
+          name: data.name,
+          description: data.description || '',
+          status: (data.status as any) || 'planning',
+          version: data.version || '0.1.0',
+          progress: data.progress || 0,
+          tags: data.tags || [],
+          components: componentsData ? componentsData.map((c: any) => ({
+            id: c.id,
+            name: c.name,
+            type: c.type || 'feature',
+            description: c.description || '',
+            status: c.status || 'pending',
+            assignedTo: c.assigned_to,
+            dueDate: c.due_date
+          })) : [],
+          tasks: tasksData ? tasksData.map((t: any) => ({
+            id: t.id,
+            name: t.title || t.name,
+            description: t.description || '',
+            status: t.status || 'pending',
+            assignedTo: t.assigned_to,
+            dueDate: t.due_date,
+            priority: t.priority || 'medium'
+          })) : [],
+          ownerType: data.owner_type || 'personal',
+          ownerId: data.owner_id || '',
+          createdAt: data.created_at,
+          updatedAt: data.updated_at
+        };
+        
+        return project;
+      } catch (error: any) {
+        console.error(`Error fetching project ${projectId}:`, error);
+        toast(`Error fetching project: ${error.message}`);
+        return null;
+      }
     },
+    enabled: !!projectId
   });
 };
 
 export const useGetProjects = () => {
   return useQuery({
     queryKey: ['projects'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('projects')
-        .select(`
-          *,
-          components:project_components(*),
-          tasks:project_tasks(*)
-        `)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      return data.map((p: any) => {
-        const components = (p.components || []).map((c: ProjectComponentRecord) => ({
-          id: c.id,
-          name: c.name,
-          description: c.description || '',
-          status: c.status as 'in_progress' | 'completed' | 'pending',
-          type: c.type as 'ui' | 'feature' | 'integration' | 'page'
+    queryFn: async (): Promise<Project[]> => {
+      try {
+        const { data, error } = await supabase
+          .from('projects')
+          .select('*')
+          .order('created_at', { ascending: false });
+          
+        if (error) throw error;
+        
+        return (data || []).map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          description: p.description || '',
+          status: p.status || 'planning',
+          version: p.version || '0.1.0',
+          progress: p.progress || 0,
+          tags: p.tags || [],
+          components: [],
+          tasks: [],
+          ownerType: p.owner_type || 'personal',
+          ownerId: p.owner_id || '',
+          createdAt: p.created_at,
+          updatedAt: p.updated_at
         }));
-
-        const tasks = (p.tasks || []).map((t: ProjectTaskRecord) => ({
-          id: t.id,
-          name: t.title,
-          description: t.description || '',
-          status: t.status as 'in_progress' | 'completed' | 'pending',
-          priority: t.priority as 'low' | 'medium' | 'high',
-          assignedTo: t.assigned_to,
-          dueDate: t.due_date
-        }));
-
-        return {
-          ...p,
-          components,
-          tasks
-        } as Project;
-      });
-    },
+      } catch (error: any) {
+        console.error('Error fetching projects:', error);
+        toast(`Error fetching projects: ${error.message}`);
+        return [];
+      }
+    }
   });
 };
 
-export const useCreateProjectComponent = () => {
-  return useMutation({
-    mutationFn: async (component: Omit<ProjectComponent, 'id'> & { project_id: string }) => {
-      const { data, error } = await supabase
-        .from('project_components')
-        .insert({
-          project_id: component.project_id,
-          name: component.name,
-          description: component.description,
-          status: component.status,
-          type: component.type
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-  });
-};
-
-export const useUpdateProjectComponent = () => {
-  return useMutation({
-    mutationFn: async ({ id, ...component }: Partial<ProjectComponent> & { id: string }) => {
-      const { data, error } = await supabase
-        .from('project_components')
-        .update({
-          name: component.name,
-          description: component.description,
-          status: component.status,
-          type: component.type
-        })
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-  });
-};
-
-export const useDeleteProjectComponent = () => {
-  return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('project_components')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-    },
-  });
-};
-
-export const useCreateProjectTask = () => {
-  return useMutation({
-    mutationFn: async (task: Omit<ProjectTask, 'id'> & { project_id: string }) => {
-      const { data, error } = await supabase
-        .from('project_tasks')
-        .insert({
-          project_id: task.project_id,
-          title: task.name,
-          description: task.description,
-          status: task.status,
-          priority: task.priority,
-          assigned_to: task.assignedTo,
-          due_date: task.dueDate
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-  });
-};
-
-export const useUpdateProjectTask = () => {
-  return useMutation({
-    mutationFn: async ({ id, ...task }: Partial<ProjectTask> & { id: string }) => {
-      const { data, error } = await supabase
-        .from('project_tasks')
-        .update({
-          title: task.name,
-          description: task.description,
-          status: task.status,
-          priority: task.priority,
-          assigned_to: task.assignedTo,
-          due_date: task.dueDate
-        })
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-  });
-};
-
-export const useDeleteProjectTask = () => {
-  return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('project_tasks')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-    },
-  });
-};
-
-// Main hook that combines all project operations
-export const useProject = () => {
+export const useCreateProject = () => {
+  const queryClient = useQueryClient();
   const { user } = useUser();
-
-  const createProject = useCreateProject();
-  const updateProject = useUpdateProject();
-  const deleteProject = useDeleteProject();
-  const getProject = useGetProject;
-  const getProjects = useGetProjects();
   
-  const createComponent = useCreateProjectComponent();
-  const updateComponent = useUpdateProjectComponent();
-  const deleteComponent = useDeleteProjectComponent();
-  
-  const createTask = useCreateProjectTask();
-  const updateTask = useUpdateProjectTask();
-  const deleteTask = useDeleteProjectTask();
+  return useMutation({
+    mutationFn: async (projectData: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'components' | 'tasks'>) => {
+      try {
+        const { data, error } = await supabase
+          .from('projects')
+          .insert({
+            name: projectData.name,
+            description: projectData.description,
+            status: projectData.status,
+            version: projectData.version,
+            progress: projectData.progress,
+            tags: projectData.tags,
+            owner_type: projectData.ownerType,
+            owner_id: projectData.ownerId || user?.id
+          })
+          .select('id')
+          .single();
+          
+        if (error) throw error;
+        if (!data) throw new Error('Failed to create project');
+        
+        return data.id;
+      } catch (error: any) {
+        console.error('Error creating project:', error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      toast('Project created successfully');
+    },
+    onError: (error: any) => {
+      toast(`Error creating project: ${error.message}`);
+    }
+  });
+};
 
+export const useProject = () => {
   return {
-    createProject,
-    updateProject,
-    deleteProject,
-    getProject,
-    getProjects,
-    createComponent,
-    updateComponent,
-    deleteComponent,
-    createTask,
-    updateTask,
-    deleteTask
+    useGetProjects,
+    useGetProject,
+    useCreateProject
   };
 };

@@ -1,3 +1,4 @@
+
 export type ProjectOwnershipType = 'personal' | 'brand' | 'artist' | 'community';
 
 export interface Project {
@@ -34,4 +35,4 @@ export interface ProjectTask {
   assignedTo?: string;
   dueDate?: string;
   priority: 'low' | 'medium' | 'high';
-} 
+}

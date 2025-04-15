@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -8,9 +9,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/hooks/use-auth';
 import { useProject } from '@/hooks/use-project';
+import { ProjectOwnershipType } from '@/types/project';
 import { toast } from 'sonner';
-
-type ProjectOwnershipType = 'personal' | 'brand' | 'artist' | 'community';
 
 interface ProjectFormData {
   name: string;
@@ -32,33 +32,37 @@ const CreateProject = () => {
     ownershipType: 'personal',
     tags: []
   });
+  
+  // Parse and format tag inputs
+  const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const tagString = e.target.value;
+    const tagsArray = tagString.split(',').map(tag => tag.trim()).filter(Boolean);
+    setFormData({ ...formData, tags: tagsArray });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!user) {
-      toast.error('You must be logged in to create a project');
+      toast('You must be logged in to create a project');
       return;
     }
 
     try {
-      const projectId = await createProject.mutateAsync({
+      await createProject.mutateAsync({
         name: formData.name,
         description: formData.description,
         status: 'planning',
         version: '0.1.0',
         progress: 0,
         tags: formData.tags,
-        components: [],
-        tasks: [],
         ownerType: formData.ownershipType,
         ownerId: formData.ownerId || user.id
       });
 
-      toast.success('Project created successfully');
-      navigate(`/projects/${projectId}`);
-    } catch (error) {
-      toast.error('Failed to create project');
+      navigate('/projects');
+    } catch (error: any) {
+      toast(`Failed to create project: ${error.message}`);
       console.error(error);
     }
   };
@@ -124,9 +128,24 @@ const CreateProject = () => {
                 />
               </div>
             )}
+            
+            <div className="space-y-2">
+              <Label htmlFor="tags">Tags (comma-separated)</Label>
+              <Input
+                id="tags"
+                value={formData.tags.join(', ')}
+                onChange={handleTagsChange}
+                placeholder="e.g. design, development, marketing"
+              />
+            </div>
 
             <div className="flex justify-end">
-              <Button type="submit">Create Project</Button>
+              <Button 
+                type="submit" 
+                disabled={createProject.isPending}
+              >
+                {createProject.isPending ? 'Creating...' : 'Create Project'}
+              </Button>
             </div>
           </form>
         </div>
