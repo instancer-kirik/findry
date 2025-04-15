@@ -38,6 +38,29 @@ export const useGetProject = (projectId?: string) => {
           
         if (tasksError) throw tasksError;
         
+        // Get ownership data from content_ownership table if it exists
+        let ownerType: string = 'personal';
+        let ownerId: string = '';
+        
+        try {
+          const { data: ownershipData, error: ownershipError } = await supabase
+            .from('content_ownership')
+            .select('*')
+            .eq('content_id', projectId)
+            .eq('content_type', 'project')
+            .maybeSingle();
+            
+          if (!ownershipError && ownershipData) {
+            ownerId = ownershipData.owner_id;
+            // Set owner type based on profile if needed
+            // This is a placeholder - you might want to determine this based on user profiles
+            ownerType = 'personal';
+          }
+        } catch (ownershipError) {
+          console.warn('Could not fetch ownership data:', ownershipError);
+          // Continue without ownership data
+        }
+        
         const project: Project = {
           id: data.id,
           name: data.name,
@@ -65,8 +88,8 @@ export const useGetProject = (projectId?: string) => {
             dueDate: t.due_date,
             priority: t.priority || 'medium'
           })) : [],
-          ownerType: data.owner_type || 'personal',
-          ownerId: data.owner_id || '',
+          ownerType: ownerType,
+          ownerId: ownerId,
           createdAt: data.created_at,
           updatedAt: data.updated_at,
           // Additional fields from the database schema
@@ -101,6 +124,8 @@ export const useGetProjects = () => {
           
         if (error) throw error;
         
+        // For each project, we might want to fetch ownership data
+        // but for performance reasons, we'll set defaults here
         return (data || []).map((p: any) => ({
           id: p.id,
           name: p.name,
@@ -111,8 +136,8 @@ export const useGetProjects = () => {
           tags: p.tags || [],
           components: [],
           tasks: [],
-          ownerType: p.owner_type || 'personal',
-          ownerId: p.owner_id || '',
+          ownerType: 'personal', // Default value
+          ownerId: '', // Default value - could be populated in a separate query if needed
           createdAt: p.created_at,
           updatedAt: p.updated_at,
           // Additional fields
@@ -156,6 +181,20 @@ export const useCreateProject = () => {
           
         if (error) throw error;
         if (!data) throw new Error('Failed to create project');
+        
+        // Create content ownership record
+        if (user?.id) {
+          try {
+            await supabase.from('content_ownership').insert({
+              content_id: data.id,
+              content_type: 'project',
+              owner_id: user.id
+            });
+          } catch (ownershipError) {
+            console.warn('Failed to create content ownership record:', ownershipError);
+            // Continue even if ownership record creation fails
+          }
+        }
         
         return data.id;
       } catch (error: any) {
