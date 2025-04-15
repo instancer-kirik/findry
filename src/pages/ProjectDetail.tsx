@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,9 @@ import { useProject } from '@/hooks/use-project';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Project } from '@/types/project';
 import { supabase } from '@/integrations/supabase/client';
+import ProjectChat, { ReferenceItem } from '@/components/projects/ProjectChat';
+import ProjectInteractionProgress from '@/components/projects/ProjectInteractionProgress';
+import { useProjectInteractions } from '@/hooks/use-project-interactions';
 
 const ProjectDetail: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -18,6 +20,9 @@ const ProjectDetail: React.FC = () => {
   const { useGetProject } = useProject();
   const { data: project, isLoading, error } = useGetProject(projectId);
   const [isOwner, setIsOwner] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
+  const chatRef = useRef<{ addReference: (item: ReferenceItem) => void }>(null);
+  const { updateProjectStatus } = useProjectInteractions({ projectId: projectId || '' });
 
   useEffect(() => {
     if (!user || !projectId) return;
@@ -47,6 +52,48 @@ const ProjectDetail: React.FC = () => {
     
     checkOwnership();
   }, [user, projectId]);
+
+  const handleStatusChange = async (newStatus: Project['status']) => {
+    if (!project) return;
+    
+    if (isOwner) {
+      await updateProjectStatus(project, newStatus);
+    } else {
+      toast.error('Only the project owner can change the project status');
+    }
+  };
+
+  const handleComponentClick = (componentId: string) => {
+    setActiveTab('components');
+    setTimeout(() => {
+      const element = document.getElementById(`component-${componentId}`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+        element.classList.add('ring', 'ring-primary', 'ring-opacity-50');
+        setTimeout(() => {
+          element.classList.remove('ring', 'ring-primary', 'ring-opacity-50');
+        }, 2000);
+      }
+    }, 100);
+  };
+
+  const handleTaskClick = (taskId: string) => {
+    setActiveTab('tasks');
+    setTimeout(() => {
+      const element = document.getElementById(`task-${taskId}`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+        element.classList.add('ring', 'ring-primary', 'ring-opacity-50');
+        setTimeout(() => {
+          element.classList.remove('ring', 'ring-primary', 'ring-opacity-50');
+        }, 2000);
+      }
+    }, 100);
+  };
+
+  const addReferenceToChat = (item: ReferenceItem) => {
+    chatRef.current?.addReference(item);
+  };
 
   if (isLoading) {
     return (
@@ -111,48 +158,55 @@ const ProjectDetail: React.FC = () => {
           <div className="lg:col-span-2">
             <Card className="mb-8">
               <CardContent className="pt-6">
-                <h1 className="text-3xl font-bold mb-2">{project.name}</h1>
+                <h1 className="text-3xl font-bold mb-2">{project?.name}</h1>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {project.tags && project.tags.map(tag => (
+                  {project?.tags && project.tags.map(tag => (
                     <span key={tag} className="inline-block bg-muted px-2.5 py-1 rounded-full text-xs">
                       {tag}
                     </span>
                   ))}
                 </div>
                 <div className="text-muted-foreground mb-6">
-                  {project.description}
+                  {project?.description}
                 </div>
                 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                   <div>
                     <h3 className="text-sm text-muted-foreground mb-1">Status</h3>
                     <div className="font-medium capitalize">
-                      {project.status.replace('_', ' ')}
+                      {project?.status.replace('_', ' ')}
                     </div>
                   </div>
                   <div>
                     <h3 className="text-sm text-muted-foreground mb-1">Version</h3>
                     <div className="font-medium">
-                      {project.version || 'N/A'}
+                      {project?.version || 'N/A'}
                     </div>
                   </div>
                   <div>
                     <h3 className="text-sm text-muted-foreground mb-1">Progress</h3>
                     <div className="font-medium">
-                      {project.progress !== undefined ? `${project.progress}%` : 'N/A'}
+                      {project?.progress !== undefined ? `${project.progress}%` : 'N/A'}
                     </div>
                   </div>
                   <div>
                     <h3 className="text-sm text-muted-foreground mb-1">Last Updated</h3>
                     <div className="font-medium">
-                      {new Date(project.updatedAt).toLocaleDateString()}
+                      {project?.updatedAt && new Date(project.updatedAt).toLocaleDateString()}
                     </div>
                   </div>
                 </div>
+                
+                {project && (
+                  <ProjectInteractionProgress 
+                    project={project} 
+                    onMilestoneClick={isOwner ? handleStatusChange : undefined}
+                  />
+                )}
               </CardContent>
             </Card>
             
-            <Tabs defaultValue="components" className="mb-8">
+            <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="mb-8">
               <TabsList className="mb-4">
                 <TabsTrigger value="components">Components</TabsTrigger>
                 <TabsTrigger value="tasks">Tasks</TabsTrigger>
@@ -168,7 +222,7 @@ const ProjectDetail: React.FC = () => {
                   )}
                 </div>
                 
-                {project.components && project.components.length > 0 ? (
+                {project?.components && project.components.length > 0 ? (
                   <div className="space-y-4">
                     {project.components.map(component => (
                       <Card key={component.id} id={`component-${component.id}`}>
@@ -183,9 +237,9 @@ const ProjectDetail: React.FC = () => {
                             <div className="flex flex-col items-end">
                               <div className="flex gap-2 mb-1">
                                 <span className={`text-xs px-2 py-1 rounded-full ${
-                                  component.status === 'completed' ? 'bg-green-100 text-green-800' :
-                                  component.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                                  'bg-gray-100 text-gray-800'
+                                  component.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                                  component.status === 'in_progress' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
+                                  'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400'
                                 }`}>
                                   {component.status.replace('_', ' ')}
                                 </span>
@@ -193,11 +247,25 @@ const ProjectDetail: React.FC = () => {
                                   {component.type}
                                 </span>
                               </div>
-                              {isOwner && (
-                                <Button variant="ghost" size="sm">
-                                  Edit
+                              <div className="flex gap-2">
+                                {isOwner && (
+                                  <Button variant="ghost" size="sm">
+                                    Edit
+                                  </Button>
+                                )}
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  onClick={() => addReferenceToChat({
+                                    id: component.id,
+                                    type: 'component',
+                                    name: component.name,
+                                    status: component.status
+                                  })}
+                                >
+                                  Reference
                                 </Button>
-                              )}
+                              </div>
                             </div>
                           </div>
                         </CardContent>
@@ -221,14 +289,14 @@ const ProjectDetail: React.FC = () => {
                   )}
                 </div>
                 
-                {project.tasks && project.tasks.length > 0 ? (
+                {project?.tasks && project.tasks.length > 0 ? (
                   <div className="space-y-4">
                     {project.tasks.map(task => (
                       <Card key={task.id} id={`task-${task.id}`}>
                         <CardContent className="pt-6">
                           <div className="flex justify-between items-start">
                             <div>
-                              <h3 className="font-semibold">{task.name}</h3>
+                              <h3 className="font-semibold">{task.title || task.name}</h3>
                               <div className="text-sm text-muted-foreground mt-1">
                                 {task.description}
                               </div>
@@ -248,25 +316,39 @@ const ProjectDetail: React.FC = () => {
                             <div className="flex flex-col items-end">
                               <div className="flex gap-2 mb-1">
                                 <span className={`text-xs px-2 py-1 rounded-full ${
-                                  task.status === 'completed' ? 'bg-green-100 text-green-800' :
-                                  task.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                                  'bg-gray-100 text-gray-800'
+                                  task.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                                  task.status === 'in_progress' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
+                                  'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400'
                                 }`}>
                                   {task.status.replace('_', ' ')}
                                 </span>
                                 <span className={`text-xs px-2 py-1 rounded-full ${
-                                  task.priority === 'high' ? 'bg-red-100 text-red-800' :
-                                  task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                                  'bg-green-100 text-green-800'
+                                  task.priority === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
+                                  task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                                  'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
                                 }`}>
                                   {task.priority}
                                 </span>
                               </div>
-                              {isOwner && (
-                                <Button variant="ghost" size="sm">
-                                  Edit
+                              <div className="flex gap-2">
+                                {isOwner && (
+                                  <Button variant="ghost" size="sm">
+                                    Edit
+                                  </Button>
+                                )}
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => addReferenceToChat({
+                                    id: task.id,
+                                    type: 'task',
+                                    name: task.title || task.name,
+                                    status: task.status
+                                  })}
+                                >
+                                  Reference
                                 </Button>
-                              )}
+                              </div>
                             </div>
                           </div>
                         </CardContent>
@@ -282,7 +364,7 @@ const ProjectDetail: React.FC = () => {
             </Tabs>
           </div>
           
-          <div>
+          <div className="space-y-6">
             <Card>
               <CardContent className="pt-6">
                 <h2 className="text-xl font-semibold mb-4">Project Information</h2>
@@ -290,30 +372,43 @@ const ProjectDetail: React.FC = () => {
                   <div>
                     <h3 className="text-sm text-muted-foreground mb-1">Owner Type</h3>
                     <div className="font-medium capitalize">
-                      {project.ownerType}
+                      {project?.ownerType}
                     </div>
                   </div>
                   <div>
                     <h3 className="text-sm text-muted-foreground mb-1">Created</h3>
                     <div className="font-medium">
-                      {new Date(project.createdAt).toLocaleDateString()}
+                      {project?.createdAt && new Date(project.createdAt).toLocaleDateString()}
                     </div>
                   </div>
                   <div>
                     <h3 className="text-sm text-muted-foreground mb-1">Components</h3>
                     <div className="font-medium">
-                      {project.components?.length || 0} components
+                      {project?.components?.length || 0} components
                     </div>
                   </div>
                   <div>
                     <h3 className="text-sm text-muted-foreground mb-1">Tasks</h3>
                     <div className="font-medium">
-                      {project.tasks?.length || 0} tasks
+                      {project?.tasks?.length || 0} tasks
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
+            
+            {project && (
+              <ProjectChat
+                ref={chatRef}
+                project={project}
+                className="sticky top-20"
+                onReferenceClick={{
+                  component: handleComponentClick,
+                  task: handleTaskClick
+                }}
+                onStatusChange={isOwner ? handleStatusChange : undefined}
+              />
+            )}
           </div>
         </div>
       </div>

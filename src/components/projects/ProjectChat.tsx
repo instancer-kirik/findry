@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useImperativeHandle, forwardRef } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -8,8 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from '@/hooks/use-auth';
 import { useProjectChat, ProjectMessage } from '@/hooks/use-project-chat';
-import { Project, ProjectComponent, ProjectTask } from '@/types/project';
+import { Project, ProjectTask, ProjectEvent } from '@/types/project';
 import { toast } from 'sonner';
+import { useProjectInteractions } from '@/hooks/use-project-interactions';
 import {
   Popover,
   PopoverContent,

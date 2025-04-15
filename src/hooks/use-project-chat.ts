@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './use-auth';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { useProjectInteractions } from './use-project-interactions';
 
 export interface ProjectMessage {
   id: string;
@@ -27,28 +28,24 @@ export const useProjectChat = ({ projectId, projectName }: UseProjectChatParams)
   const { user } = useAuth();
   const navigate = useNavigate();
   
-  // Channel name format to ensure consistency
+  const { recordEvent } = useProjectInteractions({ projectId });
+  
   const channelName = `project_chat_${projectId}`;
   
-  // Initialize and fetch messages
   useEffect(() => {
     fetchMessages();
     
-    // Subscribe to real-time updates
     const channel = supabase
       .channel(channelName)
       .on('broadcast', { event: 'new_message' }, (payload) => {
         const newMsg = payload.payload as ProjectMessage;
         
-        // Add message to the list
         setMessages(prev => 
-          // Avoid duplicates
           prev.some(msg => msg.id === newMsg.id) 
             ? prev 
             : [...prev, newMsg]
         );
         
-        // Handle notifications for messages from other users
         if (newMsg.user_id !== user?.id) {
           notifyNewMessage(newMsg);
         }
@@ -56,14 +53,12 @@ export const useProjectChat = ({ projectId, projectName }: UseProjectChatParams)
       .on('broadcast', { event: 'project_update' }, (payload) => {
         const notification = payload.payload as ProjectMessage;
         
-        // Add notification to the list
         setMessages(prev => 
           prev.some(msg => msg.id === notification.id) 
             ? prev 
             : [...prev, notification]
         );
         
-        // Always notify for project updates
         notifyProjectUpdate(notification);
       })
       .subscribe();
@@ -73,21 +68,11 @@ export const useProjectChat = ({ projectId, projectName }: UseProjectChatParams)
     };
   }, [projectId, user?.id]);
   
-  // Fetch messages from the database
   const fetchMessages = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      // In a real implementation, you would fetch messages from Supabase
-      // Example query:
-      // const { data, error } = await supabase
-      //   .from('project_messages')
-      //   .select('*')
-      //   .eq('project_id', projectId)
-      //   .order('created_at', { ascending: true });
-      
-      // For now, use mock data
       const mockMessages: ProjectMessage[] = [
         {
           id: '1',
@@ -136,7 +121,6 @@ export const useProjectChat = ({ projectId, projectName }: UseProjectChatParams)
     }
   };
   
-  // Send a regular chat message
   const sendMessage = async (content: string) => {
     if (!user) {
       toast.error('You must be logged in to send messages');
@@ -144,10 +128,8 @@ export const useProjectChat = ({ projectId, projectName }: UseProjectChatParams)
     }
     
     try {
-      // Generate message ID
       const messageId = `msg_${Date.now()}`;
       
-      // Create message object
       const message: ProjectMessage = {
         id: messageId,
         project_id: projectId,
@@ -158,19 +140,17 @@ export const useProjectChat = ({ projectId, projectName }: UseProjectChatParams)
         created_at: new Date().toISOString(),
       };
       
-      // In a real implementation, you would save to Supabase
-      // Example:
-      // const { error } = await supabase.from('project_messages').insert(message);
-      // if (error) throw error;
-      
-      // Add to local state
       setMessages(prev => [...prev, message]);
       
-      // Broadcast to channel
       await supabase.channel(channelName).send({
         type: 'broadcast',
         event: 'new_message',
         payload: message
+      });
+      
+      await recordEvent('comment', { 
+        messageId: message.id,
+        content: content.length > 50 ? content.substring(0, 50) + '...' : content
       });
       
       return message;
@@ -181,7 +161,6 @@ export const useProjectChat = ({ projectId, projectName }: UseProjectChatParams)
     }
   };
   
-  // Send a project update notification
   const sendProjectUpdate = async (content: string) => {
     if (!user) {
       toast.error('You must be logged in to send updates');
@@ -189,10 +168,8 @@ export const useProjectChat = ({ projectId, projectName }: UseProjectChatParams)
     }
     
     try {
-      // Generate message ID
       const messageId = `notify_${Date.now()}`;
       
-      // Create notification object
       const notification: ProjectMessage = {
         id: messageId,
         project_id: projectId,
@@ -203,15 +180,8 @@ export const useProjectChat = ({ projectId, projectName }: UseProjectChatParams)
         is_notification: true,
       };
       
-      // In a real implementation, you would save to Supabase
-      // Example:
-      // const { error } = await supabase.from('project_messages').insert(notification);
-      // if (error) throw error;
-      
-      // Add to local state
       setMessages(prev => [...prev, notification]);
       
-      // Broadcast to channel
       await supabase.channel(channelName).send({
         type: 'broadcast',
         event: 'project_update',
@@ -226,7 +196,6 @@ export const useProjectChat = ({ projectId, projectName }: UseProjectChatParams)
     }
   };
   
-  // Display notification for new messages
   const notifyNewMessage = (message: ProjectMessage) => {
     toast.success(`New message in ${projectName}`, {
       description: `${message.user_name}: ${message.content.substring(0, 50)}${message.content.length > 50 ? '...' : ''}`,
@@ -237,7 +206,6 @@ export const useProjectChat = ({ projectId, projectName }: UseProjectChatParams)
     });
   };
   
-  // Display notification for project updates
   const notifyProjectUpdate = (notification: ProjectMessage) => {
     toast.info(`Update in ${projectName}`, {
       description: notification.content,
@@ -255,4 +223,4 @@ export const useProjectChat = ({ projectId, projectName }: UseProjectChatParams)
     sendMessage,
     sendProjectUpdate,
   };
-}; 
+};

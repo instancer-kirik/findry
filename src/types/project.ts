@@ -44,3 +44,27 @@ export interface ProjectTask {
   dueDate?: string;
   priority: 'low' | 'medium' | 'high';
 }
+
+export interface ProjectMessage {
+  id: string;
+  projectId: string;
+  userId: string;
+  userName: string;
+  userAvatar?: string;
+  content: string;
+  createdAt: string;
+  isNotification: boolean;
+  reference?: {
+    type: 'component' | 'task';
+    id: string;
+    name: string;
+  };
+}
+
+export interface ProjectEvent {
+  type: 'status_change' | 'task_update' | 'component_update' | 'comment' | 'member_joined';
+  timestamp: string;
+  userId: string;
+  userName: string;
+  details: Record<string, any>;
+}
