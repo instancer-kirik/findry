@@ -53,13 +53,14 @@ const ProjectDetail: React.FC = () => {
     checkOwnership();
   }, [user, projectId]);
 
-  const handleStatusChange = async (newStatus: Project['status']) => {
-    if (!project) return;
+  const handleStatusChange = async (newStatus: Project['status']): Promise<boolean> => {
+    if (!project) return false;
     
     if (isOwner) {
-      await updateProjectStatus(project, newStatus);
+      return await updateProjectStatus(project, newStatus);
     } else {
       toast.error('Only the project owner can change the project status');
+      return false;
     }
   };
 
