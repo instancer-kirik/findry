@@ -1,7 +1,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Project, ProjectComponent, ProjectTask } from '@/types/project';
+import { Project, ProjectComponent, ProjectTask, ProjectOwnershipType } from '@/types/project';
 import { toast } from 'sonner';
 import { useUser } from '@/hooks/use-user';
 
@@ -39,7 +39,7 @@ export const useGetProject = (projectId?: string) => {
         if (tasksError) throw tasksError;
         
         // Get ownership data from content_ownership table if it exists
-        let ownerType: string = 'personal';
+        let ownerType: ProjectOwnershipType = 'personal';
         let ownerId: string = '';
         
         try {
@@ -136,7 +136,7 @@ export const useGetProjects = () => {
           tags: p.tags || [],
           components: [],
           tasks: [],
-          ownerType: 'personal', // Default value
+          ownerType: 'personal' as ProjectOwnershipType, // Cast to correct type
           ownerId: '', // Default value - could be populated in a separate query if needed
           createdAt: p.created_at,
           updatedAt: p.updated_at,
