@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -10,9 +11,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from "@/hooks/use-auth";
 import EventSharingDialog from '@/components/events/EventSharingDialog';
-import { EventSlot, FeaturedArtist } from '@/types/event';
+import { EventSlot, FeaturedArtist, ArtGalleryItem } from '@/types/event';
 import { Json } from '@/integrations/supabase/types';
 import { convertFromJson } from '@/types/supabase';
+import ArtGalleryCard from '@/components/events/ArtGalleryCard';
 
 interface EventProps {
   id: string;
@@ -33,7 +35,8 @@ interface EventProps {
   eventbrite_url?: string;
   slots?: Json;
   requested_items?: Json;
-  featuredArtists?: Json;
+  featured_artists?: Json;
+  gallery_items?: Json;
 }
 
 const EventDetail = () => {
@@ -42,6 +45,7 @@ const EventDetail = () => {
   const [eventSlots, setEventSlots] = useState<EventSlot[]>([]);
   const [requestedItems, setRequestedItems] = useState<any[]>([]);
   const [featuredArtists, setFeaturedArtists] = useState<FeaturedArtist[]>([]);
+  const [galleryItems, setGalleryItems] = useState<ArtGalleryItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [attending, setAttending] = useState<boolean>(false);
@@ -93,22 +97,25 @@ const EventDetail = () => {
             }
           }
           
-          const rawData = data as any;
-          if (rawData.featured_artists) {
+          // Parse featured artists
+          if (data.featured_artists) {
             try {
-              const parsedArtists = convertFromJson<FeaturedArtist[]>(rawData.featured_artists);
+              const parsedArtists = convertFromJson<FeaturedArtist[]>(data.featured_artists);
               setFeaturedArtists(parsedArtists || []);
               console.log("Parsed featured artists:", parsedArtists);
             } catch (err) {
               console.error("Error parsing featured artists:", err);
             }
-          } else if (rawData.featuredArtists) {
+          }
+          
+          // Parse gallery items
+          if (data.gallery_items) {
             try {
-              const parsedArtists = convertFromJson<FeaturedArtist[]>(rawData.featuredArtists);
-              setFeaturedArtists(parsedArtists || []);
-              console.log("Parsed featured artists:", parsedArtists);
+              const parsedGalleryItems = convertFromJson<ArtGalleryItem[]>(data.gallery_items);
+              setGalleryItems(parsedGalleryItems || []);
+              console.log("Parsed gallery items:", parsedGalleryItems);
             } catch (err) {
-              console.error("Error parsing featured artists:", err);
+              console.error("Error parsing gallery items:", err);
             }
           }
           
@@ -283,6 +290,18 @@ const EventDetail = () => {
               <h2 className="text-xl font-semibold mb-2">About This Event</h2>
               <p className="whitespace-pre-line">{event?.description}</p>
             </div>
+            
+            {/* Gallery Items Section */}
+            {galleryItems && galleryItems.length > 0 && (
+              <div className="mt-8 mb-8">
+                <h2 className="text-xl font-semibold mb-4">Artwork Gallery</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {galleryItems.map((item) => (
+                    <ArtGalleryCard key={item.id} item={item} />
+                  ))}
+                </div>
+              </div>
+            )}
 
             {featuredArtists && featuredArtists.length > 0 && (
               <div className="mt-8 mb-8">

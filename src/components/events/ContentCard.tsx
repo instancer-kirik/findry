@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +10,7 @@ interface ContentCardProps {
   type?: string;
   location?: string;
   image_url?: string;
+  description?: string;
   isSelected?: boolean;
   selectionMode?: boolean;
   onClick?: () => void;
@@ -20,6 +22,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
   type,
   location,
   image_url,
+  description,
   isSelected = false,
   selectionMode = false,
   onClick
@@ -49,6 +52,10 @@ const ContentCard: React.FC<ContentCardProps> = ({
       <CardContent className="p-4">
         <h3 className="font-medium">{name}</h3>
         
+        {description && (
+          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{description}</p>
+        )}
+        
         <div className="flex flex-wrap gap-2 mt-2">
           {type && (
             <Badge variant="secondary" className="text-xs">
@@ -68,4 +75,4 @@ const ContentCard: React.FC<ContentCardProps> = ({
   );
 };
 
-export default ContentCard; 
+export default ContentCard;

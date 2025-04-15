@@ -1,3 +1,4 @@
+
 import { Profile } from "./profile";
 import { ContentItemProps } from "@/types/content";
 import { Json } from "@/integrations/supabase/types";
@@ -34,6 +35,20 @@ export interface FeaturedArtist {
   platformId?: string;
 }
 
+export interface ArtGalleryItem {
+  id: string;
+  title: string;
+  artistName: string;
+  medium?: string;
+  year?: string;
+  description?: string;
+  imageUrl?: string;
+  price?: string;
+  dimensions?: string;
+  isForSale?: boolean;
+  collectionName?: string;
+}
+
 export interface Event {
   id: string;
   title: string;
@@ -57,6 +72,7 @@ export interface Event {
   requested_items?: any[];
   artists?: ContentItemProps[];
   featuredArtists?: FeaturedArtist[];
+  galleryItems?: ArtGalleryItem[];
   resources?: ContentItemProps[];
   venueId?: string;
   venue?: ContentItemProps;
