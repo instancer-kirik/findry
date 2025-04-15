@@ -54,11 +54,11 @@ const About: React.FC = () => {
               <Card>
                 <CardHeader className="pb-2">
                   <Users className="h-8 w-8 mb-2 text-primary" />
-                  <CardTitle>Affordable Culture</CardTitle>
+                  <CardTitle>Accessible Culture</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    We believe that one's desired culture should be accessible.
+                    One's desired culture should be accessible, and the resources to create it should be too.
                   </p>
                 </CardContent>
               </Card>
@@ -66,12 +66,11 @@ const About: React.FC = () => {
               <Card>
                 <CardHeader className="pb-2">
                   <Lightbulb className="h-8 w-8 mb-2 text-primary" />
-                  <CardTitle>Enabling Creativity</CardTitle>
+                  <CardTitle>Sustainable Culture</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    Our platform is designed to remove obstacles and provide tools that enable 
-                    creators to focus on their craft and bring their ideas to reality.
+                    Utilization, reutilization, and creation of resources should be sustainable.
                   </p>
                 </CardContent>
               </Card>
@@ -79,12 +78,11 @@ const About: React.FC = () => {
               <Card>
                 <CardHeader className="pb-2">
                   <Heart className="h-8 w-8 mb-2 text-primary" />
-                  <CardTitle>Inclusive Innovation</CardTitle>
+                  <CardTitle>Epicer Software</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    We're committed to building a platform that serves diverse creative communities 
-                    and ensures that resources are accessible.
+                    The awesome thing about me making this, is that I want and make fantastic software.
                   </p>
                 </CardContent>
               </Card>

@@ -18,7 +18,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Link } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { sendVerificationEmail } from '@/lib/email-templates';
 
 // Define the form schema with Zod
 const signUpSchema = z.object({
@@ -96,9 +95,6 @@ const SignUpForm: React.FC = () => {
         }
         throw profileError;
       }
-
-      // Send verification email
-      await sendVerificationEmail(values.email);
 
       toast({
         title: 'Account created!',
