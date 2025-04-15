@@ -14,38 +14,15 @@ import { EventSlot, FeaturedArtist } from '@/types/event';
 import { ContentItemProps } from '@/types/content';
 import { v4 as uuidv4 } from 'uuid';
 import { convertToJson } from '@/types/supabase';
+import ArtGalleryItemsForm from '@/components/events/forms/ArtGalleryItemsForm';
+import { ArtGalleryItem } from '@/types/event';
 
-// Import form components
-import EventDetailsForm from '@/components/events/forms/EventDetailsForm';
-import DateTimeForm from '@/components/events/forms/DateTimeForm';
-import PosterUpload from '@/components/events/forms/PosterUpload';
-import AdditionalSettings from '@/components/events/forms/AdditionalSettings';
-import FeaturedArtistsForm from '@/components/events/forms/FeaturedArtistsForm';
-import ContentCard from '@/components/events/ContentCard';
-
-// Types
-interface EventContentItem {
-  id: string;
-  name: string;
-  type: string;
-  location: string;
-  image_url?: string;
-  description?: string;
-  tags?: string[];
-  selected?: boolean;
-}
-
-type FilterType = 'all' | 'artists' | 'venues' | 'resources' | 'brands' | 'communities';
-type RecurrenceType = 'none' | 'daily' | 'weekly' | 'monthly';
-
-// Main CreateEvent Component
 const CreateEvent = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const communityId = searchParams.get('communityId');
   
-  // Form state
   const [eventName, setEventName] = useState('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
@@ -66,8 +43,8 @@ const CreateEvent = () => {
   const [loading, setLoading] = useState(false);
   const [eventSlots, setEventSlots] = useState<EventSlot[]>([]);
   const [featuredArtists, setFeaturedArtists] = useState<FeaturedArtist[]>([]);
+  const [galleryItems, setGalleryItems] = useState<ArtGalleryItem[]>([]);
   
-  // Event components state
   const [selectedObjects, setSelectedObjects] = useState<{
     artists: ContentItemProps[];
     resources: ContentItemProps[];
@@ -173,7 +150,6 @@ const CreateEvent = () => {
     }
   ]);
 
-  // Update selected objects when components change
   useEffect(() => {
     setSelectedObjects({
       artists: artists.filter(a => a.selected).map(a => ({
@@ -203,7 +179,6 @@ const CreateEvent = () => {
     });
   }, [artists, resources, venues]);
 
-  // Handle component selection
   const handleArtistSelection = (id: string) => {
     setArtists(artists.map(artist => 
       artist.id === id ? { ...artist, selected: !artist.selected } : artist
@@ -234,7 +209,6 @@ const CreateEvent = () => {
     ));
   };
 
-  // Handle component group application
   const handleApplyComponentGroup = (group: any) => {
     const updatedArtists = [...artists];
     const updatedVenues = [...venues];
@@ -300,7 +274,6 @@ const CreateEvent = () => {
     toast.success("Component group applied successfully!");
   };
 
-  // Handle poster upload
   const uploadPosterToStorage = async (): Promise<string | null> => {
     if (!posterImage) return null;
 
@@ -326,7 +299,6 @@ const CreateEvent = () => {
     }
   };
 
-  // Handle form submission
   const handleCreateEvent = async () => {
     const processingId = Date.now();
     console.log(`Create button clicked (ID: ${processingId}), starting event creation process`);
@@ -476,7 +448,8 @@ const CreateEvent = () => {
         slots: convertToJson(processedSlots),
         requested_items: convertToJson(requestedItems),
         created_by: user.id,
-        featured_artists: convertToJson(featuredArtists)
+        featured_artists: convertToJson(featuredArtists),
+        gallery_items: convertToJson(galleryItems)
       };
       
       console.log("Step 1: Creating content ownership record...", eventId);
@@ -591,6 +564,11 @@ const CreateEvent = () => {
           <FeaturedArtistsForm 
             featuredArtists={featuredArtists}
             setFeaturedArtists={setFeaturedArtists}
+          />
+
+          <ArtGalleryItemsForm
+            galleryItems={galleryItems}
+            setGalleryItems={setGalleryItems}
           />
 
           <div className="mt-6 border rounded-lg p-4 bg-background">

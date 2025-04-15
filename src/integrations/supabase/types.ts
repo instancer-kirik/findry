@@ -298,6 +298,8 @@ export type Database = {
           created_by: string | null
           description: string | null
           end_date: string | null
+          featured_artists: Json | null
+          gallery_items: Json | null
           id: string
           image_url: string | null
           location: string | null
@@ -316,6 +318,8 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           end_date?: string | null
+          featured_artists?: Json | null
+          gallery_items?: Json | null
           id?: string
           image_url?: string | null
           location?: string | null
@@ -334,6 +338,8 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           end_date?: string | null
+          featured_artists?: Json | null
+          gallery_items?: Json | null
           id?: string
           image_url?: string | null
           location?: string | null

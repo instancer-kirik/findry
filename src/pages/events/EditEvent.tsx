@@ -644,6 +644,7 @@ const EditEvent: React.FC = () => {
                 <TabsTrigger value="schedule" className="rounded-none">Schedule</TabsTrigger>
                 <TabsTrigger value="components" className="rounded-none">Components</TabsTrigger>
                 <TabsTrigger value="featured-artists" className="rounded-none">Featured Artists</TabsTrigger>
+                <TabsTrigger value="gallery-items" className="rounded-none">Gallery Items</TabsTrigger>
               </TabsList>
               
               <TabsContent value="details" className="p-6">
@@ -894,6 +895,11 @@ const EditEvent: React.FC = () => {
                   setFeaturedArtists={setFeaturedArtists}
                 />
               </TabsContent>
+              
+              <TabsContent value="gallery-items" className="p-6">
+                <h2 className="text-xl font-semibold mb-4">Gallery Items</h2>
+                {/* Content for gallery items */}
+              </TabsContent>
             </Tabs>
           </Card>
           
@@ -917,4 +923,4 @@ const EditEvent: React.FC = () => {
   );
 };
 
-export default EditEvent; 
+export default EditEvent;

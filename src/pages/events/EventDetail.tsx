@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -426,7 +425,7 @@ const EventDetail = () => {
                       {item.link && (
                         <p className="text-sm mt-1">
                           <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline flex items-center">
-                            <ExternalLink className="h-3 w-3 mr-1" /> Link
+                            <ExternalLink className="h-4 w-4 mr-2" /> Link
                           </a>
                         </p>
                       )}
