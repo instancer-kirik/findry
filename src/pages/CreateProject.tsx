@@ -76,19 +76,19 @@ const CreateProject = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="name">Project Name</Label>
-              <Input
+                <Input 
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Enter project name"
-                required
-              />
-            </div>
+                  required
+                />
+              </div>
 
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
+              <Textarea 
+                id="description" 
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Describe your project"
@@ -98,7 +98,7 @@ const CreateProject = () => {
 
             <div className="space-y-2">
               <Label htmlFor="ownershipType">Project Ownership</Label>
-              <Select
+              <Select 
                 value={formData.ownershipType}
                 onValueChange={(value: ProjectOwnershipType) => 
                   setFormData({ ...formData, ownershipType: value })
@@ -131,14 +131,14 @@ const CreateProject = () => {
             
             <div className="space-y-2">
               <Label htmlFor="tags">Tags (comma-separated)</Label>
-              <Input
+                <Input 
                 id="tags"
                 value={formData.tags.join(', ')}
                 onChange={handleTagsChange}
                 placeholder="e.g. design, development, marketing"
-              />
-            </div>
-
+                />
+              </div>
+              
             <div className="flex justify-end">
               <Button 
                 type="submit" 
@@ -148,7 +148,7 @@ const CreateProject = () => {
               </Button>
             </div>
           </form>
-        </div>
+          </div>
       </div>
     </Layout>
   );

@@ -2,29 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Calendar } from '@/components/ui/calendar';
-import ContentCard from '@/components/marketplace/ContentCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Clock, Image, Plus, Upload } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { generateUniqueId } from '@/utils/unique-id';
 import EventComponentGroups from '@/components/events/EventComponentGroups';
 import EventSharingDialog from '@/components/events/EventSharingDialog';
 import EventSlotManager from '@/components/events/EventSlotManager';
-import { EventSlot } from '@/types/event';
+import { EventSlot, FeaturedArtist } from '@/types/event';
 import { ContentItemProps } from '@/types/content';
 import { v4 as uuidv4 } from 'uuid';
 import { convertToJson } from '@/types/supabase';
 
+// Import form components
+import EventDetailsForm from '@/components/events/forms/EventDetailsForm';
+import DateTimeForm from '@/components/events/forms/DateTimeForm';
+import PosterUpload from '@/components/events/forms/PosterUpload';
+import AdditionalSettings from '@/components/events/forms/AdditionalSettings';
+import FeaturedArtistsForm from '@/components/events/forms/FeaturedArtistsForm';
+import ContentCard from '@/components/events/ContentCard';
+
+// Types
 interface EventContentItem {
   id: string;
   name: string;
@@ -36,16 +35,17 @@ interface EventContentItem {
   selected?: boolean;
 }
 
-type FilterType = "resources" | "artists" | "venues" | "brands" | "communities" | "all";
+type FilterType = 'all' | 'artists' | 'venues' | 'resources' | 'brands' | 'communities';
+type RecurrenceType = 'none' | 'daily' | 'weekly' | 'monthly';
 
-type RecurrenceType = "none" | "daily" | "weekly" | "monthly" | "custom";
-
+// Main CreateEvent Component
 const CreateEvent = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const communityId = searchParams.get('communityId');
   
+  // Form state
   const [eventName, setEventName] = useState('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
@@ -65,6 +65,9 @@ const CreateEvent = () => {
   const [registrationRequired, setRegistrationRequired] = useState(false);
   const [loading, setLoading] = useState(false);
   const [eventSlots, setEventSlots] = useState<EventSlot[]>([]);
+  const [featuredArtists, setFeaturedArtists] = useState<FeaturedArtist[]>([]);
+  
+  // Event components state
   const [selectedObjects, setSelectedObjects] = useState<{
     artists: ContentItemProps[];
     resources: ContentItemProps[];
@@ -170,6 +173,7 @@ const CreateEvent = () => {
     }
   ]);
 
+  // Update selected objects when components change
   useEffect(() => {
     setSelectedObjects({
       artists: artists.filter(a => a.selected).map(a => ({
@@ -199,6 +203,7 @@ const CreateEvent = () => {
     });
   }, [artists, resources, venues]);
 
+  // Handle component selection
   const handleArtistSelection = (id: string) => {
     setArtists(artists.map(artist => 
       artist.id === id ? { ...artist, selected: !artist.selected } : artist
@@ -229,6 +234,7 @@ const CreateEvent = () => {
     ));
   };
 
+  // Handle component group application
   const handleApplyComponentGroup = (group: any) => {
     const updatedArtists = [...artists];
     const updatedVenues = [...venues];
@@ -294,18 +300,7 @@ const CreateEvent = () => {
     toast.success("Component group applied successfully!");
   };
 
-  const handlePosterUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!event.target.files || event.target.files.length === 0) {
-      return;
-    }
-    
-    const file = event.target.files[0];
-    setPosterImage(file);
-    
-    const url = URL.createObjectURL(file);
-    setPosterUrl(url);
-  };
-
+  // Handle poster upload
   const uploadPosterToStorage = async (): Promise<string | null> => {
     if (!posterImage) return null;
 
@@ -331,6 +326,7 @@ const CreateEvent = () => {
     }
   };
 
+  // Handle form submission
   const handleCreateEvent = async () => {
     const processingId = Date.now();
     console.log(`Create button clicked (ID: ${processingId}), starting event creation process`);
@@ -410,70 +406,6 @@ const CreateEvent = () => {
       const processedSlots = eventSlots.map(slot => {
         const processedSlot = { ...slot };
         
-        if (slot.artist?.isNew) {
-          const requestedArtist = {
-            id: slot.artist.id,
-            name: slot.artist.name,
-            type: 'artist',
-            status: 'requested',
-            email: slot.artist.email,
-            link: slot.artist.link,
-            location: slot.artist.location
-          };
-          
-          requestedItems.push(requestedArtist);
-          
-          const requestNote = `Requested artist: ${slot.artist.name}`;
-          processedSlot.notes = processedSlot.notes 
-            ? `${processedSlot.notes}\n${requestNote}` 
-            : requestNote;
-          
-          if (slot.artist.email) {
-            processedSlot.notes += `\nEmail: ${slot.artist.email}`;
-          }
-          if (slot.artist.link) {
-            processedSlot.notes += `\nLink: ${slot.artist.link}`;
-          }
-          if (slot.artist.location) {
-            processedSlot.notes += `\nLocation: ${slot.artist.location}`;
-          }
-          
-          processedSlot.artist = undefined;
-          processedSlot.isRequestOnly = true;
-        }
-        
-        if (slot.resource?.isNew) {
-          const requestedResource = {
-            id: slot.resource.id,
-            name: slot.resource.name,
-            type: 'resource',
-            status: 'requested',
-            email: slot.resource.email,
-            link: slot.resource.link,
-            location: slot.resource.location
-          };
-          
-          requestedItems.push(requestedResource);
-          
-          const requestNote = `Requested resource: ${slot.resource.name}`;
-          processedSlot.notes = processedSlot.notes 
-            ? `${processedSlot.notes}\n${requestNote}` 
-            : requestNote;
-          
-          if (slot.resource.email) {
-            processedSlot.notes += `\nEmail: ${slot.resource.email}`;
-          }
-          if (slot.resource.link) {
-            processedSlot.notes += `\nLink: ${slot.resource.link}`;
-          }
-          if (slot.resource.location) {
-            processedSlot.notes += `\nLocation: ${slot.resource.location}`;
-          }
-          
-          processedSlot.resource = undefined;
-          processedSlot.isRequestOnly = true;
-        }
-        
         if (slot.venue?.isNew) {
           const requestedVenue = {
             id: slot.venue.id,
@@ -543,7 +475,8 @@ const CreateEvent = () => {
         tags: eventTags,
         slots: convertToJson(processedSlots),
         requested_items: convertToJson(requestedItems),
-        created_by: user.id
+        created_by: user.id,
+        featured_artists: convertToJson(featuredArtists)
       };
       
       console.log("Step 1: Creating content ownership record...", eventId);
@@ -590,106 +523,21 @@ const CreateEvent = () => {
           return;
         }
         
-        console.log("Step 3: Event created successfully");
-        
-        if (communityId && user) {
-          console.log("Step 4: Creating community relationship");
-          try {
-            const { error: relationshipError } = await supabase
-              .from('event_community_relationships')
-              .insert({
-                event_id: eventId,
-                community_id: communityId,
-                created_by: user.id
-              });
-              
-            if (relationshipError) {
-              console.error('Error creating relationship:', relationshipError);
-            } else {
-              console.log("Step 4: Community relationship created successfully");
-            }
-          } catch (relationshipError) {
-            console.error('Failed to store event relationship:', relationshipError);
-          }
-        }
-        
-        console.log("Step 5: All done - showing success message");
         toast.success("Event created successfully!");
-        
-        setTimeout(() => {
-          if (isProcessing) {
-            console.log("Step 6: Navigating to event page", eventId);
-            navigate(`/events/${eventId}`);
-          }
-        }, 1000);
-        
+        navigate(`/events/${eventId}`);
       } catch (error: any) {
-        isProcessing = false;
-        console.error(`Error in event creation process (ID: ${processingId}):`, error);
+        console.error('Error in event creation process:', error);
         toast.error(error.message || "Failed to create event");
-      }
-    } catch (outerError: any) {
-      isProcessing = false;
-      console.error(`Error in create event process (ID: ${processingId}):`, outerError);
-      toast.error(outerError.message || "Failed to create event");
-    } finally {
-      if (isProcessing) {
-        isProcessing = false;
+      } finally {
         setLoading(false);
-        console.log(`Set loading state to false (ID: ${processingId})`);
+        isProcessing = false;
       }
+    } catch (error: any) {
+      console.error('Error in event creation process:', error);
+      toast.error(error.message || "Failed to create event");
+      setLoading(false);
+      isProcessing = false;
     }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-  };
-
-  const getFilteredContent = () => {
-    switch (filterType) {
-      case 'artists':
-        return artists;
-      case 'venues':
-        return venues;
-      case 'resources':
-        return resources;
-      case 'brands':
-        return brands;
-      case 'communities':
-        return communities;
-      case 'all':
-      default:
-        return [
-          ...artists, 
-          ...venues, 
-          ...resources, 
-          ...brands,
-          ...communities
-        ];
-    }
-  };
-
-  const handleItemClick = (itemId: string) => {
-    if (artists.some(a => a.id === itemId)) {
-      handleArtistSelection(itemId);
-    } else if (venues.some(v => v.id === itemId)) {
-      handleVenueSelection(itemId);
-    } else if (resources.some(r => r.id === itemId)) {
-      handleResourceSelection(itemId);
-    } else if (brands.some(b => b.id === itemId)) {
-      handleBrandSelection(itemId);
-    } else if (communities.some(c => c.id === itemId)) {
-      handleCommunitySelection(itemId);
-    }
-  };
-
-  const tabKeys = {
-    all: generateUniqueId('tab-all'),
-    artists: generateUniqueId('tab-artists'),
-    venues: generateUniqueId('tab-venues'),
-    resources: generateUniqueId('tab-resources'),
-    brands: generateUniqueId('tab-brands'),
-    communities: generateUniqueId('tab-communities')
   };
 
   return (
@@ -697,276 +545,54 @@ const CreateEvent = () => {
       <div className="container mx-auto py-8 px-4">
         <h1 className="text-3xl font-bold mb-6">Create New Event</h1>
         
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <section className="space-y-6">
-            <h2 className="text-xl font-semibold">Event Details</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label htmlFor="eventName">Event Name*</Label>
-                <Input 
-                  id="eventName" 
-                  value={eventName} 
-                  onChange={(e) => setEventName(e.target.value)} 
-                  placeholder="Enter event name"
-                  required
-                />
-              </div>
+        <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
+          <EventDetailsForm
+            eventName={eventName}
+            setEventName={setEventName}
+            description={description}
+            setDescription={setDescription}
+            location={location}
+            setLocation={setLocation}
+            capacity={capacity}
+            setCapacity={setCapacity}
+            eventType={eventType}
+            setEventType={setEventType}
+          />
 
-              <div>
-                <Label htmlFor="eventType">Event Type*</Label>
-                <Select 
-                  value={eventType}
-                  onValueChange={setEventType}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select event type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="in-person">In-Person</SelectItem>
-                    <SelectItem value="online">Online</SelectItem>
-                    <SelectItem value="hybrid">Hybrid</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            <div>
-              <Label htmlFor="description">Description</Label>
-              <Textarea 
-                id="description" 
-                value={description} 
-                onChange={(e) => setDescription(e.target.value)} 
-                placeholder="Describe your event"
-                rows={4}
-              />
-            </div>
+          <DateTimeForm
+            startDate={startDate}
+            setStartDate={setStartDate}
+            endDate={endDate}
+            setEndDate={setEndDate}
+            startTime={startTime}
+            setStartTime={setStartTime}
+            endTime={endTime}
+            setEndTime={setEndTime}
+          />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label htmlFor="location">Location*</Label>
-                <Input 
-                  id="location" 
-                  value={location} 
-                  onChange={(e) => setLocation(e.target.value)} 
-                  placeholder="Event location or online platform"
-                  required
-                />
-              </div>
+          <PosterUpload
+            posterImage={posterImage}
+            setPosterImage={setPosterImage}
+            posterUrl={posterUrl}
+            setPosterUrl={setPosterUrl}
+          />
 
-              <div>
-                <Label htmlFor="capacity">Capacity</Label>
-                <Input 
-                  id="capacity" 
-                  value={capacity} 
-                  onChange={(e) => setCapacity(e.target.value)} 
-                  placeholder="Maximum number of attendees"
-                  type="number"
-                />
-              </div>
-            </div>
-          </section>
+          <AdditionalSettings
+            isPrivate={isPrivate}
+            setIsPrivate={setIsPrivate}
+            registrationRequired={registrationRequired}
+            setRegistrationRequired={setRegistrationRequired}
+            ticketPrice={ticketPrice}
+            setTicketPrice={setTicketPrice}
+            ticketUrl={ticketUrl}
+            setTicketUrl={setTicketUrl}
+          />
 
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold">Event Poster</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label htmlFor="posterImage">Upload Poster Image</Label>
-                <div className="mt-2 flex items-center gap-4">
-                  <Label 
-                    htmlFor="posterUpload" 
-                    className="cursor-pointer flex h-10 items-center rounded-md px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90"
-                  >
-                    <Upload className="mr-2 h-4 w-4" />
-                    Choose File
-                  </Label>
-                  <Input 
-                    id="posterUpload"
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePosterUpload}
-                    className="hidden"
-                  />
-                  <span className="text-sm text-muted-foreground">
-                    {posterImage ? posterImage.name : "No file chosen"}
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Recommended size: 1200x630 pixels (16:9 ratio)
-                </p>
-              </div>
-              
-              <div>
-                {posterUrl ? (
-                  <div className="aspect-video rounded-md overflow-hidden bg-muted">
-                    <img 
-                      src={posterUrl} 
-                      alt="Event poster preview" 
-                      className="w-full h-full object-cover" 
-                    />
-                  </div>
-                ) : (
-                  <div className="aspect-video rounded-md flex items-center justify-center bg-muted">
-                    <div className="text-center text-muted-foreground">
-                      <Image className="h-8 w-8 mx-auto mb-2" />
-                      <p>Poster preview</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </section>
-          
-          <section className="space-y-6">
-            <h2 className="text-xl font-semibold">Event Schedule</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label>Start Date*</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start text-left font-normal"
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {startDate ? format(startDate, "PPP") : "Select a date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={startDate}
-                      onSelect={setStartDate}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              
-              <div>
-                <Label htmlFor="startTime">Start Time*</Label>
-                <div className="flex items-center">
-                  <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    id="startTime" 
-                    type="time"
-                    value={startTime}
-                    onChange={(e) => setStartTime(e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <Label>End Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start text-left font-normal"
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {endDate ? format(endDate, "PPP") : "Select a date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={endDate}
-                      onSelect={setEndDate}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              
-              <div>
-                <Label htmlFor="endTime">End Time</Label>
-                <div className="flex items-center">
-                  <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    id="endTime" 
-                    type="time"
-                    value={endTime}
-                    onChange={(e) => setEndTime(e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
-            
-            <div>
-              <Label htmlFor="recurrenceType">Recurrence</Label>
-              <Select 
-                value={recurrenceType}
-                onValueChange={(value) => setRecurrenceType(value as RecurrenceType)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select recurrence pattern" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">One-time event</SelectItem>
-                  <SelectItem value="daily">Daily</SelectItem>
-                  <SelectItem value="weekly">Weekly</SelectItem>
-                  <SelectItem value="monthly">Monthly</SelectItem>
-                  <SelectItem value="custom">Custom</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </section>
-          
-          <section className="space-y-6">
-            <h2 className="text-xl font-semibold">Additional Settings</h2>
-            
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="isPrivate" className="cursor-pointer">Private Event</Label>
-                  <p className="text-sm text-muted-foreground">Only visible to invited participants</p>
-                </div>
-                <Switch 
-                  id="isPrivate" 
-                  checked={isPrivate}
-                  onCheckedChange={setIsPrivate}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="registrationRequired" className="cursor-pointer">Require Registration</Label>
-                  <p className="text-sm text-muted-foreground">Participants must register to attend</p>
-                </div>
-                <Switch 
-                  id="registrationRequired" 
-                  checked={registrationRequired}
-                  onCheckedChange={setRegistrationRequired}
-                />
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label htmlFor="ticketPrice">Ticket Price</Label>
-                <Input 
-                  id="ticketPrice" 
-                  value={ticketPrice} 
-                  onChange={(e) => setTicketPrice(e.target.value)} 
-                  placeholder="Leave blank for free events"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="ticketUrl">Ticket Link</Label>
-                <Input 
-                  id="ticketUrl" 
-                  value={ticketUrl} 
-                  onChange={(e) => setTicketUrl(e.target.value)} 
-                  placeholder="External ticketing website URL"
-                />
-              </div>
-            </div>
-          </section>
+          <FeaturedArtistsForm 
+            featuredArtists={featuredArtists}
+            setFeaturedArtists={setFeaturedArtists}
+          />
+
           <div className="mt-6 border rounded-lg p-4 bg-background">
             <EventSlotManager 
               slots={eventSlots}
@@ -996,36 +622,42 @@ const CreateEvent = () => {
             <p className="text-muted-foreground">
               Select artists, venues, resources, brands and communities for your event
             </p>
-            
-            <Tabs defaultValue="all">
-              <TabsList>
-                <TabsTrigger value="all" onClick={() => setFilterType("all")}>All</TabsTrigger>
-                <TabsTrigger value="artists" onClick={() => setFilterType("artists")}>Artists</TabsTrigger>
-                <TabsTrigger value="venues" onClick={() => setFilterType("venues")}>Venues</TabsTrigger>
-                <TabsTrigger value="resources" onClick={() => setFilterType("resources")}>Resources</TabsTrigger>
-                <TabsTrigger value="brands" onClick={() => setFilterType("brands")}>Brands</TabsTrigger>
-                <TabsTrigger value="communities" onClick={() => setFilterType("communities")}>Communities</TabsTrigger>
+
+            <Tabs defaultValue="all" value={filterType} onValueChange={(value) => setFilterType(value as FilterType)}>
+              <TabsList className="grid w-full grid-cols-6">
+                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="artists">Artists</TabsTrigger>
+                <TabsTrigger value="venues">Venues</TabsTrigger>
+                <TabsTrigger value="resources">Resources</TabsTrigger>
+                <TabsTrigger value="brands">Brands</TabsTrigger>
+                <TabsTrigger value="communities">Communities</TabsTrigger>
               </TabsList>
-              
-              <TabsContent value="all" key={tabKeys.all} className="pt-4">
+
+              <TabsContent value="all" className="pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {getFilteredContent().map(item => (
+                  {[...artists, ...venues, ...resources, ...brands, ...communities].map(item => (
                     <ContentCard 
                       key={item.id}
                       id={item.id}
                       name={item.name}
                       image_url={item.image_url}
                       type={item.type}
-                      location={item.location}
+                      location={item.location} 
                       isSelected={item.selected}
                       selectionMode={true}
-                      onClick={() => handleItemClick(item.id)}
+                      onClick={() => {
+                        if (artists.some(a => a.id === item.id)) handleArtistSelection(item.id);
+                        else if (venues.some(v => v.id === item.id)) handleVenueSelection(item.id);
+                        else if (resources.some(r => r.id === item.id)) handleResourceSelection(item.id);
+                        else if (brands.some(b => b.id === item.id)) handleBrandSelection(item.id);
+                        else if (communities.some(c => c.id === item.id)) handleCommunitySelection(item.id);
+                      }}
                     />
                   ))}
                 </div>
               </TabsContent>
-              
-              <TabsContent value="artists" key={tabKeys.artists} className="pt-4">
+
+              <TabsContent value="artists" className="pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {artists.map(item => (
                     <ContentCard 
@@ -1034,7 +666,7 @@ const CreateEvent = () => {
                       name={item.name}
                       image_url={item.image_url}
                       type={item.type}
-                      location={item.location}
+                      location={item.location} 
                       isSelected={item.selected}
                       selectionMode={true}
                       onClick={() => handleArtistSelection(item.id)}
@@ -1042,8 +674,8 @@ const CreateEvent = () => {
                   ))}
                 </div>
               </TabsContent>
-              
-              <TabsContent value="venues" key={tabKeys.venues} className="pt-4">
+
+              <TabsContent value="venues" className="pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {venues.map(item => (
                     <ContentCard 
@@ -1052,7 +684,7 @@ const CreateEvent = () => {
                       name={item.name}
                       image_url={item.image_url}
                       type={item.type}
-                      location={item.location}
+                      location={item.location} 
                       isSelected={item.selected}
                       selectionMode={true}
                       onClick={() => handleVenueSelection(item.id)}
@@ -1060,8 +692,8 @@ const CreateEvent = () => {
                   ))}
                 </div>
               </TabsContent>
-              
-              <TabsContent value="resources" key={tabKeys.resources} className="pt-4">
+
+              <TabsContent value="resources" className="pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {resources.map(item => (
                     <ContentCard 
@@ -1079,7 +711,7 @@ const CreateEvent = () => {
                 </div>
               </TabsContent>
 
-              <TabsContent value="brands" key={tabKeys.brands} className="pt-4">
+              <TabsContent value="brands" className="pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {brands.map(item => (
                     <ContentCard 
@@ -1097,7 +729,7 @@ const CreateEvent = () => {
                 </div>
               </TabsContent>
 
-              <TabsContent value="communities" key={tabKeys.communities} className="pt-4">
+              <TabsContent value="communities" className="pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {communities.map(item => (
                     <ContentCard 
@@ -1117,7 +749,6 @@ const CreateEvent = () => {
             </Tabs>
           </section>
           
-         
           <div className="flex justify-end space-x-4">
             <Button type="button" variant="outline" onClick={() => navigate('/events')}>
               Cancel

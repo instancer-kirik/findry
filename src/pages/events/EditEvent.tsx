@@ -17,10 +17,11 @@ import { CalendarIcon, Clock, Upload, ArrowLeft } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import EventSlotManager from '@/components/events/EventSlotManager';
-import { EventSlot } from '@/types/event';
+import { EventSlot, FeaturedArtist } from '@/types/event';
 import { ContentItemProps } from '@/types/content';
 import { convertToJson, convertFromJson } from '@/types/supabase';
 import { Json } from '@/integrations/supabase/types';
+import FeaturedArtistsForm from '@/components/events/forms/FeaturedArtistsForm';
 
 type FilterType = "resources" | "artists" | "venues" | "brands" | "communities" | "all";
 type RecurrenceType = "none" | "daily" | "weekly" | "monthly" | "custom";
@@ -52,6 +53,7 @@ const EditEvent: React.FC = () => {
   const [imageUrl, setImageUrl] = useState('');
   const [posterImage, setPosterImage] = useState<File | null>(null);
   const [requestedItems, setRequestedItems] = useState<any[]>([]);
+  const [featuredArtists, setFeaturedArtists] = useState<FeaturedArtist[]>([]);
   
   const [selectedObjects, setSelectedObjects] = useState<{
     artists: ContentItemProps[];
@@ -176,6 +178,17 @@ const EditEvent: React.FC = () => {
           }
         }
         
+        // Parse featured artists
+        if (event.featured_artists) {
+          try {
+            const parsedArtists = convertFromJson<FeaturedArtist[]>(event.featured_artists);
+            setFeaturedArtists(parsedArtists || []);
+            console.log("Parsed featured artists:", parsedArtists);
+          } catch (err) {
+            console.error("Error parsing featured artists:", err);
+          }
+        }
+        
       } catch (error) {
         console.error('Error fetching event data:', error);
         toast.error('Error loading event data');
@@ -284,7 +297,7 @@ const EditEvent: React.FC = () => {
       }
       
       // Prepare event data for update
-      const eventData = {
+      const eventData: any = {
         name: eventName,
         description,
         type: eventType,
@@ -296,6 +309,7 @@ const EditEvent: React.FC = () => {
         tags,
         slots: convertToJson(processedSlots),
         requested_items: convertToJson(requestedItems),
+        featured_artists: convertToJson(featuredArtists),
         updated_at: new Date().toISOString()
       };
       
@@ -623,35 +637,280 @@ const EditEvent: React.FC = () => {
             </div>
           </Card>
           
-          {/* Event Schedule */}
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Event Schedule</h2>
-            <EventSlotManager
-              slots={eventSlots}
-              onSlotsChange={setEventSlots}
-              eventStartTime={startTime || '09:00'}
-              eventEndTime={endTime || '17:00'}
-              eventDate={startDate || new Date()}
-              availableArtists={selectedObjects.artists}
-              availableResources={selectedObjects.resources}
-              availableVenues={selectedObjects.venues}
-            />
+          <Card className="mt-8">
+            <Tabs defaultValue="details">
+              <TabsList className="p-0 mb-6 flex flex-wrap border-b w-full rounded-none justify-start">
+                <TabsTrigger value="details" className="rounded-none">Details</TabsTrigger>
+                <TabsTrigger value="schedule" className="rounded-none">Schedule</TabsTrigger>
+                <TabsTrigger value="components" className="rounded-none">Components</TabsTrigger>
+                <TabsTrigger value="featured-artists" className="rounded-none">Featured Artists</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="details" className="p-6">
+                <h2 className="text-xl font-semibold mb-4">Event Details</h2>
+                <div className="space-y-6">
+                  <div>
+                    <Label htmlFor="eventName">Event Name</Label>
+                    <Input 
+                      id="eventName" 
+                      placeholder="Enter event name" 
+                      value={eventName}
+                      onChange={(e) => setEventName(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea 
+                      id="description" 
+                      placeholder="Describe your event" 
+                      rows={5}
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="location">Location</Label>
+                    <Input 
+                      id="location" 
+                      placeholder="Enter event location" 
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Start Date</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start text-left font-normal mt-1"
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {startDate ? format(startDate, 'PPP') : <span>Pick a date</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={startDate}
+                            onSelect={setStartDate}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    
+                    <div>
+                      <Label>Start Time</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start text-left font-normal mt-1"
+                          >
+                            <Clock className="mr-2 h-4 w-4" />
+                            {startTime || <span>Set time</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Input
+                            type="time"
+                            value={startTime}
+                            onChange={(e) => setStartTime(e.target.value)}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    
+                    <div>
+                      <Label>End Date (Optional)</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start text-left font-normal mt-1"
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {endDate ? format(endDate, 'PPP') : <span>Pick a date</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={endDate}
+                            onSelect={setEndDate}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    
+                    <div>
+                      <Label>End Time (Optional)</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start text-left font-normal mt-1"
+                          >
+                            <Clock className="mr-2 h-4 w-4" />
+                            {endTime || <span>Set time</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Input
+                            type="time"
+                            value={endTime}
+                            onChange={(e) => setEndTime(e.target.value)}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="eventType">Event Type</Label>
+                      <Select
+                        value={eventType}
+                        onValueChange={setEventType}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select event type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="in-person">In Person</SelectItem>
+                          <SelectItem value="online">Online</SelectItem>
+                          <SelectItem value="hybrid">Hybrid</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="capacity">Capacity</Label>
+                      <Input
+                        id="capacity"
+                        type="number"
+                        placeholder="Enter capacity"
+                        value={capacity}
+                        onChange={(e) => setCapacity(e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <Label htmlFor="posterImage">Event Image</Label>
+                      {imageUrl && (
+                        <Button
+                          variant="ghost"
+                          onClick={() => {
+                            setImageUrl('');
+                            setPosterImage(null);
+                          }}
+                          size="sm"
+                        >
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+                    
+                    {imageUrl ? (
+                      <div className="mt-1 relative aspect-video w-full overflow-hidden rounded-lg border">
+                        <img 
+                          src={imageUrl} 
+                          alt="Event poster preview" 
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute bottom-2 right-2">
+                          <Button 
+                            size="sm"
+                            onClick={() => document.getElementById('poster-upload')?.click()}
+                          >
+                            Change Image
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div 
+                        className="mt-1 border rounded-lg p-12 text-center cursor-pointer hover:bg-muted/50 transition-colors flex flex-col items-center justify-center"
+                        onClick={() => document.getElementById('poster-upload')?.click()}
+                      >
+                        <Upload className="h-10 w-10 text-muted-foreground mb-2" />
+                        <p className="text-muted-foreground">Click to upload event image</p>
+                      </div>
+                    )}
+                    
+                    <input
+                      id="poster-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handlePosterUpload}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="private-event"
+                      checked={isPrivate}
+                      onCheckedChange={setIsPrivate}
+                    />
+                    <Label htmlFor="private-event">Make this event private</Label>
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="schedule" className="p-6">
+                <h2 className="text-xl font-semibold mb-4">Event Schedule</h2>
+                <EventSlotManager 
+                  slots={eventSlots} 
+                  onSlotsChange={setEventSlots}
+                  eventStartTime={startTime || '09:00'}
+                  eventEndTime={endTime || '17:00'}
+                  eventDate={startDate || new Date()}
+                  availableArtists={selectedObjects.artists}
+                  availableResources={selectedObjects.resources}
+                  availableVenues={selectedObjects.venues}
+                />
+              </TabsContent>
+              
+              <TabsContent value="components" className="p-6">
+                <h2 className="text-xl font-semibold mb-4">Event Components</h2>
+                {/* Content for event components */}
+              </TabsContent>
+              
+              <TabsContent value="featured-artists" className="p-6">
+                <FeaturedArtistsForm
+                  featuredArtists={featuredArtists}
+                  setFeaturedArtists={setFeaturedArtists}
+                />
+              </TabsContent>
+            </Tabs>
           </Card>
-        </div>
-        
-        <div className="mt-8 flex justify-end space-x-4">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate(`/events/${eventId}`)}
-          >
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleSaveEvent}
-            disabled={saving}
-          >
-            {saving ? 'Saving...' : 'Save Changes'}
-          </Button>
+          
+          <div className="flex justify-end gap-2 mt-8">
+            <Button 
+              variant="outline" 
+              onClick={() => navigate(`/events/${eventId}`)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSaveEvent}
+              disabled={saving}
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </div>
         </div>
       </div>
     </Layout>

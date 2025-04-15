@@ -9,6 +9,7 @@ import ProfilePage from './pages/ProfilePage';
 import ProfileSetup from './pages/ProfileSetup';
 import SignUp from './pages/SignUp';
 import Login from './pages/Login';
+import ResetPassword from './pages/ResetPassword';
 import Discover from './pages/Discover';
 import ArtistProfile from './pages/ArtistProfile';
 import VenueDetail from './pages/VenueDetail';
@@ -16,7 +17,7 @@ import BrandDetail from './pages/BrandDetail';
 import ResourceDetail from './pages/ResourceDetail';
 import ResourceIndexPage from './pages/ResourceIndexPage';
 import CreateEvent from './pages/CreateEvent';
-import EventDetail from './pages/EventDetail';
+import EventDetail from './pages/events/EventDetail';
 import EditEvent from './pages/events/EditEvent';
 import EventsUpcoming from './pages/EventsUpcoming';
 import EventsInterested from './pages/EventsInterested';
@@ -101,10 +102,11 @@ const App: React.FC = () => {
           <Route path="/profile/:id" element={<ProfilePage />} />
           <Route path="/profile-setup" element={<ProfileSetup />} />
           <Route path="/create-event" element={<CreateEvent />} />
+          <Route path="/events/create" element={<CreateEvent />} />
           <Route path="/events/edit/:eventId" element={<EditEvent />} />
-          <Route path="/events/:eventId" element={<EventDetail />} />
           <Route path="/events/interested" element={<EventsInterested />} />
           <Route path="/events/upcoming" element={<EventsUpcoming />} />
+          <Route path="/events/:eventId" element={<EventDetail />} />
           <Route path="/communities" element={<Communities />} />
           <Route path="/communities/:id" element={<CommunityDashboard />} />
           <Route path="/community-events" element={<CommunityEvents />} />

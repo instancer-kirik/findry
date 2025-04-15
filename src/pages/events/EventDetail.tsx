@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { Calendar, Clock, MapPin, Users, Share2, ExternalLink, Pencil } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, Share2, ExternalLink, Pencil, Globe, Mail } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from "@/hooks/use-auth";
 import EventSharingDialog from '@/components/events/EventSharingDialog';
-import { EventSlot } from '@/types/event';
+import { EventSlot, FeaturedArtist } from '@/types/event';
 import { Json } from '@/integrations/supabase/types';
 import { convertFromJson } from '@/types/supabase';
 
@@ -34,6 +33,7 @@ interface EventProps {
   eventbrite_url?: string;
   slots?: Json;
   requested_items?: Json;
+  featuredArtists?: Json;
 }
 
 const EventDetail = () => {
@@ -41,6 +41,7 @@ const EventDetail = () => {
   const [event, setEvent] = useState<EventProps | null>(null);
   const [eventSlots, setEventSlots] = useState<EventSlot[]>([]);
   const [requestedItems, setRequestedItems] = useState<any[]>([]);
+  const [featuredArtists, setFeaturedArtists] = useState<FeaturedArtist[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [attending, setAttending] = useState<boolean>(false);
@@ -89,6 +90,25 @@ const EventDetail = () => {
               console.log("Parsed requested items:", parsedItems);
             } catch (err) {
               console.error("Error parsing requested items:", err);
+            }
+          }
+          
+          const rawData = data as any;
+          if (rawData.featured_artists) {
+            try {
+              const parsedArtists = convertFromJson<FeaturedArtist[]>(rawData.featured_artists);
+              setFeaturedArtists(parsedArtists || []);
+              console.log("Parsed featured artists:", parsedArtists);
+            } catch (err) {
+              console.error("Error parsing featured artists:", err);
+            }
+          } else if (rawData.featuredArtists) {
+            try {
+              const parsedArtists = convertFromJson<FeaturedArtist[]>(rawData.featuredArtists);
+              setFeaturedArtists(parsedArtists || []);
+              console.log("Parsed featured artists:", parsedArtists);
+            } catch (err) {
+              console.error("Error parsing featured artists:", err);
             }
           }
           
@@ -263,6 +283,65 @@ const EventDetail = () => {
               <h2 className="text-xl font-semibold mb-2">About This Event</h2>
               <p className="whitespace-pre-line">{event?.description}</p>
             </div>
+
+            {featuredArtists && featuredArtists.length > 0 && (
+              <div className="mt-8 mb-8">
+                <h2 className="text-xl font-semibold mb-4">Featured Artists</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {featuredArtists.map((artist) => (
+                    <div key={artist.id} className="border rounded-md p-4">
+                      <div className="flex items-start space-x-4">
+                        {artist.image_url && (
+                          <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
+                            <img 
+                              src={artist.image_url} 
+                              alt={artist.name} 
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <h3 className="font-semibold">{artist.name}</h3>
+                          {artist.type && <Badge variant="outline" className="mb-2">{artist.type}</Badge>}
+                          {artist.description && (
+                            <p className="text-sm text-muted-foreground line-clamp-3">{artist.description}</p>
+                          )}
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {artist.website && (
+                              <a 
+                                href={artist.website} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-sm text-blue-500 hover:underline flex items-center"
+                              >
+                                <Globe className="h-3 w-3 mr-1" />Website
+                              </a>
+                            )}
+                            {artist.email && (
+                              <a 
+                                href={`mailto:${artist.email}`}
+                                className="text-sm text-blue-500 hover:underline flex items-center"
+                              >
+                                <Mail className="h-3 w-3 mr-1" />Email
+                              </a>
+                            )}
+                            {artist.isOnPlatform && artist.platformId && (
+                              <Button 
+                                variant="link" 
+                                className="p-0 h-auto text-blue-500 text-sm"
+                                onClick={() => navigate(`/profile/${artist.platformId}`)}
+                              >
+                                View Profile
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {eventSlots && eventSlots.length > 0 && (
               <div className="mt-8">

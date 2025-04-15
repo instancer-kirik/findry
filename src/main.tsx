@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client'
 import { ThemeProvider } from '@/hooks/use-theme'
+import { BrowserRouter } from 'react-router-dom'
 import App from './App.tsx'
 import './index.css'
 
@@ -15,8 +16,10 @@ root.render(
 // Render the app with theme provider
 setTimeout(() => {
   root.render(
-    <ThemeProvider defaultTheme="system" storageKey="theme">
-      <App />
-    </ThemeProvider>
+    <BrowserRouter>
+      <ThemeProvider defaultTheme="system" storageKey="theme">
+        <App />
+      </ThemeProvider>
+    </BrowserRouter>
   );
 }, 100);

@@ -80,8 +80,8 @@ const Navbar = () => {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-6">
           <Link to="/" className="font-bold text-xl">
-            Findry
-          </Link>
+          Findry
+        </Link>
           
           <div className="hidden md:flex items-center gap-4">
             <DropdownMenu>
@@ -93,9 +93,9 @@ const Navbar = () => {
                     location.pathname.includes('/artists') || 
                     location.pathname.includes('/venues') || 
                     location.pathname.includes('/resources') ? 'bg-primary/10 text-primary' : ''
-                  }`}
-                >
-                  Discover
+            }`}
+          >
+            Discover
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-[400px] p-0 grid grid-cols-2 gap-0 bg-background">
@@ -296,13 +296,13 @@ const Navbar = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            
-            <Link
+
+          <Link
               to="/about"
               className={`text-sm px-3 py-2 rounded-md ${location.pathname === '/about' ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`}
             >
               <span>About</span>
-            </Link>
+          </Link>
           </div>
         </div>
 
@@ -396,8 +396,8 @@ const Navbar = () => {
               <div className="flex flex-col gap-4 py-4">
                 <div className="flex items-center justify-between">
                   <Link to="/" className="font-bold text-xl">
-                    Findry
-                  </Link>
+                  Findry
+                </Link>
                   <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
                     <X className="h-5 w-5" />
                   </Button>
@@ -407,7 +407,7 @@ const Navbar = () => {
                   <Link to="/dashboard" className="flex items-center space-x-2 py-2 text-sm px-4 hover:bg-muted border-b" onClick={() => setIsMobileMenuOpen(false)}>
                     <LayoutDashboard className="h-5 w-5" />
                     <span>Dashboard</span>
-                  </Link>
+                </Link>
                 )}
                 
                 <div className="space-y-2">

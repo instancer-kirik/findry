@@ -1,4 +1,3 @@
-
 import { Profile } from "./profile";
 import { ContentItemProps } from "@/types/content";
 import { Json } from "@/integrations/supabase/types";
@@ -19,6 +18,20 @@ export interface EventSlot {
   slotType: 'performance' | 'setup' | 'breakdown' | 'break' | 'other';
   notes?: string;
   isRequestOnly?: boolean;
+}
+
+export interface FeaturedArtist {
+  id: string;
+  name: string;
+  image_url?: string;
+  description?: string;
+  type?: string;
+  location?: string;
+  email?: string;
+  website?: string;
+  social_links?: string[];
+  isOnPlatform?: boolean;
+  platformId?: string;
 }
 
 export interface Event {
@@ -43,6 +56,7 @@ export interface Event {
   slots?: EventSlot[];
   requested_items?: any[];
   artists?: ContentItemProps[];
+  featuredArtists?: FeaturedArtist[];
   resources?: ContentItemProps[];
   venueId?: string;
   venue?: ContentItemProps;

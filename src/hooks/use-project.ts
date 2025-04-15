@@ -6,36 +6,36 @@ import { toast } from 'sonner';
 import { useUser } from '@/hooks/use-user';
 
 export const useGetProject = (projectId?: string) => {
-  return useQuery({
-    queryKey: ['project', projectId],
-    queryFn: async (): Promise<Project | null> => {
-      if (!projectId) return null;
-      
-      try {
+    return useQuery({
+      queryKey: ['project', projectId],
+      queryFn: async (): Promise<Project | null> => {
+        if (!projectId) return null;
+        
+        try {
         // Get the project data
-        const { data, error } = await supabase
-          .from('projects')
-          .select('*')
-          .eq('id', projectId)
-          .single();
+          const { data, error } = await supabase
+            .from('projects')
+            .select('*')
+            .eq('id', projectId)
+            .single();
+
+          if (error) throw error;
+          if (!data) return null;
           
-        if (error) throw error;
-        if (!data) return null;
-        
-        // Get components
-        const { data: componentsData, error: componentsError } = await supabase
-          .from('project_components')
-          .select('*')
-          .eq('project_id', projectId);
-          
+          // Get components
+          const { data: componentsData, error: componentsError } = await supabase
+            .from('project_components')
+            .select('*')
+            .eq('project_id', projectId);
+            
         if (componentsError) throw componentsError;
-        
-        // Get tasks
-        const { data: tasksData, error: tasksError } = await supabase
-          .from('project_tasks')
-          .select('*')
-          .eq('project_id', projectId);
           
+          // Get tasks
+          const { data: tasksData, error: tasksError } = await supabase
+            .from('project_tasks')
+            .select('*')
+            .eq('project_id', projectId);
+            
         if (tasksError) throw tasksError;
         
         // Get ownership data from content_ownership table if it exists
@@ -100,18 +100,18 @@ export const useGetProject = (projectId?: string) => {
           image_url: data.image_url || '',
           repo_url: data.repo_url || ''
         };
-        
-        return project;
+          
+          return project;
       } catch (error: any) {
         console.error(`Error fetching project ${projectId}:`, error);
         toast(`Error fetching project: ${error.message}`);
-        return null;
-      }
-    },
-    enabled: !!projectId
-  });
-};
-
+          return null;
+        }
+      },
+      enabled: !!projectId
+    });
+  };
+  
 export const useGetProjects = () => {
   return useQuery({
     queryKey: ['projects'],
@@ -121,7 +121,7 @@ export const useGetProjects = () => {
           .from('projects')
           .select('*')
           .order('created_at', { ascending: false });
-          
+        
         if (error) throw error;
         
         // For each project, we might want to fetch ownership data
@@ -153,15 +153,15 @@ export const useGetProjects = () => {
         toast(`Error fetching projects: ${error.message}`);
         return [];
       }
-    }
-  });
-};
-
+      }
+    });
+  };
+  
 export const useCreateProject = () => {
   const queryClient = useQueryClient();
   const { user } = useUser();
   
-  return useMutation({
+    return useMutation({
     mutationFn: async (projectData: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'components' | 'tasks'>) => {
       try {
         const { data, error } = await supabase
@@ -178,7 +178,7 @@ export const useCreateProject = () => {
           })
           .select('id')
           .single();
-          
+        
         if (error) throw error;
         if (!data) throw new Error('Failed to create project');
         
@@ -208,10 +208,10 @@ export const useCreateProject = () => {
     },
     onError: (error: any) => {
       toast(`Error creating project: ${error.message}`);
-    }
-  });
-};
-
+      }
+    });
+  };
+  
 export const useProject = () => {
   return {
     useGetProjects,
