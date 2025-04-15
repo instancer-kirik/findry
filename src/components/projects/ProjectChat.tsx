@@ -33,6 +33,7 @@ interface ProjectChatProps {
     component?: (componentId: string) => void;
     task?: (taskId: string) => void;
   };
+  onStatusChange?: (newStatus: Project['status']) => Promise<boolean>;
 }
 
 interface ReferenceItem {
