@@ -16,6 +16,22 @@ import { v4 as uuidv4 } from 'uuid';
 import { convertToJson } from '@/types/supabase';
 import ArtGalleryItemsForm from '@/components/events/forms/ArtGalleryItemsForm';
 import { ArtGalleryItem } from '@/types/event';
+import { 
+  FilterType, 
+  RecurrenceType, 
+  EventContentItem,
+  EventDetailsFormProps,
+  DateTimeFormProps,
+  PosterUploadProps,
+  AdditionalSettingsProps,
+  ContentCardProps
+} from '@/types/forms';
+import EventDetailsForm from '@/components/events/forms/EventDetailsForm';
+import DateTimeForm from '@/components/events/forms/DateTimeForm';
+import PosterUpload from '@/components/events/forms/PosterUpload';
+import AdditionalSettings from '@/components/events/forms/AdditionalSettings';
+import ContentCard from '@/components/events/ContentCard';
+import FeaturedArtistsForm from '@/components/events/forms/FeaturedArtistsForm';
 
 const CreateEvent = () => {
   const { user } = useAuth();
@@ -497,18 +513,18 @@ const CreateEvent = () => {
         }
         
         toast.success("Event created successfully!");
-        navigate(`/events/${eventId}`);
+            navigate(`/events/${eventId}`);
       } catch (error: any) {
         console.error('Error in event creation process:', error);
         toast.error(error.message || "Failed to create event");
-      } finally {
+    } finally {
         setLoading(false);
         isProcessing = false;
       }
     } catch (error: any) {
       console.error('Error in event creation process:', error);
       toast.error(error.message || "Failed to create event");
-      setLoading(false);
+        setLoading(false);
       isProcessing = false;
     }
   };
@@ -600,7 +616,7 @@ const CreateEvent = () => {
             <p className="text-muted-foreground">
               Select artists, venues, resources, brands and communities for your event
             </p>
-
+            
             <Tabs defaultValue="all" value={filterType} onValueChange={(value) => setFilterType(value as FilterType)}>
               <TabsList className="grid w-full grid-cols-6">
                 <TabsTrigger value="all">All</TabsTrigger>
@@ -610,7 +626,7 @@ const CreateEvent = () => {
                 <TabsTrigger value="brands">Brands</TabsTrigger>
                 <TabsTrigger value="communities">Communities</TabsTrigger>
               </TabsList>
-
+              
               <TabsContent value="all" className="pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {[...artists, ...venues, ...resources, ...brands, ...communities].map(item => (
@@ -620,7 +636,7 @@ const CreateEvent = () => {
                       name={item.name}
                       image_url={item.image_url}
                       type={item.type}
-                      location={item.location} 
+                      location={item.location}
                       isSelected={item.selected}
                       selectionMode={true}
                       onClick={() => {
@@ -634,7 +650,7 @@ const CreateEvent = () => {
                   ))}
                 </div>
               </TabsContent>
-
+              
               <TabsContent value="artists" className="pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {artists.map(item => (
@@ -644,7 +660,7 @@ const CreateEvent = () => {
                       name={item.name}
                       image_url={item.image_url}
                       type={item.type}
-                      location={item.location} 
+                      location={item.location}
                       isSelected={item.selected}
                       selectionMode={true}
                       onClick={() => handleArtistSelection(item.id)}
@@ -652,7 +668,7 @@ const CreateEvent = () => {
                   ))}
                 </div>
               </TabsContent>
-
+              
               <TabsContent value="venues" className="pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {venues.map(item => (
@@ -662,7 +678,7 @@ const CreateEvent = () => {
                       name={item.name}
                       image_url={item.image_url}
                       type={item.type}
-                      location={item.location} 
+                      location={item.location}
                       isSelected={item.selected}
                       selectionMode={true}
                       onClick={() => handleVenueSelection(item.id)}
@@ -670,7 +686,7 @@ const CreateEvent = () => {
                   ))}
                 </div>
               </TabsContent>
-
+              
               <TabsContent value="resources" className="pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {resources.map(item => (
@@ -726,7 +742,7 @@ const CreateEvent = () => {
               </TabsContent>
             </Tabs>
           </section>
-          
+         
           <div className="flex justify-end space-x-4">
             <Button type="button" variant="outline" onClick={() => navigate('/events')}>
               Cancel

@@ -47,6 +47,10 @@ import ProductDetail from './pages/ProductDetail';
 import TandemXShop from './pages/TandemXShop';
 import ResourcerProfile from './pages/ResourcerProfile';
 import Grouper from './pages/Grouper';
+import GlossaryPage from './pages/GlossaryPage';
+import CreateGlossaryEntry from './pages/CreateGlossaryEntry';
+import GlossaryEntryDetail from './pages/GlossaryEntryDetail';
+import GlossaryExample from './pages/GlossaryExample';
 
 const queryClient = new QueryClient();
 
@@ -126,6 +130,10 @@ const App: React.FC = () => {
           <Route path="/chats" element={<Chats />} />
           <Route path="/artist/:artistId" element={<ArtistProfile />} />
           <Route path="/resourcer/:resourcerId" element={<ResourcerProfile />} />
+          <Route path="/glossary" element={<GlossaryPage />} />
+          <Route path="/glossary/create" element={<CreateGlossaryEntry />} />
+          <Route path="/glossary/:entryId" element={<GlossaryEntryDetail />} />
+          <Route path="/glossary-examples" element={<GlossaryExample />} />
           <Route path="*" element={<Navigate to="/not-found" replace />} />
         </Routes>
       </ThemeProvider>

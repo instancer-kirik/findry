@@ -1,13 +1,23 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ContentItemProps } from '@/types/content';
+import { 
+  artists, 
+  resources, 
+  projects, 
+  events, 
+  venues, 
+  communities, 
+  brands, 
+  albums, 
+  songs, 
+  artworks 
+} from '@/components/discover/DiscoverData';
 
-// Helper function to safely access a property with type checking
-const safeProp = <T, K extends string>(obj: T, key: K, defaultValue: any = ''): any => {
-  return obj && Object.prototype.hasOwnProperty.call(obj, key) 
-    ? (obj as any)[key] 
-    : defaultValue;
-};
+// Helper function to safely get a property
+function safeProp<T, K extends keyof T>(obj: T, key: K, defaultValue: T[K]): T[K] {
+  return (obj && obj[key] !== undefined && obj[key] !== null) ? obj[key] : defaultValue;
+}
 
 export const useFetchDiscoverContent = () => {
   const [content, setContent] = useState<ContentItemProps[]>([]);
@@ -121,101 +131,52 @@ export const useDiscoverData = (
       try {
         let data: ContentItemProps[] = [];
         
-        // Map activeTab to appropriate table
-        const table = activeTab as 'artists' | 'venues' | 'resources' | 'projects' | 'brands' | 'communities' | 'shops' | 'events';
-        
-        // Fetch data from Supabase
-        const { data: responseData, error: responseError } = await supabase
-          .from(table)
-          .select('*');
-        
-        if (responseError) throw responseError;
-        
-        // Transform the data based on the table/type
-        if (responseData && Array.isArray(responseData)) {
-          data = responseData.map(item => {
-            // Basic common properties
-            const commonProps: ContentItemProps = {
-              id: String(item.id || ''),
-              name: item.name || 'Unnamed',
-              type: activeTab === 'events' ? 'event' : activeTab.substring(0, activeTab.length - 1), // Special case for events
-              location: safeProp(item, 'location', 'Unknown location'),
-              description: safeProp(item, 'description', safeProp(item, 'bio', '')),
-              image_url: safeProp(item, 'image_url', 
-                safeProp(item, 'logo_url', 
-                  safeProp(item, 'banner_image_url', ''))),
-              tags: safeProp(item, 'tags', []),
-              subtype: safeProp(item, 'subtype', safeProp(item, 'type', '')),
-            };
-            
-            // Add specific properties based on the type
-            if (activeTab === 'artists') {
-              return {
-                ...commonProps,
-                disciplines: safeProp(item, 'disciplines', []),
-                styles: safeProp(item, 'styles', []),
-                multidisciplinary: safeProp(item, 'multidisciplinary', false),
-              } as ContentItemProps;
-            } 
-            else if (activeTab === 'venues') {
-              return {
-                ...commonProps,
-                capacity: safeProp(item, 'capacity', null),
-                amenities: safeProp(item, 'amenities', []),
-              } as ContentItemProps;
-            }
-            else if (activeTab === 'resources') {
-              return {
-                ...commonProps,
-                availability: safeProp(item, 'availability', null),
-              } as ContentItemProps;
-            }
-            else if (activeTab === 'projects') {
-              return {
-                ...commonProps,
-                status: safeProp(item, 'status', ''),
-                version: safeProp(item, 'version', ''),
-                progress: safeProp(item, 'progress', 0),
-                repo_url: safeProp(item, 'repo_url', ''),
-                budget: safeProp(item, 'budget', ''),
-                timeline: safeProp(item, 'timeline', ''),
-              } as ContentItemProps;
-            }
-            else if (activeTab === 'events') {
-              return {
-                ...commonProps,
-                start_date: safeProp(item, 'start_date', ''),
-                end_date: safeProp(item, 'end_date', ''),
-                capacity: safeProp(item, 'capacity', null),
-              } as ContentItemProps;
-            }
-            else if (activeTab === 'communities') {
-              return {
-                ...commonProps,
-                category: safeProp(item, 'category', ''),
-                created_by: safeProp(item, 'created_by', ''),
-              } as ContentItemProps;
-            }
-            else if (activeTab === 'shops') {
-              return {
-                ...commonProps,
-                website_url: safeProp(item, 'website_url', ''),
-                logo_url: safeProp(item, 'logo_url', ''),
-                banner_image_url: safeProp(item, 'banner_image_url', ''),
-              } as ContentItemProps;
-            }
-            else {
-              return commonProps;
-            }
-          });
+        // Map activeTab to appropriate data source
+        switch(activeTab) {
+          case 'artists':
+            data = [...artists];
+            break;
+          case 'resources':
+            data = [...resources];
+            break;
+          case 'events':
+            data = [...events];
+            break;
+          case 'venues':
+            data = [...venues];
+            break;
+          case 'communities':
+            data = [...communities];
+            break;
+          case 'brands':
+            data = [...brands];
+            break;
+          case 'projects':
+            data = [...projects];
+            break;
+          case 'albums':
+            data = [...albums];
+            break;
+          case 'songs':
+            data = [...songs];
+            break;
+          case 'artworks':
+            data = [...artworks];
+            break;
+          default:
+            data = [];
         }
         
-        // Filter results by search query
+        // Apply search query if provided
         if (searchQuery) {
+          const query = searchQuery.toLowerCase();
           data = data.filter(item => 
-            item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (item.location && item.location.toLowerCase().includes(searchQuery.toLowerCase()))
+            item.name.toLowerCase().includes(query) || 
+            item.location.toLowerCase().includes(query) ||
+            (item.description && item.description.toLowerCase().includes(query)) ||
+            (item.tags && item.tags.some(tag => tag.toLowerCase().includes(query))) ||
+            (item.artist_name && item.artist_name.toLowerCase().includes(query)) ||
+            (item.album_name && item.album_name.toLowerCase().includes(query))
           );
         }
         
@@ -245,7 +206,80 @@ export const useDiscoverData = (
         
         // Filter by resource type if selected
         if (activeTab === 'resources' && resourceType && resourceType !== 'all') {
-          data = data.filter(item => item.subtype === resourceType);
+          data = data.filter(item => {
+            if (resourceType === 'art_space') {
+              return item.subtype === 'Art Space';
+            } else if (resourceType === 'art_tools') {
+              return item.subtype === 'Art Tools' || item.subtype === 'Art Supplier';
+            } else {
+              return item.type === resourceType || item.subtype === resourceType;
+            }
+          });
+        }
+        
+        // Filter by album type
+        if (activeTab === 'albums' && activeSubTab !== 'all') {
+          data = data.filter(item => {
+            switch(activeSubTab) {
+              case 'full-length':
+                return item.subtype === 'Album';
+              case 'ep':
+                return item.subtype === 'EP';
+              case 'single':
+                return item.subtype === 'Single';
+              case 'compilation':
+                return item.subtype === 'Compilation';
+              case 'live':
+                return item.subtype === 'Live';
+              default:
+                return true;
+            }
+          });
+        }
+        
+        // Filter by song type
+        if (activeTab === 'songs' && activeSubTab !== 'all') {
+          data = data.filter(item => {
+            const tags = item.tags || [];
+            switch(activeSubTab) {
+              case 'singles':
+                return !item.album_id || tags.includes('Single');
+              case 'album-tracks':
+                return !!item.album_id;
+              case 'unreleased':
+                return tags.includes('Unreleased');
+              case 'live':
+                return tags.includes('Live');
+              case 'remix':
+                return tags.includes('Remix');
+              default:
+                return true;
+            }
+          });
+        }
+        
+        // Filter by artwork type
+        if (activeTab === 'artworks' && activeSubTab !== 'all') {
+          data = data.filter(item => {
+            switch(activeSubTab) {
+              case 'paintings':
+                return item.subtype === 'Painting';
+              case 'sculptures':
+                return item.subtype === 'Sculpture';
+              case 'digital':
+                return item.subtype === 'Digital';
+              case 'installations':
+                return item.subtype === 'Installation';
+              case 'performances':
+                return item.subtype === 'Performance';
+              case 'photography':
+                return item.subtype === 'Photography';
+              case 'mixed-media':
+                return item.subtype === 'Mixed Media';
+              default:
+                return true;
+            }
+          });
         }
         
         // Filter by subfilters if any are selected
@@ -273,9 +307,18 @@ export const useDiscoverData = (
         setIsLoading(false);
       }
     };
-    
+
     fetchData();
-  }, [activeTab, searchQuery, selectedTags, resourceType, artistStyle, disciplinaryType, activeSubTab, selectedSubfilters]);
-  
+  }, [
+    activeTab, 
+    searchQuery, 
+    selectedTags, 
+    resourceType, 
+    artistStyle, 
+    disciplinaryType, 
+    activeSubTab, 
+    selectedSubfilters
+  ]);
+
   return { items, isLoading, error };
 };

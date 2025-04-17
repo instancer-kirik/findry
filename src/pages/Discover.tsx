@@ -12,10 +12,21 @@ import { cn } from '@/lib/utils';
 import { artistStyleFilters, disciplinaryFilters, resourceTypes, allTags } from '@/components/discover/DiscoverData';
 import { useDiscoverData } from '@/hooks/use-discover-data';
 import { ContentItemProps } from '@/types/content';
-import { Check, Grid, List } from 'lucide-react';
+import { Check, Grid, List, Upload, UserPlus, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import DiscoverMobileDrawer from '@/components/discover/DiscoverMobileDrawer';
 import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose
+} from '@/components/ui/dialog';
+import ArtistBulkImport from '@/components/discover/ArtistBulkImport';
+import { toast } from '@/components/ui/use-toast';
 
 const Discover = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -56,6 +67,10 @@ const Discover = () => {
   // State for selection panel
   const [selectedItems, setSelectedItems] = useState<ContentItemProps[]>([]);
   const [isSelectionMinimized, setIsSelectionMinimized] = useState(!selectionMode);
+
+  // State for bulk import
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [importedArtists, setImportedArtists] = useState<ContentItemProps[]>([]);
 
   // Use the custom hook for data fetching
   const { items, isLoading } = useDiscoverData(
@@ -225,6 +240,17 @@ const Discover = () => {
     }
   }, [activeTab]);
 
+  // Handler for import completion
+  const handleImportComplete = (artists: ContentItemProps[]) => {
+    setImportedArtists(prev => [...prev, ...artists]);
+    setImportDialogOpen(false);
+    toast({
+      title: "Artists Imported",
+      description: `${artists.length} artists have been imported successfully.`,
+      variant: "default",
+    });
+  };
+
   return (
     <Layout>
       <div className="min-h-screen bg-background">
@@ -314,15 +340,56 @@ const Discover = () => {
                 </div>
               )}
 
+              {/* Actions Bar - Add, Import, etc. */}
+              {(activeTab === 'artists' || activeTab === 'albums' || activeTab === 'songs' || activeTab === 'artworks') && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-1"
+                    onClick={() => {/* Add create functionality */}}
+                  >
+                    <PlusCircle className="h-4 w-4" />
+                    Add New {activeTab.slice(0, -1).charAt(0).toUpperCase() + activeTab.slice(0, -1).slice(1)}
+                  </Button>
+                  
+                  {activeTab === 'artists' && (
+                    <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-1"
+                        >
+                          <Upload className="h-4 w-4" />
+                          Bulk Import Artists
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[600px]">
+                        <DialogHeader>
+                          <DialogTitle>Bulk Import Artists</DialogTitle>
+                          <DialogDescription>
+                            Import multiple artists at once using a CSV file.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="py-4">
+                          <ArtistBulkImport onImportComplete={handleImportComplete} />
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </div>
+              )}
+
               {isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {[...Array(6)].map((_, i) => (
                     <Skeleton key={i} className="h-64 rounded-lg" />
                   ))}
                 </div>
-              ) : items.length > 0 ? (
+              ) : items.length > 0 || importedArtists.length > 0 ? (
                 <CategoryItemsGrid
-                  items={items}
+                  items={activeTab === 'artists' ? [...importedArtists, ...items] : items}
                   title={headerSearchQuery ? `Results for "${headerSearchQuery}"` : `Discover ${getTabLabel(activeTab)}`}
                   onSelectItem={selectionMode ? handleSelectItem : handleItemClick}
                   selectedItems={selectionMode ? selectedItems : undefined}

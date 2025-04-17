@@ -148,6 +148,33 @@ const About: React.FC = () => {
                   </div>
                 </CardContent>
               </Card>
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-4">
+                    <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span className="text-xl font-bold text-primary">AL</span>
+                    </div>
+                    <div>
+                      <CardTitle>Charlie W.</CardTitle>
+                      <CardDescription>Founder & Lead Developer</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    With a background in both art and technology, he founded Findry to bridge the gap 
+                    between creative minds and the resources they need to thrive.
+                  </p>
+                  <div className="flex mt-4 gap-2">
+                    <Button variant="outline" size="icon">
+                      <Github className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" size="icon">
+                      <Globe className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </section>
 

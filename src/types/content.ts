@@ -1,4 +1,3 @@
-
 import { ContentType } from './database';
 import { Profile } from './profile';
 
@@ -30,6 +29,22 @@ export interface ContentItemProps {
   isRequestOnly?: boolean; // Added for requested resources
   isNew?: boolean;    // Added to track newly created items
   status?: string;    // Added for tracking request status
+  selected?: boolean; // Added for selection in event creation
+  
+  // New properties for albums
+  artist_id?: string;
+  artist_name?: string;
+  release_date?: string;
+  
+  // New properties for songs
+  album_id?: string;
+  album_name?: string;
+  duration?: string;
+  
+  // New properties for artworks
+  creation_date?: string;
+  medium?: string;
+  dimensions?: string;
 }
 
 export interface ContentOwnershipProps {

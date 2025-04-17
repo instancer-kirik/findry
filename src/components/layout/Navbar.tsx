@@ -297,12 +297,7 @@ const Navbar = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-          <Link
-              to="/about"
-              className={`text-sm px-3 py-2 rounded-md ${location.pathname === '/about' ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`}
-            >
-              <span>About</span>
-          </Link>
+          
           </div>
         </div>
 

@@ -151,6 +151,30 @@ export const resources: ContentItemProps[] = [
     location: "Nashville, TN",
     tags: ["Music Production", "Jazz", "Blues"],
     subtype: "Service Provider"
+  },
+  {
+    id: "550e8400-e29b-41d4-a716-446655440027",
+    name: "Art Gallery Space",
+    type: "space",
+    location: "San Francisco, CA",
+    tags: ["Gallery", "Exhibition Space", "Art", "1800 sq ft"],
+    subtype: "Art Space"
+  },
+  {
+    id: "550e8400-e29b-41d4-a716-446655440028",
+    name: "Digital Art Tools",
+    type: "tool",
+    location: "Online",
+    tags: ["Digital Art", "Software", "Equipment Available"],
+    subtype: "Art Tools"
+  },
+  {
+    id: "550e8400-e29b-41d4-a716-446655440029",
+    name: "Art Supplies Store",
+    type: "offerer",
+    location: "New York, NY",
+    tags: ["Art Supplies", "Painting", "Sculpture"],
+    subtype: "Art Supplier"
   }
 ];
 
@@ -273,6 +297,142 @@ export const brands: ContentItemProps[] = [
   }
 ];
 
+export const albums: ContentItemProps[] = [
+  {
+    id: "550e8400-e29b-41d4-a716-446655441001",
+    name: "Midnight Echoes",
+    type: "album",
+    location: "Los Angeles, CA",
+    tags: ["Electronic", "Ambient", "Experimental"],
+    subtype: "Album",
+    artist_id: "550e8400-e29b-41d4-a716-446655440016",
+    artist_name: "Mia Chen",
+    release_date: "2023-06-15",
+    description: "An ambient electronic journey through nocturnal soundscapes."
+  },
+  {
+    id: "550e8400-e29b-41d4-a716-446655441002",
+    name: "Urban Soul",
+    type: "album",
+    location: "Atlanta, GA",
+    tags: ["Hip-Hop", "Soul", "Urban"],
+    subtype: "Album",
+    artist_id: "550e8400-e29b-41d4-a716-446655440017",
+    artist_name: "Marcus Johnson",
+    release_date: "2023-04-22",
+    description: "A soulful blend of hip-hop and R&B influenced by city life."
+  },
+  {
+    id: "550e8400-e29b-41d4-a716-446655441003",
+    name: "Acoustic Sessions",
+    type: "album",
+    location: "Chicago, IL",
+    tags: ["Folk", "Acoustic", "Live"],
+    subtype: "EP",
+    artist_id: "550e8400-e29b-41d4-a716-446655440015",
+    artist_name: "James Wilson",
+    release_date: "2023-01-10",
+    description: "Intimate acoustic performances recorded live in studio."
+  }
+];
+
+export const songs: ContentItemProps[] = [
+  {
+    id: "550e8400-e29b-41d4-a716-446655442001",
+    name: "Nightfall",
+    type: "song",
+    location: "Los Angeles, CA",
+    tags: ["Electronic", "Ambient"],
+    subtype: "Song",
+    artist_id: "550e8400-e29b-41d4-a716-446655440016",
+    artist_name: "Mia Chen",
+    album_id: "550e8400-e29b-41d4-a716-446655441001",
+    album_name: "Midnight Echoes",
+    duration: "4:32"
+  },
+  {
+    id: "550e8400-e29b-41d4-a716-446655442002",
+    name: "City Lights",
+    type: "song",
+    location: "Los Angeles, CA",
+    tags: ["Electronic", "Downtempo"],
+    subtype: "Song",
+    artist_id: "550e8400-e29b-41d4-a716-446655440016",
+    artist_name: "Mia Chen",
+    album_id: "550e8400-e29b-41d4-a716-446655441001",
+    album_name: "Midnight Echoes",
+    duration: "5:17"
+  },
+  {
+    id: "550e8400-e29b-41d4-a716-446655442003",
+    name: "Urban Flow",
+    type: "song",
+    location: "Atlanta, GA",
+    tags: ["Hip-Hop", "Rap"],
+    subtype: "Song",
+    artist_id: "550e8400-e29b-41d4-a716-446655440017",
+    artist_name: "Marcus Johnson",
+    album_id: "550e8400-e29b-41d4-a716-446655441002",
+    album_name: "Urban Soul",
+    duration: "3:45"
+  },
+  {
+    id: "550e8400-e29b-41d4-a716-446655442004",
+    name: "Mountain Road",
+    type: "song",
+    location: "Chicago, IL",
+    tags: ["Folk", "Acoustic", "Guitar"],
+    subtype: "Song",
+    artist_id: "550e8400-e29b-41d4-a716-446655440015",
+    artist_name: "James Wilson",
+    album_id: "550e8400-e29b-41d4-a716-446655441003",
+    album_name: "Acoustic Sessions",
+    duration: "3:28"
+  }
+];
+
+export const artworks: ContentItemProps[] = [
+  {
+    id: "550e8400-e29b-41d4-a716-446655443001",
+    name: "Abstract Visions",
+    type: "artwork",
+    location: "Seattle, WA",
+    tags: ["Abstract", "Painting", "Canvas"],
+    subtype: "Painting",
+    artist_id: "550e8400-e29b-41d4-a716-446655440019",
+    artist_name: "David Kim",
+    creation_date: "2023-02-15",
+    medium: "Acrylic on canvas",
+    dimensions: "36x48 inches"
+  },
+  {
+    id: "550e8400-e29b-41d4-a716-446655443002",
+    name: "Sonic Sculpture",
+    type: "artwork",
+    location: "Seattle, WA",
+    tags: ["Installation", "Sculpture", "Sound"],
+    subtype: "Installation",
+    artist_id: "550e8400-e29b-41d4-a716-446655440019",
+    artist_name: "David Kim",
+    creation_date: "2023-05-22",
+    medium: "Mixed media with sound components",
+    dimensions: "6x8x10 feet"
+  },
+  {
+    id: "550e8400-e29b-41d4-a716-446655443003",
+    name: "Movement Study",
+    type: "artwork",
+    location: "Miami, FL",
+    tags: ["Performance", "Video", "Movement"],
+    subtype: "Performance",
+    artist_id: "550e8400-e29b-41d4-a716-446655440018",
+    artist_name: "Sophia Rodriguez",
+    creation_date: "2023-03-10",
+    medium: "4K video",
+    duration: "12:45"
+  }
+];
+
 export const allTags: string[] = [
   "Vocalist", "R&B", "Soul", "Guitar", "Blues", "Jazz", 
   "Producer", "Electronic", "Hip-Hop", "Rapper",
@@ -304,26 +464,36 @@ export const allTags: string[] = [
   "Digital & Physical", "Text & Image", "Movement & Sound",
   
   "Dance", "Sculpture", "Sound Design", "Video Production", "Digital Art",
-  "Multimedia", "Performance Artist", "Visual Artist"
+  "Multimedia", "Performance Artist", "Visual Artist",
+  
+  "Painting", "Sculpture", "Digital Art", "Installation", "Performance Art",
+  "Canvas", "Mixed Media", "Video Art", "Art Supplies", "Acrylic", "Oil Paint",
+  "Album", "EP", "Single", "Song", "Track", "Release", "Collaboration",
+  "Acoustic", "Electronic", "Ambient", "Downtempo", "Pop", "Folk", "Rap"
 ];
 
 export const tabSubcategories: Record<string, string[]> = {
   artists: ["all", "vocalists", "producers", "instrumentalists", "djs", "composers", "multidisciplinary", "visual artists", "performance artists"],
-  resources: ["all", "spaces", "tools", "services", "materials"],
+  resources: ["all", "spaces", "tools", "services", "materials", "art supplies", "music equipment", "art spaces"],
   projects: ["all", "music", "art", "film", "fashion", "tech"],
   events: ["all", "concerts", "exhibitions", "workshops", "festivals", "networking"],
   venues: ["all", "clubs", "concert halls", "theaters", "outdoor", "cafes", "galleries"],
   communities: ["all", "music", "art", "tech", "social", "professional", "interest"],
-  brands: ["all", "labels", "equipment", "fashion", "food", "tech", "media"]
+  brands: ["all", "labels", "equipment", "fashion", "food", "tech", "media"],
+  albums: ["all", "full-length", "ep", "single", "compilation", "live"],
+  songs: ["all", "singles", "album tracks", "unreleased", "live", "remix"],
+  artworks: ["all", "paintings", "sculptures", "digital", "installations", "performances", "photography", "mixed media"]
 };
 
-export const availableTabs = ["artists", "resources", "projects", "events", "venues", "communities", "brands"];
+export const availableTabs = ["artists", "resources", "projects", "events", "venues", "communities", "brands", "albums", "songs", "artworks"];
 
 export const resourceTypes = [
   { value: "all", label: "All Resources" },
   { value: "space", label: "Spaces" },
   { value: "tool", label: "Tools & Equipment" },
   { value: "offerer", label: "Service Providers" },
+  { value: "art_space", label: "Art Spaces" },
+  { value: "art_tools", label: "Art Tools & Supplies" },
   { value: "other", label: "Other Resources" }
 ];
 

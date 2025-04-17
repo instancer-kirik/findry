@@ -1,10 +1,4 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+import { Json } from './types';
 
 export interface Database {
   public: {
@@ -554,6 +548,47 @@ export interface Database {
           source?: string | null
           created_at?: string
         }
+      }
+      project_components: {
+        Row: {
+          id: string;
+          project_id: string;
+          name: string;
+          description: string | null;
+          type: string | null;
+          status: string | null;
+          assigned_to: string | null;
+          due_date: string | null;
+          created_at: string;
+          updated_at: string;
+          dependencies: string[] | null;
+        };
+        Insert: {
+          id?: string;
+          project_id: string;
+          name: string;
+          description?: string | null;
+          type?: string | null;
+          status?: string | null;
+          assigned_to?: string | null;
+          due_date?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          dependencies?: string[] | null;
+        };
+        Update: {
+          id?: string;
+          project_id?: string;
+          name?: string;
+          description?: string | null;
+          type?: string | null;
+          status?: string | null;
+          assigned_to?: string | null;
+          due_date?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          dependencies?: string[] | null;
+        };
       }
     }
   }
