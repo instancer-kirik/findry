@@ -95,7 +95,6 @@ const ArtistBulkImport: React.FC<ArtistBulkImportProps> = ({ onImportComplete })
         tags: artistData.tags.split(';').map((t: string) => t.trim()),
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        created_by: 'import'
       };
       
       // Add optional fields
@@ -256,4 +255,4 @@ const ArtistBulkImport: React.FC<ArtistBulkImportProps> = ({ onImportComplete })
   );
 };
 
-export default ArtistBulkImport; 
+export default ArtistBulkImport;

@@ -1,121 +1,101 @@
 
 import { ContentItemProps } from "./content";
-import { TimeSlot, SpaceType } from "./space";
+import { TimeSlot, SpaceType } from './space';
+import { Dispatch, SetStateAction } from 'react';
 
-// Type definitions for event creation/editing
-export type FilterType = "resources" | "artists" | "venues" | "brands" | "communities" | "all";
-export type RecurrenceType = "none" | "daily" | "weekly" | "monthly" | "custom";
-
-// Event content item is an alias for ContentItemProps for clarity in event context
-export type EventContentItem = ContentItemProps;
-
-// Form component props
-export interface EventDetailsFormProps {
-  eventName: string;
-  setEventName: (value: string) => void;
-  description: string;
-  setDescription: (value: string) => void;
-  location: string;
-  setLocation: (value: string) => void;
-  eventType: string;
-  setEventType: (value: string) => void;
-  tags?: string[];
-  setTags?: (value: string[]) => void;
-}
-
-export interface DateTimeFormProps {
-  startDate: Date | undefined;
-  setStartDate: (value: Date | undefined) => void;
-  endDate: Date | undefined;
-  setEndDate: (value: Date | undefined) => void;
-  startTime: string;
-  setStartTime: (value: string) => void;
-  endTime: string;
-  setEndTime: (value: string) => void;
-  recurrenceType?: RecurrenceType;
-  setRecurrenceType?: (value: RecurrenceType) => void;
-}
-
-export interface PosterUploadProps {
-  posterImage: File | null;
-  setPosterImage: (value: File | null) => void;
-  posterUrl: string;
-  setPosterUrl: (value: string) => void;
-}
-
-export interface AdditionalSettingsProps {
-  isPrivate: boolean;
-  setIsPrivate: (value: boolean) => void;
-  registrationRequired?: boolean;
-  setRegistrationRequired?: (value: boolean) => void;
-  ticketPrice?: string;
-  setTicketPrice?: (value: string) => void;
-  ticketUrl?: string;
-  setTicketUrl?: (value: string) => void;
-  capacity?: string;
-  setCapacity?: (value: string) => void;
-}
+// Define types for form components
+export type FilterType = 'all' | 'artists' | 'venues' | 'resources' | 'brands' | 'communities';
+export type RecurrenceType = 'none' | 'daily' | 'weekly' | 'monthly';
 
 export interface ContentCardProps {
   id: string;
   name: string;
-  type: string;
+  type?: string;
   location?: string;
   imageUrl?: string;
   description?: string;
   selected?: boolean;
   onSelect?: () => void;
+  onClick?: () => void;
+  isSelected?: boolean;
+  selectionMode?: boolean;
 }
 
-// New form interfaces for Space management
-export interface SpaceFormProps {
+export interface EventContentItem {
+  id: string;
   name: string;
-  setName: (value: string) => void;
-  spaceType: SpaceType;
-  setSpaceType: (value: SpaceType) => void;
-  squareFootage: number;
-  setSquareFootage: (value: number) => void;
-  equipmentList: string[];
-  setEquipmentList: (value: string[]) => void;
+  image_url?: string;
+  description?: string;
+  type?: string;
+  location?: string;
+  email?: string;
+  link?: string;
+  medium?: string;
+  selected?: boolean;
+  isNew?: boolean;
+}
+
+export interface ArtGalleryItem {
+  id: string;
+  name: string;
+  image_url?: string;
+  medium?: string;
+  artist?: string;
+  year?: string;
+  description?: string;
+}
+
+export interface FeaturedArtist {
+  id: string;
+  name: string;
+  image_url?: string;
+  bio?: string;
+  website?: string;
+  social_media?: string[];
+}
+
+export interface EventDetailsFormProps {
+  eventName: string;
+  setEventName: Dispatch<SetStateAction<string>>;
   description: string;
-  setDescription: (value: string) => void;
+  setDescription: Dispatch<SetStateAction<string>>;
   location: string;
-  setLocation: (value: string) => void;
+  setLocation: Dispatch<SetStateAction<string>>;
+  eventType: string;
+  setEventType: Dispatch<SetStateAction<string>>;
+  capacity?: string;
+  setCapacity?: Dispatch<SetStateAction<string>>;
+  tags?: string[];
+  setTags?: Dispatch<SetStateAction<string[]>>;
 }
 
-export interface SpacePricingFormProps {
-  hourlyRate: number;
-  setHourlyRate: (value: number) => void;
-  dailyRate?: number;
-  setDailyRate: (value?: number) => void;
-  weeklyRate?: number;
-  setWeeklyRate: (value?: number) => void;
-  monthlyRate?: number;
-  setMonthlyRate: (value?: number) => void;
-  depositRequired: boolean;
-  setDepositRequired: (value: boolean) => void;
-  depositAmount?: number;
-  setDepositAmount: (value?: number) => void;
+export interface DateTimeFormProps {
+  startDate?: Date;
+  setStartDate: Dispatch<SetStateAction<Date | undefined>>;
+  endDate?: Date;
+  setEndDate: Dispatch<SetStateAction<Date | undefined>>;
+  startTime: string;
+  setStartTime: Dispatch<SetStateAction<string>>;
+  endTime: string;
+  setEndTime: Dispatch<SetStateAction<string>>;
+  recurrenceType?: RecurrenceType;
+  setRecurrenceType?: Dispatch<SetStateAction<RecurrenceType>>;
 }
 
-export interface SpaceAvailabilityFormProps {
-  availabilitySchedule: TimeSlot[];
-  setAvailabilitySchedule: (value: TimeSlot[]) => void;
-  accessHours: {
-    monday: TimeSlot[];
-    tuesday: TimeSlot[];
-    wednesday: TimeSlot[];
-    thursday: TimeSlot[];
-    friday: TimeSlot[];
-    saturday: TimeSlot[];
-    sunday: TimeSlot[];
-  };
-  setAccessHours: (value: any) => void;
+export interface PosterUploadProps {
+  posterImage: File | null;
+  setPosterImage: Dispatch<SetStateAction<File | null>>;
+  posterUrl: string;
+  setPosterUrl: Dispatch<SetStateAction<string>>;
 }
 
-export interface FeaturedArtistsForm {
-  selectedArtists: EventContentItem[];
-  setSelectedArtists: (artists: EventContentItem[]) => void;
-  onAddArtist: (artist: EventContentItem) => void;
-  onRemoveArtist: (artistId: string) => void;
+export interface AdditionalSettingsProps {
+  isPrivate: boolean;
+  setIsPrivate: Dispatch<SetStateAction<boolean>>;
+  registrationRequired: boolean;
+  setRegistrationRequired: Dispatch<SetStateAction<boolean>>;
+  ticketPrice: string;
+  setTicketPrice: Dispatch<SetStateAction<string>>;
+  ticketUrl: string;
+  setTicketUrl: Dispatch<SetStateAction<string>>;
 }

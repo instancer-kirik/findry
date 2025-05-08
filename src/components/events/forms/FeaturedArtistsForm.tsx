@@ -6,27 +6,34 @@ import { Avatar } from '@/components/ui/avatar';
 import { AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { X, Plus } from 'lucide-react';
 
-interface FeaturedArtistsFormProps {
-  selectedArtists: EventContentItem[];
-  setSelectedArtists: (artists: EventContentItem[]) => void;
+export interface FeaturedArtistsFormProps {
+  selectedArtists?: EventContentItem[];
+  setSelectedArtists?: (artists: EventContentItem[]) => void;
+  featuredArtists?: any[];  // To support the old property
+  setFeaturedArtists?: (artists: any[]) => void;  // To support the old property
   onAddArtist?: (artist: EventContentItem) => void;
   onRemoveArtist?: (artistId: string) => void;
 }
 
 export const FeaturedArtistsForm: React.FC<FeaturedArtistsFormProps> = ({
-  selectedArtists,
-  onRemoveArtist
+  selectedArtists = [],
+  onRemoveArtist,
+  featuredArtists = [],
+  setFeaturedArtists
 }) => {
+  // Use the appropriate data source based on what's provided
+  const displayArtists = selectedArtists.length > 0 ? selectedArtists : featuredArtists;
+  
   return (
     <div className="space-y-4">
       <div className="flex flex-col space-y-2">
         <h4 className="text-sm font-medium">Featured Artists</h4>
         
-        {selectedArtists.length === 0 ? (
+        {displayArtists.length === 0 ? (
           <p className="text-sm text-muted-foreground">No artists selected yet</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {selectedArtists.map((artist) => (
+            {displayArtists.map((artist) => (
               <div 
                 key={artist.id}
                 className="flex items-center justify-between p-2 border rounded-md"

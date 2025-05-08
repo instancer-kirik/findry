@@ -22,6 +22,8 @@ export const EventDetailsForm: React.FC<EventDetailsFormProps> = ({
   setLocation,
   eventType,
   setEventType,
+  capacity,
+  setCapacity,
   tags,
   setTags
 }) => {
@@ -64,6 +66,16 @@ export const EventDetailsForm: React.FC<EventDetailsFormProps> = ({
           placeholder="Enter location"
           value={location}
           onChange={(e) => setLocation(e.target.value)}
+        />
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="capacity">Capacity</Label>
+        <Input
+          id="capacity"
+          placeholder="Enter capacity"
+          value={capacity}
+          onChange={(e) => setCapacity(e.target.value)}
         />
       </div>
       

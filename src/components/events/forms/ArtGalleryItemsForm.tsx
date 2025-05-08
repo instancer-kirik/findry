@@ -5,24 +5,31 @@ import { EventContentItem } from '@/types/forms';
 import { X } from 'lucide-react';
 
 interface ArtGalleryItemsFormProps {
-  selectedItems: EventContentItem[];
+  selectedItems?: EventContentItem[];
   onRemoveItem?: (itemId: string) => void;
+  galleryItems?: any[];  // To support the old property
+  setGalleryItems?: (items: any[]) => void;  // To support the old property
 }
 
 export const ArtGalleryItemsForm: React.FC<ArtGalleryItemsFormProps> = ({
-  selectedItems,
-  onRemoveItem
+  selectedItems = [],
+  onRemoveItem,
+  galleryItems = [],
+  setGalleryItems
 }) => {
+  // Use the appropriate data source based on what's provided
+  const displayItems = selectedItems.length > 0 ? selectedItems : galleryItems;
+  
   return (
     <div className="space-y-4">
       <div className="flex flex-col space-y-2">
         <h4 className="text-sm font-medium">Gallery Items</h4>
         
-        {selectedItems.length === 0 ? (
+        {displayItems.length === 0 ? (
           <p className="text-sm text-muted-foreground">No gallery items selected yet</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {selectedItems.map((item) => (
+            {displayItems.map((item) => (
               <div 
                 key={item.id}
                 className="flex items-center justify-between p-2 border rounded-md"

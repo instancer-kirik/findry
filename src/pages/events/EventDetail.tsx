@@ -14,6 +14,7 @@ import { EventSlot, FeaturedArtist, ArtGalleryItem } from '@/types/event';
 import { Json } from '@/integrations/supabase/types';
 import { convertFromJson } from '@/types/supabase';
 import ArtGalleryCard from '@/components/events/ArtGalleryCard';
+import { CardTitle } from '@/components/ui/card';
 
 interface EventProps {
   id: string;

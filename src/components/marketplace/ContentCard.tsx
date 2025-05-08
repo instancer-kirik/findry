@@ -4,6 +4,41 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ContentCardProps } from '@/types/forms';
 
+// Export the ContentItemProps interface for use in other components
+export interface ContentItemProps {
+  id: string;
+  name: string;
+  type: string;
+  location: string;
+  subtype?: string;
+  description?: string;
+  image_url?: string;
+  isSelected?: boolean;
+  selectionMode?: boolean;
+  tags?: string[];
+  price?: number;
+  date?: string;
+  time?: string;
+  website_url?: string;
+  banner_image_url?: string;
+  logo_url?: string;
+  category?: string;
+  shop_id?: string;
+  created_at?: string;
+  updated_at?: string;
+  created_by?: string;
+  multidisciplinary?: boolean;
+  styles?: string[];
+  disciplines?: string[];
+  email?: string;
+  link?: string;
+  isRequestOnly?: boolean;
+  isNew?: boolean;
+  status?: string;
+  selected?: boolean;
+  onClick?: () => void;
+}
+
 export const ContentCard: React.FC<ContentCardProps> = ({
   id,
   name,

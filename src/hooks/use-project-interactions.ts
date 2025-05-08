@@ -173,4 +173,6 @@ const useProjectInteractions = (projectId: string) => {
   };
 };
 
+// Export the hook properly
+export { useProjectInteractions };
 export default useProjectInteractions;
