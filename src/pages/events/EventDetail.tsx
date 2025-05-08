@@ -371,7 +371,7 @@ const EventDetail = () => {
                       <div className="flex justify-between items-center">
                         <div>
                           <h3 className="font-medium">{slot.title || `Slot ${index + 1}`}</h3>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-muted-foreground">
                             {slot.startTime} - {slot.endTime}
                           </p>
                         </div>

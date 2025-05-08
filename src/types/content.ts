@@ -1,4 +1,3 @@
-
 import { ContentType } from './database';
 import { Profile } from './profile';
 import { SpaceType, PricingTerms, LightingDetails, AccessHours, LocationData, TimeSlot } from './space';
@@ -33,17 +32,15 @@ export interface ContentItemProps {
   status?: string;    // Added for tracking request status
   selected?: boolean; // Added for selection in event creation
   
-  // New properties for albums
-  artist_id?: string;
+  // Album and song properties
+  artist_id?: string; // Added for album/song attribution
   artist_name?: string;
-  release_date?: string;
-  
-  // New properties for songs
   album_id?: string;
   album_name?: string;
+  release_date?: string;
   duration?: string;
   
-  // New properties for artworks
+  // Artwork properties
   creation_date?: string;
   medium?: string;
   dimensions?: string;
@@ -75,6 +72,9 @@ export interface ContentItemProps {
   // Match-specific properties
   compatibility_score?: number;
   matched_at?: string;
+  
+  // Other multimedia properties
+  title?: string; // For event titles and other objects
 }
 
 export interface ContentOwnershipProps {
