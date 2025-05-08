@@ -1,85 +1,80 @@
-import React from 'react';
+
+import React, { useCallback } from 'react';
+import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Image, Upload } from 'lucide-react';
+import { PosterUploadProps } from '@/types/forms';
+import { Upload, X } from 'lucide-react';
 
-interface PosterUploadProps {
-  posterImage: File | null;
-  setPosterImage: (file: File | null) => void;
-  posterUrl: string;
-  setPosterUrl: (url: string) => void;
-}
-
-const PosterUpload: React.FC<PosterUploadProps> = ({
+export const PosterUpload: React.FC<PosterUploadProps> = ({
   posterImage,
   setPosterImage,
   posterUrl,
   setPosterUrl
 }) => {
-  const handlePosterUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!event.target.files || event.target.files.length === 0) {
-      return;
+  const handleImageChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setPosterImage(e.target.files[0]);
+      
+      // Create a temporary URL for preview
+      const fileUrl = URL.createObjectURL(e.target.files[0]);
+      setPosterUrl(fileUrl);
     }
-    
-    const file = event.target.files[0];
-    setPosterImage(file);
-    
-    const url = URL.createObjectURL(file);
-    setPosterUrl(url);
-  };
+  }, [setPosterImage, setPosterUrl]);
+
+  const removeImage = useCallback(() => {
+    setPosterImage(null);
+    setPosterUrl('');
+  }, [setPosterImage, setPosterUrl]);
 
   return (
-    <section className="space-y-4">
-      <h2 className="text-xl font-semibold">Event Poster</h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <Label htmlFor="posterImage">Upload Poster Image</Label>
-          <div className="mt-2 flex items-center gap-4">
-            <Label 
-              htmlFor="posterUpload" 
-              className="cursor-pointer flex h-10 items-center rounded-md px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90"
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="posterUpload">Event Poster</Label>
+        
+        {posterUrl ? (
+          <div className="relative border rounded-md overflow-hidden">
+            <img 
+              src={posterUrl} 
+              alt="Event poster" 
+              className="max-h-64 w-full object-contain"
+            />
+            <Button
+              variant="destructive"
+              size="icon"
+              className="absolute top-2 right-2 h-8 w-8"
+              onClick={removeImage}
             >
-              <Upload className="mr-2 h-4 w-4" />
-              Choose File
-            </Label>
-            <Input 
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-md border-gray-300 dark:border-gray-600">
+            <Upload className="h-10 w-10 text-muted-foreground mb-2" />
+            <p className="text-sm text-muted-foreground mb-1">
+              Drag and drop your poster image here, or click to select
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Recommended size: 1200 x 600px (2:1 ratio)
+            </p>
+            <input
               id="posterUpload"
               type="file"
               accept="image/*"
-              onChange={handlePosterUpload}
               className="hidden"
+              onChange={handleImageChange}
             />
-            <span className="text-sm text-muted-foreground">
-              {posterImage ? posterImage.name : "No file chosen"}
-            </span>
+            <Button
+              variant="outline"
+              className="mt-4"
+              onClick={() => document.getElementById('posterUpload')?.click()}
+            >
+              Upload Image
+            </Button>
           </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            Recommended size: 1200x630 pixels (16:9 ratio)
-          </p>
-        </div>
-        
-        <div>
-          {posterUrl ? (
-            <div className="aspect-video rounded-md overflow-hidden bg-muted">
-              <img 
-                src={posterUrl} 
-                alt="Event poster preview" 
-                className="w-full h-full object-cover" 
-              />
-            </div>
-          ) : (
-            <div className="aspect-video rounded-md flex items-center justify-center bg-muted">
-              <div className="text-center text-muted-foreground">
-                <Image className="h-8 w-8 mx-auto mb-2" />
-                <p>Poster preview</p>
-              </div>
-            </div>
-          )}
-        </div>
+        )}
       </div>
-    </section>
+    </div>
   );
 };
 
-export default PosterUpload; 
+export default PosterUpload;

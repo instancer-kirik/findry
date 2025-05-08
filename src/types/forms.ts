@@ -1,5 +1,6 @@
+
 import { ContentItemProps } from "./content";
-import { FeaturedArtist } from "./event";
+import { TimeSlot, SpaceType } from "./space";
 
 // Type definitions for event creation/editing
 export type FilterType = "resources" | "artists" | "venues" | "brands" | "communities" | "all";
@@ -64,4 +65,57 @@ export interface ContentCardProps {
   description?: string;
   selected?: boolean;
   onSelect?: () => void;
-} 
+}
+
+// New form interfaces for Space management
+export interface SpaceFormProps {
+  name: string;
+  setName: (value: string) => void;
+  spaceType: SpaceType;
+  setSpaceType: (value: SpaceType) => void;
+  squareFootage: number;
+  setSquareFootage: (value: number) => void;
+  equipmentList: string[];
+  setEquipmentList: (value: string[]) => void;
+  description: string;
+  setDescription: (value: string) => void;
+  location: string;
+  setLocation: (value: string) => void;
+}
+
+export interface SpacePricingFormProps {
+  hourlyRate: number;
+  setHourlyRate: (value: number) => void;
+  dailyRate?: number;
+  setDailyRate: (value?: number) => void;
+  weeklyRate?: number;
+  setWeeklyRate: (value?: number) => void;
+  monthlyRate?: number;
+  setMonthlyRate: (value?: number) => void;
+  depositRequired: boolean;
+  setDepositRequired: (value: boolean) => void;
+  depositAmount?: number;
+  setDepositAmount: (value?: number) => void;
+}
+
+export interface SpaceAvailabilityFormProps {
+  availabilitySchedule: TimeSlot[];
+  setAvailabilitySchedule: (value: TimeSlot[]) => void;
+  accessHours: {
+    monday: TimeSlot[];
+    tuesday: TimeSlot[];
+    wednesday: TimeSlot[];
+    thursday: TimeSlot[];
+    friday: TimeSlot[];
+    saturday: TimeSlot[];
+    sunday: TimeSlot[];
+  };
+  setAccessHours: (value: any) => void;
+}
+
+export interface FeaturedArtistsForm {
+  selectedArtists: EventContentItem[];
+  setSelectedArtists: (artists: EventContentItem[]) => void;
+  onAddArtist: (artist: EventContentItem) => void;
+  onRemoveArtist: (artistId: string) => void;
+}

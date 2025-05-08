@@ -1,192 +1,176 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { ProjectComponent } from '@/types/project';
-import { Database } from '@/integrations/supabase/database.types';
 
-// Type for database project component
-type ProjectComponentRecord = Database['public']['Tables']['project_components']['Row'];
-
-// Export interface correctly matching the project.ts type file
-export interface ProjectInteractionsProps {
+export interface ProjectComponent {
+  id: string;
+  name: string;
+  status: string;
+  type: string;
   projectId: string;
+  description?: string;
+  dependencies?: string[];
+  createdAt: string;
+  updatedAt: string;
 }
 
-// Convert database record to ProjectComponent type
-function convertToProjectComponent(record: ProjectComponentRecord): ProjectComponent {
-  return {
-    id: record.id,
-    name: record.name,
-    type: record.type || 'feature',
-    description: record.description || '',
-    status: (record.status as 'pending' | 'in_progress' | 'completed'),
-    assignedTo: record.assigned_to || undefined,
-    dueDate: record.due_date || undefined
-  };
-}
-
-// Convert ProjectComponent to database format
-function convertFromProjectComponent(component: Partial<ProjectComponent>, projectId: string): Partial<ProjectComponentRecord> {
-  const record: Partial<ProjectComponentRecord> = {};
-  
-  if ('name' in component) record.name = component.name;
-  if ('description' in component) record.description = component.description || null;
-  if ('type' in component) record.type = component.type || null;
-  if ('status' in component) record.status = component.status || null;
-  if ('assignedTo' in component) record.assigned_to = component.assignedTo || null;
-  if ('dueDate' in component) record.due_date = component.dueDate || null;
-  record.project_id = projectId;
-  
-  return record;
-}
-
-export const useProjectInteractions = ({ projectId }: ProjectInteractionsProps) => {
+const useProjectInteractions = (projectId: string) => {
   const [components, setComponents] = useState<ProjectComponent[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    const fetchComponents = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const { data, error } = await supabase
-          .from('project_components')
-          .select('*')
-          .eq('project_id', projectId);
-
-        if (error) {
-          setError(error.message);
-        } else if (data) {
-          const formattedComponents = data.map(convertToProjectComponent);
-          setComponents(formattedComponents);
-        }
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchComponents();
-  }, [projectId]);
-
-  const addComponent = async (newComponent: Omit<ProjectComponent, 'id'>) => {
-    setLoading(true);
-    setError(null);
-
+  // Fetch project components
+  const fetchComponents = async () => {
     try {
-      const dbRecord = convertFromProjectComponent(newComponent, projectId);
+      setLoading(true);
       
+      // Use the project_components table directly
       const { data, error } = await supabase
         .from('project_components')
-        .insert([dbRecord])
-        .select();
-
-      if (error) {
-        setError(error.message);
-        toast.error(`Failed to add component: ${error.message}`);
-        return null;
-      } else if (data && data.length > 0) {
-        const formattedComponent = convertToProjectComponent(data[0] as ProjectComponentRecord);
-        setComponents([...components, formattedComponent]);
-        toast.success('Component added successfully!');
-        return formattedComponent;
+        .select('*')
+        .eq('project_id', projectId);
+      
+      if (error) throw error;
+      
+      if (data) {
+        // Transform the data to match the ProjectComponent interface
+        const transformedData: ProjectComponent[] = data.map(item => ({
+          id: item.id,
+          name: item.name,
+          status: item.status,
+          type: item.type,
+          projectId: item.project_id,
+          description: item.description,
+          dependencies: item.dependencies,
+          createdAt: item.created_at,
+          updatedAt: item.updated_at
+        }));
+        
+        setComponents(transformedData);
       }
-      return null;
-    } catch (err: any) {
-      setError(err.message);
-      toast.error(`Failed to add component: ${err.message}`);
-      return null;
+    } catch (e) {
+      console.error('Error fetching project components:', e);
+      setError(e as Error);
     } finally {
       setLoading(false);
     }
   };
 
-  const updateComponent = async (componentId: string, updates: Partial<ProjectComponent>) => {
-    setLoading(true);
-    setError(null);
-
+  // Create a new component
+  const createComponent = async (component: Omit<ProjectComponent, 'id' | 'createdAt' | 'updatedAt' | 'projectId'>) => {
     try {
-      const dbUpdates = convertFromProjectComponent(updates, projectId);
-
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('project_components')
-        .update(dbUpdates)
-        .eq('id', componentId);
-
-      if (error) {
-        setError(error.message);
-        toast.error(`Failed to update component: ${error.message}`);
-        return false;
-      } else {
-        // Update the local state with the changes
-        setComponents(components.map(c => 
-          c.id === componentId ? { ...c, ...updates } : c
-        ));
-        toast.success('Component updated successfully!');
-        return true;
+        .insert([{ 
+          name: component.name,
+          status: component.status,
+          type: component.type,
+          project_id: projectId,
+          description: component.description,
+          dependencies: component.dependencies || []
+        }])
+        .select();
+      
+      if (error) throw error;
+      
+      if (data && data[0]) {
+        // Transform the new component data
+        const newComponent: ProjectComponent = {
+          id: data[0].id,
+          name: data[0].name,
+          status: data[0].status,
+          type: data[0].type,
+          projectId: data[0].project_id,
+          description: data[0].description,
+          dependencies: data[0].dependencies,
+          createdAt: data[0].created_at,
+          updatedAt: data[0].updated_at
+        };
+        
+        setComponents([...components, newComponent]);
       }
-    } catch (err: any) {
-      setError(err.message);
-      toast.error(`Failed to update component: ${err.message}`);
-      return false;
-    } finally {
-      setLoading(false);
+      
+      return data;
+    } catch (e) {
+      console.error('Error creating component:', e);
+      throw e;
     }
   };
 
-  const deleteComponent = async (componentId: string) => {
-    setLoading(true);
-    setError(null);
+  // Update an existing component
+  const updateComponent = async (component: ProjectComponent) => {
+    try {
+      const { data, error } = await supabase
+        .from('project_components')
+        .update({ 
+          name: component.name,
+          status: component.status,
+          type: component.type,
+          description: component.description,
+          dependencies: component.dependencies || []
+        })
+        .eq('id', component.id)
+        .select();
+      
+      if (error) throw error;
+      
+      if (data) {
+        // Update the components state
+        setComponents(components.map(c => 
+          c.id === component.id 
+            ? {
+                ...c,
+                name: component.name,
+                status: component.status,
+                type: component.type,
+                description: component.description,
+                dependencies: component.dependencies,
+                updatedAt: new Date().toISOString()
+              } 
+            : c
+        ));
+      }
+      
+      return data;
+    } catch (e) {
+      console.error('Error updating component:', e);
+      throw e;
+    }
+  };
 
+  // Delete a component
+  const deleteComponent = async (componentId: string) => {
     try {
       const { error } = await supabase
         .from('project_components')
         .delete()
         .eq('id', componentId);
+      
+      if (error) throw error;
+      
+      // Update the components state
+      setComponents(components.filter(c => c.id !== componentId));
+    } catch (e) {
+      console.error('Error deleting component:', e);
+      throw e;
+    }
+  };
 
-      if (error) {
-        setError(error.message);
-        toast.error(`Failed to delete component: ${error.message}`);
-        return false;
-      } else {
-        setComponents(components.filter(c => c.id !== componentId));
-        toast.success('Component deleted successfully!');
-        return true;
-      }
-    } catch (err: any) {
-      setError(err.message);
-      toast.error(`Failed to delete component: ${err.message}`);
-      return false;
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (projectId) {
+      fetchComponents();
     }
-  };
-  
-  // Add this function to support chat integration
-  const recordEvent = async (
-    eventType: 'status_change' | 'task_update' | 'component_update' | 'comment' | 'member_joined',
-    details: Record<string, any>
-  ) => {
-    try {
-      // For now, we'll just log the event - in a real implementation this would be saved to the database
-      console.log('Project event recorded:', { projectId, eventType, details });
-      return true;
-    } catch (err: any) {
-      console.error('Error recording project event:', err);
-      return false;
-    }
-  };
+  }, [projectId]);
 
   return {
     components,
     loading,
     error,
-    addComponent,
+    fetchComponents,
+    createComponent,
     updateComponent,
-    deleteComponent,
-    recordEvent
+    deleteComponent
   };
 };
+
+export default useProjectInteractions;

@@ -1,5 +1,7 @@
+
 import { ContentType } from './database';
 import { Profile } from './profile';
+import { SpaceType, PricingTerms, LightingDetails, AccessHours, LocationData, TimeSlot } from './space';
 
 export interface ContentItemProps {
   id: string;
@@ -45,6 +47,34 @@ export interface ContentItemProps {
   creation_date?: string;
   medium?: string;
   dimensions?: string;
+  
+  // Space-specific properties
+  space_type?: SpaceType;
+  square_footage?: number;
+  equipment_list?: string[];
+  availability_schedule?: TimeSlot[];
+  pricing_terms?: PricingTerms;
+  acoustics_rating?: number;
+  lighting_details?: LightingDetails;
+  access_hours?: AccessHours;
+  location_data?: LocationData;
+  photos?: string[];
+  virtual_tour_url?: string;
+
+  // Artist-specific properties
+  creative_discipline?: string[];
+  space_requirements?: SpaceRequirements;
+  project_timeline?: TimeSlot;
+  budget_range?: BudgetRange;
+  equipment_needs?: string[];
+  preferred_hours?: AccessHours;
+  portfolio_urls?: string[];
+  group_size?: number;
+  noise_level?: number;
+
+  // Match-specific properties
+  compatibility_score?: number;
+  matched_at?: string;
 }
 
 export interface ContentOwnershipProps {
@@ -54,4 +84,20 @@ export interface ContentOwnershipProps {
   owner_id: string;
   created_at: string;
   updated_at: string;
+}
+
+// New interface definitions based on the schema
+export interface SpaceRequirements {
+  min_square_footage: number;
+  preferred_types: SpaceType[];
+  required_equipment: string[];
+  min_acoustics_rating: number;
+  natural_light_required: boolean;
+  storage_needed: boolean;
+  special_requirements: string[];
+}
+
+export interface BudgetRange {
+  min: number;
+  max: number;
 }

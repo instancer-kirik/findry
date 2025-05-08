@@ -1,99 +1,84 @@
-import React from 'react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-interface EventDetailsFormProps {
-  eventName: string;
-  setEventName: (value: string) => void;
-  description: string;
-  setDescription: (value: string) => void;
-  location: string;
-  setLocation: (value: string) => void;
-  capacity: string;
-  setCapacity: (value: string) => void;
-  eventType: string;
-  setEventType: (value: string) => void;
-}
+import React from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { 
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue 
+} from "@/components/ui/select";
+import { EventDetailsFormProps } from "@/types/forms";
 
-const EventDetailsForm: React.FC<EventDetailsFormProps> = ({
-  eventName, setEventName,
-  description, setDescription,
-  location, setLocation,
-  capacity, setCapacity,
-  eventType, setEventType
+export const EventDetailsForm: React.FC<EventDetailsFormProps> = ({
+  eventName,
+  setEventName,
+  description,
+  setDescription,
+  location,
+  setLocation,
+  eventType,
+  setEventType,
+  tags,
+  setTags
 }) => {
   return (
-    <section className="space-y-6">
-      <h2 className="text-xl font-semibold">Event Details</h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <Label htmlFor="eventName">Event Name*</Label>
-          <Input 
-            id="eventName" 
-            value={eventName} 
-            onChange={(e) => setEventName(e.target.value)} 
-            placeholder="Enter event name"
-            required
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="eventType">Event Type*</Label>
-          <Select 
-            value={eventType}
-            onValueChange={setEventType}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select event type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="in-person">In-Person</SelectItem>
-              <SelectItem value="online">Online</SelectItem>
-              <SelectItem value="hybrid">Hybrid</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      
-      <div>
-        <Label htmlFor="description">Description</Label>
-        <Textarea 
-          id="description" 
-          value={description} 
-          onChange={(e) => setDescription(e.target.value)} 
-          placeholder="Describe your event"
-          rows={4}
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="eventName">Event Name</Label>
+        <Input
+          id="eventName"
+          placeholder="Enter event name"
+          value={eventName}
+          onChange={(e) => setEventName(e.target.value)}
         />
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <Label htmlFor="location">Location*</Label>
-          <Input 
-            id="location" 
-            value={location} 
-            onChange={(e) => setLocation(e.target.value)} 
-            placeholder="Event location or online platform"
-            required
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="capacity">Capacity</Label>
-          <Input 
-            id="capacity" 
-            value={capacity} 
-            onChange={(e) => setCapacity(e.target.value)} 
-            placeholder="Maximum number of attendees"
-            type="number"
-          />
-        </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="eventType">Event Type</Label>
+        <Select value={eventType} onValueChange={setEventType}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select event type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectItem value="concert">Concert</SelectItem>
+              <SelectItem value="exhibition">Exhibition</SelectItem>
+              <SelectItem value="workshop">Workshop</SelectItem>
+              <SelectItem value="gallery">Gallery</SelectItem>
+              <SelectItem value="festival">Festival</SelectItem>
+              <SelectItem value="networking">Networking</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       </div>
-    </section>
+      
+      <div className="space-y-2">
+        <Label htmlFor="location">Location</Label>
+        <Input
+          id="location"
+          placeholder="Enter location"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+        />
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="description">Description</Label>
+        <Textarea
+          id="description"
+          placeholder="Enter event description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={5}
+        />
+      </div>
+    </div>
   );
 };
 
-export default EventDetailsForm; 
+export default EventDetailsForm;

@@ -354,6 +354,362 @@ export type Database = {
         }
         Relationships: []
       }
+      game_jam_resources: {
+        Row: {
+          created_at: string
+          description: string | null
+          game_jam_id: string
+          id: string
+          name: string
+          type: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          game_jam_id: string
+          id?: string
+          name: string
+          type: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          game_jam_id?: string
+          id?: string
+          name?: string
+          type?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_jam_resources_game_jam_id_fkey"
+            columns: ["game_jam_id"]
+            isOneToOne: false
+            referencedRelation: "game_jams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      game_jam_roles: {
+        Row: {
+          created_at: string
+          description: string | null
+          game_jam_id: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          game_jam_id: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          game_jam_id?: string
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_jam_roles_game_jam_id_fkey"
+            columns: ["game_jam_id"]
+            isOneToOne: false
+            referencedRelation: "game_jams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      game_jam_submissions: {
+        Row: {
+          created_at: string
+          description: string | null
+          game_jam_id: string
+          id: string
+          score: number | null
+          status: string
+          submitted_at: string | null
+          team_id: string
+          title: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          game_jam_id: string
+          id?: string
+          score?: number | null
+          status?: string
+          submitted_at?: string | null
+          team_id: string
+          title: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          game_jam_id?: string
+          id?: string
+          score?: number | null
+          status?: string
+          submitted_at?: string | null
+          team_id?: string
+          title?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_jam_submissions_game_jam_id_fkey"
+            columns: ["game_jam_id"]
+            isOneToOne: false
+            referencedRelation: "game_jams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_jam_submissions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "game_jam_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      game_jam_team_members: {
+        Row: {
+          created_at: string
+          id: string
+          member_id: string
+          member_name: string
+          roles: string[] | null
+          team_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          member_id: string
+          member_name: string
+          roles?: string[] | null
+          team_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          member_id?: string
+          member_name?: string
+          roles?: string[] | null
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_jam_team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "game_jam_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      game_jam_teams: {
+        Row: {
+          created_at: string
+          game_jam_id: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          game_jam_id: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          game_jam_id?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_jam_teams_game_jam_id_fkey"
+            columns: ["game_jam_id"]
+            isOneToOne: false
+            referencedRelation: "game_jams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      game_jams: {
+        Row: {
+          created_at: string
+          description: string | null
+          end_date: string
+          id: string
+          name: string
+          start_date: string
+          status: Database["public"]["Enums"]["game_jam_status"]
+          theme: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          end_date: string
+          id?: string
+          name: string
+          start_date: string
+          status?: Database["public"]["Enums"]["game_jam_status"]
+          theme: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          end_date?: string
+          id?: string
+          name?: string
+          start_date?: string
+          status?: Database["public"]["Enums"]["game_jam_status"]
+          theme?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      games: {
+        Row: {
+          created_at: string
+          id: string
+          player_id: string
+          score: number
+          updated_at: string
+          words_played: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          player_id: string
+          score: number
+          updated_at?: string
+          words_played?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          player_id?: string
+          score?: number
+          updated_at?: string
+          words_played?: string[] | null
+        }
+        Relationships: []
+      }
+      names: {
+        Row: {
+          aliases: string[] | null
+          created_at: string
+          id: string
+          name: string
+          tags: string[] | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          aliases?: string[] | null
+          created_at?: string
+          id?: string
+          name: string
+          tags?: string[] | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          aliases?: string[] | null
+          created_at?: string
+          id?: string
+          name?: string
+          tags?: string[] | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      player_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          id: string
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          id: string
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      posts: {
+        Row: {
+          author: string
+          category: string
+          content: string
+          created_at: string | null
+          date: string
+          excerpt: string | null
+          id: string
+          image: string | null
+          slug: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          author: string
+          category: string
+          content: string
+          created_at?: string | null
+          date: string
+          excerpt?: string | null
+          id?: string
+          image?: string | null
+          slug?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          author?: string
+          category?: string
+          content?: string
+          created_at?: string | null
+          date?: string
+          excerpt?: string | null
+          id?: string
+          image?: string | null
+          slug?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           category: string | null
@@ -481,6 +837,7 @@ export type Database = {
       project_tasks: {
         Row: {
           assigned_to: string | null
+          component_id: string | null
           created_at: string
           description: string | null
           due_date: string | null
@@ -493,6 +850,7 @@ export type Database = {
         }
         Insert: {
           assigned_to?: string | null
+          component_id?: string | null
           created_at?: string
           description?: string | null
           due_date?: string | null
@@ -505,6 +863,7 @@ export type Database = {
         }
         Update: {
           assigned_to?: string | null
+          component_id?: string | null
           created_at?: string
           description?: string | null
           due_date?: string | null
@@ -517,6 +876,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "project_tasks_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "project_components"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "project_tasks_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
@@ -528,15 +894,19 @@ export type Database = {
       projects: {
         Row: {
           budget: string | null
+          category: Database["public"]["Enums"]["project_category"] | null
           created_at: string
           description: string | null
+          documentation_references: Json | null
           id: string
           image_url: string | null
           location: string | null
           name: string
           progress: number | null
           repo_url: string | null
+          source_control_details: Json | null
           status: string | null
+          system_environment_info: Json | null
           tags: string[] | null
           timeline: string | null
           type: string | null
@@ -545,15 +915,19 @@ export type Database = {
         }
         Insert: {
           budget?: string | null
+          category?: Database["public"]["Enums"]["project_category"] | null
           created_at?: string
           description?: string | null
+          documentation_references?: Json | null
           id?: string
           image_url?: string | null
           location?: string | null
           name: string
           progress?: number | null
           repo_url?: string | null
+          source_control_details?: Json | null
           status?: string | null
+          system_environment_info?: Json | null
           tags?: string[] | null
           timeline?: string | null
           type?: string | null
@@ -562,15 +936,19 @@ export type Database = {
         }
         Update: {
           budget?: string | null
+          category?: Database["public"]["Enums"]["project_category"] | null
           created_at?: string
           description?: string | null
+          documentation_references?: Json | null
           id?: string
           image_url?: string | null
           location?: string | null
           name?: string
           progress?: number | null
           repo_url?: string | null
+          source_control_details?: Json | null
           status?: string | null
+          system_environment_info?: Json | null
           tags?: string[] | null
           timeline?: string | null
           type?: string | null
@@ -876,6 +1254,36 @@ export type Database = {
         }
         Relationships: []
       }
+      words: {
+        Row: {
+          added_by: string | null
+          added_by_username: string | null
+          created_at: string
+          definition: string | null
+          id: string
+          updated_at: string
+          word: string
+        }
+        Insert: {
+          added_by?: string | null
+          added_by_username?: string | null
+          created_at?: string
+          definition?: string | null
+          id?: string
+          updated_at?: string
+          word: string
+        }
+        Update: {
+          added_by?: string | null
+          added_by_username?: string | null
+          created_at?: string
+          definition?: string | null
+          id?: string
+          updated_at?: string
+          word?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -907,6 +1315,7 @@ export type Database = {
         Args: { p_project_id: string }
         Returns: {
           assigned_to: string | null
+          component_id: string | null
           created_at: string
           description: string | null
           due_date: string | null
@@ -966,6 +1375,7 @@ export type Database = {
         }
         Returns: {
           assigned_to: string | null
+          component_id: string | null
           created_at: string
           description: string | null
           due_date: string | null
@@ -1030,6 +1440,7 @@ export type Database = {
         }
         Returns: {
           assigned_to: string | null
+          component_id: string | null
           created_at: string
           description: string | null
           due_date: string | null
@@ -1052,6 +1463,22 @@ export type Database = {
         | "venue"
         | "brand"
         | "shop"
+      game_jam_status: "upcoming" | "active" | "completed"
+      project_category:
+        | "web_application"
+        | "mobile_application"
+        | "desktop_application"
+        | "game"
+        | "library_or_framework"
+        | "api_service"
+        | "hardware_or_iot"
+        | "data_science_or_ml"
+        | "creative_asset_blender"
+        | "creative_asset_other"
+        | "script_or_utility"
+        | "documentation"
+        | "research"
+        | "other"
       user_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
@@ -1177,6 +1604,23 @@ export const Constants = {
         "venue",
         "brand",
         "shop",
+      ],
+      game_jam_status: ["upcoming", "active", "completed"],
+      project_category: [
+        "web_application",
+        "mobile_application",
+        "desktop_application",
+        "game",
+        "library_or_framework",
+        "api_service",
+        "hardware_or_iot",
+        "data_science_or_ml",
+        "creative_asset_blender",
+        "creative_asset_other",
+        "script_or_utility",
+        "documentation",
+        "research",
+        "other",
       ],
       user_role: ["admin", "moderator", "user"],
     },

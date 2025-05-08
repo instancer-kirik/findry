@@ -1,20 +1,11 @@
+
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
+import { AdditionalSettingsProps } from '@/types/forms';
 
-interface AdditionalSettingsProps {
-  isPrivate: boolean;
-  setIsPrivate: (value: boolean) => void;
-  registrationRequired: boolean;
-  setRegistrationRequired: (value: boolean) => void;
-  ticketPrice: string;
-  setTicketPrice: (value: string) => void;
-  ticketUrl: string;
-  setTicketUrl: (value: string) => void;
-}
-
-const AdditionalSettings: React.FC<AdditionalSettingsProps> = ({
+export const AdditionalSettings: React.FC<AdditionalSettingsProps> = ({
   isPrivate,
   setIsPrivate,
   registrationRequired,
@@ -22,61 +13,82 @@ const AdditionalSettings: React.FC<AdditionalSettingsProps> = ({
   ticketPrice,
   setTicketPrice,
   ticketUrl,
-  setTicketUrl
+  setTicketUrl,
+  capacity,
+  setCapacity
 }) => {
   return (
-    <section className="space-y-6">
-      <h2 className="text-xl font-semibold">Additional Settings</h2>
-      
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <Label htmlFor="isPrivate" className="cursor-pointer">Private Event</Label>
-            <p className="text-sm text-muted-foreground">Only visible to invited participants</p>
-          </div>
-          <Switch 
-            id="isPrivate" 
-            checked={isPrivate}
-            onCheckedChange={setIsPrivate}
-          />
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="space-y-0.5">
+          <Label htmlFor="isPrivate">Private Event</Label>
+          <p className="text-xs text-muted-foreground">
+            Private events are only visible to invited attendees
+          </p>
         </div>
-        
+        <Switch 
+          id="isPrivate" 
+          checked={isPrivate} 
+          onCheckedChange={setIsPrivate}
+        />
+      </div>
+
+      {setRegistrationRequired && (
         <div className="flex items-center justify-between">
-          <div>
-            <Label htmlFor="registrationRequired" className="cursor-pointer">Require Registration</Label>
-            <p className="text-sm text-muted-foreground">Participants must register to attend</p>
+          <div className="space-y-0.5">
+            <Label htmlFor="registrationRequired">Require Registration</Label>
+            <p className="text-xs text-muted-foreground">
+              Attendees must register to attend this event
+            </p>
           </div>
           <Switch 
             id="registrationRequired" 
-            checked={registrationRequired}
+            checked={registrationRequired} 
             onCheckedChange={setRegistrationRequired}
           />
         </div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
+      )}
+
+      {setCapacity && (
+        <div className="space-y-2">
+          <Label htmlFor="capacity">Capacity</Label>
+          <Input 
+            id="capacity" 
+            type="number" 
+            placeholder="e.g., 100" 
+            value={capacity}
+            onChange={(e) => setCapacity(e.target.value)} 
+          />
+        </div>
+      )}
+
+      {setTicketPrice && (
+        <div className="space-y-2">
           <Label htmlFor="ticketPrice">Ticket Price</Label>
           <Input 
             id="ticketPrice" 
-            value={ticketPrice} 
+            type="text" 
+            placeholder="e.g., $10, Free, etc." 
+            value={ticketPrice}
             onChange={(e) => setTicketPrice(e.target.value)} 
-            placeholder="Leave blank for free events"
           />
         </div>
-        
-        <div>
-          <Label htmlFor="ticketUrl">Ticket Link</Label>
+      )}
+
+      {setTicketUrl && (
+        <div className="space-y-2">
+          <Label htmlFor="ticketUrl">Ticket URL</Label>
           <Input 
             id="ticketUrl" 
-            value={ticketUrl} 
+            type="text" 
+            placeholder="e.g., https://example.com/tickets" 
+            value={ticketUrl}
             onChange={(e) => setTicketUrl(e.target.value)} 
-            placeholder="External ticketing website URL"
           />
         </div>
-      </div>
-    </section>
+      )}
+    </div>
   );
 };
 
-export default AdditionalSettings; 
+export default AdditionalSettings;
