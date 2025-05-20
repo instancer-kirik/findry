@@ -73,6 +73,24 @@ export interface ContentItemProps {
   compatibility_score?: number;
   matched_at?: string;
   
+  // Tour/roadtrip planning properties
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+  address?: string;
+  venue_id?: string;
+  venue_name?: string;
+  start_date?: string;
+  end_date?: string;
+  arrival_time?: string;
+  departure_time?: string;
+  distance_from_previous?: number;
+  travel_time_from_previous?: number;
+  accommodation?: string;
+  is_stop_point?: boolean;  // For roadtrip stops that aren't events
+  order?: number;  // For ordering stops in a tour/trip
+  
   // Other multimedia properties
   title?: string; // For event titles and other objects
 }
@@ -100,4 +118,74 @@ export interface SpaceRequirements {
 export interface BudgetRange {
   min: number;
   max: number;
+}
+
+// Tour planning related interfaces
+export interface TourPlan {
+  id: string;
+  name: string;
+  description?: string;
+  owner_id: string;
+  start_date: string;
+  end_date: string;
+  is_public: boolean;
+  type: 'band_tour' | 'roadtrip';
+  stops: TourStop[];
+  gear_list_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TourStop {
+  id: string;
+  tour_id: string;
+  name: string;
+  location: string;
+  address?: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+  date: string;
+  arrival_time?: string;
+  departure_time?: string;
+  venue_id?: string;
+  event_id?: string;
+  description?: string;
+  order: number;
+  accommodation?: string;
+  distance_from_previous?: number;
+  travel_time_from_previous?: number;
+  is_stop_point: boolean;
+}
+
+export interface GearList {
+  id: string;
+  name: string;
+  owner_id: string;
+  type: 'band' | 'personal' | 'production';
+  items: GearItem[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GearItem {
+  id: string;
+  list_id: string;
+  name: string;
+  category: string;
+  quantity: number;
+  weight?: number;
+  notes?: string;
+  is_packed: boolean;
+  assigned_to?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GearCategory {
+  id: string;
+  name: string;
+  description?: string;
+  icon?: string;
 }

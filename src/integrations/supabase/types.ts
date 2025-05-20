@@ -68,6 +68,7 @@ export type Database = {
           image_url: string | null
           location: string | null
           name: string
+          parent_brand_id: string | null
           tags: string[] | null
           type: string | null
           updated_at: string
@@ -79,6 +80,7 @@ export type Database = {
           image_url?: string | null
           location?: string | null
           name: string
+          parent_brand_id?: string | null
           tags?: string[] | null
           type?: string | null
           updated_at?: string
@@ -90,11 +92,20 @@ export type Database = {
           image_url?: string | null
           location?: string | null
           name?: string
+          parent_brand_id?: string | null
           tags?: string[] | null
           type?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "brands_parent_brand_id_fkey"
+            columns: ["parent_brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       communities: {
         Row: {
@@ -218,6 +229,182 @@ export type Database = {
           },
         ]
       }
+      companies: {
+        Row: {
+          avg_rating: number | null
+          created_at: string | null
+          description: string | null
+          id: string
+          industry: string | null
+          logo: string | null
+          name: string
+          parent_company_id: string | null
+          trending_direction: string | null
+          trending_percentage: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          avg_rating?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          industry?: string | null
+          logo?: string | null
+          name: string
+          parent_company_id?: string | null
+          trending_direction?: string | null
+          trending_percentage?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          avg_rating?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          industry?: string | null
+          logo?: string | null
+          name?: string
+          parent_company_id?: string | null
+          trending_direction?: string | null
+          trending_percentage?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companies_parent_company_id_fkey"
+            columns: ["parent_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_comments: {
+        Row: {
+          author_id: string | null
+          author_name: string | null
+          company_id: string
+          created_at: string | null
+          id: string
+          is_anonymous: boolean | null
+          text: string
+        }
+        Insert: {
+          author_id?: string | null
+          author_name?: string | null
+          company_id: string
+          created_at?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          text: string
+        }
+        Update: {
+          author_id?: string | null
+          author_name?: string | null
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_comments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_controversies: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          date: string | null
+          id: string
+          source: string | null
+          title: string
+          url: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          date?: string | null
+          id?: string
+          source?: string | null
+          title: string
+          url?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          date?: string | null
+          id?: string
+          source?: string | null
+          title?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_controversies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_ratings: {
+        Row: {
+          comment: string | null
+          company_id: string
+          created_at: string | null
+          ethics: number | null
+          id: string
+          labor_practices: number | null
+          overall_vibes: number | null
+          sustainability: number | null
+          transparency: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          comment?: string | null
+          company_id: string
+          created_at?: string | null
+          ethics?: number | null
+          id?: string
+          labor_practices?: number | null
+          overall_vibes?: number | null
+          sustainability?: number | null
+          transparency?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          comment?: string | null
+          company_id?: string
+          created_at?: string | null
+          ethics?: number | null
+          id?: string
+          labor_practices?: number | null
+          overall_vibes?: number | null
+          sustainability?: number | null
+          transparency?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_ratings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_ownership: {
         Row: {
           content_id: string
@@ -242,6 +429,35 @@ export type Database = {
           id?: string
           owner_id?: string
           updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_ownership_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cookie_phrases: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          id: string
+          phrase: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          phrase: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          phrase?: string
         }
         Relationships: []
       }
@@ -352,7 +568,15 @@ export type Database = {
           type?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       game_jam_resources: {
         Row: {
@@ -639,7 +863,15 @@ export type Database = {
           type?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "names_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       player_profiles: {
         Row: {
@@ -788,7 +1020,15 @@ export type Database = {
           updated_at?: string
           username?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       project_components: {
         Row: {
@@ -957,6 +1197,30 @@ export type Database = {
         }
         Relationships: []
       }
+      redirect_sources: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          source_key: string
+          source_name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          source_key: string
+          source_name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          source_key?: string
+          source_name?: string
+        }
+        Relationships: []
+      }
       resources: {
         Row: {
           availability: Json | null
@@ -1040,6 +1304,149 @@ export type Database = {
           website_url?: string | null
         }
         Relationships: []
+      }
+      snack_ratings: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          rating: number
+          snack_id: string
+          status: string | null
+          user_id: string | null
+          username: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          snack_id: string
+          status?: string | null
+          user_id?: string | null
+          username: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          snack_id?: string
+          status?: string | null
+          user_id?: string | null
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "snack_ratings_snack_id_fkey"
+            columns: ["snack_id"]
+            isOneToOne: false
+            referencedRelation: "snacks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "snack_ratings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      snacks: {
+        Row: {
+          brand_id: string | null
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          location: string | null
+          name: string
+          status: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          brand_id?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          name: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          brand_id?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          name?: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "snacks_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "snacks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      topshelf_faves: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          pairings: string[] | null
+          snack_id: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          pairings?: string[] | null
+          snack_id: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          pairings?: string[] | null
+          snack_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "topshelf_faves_snack_id_fkey"
+            columns: ["snack_id"]
+            isOneToOne: false
+            referencedRelation: "snacks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_artist_relationships: {
         Row: {
@@ -1162,7 +1569,15 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_integrations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -1186,7 +1601,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       venues: {
         Row: {
@@ -1286,9 +1709,26 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      user_profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          email: string | null
+          id: string | null
+          username: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      calculate_company_avg_rating: {
+        Args: { company_id: string }
+        Returns: number
+      }
+      get_average_rating: {
+        Args: { snack_id: string }
+        Returns: number
+      }
       get_community_member_count: {
         Args: { community_id: string }
         Returns: number
