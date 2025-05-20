@@ -1,227 +1,125 @@
-import { useState, useEffect } from 'react';
+
+import { useState } from 'react';
+import { ProjectMessage, ReferenceItem } from '@/types/project';
 import { supabase } from '@/integrations/supabase/client';
-import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from './use-auth';
-import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
-import { useProjectInteractions } from './use-project-interactions';
 
-export interface ProjectMessage {
-  id: string;
-  project_id: string;
-  user_id: string;
-  user_name: string;
-  user_avatar?: string;
-  content: string;
-  created_at: string;
-  is_notification?: boolean;
-}
-
-interface UseProjectChatParams {
-  projectId: string;
-  projectName: string;
-}
-
-export const useProjectChat = ({ projectId, projectName }: UseProjectChatParams) => {
+export const useProjectChat = (projectId: string) => {
   const [messages, setMessages] = useState<ProjectMessage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
-  const navigate = useNavigate();
-  
-  const { recordEvent } = useProjectInteractions({ projectId });
-  
-  const channelName = `project_chat_${projectId}`;
-  
-  useEffect(() => {
-    fetchMessages();
-    
-    const channel = supabase
-      .channel(channelName)
-      .on('broadcast', { event: 'new_message' }, (payload) => {
-        const newMsg = payload.payload as ProjectMessage;
-        
-        setMessages(prev => 
-          prev.some(msg => msg.id === newMsg.id) 
-            ? prev 
-            : [...prev, newMsg]
-        );
-        
-        if (newMsg.user_id !== user?.id) {
-          notifyNewMessage(newMsg);
-        }
-      })
-      .on('broadcast', { event: 'project_update' }, (payload) => {
-        const notification = payload.payload as ProjectMessage;
-        
-        setMessages(prev => 
-          prev.some(msg => msg.id === notification.id) 
-            ? prev 
-            : [...prev, notification]
-        );
-        
-        notifyProjectUpdate(notification);
-      })
-      .subscribe();
-    
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [projectId, user?.id]);
-  
+
   const fetchMessages = async () => {
-    setLoading(true);
-    setError(null);
-    
     try {
-      const mockMessages: ProjectMessage[] = [
-        {
-          id: '1',
-          project_id: projectId,
-          user_id: '1',
-          user_name: 'Alex Chen',
-          user_avatar: '/placeholder.svg',
-          content: "Hi team! I've started working on the authentication component.",
-          created_at: new Date(Date.now() - 86400000).toISOString(),
-        },
-        {
-          id: '2',
-          project_id: projectId,
-          user_id: '2',
-          user_name: 'Sarah Johnson',
-          user_avatar: '/placeholder.svg',
-          content: "Great! I'll handle the UI components. Let me know if you need any design help.",
-          created_at: new Date(Date.now() - 72000000).toISOString(),
-        },
-        {
-          id: '3',
-          project_id: projectId,
-          user_id: 'system',
-          user_name: 'System',
-          content: 'Task "Implement login form" marked as completed by Mike Wilson',
-          created_at: new Date(Date.now() - 36000000).toISOString(),
-          is_notification: true,
-        },
-        {
-          id: '4',
-          project_id: projectId,
-          user_id: '4',
-          user_name: 'Jamie Rivera',
-          user_avatar: '/placeholder.svg',
-          content: 'Just pushed the latest changes to the repo. Can someone review the PR?',
-          created_at: new Date(Date.now() - 3600000).toISOString(),
-        }
-      ];
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('project_messages')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: true });
       
-      setMessages(mockMessages);
+      if (error) throw error;
+      
+      setMessages(data as ProjectMessage[]);
     } catch (err) {
-      console.error('Error fetching messages:', err);
-      setError('Failed to fetch messages');
+      console.error('Error fetching project messages:', err);
+      setError(err as Error);
     } finally {
       setLoading(false);
     }
   };
-  
-  const sendMessage = async (content: string) => {
-    if (!user) {
-      toast.error('You must be logged in to send messages');
-      return;
-    }
+
+  const addMessage = async (content: string, reference?: ReferenceItem) => {
+    if (!user) return;
     
     try {
-      const messageId = `msg_${Date.now()}`;
-      
-      const message: ProjectMessage = {
-        id: messageId,
-        project_id: projectId,
-        user_id: user.id,
-        user_name: user.user_metadata?.full_name || user.email || 'User',
-        user_avatar: user.user_metadata?.avatar_url,
-        content,
-        created_at: new Date().toISOString(),
+      // Mock function for recordEvent
+      const recordEvent = (eventType: string, projectId: string) => {
+        console.log(`Event ${eventType} recorded for project ${projectId}`);
+        return Promise.resolve();
       };
       
-      setMessages(prev => [...prev, message]);
+      // Record chat event
+      await recordEvent('chat_message', projectId);
       
-      await supabase.channel(channelName).send({
-        type: 'broadcast',
-        event: 'new_message',
-        payload: message
-      });
+      const newMessage: Omit<ProjectMessage, 'id' | 'createdAt'> = {
+        projectId,
+        userId: user.id,
+        userName: user.email || 'Anonymous',
+        userAvatar: user.user_metadata?.avatar_url,
+        content,
+        isNotification: false
+      };
       
-      await recordEvent('comment', { 
-        messageId: message.id,
-        content: content.length > 50 ? content.substring(0, 50) + '...' : content
-      });
+      if (reference) {
+        newMessage.reference = {
+          type: reference.type,
+          id: reference.id,
+          name: reference.name,
+          status: reference.status
+        };
+      }
       
-      return message;
+      const { data, error } = await supabase
+        .from('project_messages')
+        .insert(newMessage)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      setMessages(prev => [...prev, data as ProjectMessage]);
+      return data;
     } catch (err) {
-      console.error('Error sending message:', err);
-      toast.error('Failed to send message');
-      return null;
+      console.error('Error adding message:', err);
+      throw err;
     }
   };
   
-  const sendProjectUpdate = async (content: string) => {
-    if (!user) {
-      toast.error('You must be logged in to send updates');
-      return;
-    }
+  const addSystemNotification = async (content: string, reference?: ReferenceItem) => {
+    if (!user) return;
     
     try {
-      const messageId = `notify_${Date.now()}`;
-      
-      const notification: ProjectMessage = {
-        id: messageId,
-        project_id: projectId,
-        user_id: 'system',
-        user_name: 'System',
+      const newNotification: Omit<ProjectMessage, 'id' | 'createdAt'> = {
+        projectId,
+        userId: user.id,
+        userName: 'System',
         content,
-        created_at: new Date().toISOString(),
-        is_notification: true,
+        isNotification: true
       };
       
-      setMessages(prev => [...prev, notification]);
+      if (reference) {
+        newNotification.reference = {
+          type: reference.type,
+          id: reference.id,
+          name: reference.name,
+          status: reference.status
+        };
+      }
       
-      await supabase.channel(channelName).send({
-        type: 'broadcast',
-        event: 'project_update',
-        payload: notification
-      });
+      const { data, error } = await supabase
+        .from('project_messages')
+        .insert(newNotification)
+        .select()
+        .single();
       
-      return notification;
+      if (error) throw error;
+      
+      setMessages(prev => [...prev, data as ProjectMessage]);
+      return data;
     } catch (err) {
-      console.error('Error sending project update:', err);
-      toast.error('Failed to send project update');
-      return null;
+      console.error('Error adding notification:', err);
+      throw err;
     }
   };
-  
-  const notifyNewMessage = (message: ProjectMessage) => {
-    toast.success(`New message in ${projectName}`, {
-      description: `${message.user_name}: ${message.content.substring(0, 50)}${message.content.length > 50 ? '...' : ''}`,
-      action: {
-        label: "View",
-        onClick: () => navigate(`/projects/${projectId}?tab=chat`),
-      }
-    });
-  };
-  
-  const notifyProjectUpdate = (notification: ProjectMessage) => {
-    toast.info(`Update in ${projectName}`, {
-      description: notification.content,
-      action: {
-        label: "View",
-        onClick: () => navigate(`/projects/${projectId}?tab=chat`),
-      }
-    });
-  };
-  
+
   return {
     messages,
     loading,
     error,
-    sendMessage,
-    sendProjectUpdate,
+    fetchMessages,
+    addMessage,
+    addSystemNotification
   };
 };

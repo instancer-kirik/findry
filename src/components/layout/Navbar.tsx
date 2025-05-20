@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-import { Icons } from '@/components/ui/icons';
+import { Icons, Icon } from '@/components/ui/icons';
 import { ModeToggle } from '@/components/ui/mode-toggle';
 import { buttonVariants } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -25,7 +26,7 @@ export default function Navbar() {
   const { session, user, loading } = useAuth();
   const { toast } = useToast()
   const navigate = useNavigate();
-  const { signOut } = useSignOut();
+  const { handleSignOut } = useSignOut();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
@@ -96,7 +97,7 @@ export default function Navbar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => {
-                    signOut()
+                    handleSignOut()
                       .then(() => {
                         toast({
                           title: "Signed out",

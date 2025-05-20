@@ -1,3 +1,4 @@
+
 export type ProjectOwnershipType = 'personal' | 'brand' | 'artist' | 'community';
 
 export interface Project {
@@ -37,7 +38,7 @@ export interface ProjectComponent {
 export interface ProjectTask {
   id: string;
   name: string;
-  title?: string; // Adding title property as it's used in ProjectChat.tsx
+  title?: string;
   description?: string;
   status: 'pending' | 'in_progress' | 'completed';
   assignedTo?: string;
@@ -59,6 +60,7 @@ export interface ProjectMessage {
     type: 'component' | 'task';
     id: string;
     name: string;
+    status?: string; // Add status field
   };
 }
 
@@ -69,3 +71,13 @@ export interface ProjectEvent {
   userName: string;
   details: Record<string, any>;
 }
+
+export interface ReferenceItem {
+  id: string;
+  type: 'component' | 'task';
+  name: string;
+  status?: string; // Add status field
+}
+
+export type ProjectTaskStatus = 'pending' | 'in_progress' | 'completed';
+export type ProjectStatus = 'planning' | 'in_progress' | 'completed' | 'cancelled';

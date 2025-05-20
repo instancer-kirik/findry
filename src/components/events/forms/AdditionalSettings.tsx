@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { AdditionalSettingsProps } from '@/types/forms';
+// Remove the import that's causing the conflict
+// import { AdditionalSettingsProps } from '@/types/forms';
 
 interface AdditionalSettingsProps {
   capacity: number;
@@ -45,60 +47,52 @@ export const AdditionalSettings: React.FC<AdditionalSettingsProps> = ({
         />
       </div>
 
-      {setRegistrationRequired && (
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label htmlFor="registrationRequired">Require Registration</Label>
-            <p className="text-xs text-muted-foreground">
-              Attendees must register to attend this event
-            </p>
-          </div>
-          <Switch 
-            id="registrationRequired" 
-            checked={registrationRequired} 
-            onCheckedChange={setRegistrationRequired}
-          />
+      <div className="flex items-center justify-between">
+        <div className="space-y-0.5">
+          <Label htmlFor="registrationRequired">Require Registration</Label>
+          <p className="text-xs text-muted-foreground">
+            Attendees must register to attend this event
+          </p>
         </div>
-      )}
+        <Switch 
+          id="registrationRequired" 
+          checked={registrationRequired} 
+          onCheckedChange={setRegistrationRequired}
+        />
+      </div>
 
-      {setCapacity && (
-        <div className="space-y-2">
-          <Label htmlFor="capacity">Capacity</Label>
-          <Input 
-            id="capacity" 
-            type="number" 
-            placeholder="e.g., 100" 
-            value={capacity}
-            onChange={(e) => setCapacity(e.target.value)} 
-          />
-        </div>
-      )}
+      <div className="space-y-2">
+        <Label htmlFor="capacity">Capacity</Label>
+        <Input 
+          id="capacity" 
+          type="number" 
+          placeholder="e.g., 100" 
+          value={capacity}
+          onChange={(e) => setCapacity(Number(e.target.value))} 
+        />
+      </div>
 
-      {setTicketPrice && (
-        <div className="space-y-2">
-          <Label htmlFor="ticketPrice">Ticket Price</Label>
-          <Input 
-            id="ticketPrice" 
-            type="text" 
-            placeholder="e.g., $10, Free, etc." 
-            value={ticketPrice}
-            onChange={(e) => setTicketPrice(e.target.value)} 
-          />
-        </div>
-      )}
+      <div className="space-y-2">
+        <Label htmlFor="ticketPrice">Ticket Price</Label>
+        <Input 
+          id="ticketPrice" 
+          type="text" 
+          placeholder="e.g., $10, Free, etc." 
+          value={ticketPrice}
+          onChange={(e) => setTicketPrice(e.target.value)} 
+        />
+      </div>
 
-      {setTicketUrl && (
-        <div className="space-y-2">
-          <Label htmlFor="ticketUrl">Ticket URL</Label>
-          <Input 
-            id="ticketUrl" 
-            type="text" 
-            placeholder="e.g., https://example.com/tickets" 
-            value={ticketUrl}
-            onChange={(e) => setTicketUrl(e.target.value)} 
-          />
-        </div>
-      )}
+      <div className="space-y-2">
+        <Label htmlFor="ticketUrl">Ticket URL</Label>
+        <Input 
+          id="ticketUrl" 
+          type="text" 
+          placeholder="e.g., https://example.com/tickets" 
+          value={ticketUrl}
+          onChange={(e) => setTicketUrl(e.target.value)} 
+        />
+      </div>
     </div>
   );
 };

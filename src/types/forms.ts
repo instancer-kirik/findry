@@ -26,8 +26,8 @@ export interface EventContentItem {
   name: string;
   image_url?: string;
   description?: string;
-  type: string; // Made required to match ContentItemProps
-  location: string; // Made required to match ContentItemProps
+  type: string; // Make required to match ContentItemProps
+  location: string; // Make required to match ContentItemProps
   email?: string;
   link?: string;
   medium?: string;
@@ -63,8 +63,8 @@ export interface EventDetailsFormProps {
   setLocation: Dispatch<SetStateAction<string>>;
   eventType: string;
   setEventType: Dispatch<SetStateAction<string>>;
-  capacity: string; // Added to match the interface used in AdditionalSettings
-  setCapacity: Dispatch<SetStateAction<string>>; // Added to match the interface used in AdditionalSettings
+  capacity: string;
+  setCapacity: Dispatch<SetStateAction<string>>;
   tags?: string[];
   setTags?: Dispatch<SetStateAction<string[]>>;
 }
@@ -98,6 +98,6 @@ export interface AdditionalSettingsProps {
   setTicketPrice: Dispatch<SetStateAction<string>>;
   ticketUrl: string;
   setTicketUrl: Dispatch<SetStateAction<string>>;
-  capacity?: string; // Added to match usage in AdditionalSettings.tsx
-  setCapacity?: Dispatch<SetStateAction<string>>; // Added to match usage in AdditionalSettings.tsx
+  capacity: number;
+  setCapacity: Dispatch<SetStateAction<number>>;
 }
