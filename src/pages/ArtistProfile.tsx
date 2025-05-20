@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,6 +22,7 @@ import {
 } from 'lucide-react';
 import ProfileCalendar, { CalendarEvent } from '@/components/profile/ProfileCalendar';
 import { Artist } from '@/types/database';
+import { ContentItemProps } from '@/types/content';
 
 const ArtistProfile = () => {
   // Extract the actual artistId and artistSlug from the URL using useParams
@@ -32,57 +32,57 @@ const ArtistProfile = () => {
 
   const [artist, setArtist] = useState<Artist | null>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [mediaItems, setMediaItems] = useState<ContentItemProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchArtist = async () => {
+    const fetchArtistAndMedia = async () => {
       try {
         setIsLoading(true);
         setError(null);
+        setMediaItems([]);
         
         console.log('Fetching artist with params:', { artistId, artistSlug });
         
-        // If we don't have either id or slug, show error
         if (!artistId && !artistSlug) {
           setError('No artist identifier provided');
+          setIsLoading(false);
           return;
         }
         
-        let query = supabase.from('profiles').select('*');
+        let profileQuery = supabase.from('profiles').select('*');
         
-        // Check if we're using ID or slug
         if (artistSlug) {
-          query = query.eq('username', artistSlug);
-          console.log('Querying by username/slug:', artistSlug);
+          profileQuery = profileQuery.eq('username', artistSlug);
         } else if (artistId) {
-          query = query.eq('id', artistId);
-          console.log('Querying by ID:', artistId);
+          profileQuery = profileQuery.eq('id', artistId);
         }
         
-        const { data, error: fetchError } = await query.single();
+        const { data: profileData, error: fetchError } = await profileQuery.single();
         
-        console.log('Query result:', { data, error: fetchError });
+        console.log('Profile query result:', { data: profileData, error: fetchError });
         
+        let currentArtist: Artist | null = null;
+
         if (fetchError) {
-          console.error('Error fetching profile:', fetchError);
-          
-          // Try fetching from artists table as fallback
+          console.warn('Error fetching profile, trying artists table fallback:', fetchError);
+          // Fallback to 'artists' table if 'profiles' fetch fails or if it's the intended source
           const { data: artistData, error: artistError } = await supabase
             .from('artists')
             .select('*')
-            .eq('id', artistId)
+            .eq(artistId ? 'id' : 'slug', artistId || artistSlug) // Adjust based on whether artists table uses slug
             .single();
             
           console.log('Fallback artist query result:', { artistData, error: artistError });
           
           if (artistError || !artistData) {
             setError('Could not load artist profile. Please try again later.');
+            setIsLoading(false);
             return;
           }
           
-          // Convert artist data to Artist type
-          const enhancedArtist: Artist = {
+          currentArtist = {
             id: artistData.id,
             name: artistData.name,
             bio: artistData.bio || 'No bio available.',
@@ -98,53 +98,138 @@ const ArtistProfile = () => {
             created_at: artistData.created_at,
             updated_at: artistData.updated_at
           };
+        } else if (profileData) {
+          const profileTypes = profileData.profile_types || [];
+          // Ensure it's an artist profile or handle appropriately
+          if (!profileTypes.includes('artist')) {
+            console.warn('Profile fetched is not an artist type specifically:', profileData);
+            // Depending on requirements, you might setError here or proceed if attributes are compatible
+          }
           
-          setArtist(enhancedArtist);
-          generateMockEvents(enhancedArtist);
-          return;
+          const roleAttrs = profileData.role_attributes as Record<string, any> || {};
+          currentArtist = {
+            id: profileData.id,
+            name: profileData.full_name || profileData.username,
+            bio: profileData.bio || 'No bio available.',
+            image_url: profileData.avatar_url,
+            location: roleAttrs.location || 'Unknown',
+            disciplines: roleAttrs.disciplines || [],
+            styles: roleAttrs.styles || [],
+            tags: roleAttrs.tags || [],
+            type: 'artist', 
+            subtype: (profileData.profile_types && profileData.profile_types.length > 0 ? profileData.profile_types.join(', ') : 'artist'),
+            multidisciplinary: roleAttrs.multidisciplinary || false,
+            social_links: roleAttrs.social_links || [],
+            created_at: profileData.created_at,
+            updated_at: profileData.updated_at
+          };
         }
-        
-        if (!data) {
+
+        if (!currentArtist) {
           setError('Artist not found');
+          setIsLoading(false);
           return;
         }
         
-        // Check if this profile is an artist type
-        const profileTypes = data.profile_types || [];
-        if (!profileTypes.includes('artist')) {
-          console.warn('Profile is not an artist type:', data);
+        setArtist(currentArtist);
+        generateMockEvents(currentArtist);
+
+        // Fetch media items from separate tables if artist ID is available
+        if (currentArtist.id) {
+          const fetchedMediaItems: ContentItemProps[] = [];
+
+          // 1. Fetch Albums
+          const { data: albumsData, error: albumsError } = await supabase
+            .from('content_albums')
+            .select('*')
+            .eq('artist_id', currentArtist.id)
+            .order('release_date', { ascending: false });
+
+          if (albumsError) {
+            console.error('Error fetching albums:', albumsError.message);
+          } else if (albumsData) {
+            for (const album of albumsData) {
+              fetchedMediaItems.push({
+                id: album.id,
+                type: 'album',
+                name: album.name,
+                image_url: album.image_url,
+                release_date: album.release_date,
+                description: album.description,
+                artist_id: album.artist_id,
+                created_at: album.created_at,
+              });
+
+              // 2. Fetch Songs for this Album
+              const { data: songsData, error: songsError } = await supabase
+                .from('content_songs')
+                .select('*')
+                .eq('album_id', album.id)
+                .order('track_number', { ascending: true });
+
+              if (songsError) {
+                console.error(`Error fetching songs for album ${album.id}:`, songsError.message);
+              } else if (songsData) {
+                songsData.forEach(song => {
+                  fetchedMediaItems.push({
+                    id: song.id,
+                    type: 'song',
+                    name: song.name,
+                    album_id: song.album_id,
+                    album_name: album.name, // Add album name for display context
+                    artist_id: song.artist_id || album.artist_id, // Fallback to album's artist_id
+                    duration: song.duration_seconds ? `${Math.floor(song.duration_seconds / 60)}:${String(song.duration_seconds % 60).padStart(2, '0')}` : undefined,
+                    // audio_url: song.audio_url, // Available if needed
+                    description: song.description,
+                    created_at: song.created_at,
+                  });
+                });
+              }
+            }
+          }
+
+          // 3. Fetch Artworks
+          const { data: artworksData, error: artworksError } = await supabase
+            .from('content_artworks')
+            .select('*')
+            .eq('artist_id', currentArtist.id)
+            .order('creation_date', { ascending: false });
+
+          if (artworksError) {
+            console.error('Error fetching artworks:', artworksError.message);
+          } else if (artworksData) {
+            artworksData.forEach(artwork => {
+              fetchedMediaItems.push({
+                id: artwork.id,
+                type: 'artwork',
+                name: artwork.title, // maps to 'name' in ContentItemProps
+                image_url: artwork.image_url,
+                medium: artwork.medium,
+                dimensions: artwork.dimensions,
+                creation_date: artwork.creation_date,
+                description: artwork.description,
+                artist_id: artwork.artist_id,
+                created_at: artwork.created_at,
+              });
+            });
+          }
+          
+          // Optionally, sort all fetchedMediaItems by a common field like created_at if a mixed chronological view is desired.
+          // For now, they will be grouped by albums (with their songs) first, then artworks.
+          // To sort all: fetchedMediaItems.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+          
+          setMediaItems(fetchedMediaItems);
+          console.log('Fetched and combined media items:', fetchedMediaItems);
         }
-        
-        // Transform profile data to match Artist type
-        const roleAttrs = data.role_attributes as Record<string, any> || {};
-        const enhancedArtist: Artist = {
-          id: data.id,
-          name: data.full_name || data.username,
-          bio: data.bio || 'No bio available.',
-          image_url: data.avatar_url,
-          location: roleAttrs.location || 'Unknown',
-          disciplines: roleAttrs.disciplines || [],
-          styles: roleAttrs.styles || [],
-          tags: roleAttrs.tags || [],
-          type: 'artist',
-          subtype: (data.profile_types && data.profile_types[0]) || 'artist',
-          multidisciplinary: roleAttrs.multidisciplinary || false,
-          social_links: roleAttrs.social_links || [],
-          created_at: data.created_at,
-          updated_at: data.updated_at
-        };
-        
-        setArtist(enhancedArtist);
-        generateMockEvents(enhancedArtist);
-      } catch (error) {
-        console.error('Error in fetchArtist:', error);
-        setError('An unexpected error occurred. Please try again later.');
+
+      } catch (error: any) {
+        console.error('Error in fetchArtistAndMedia:', error);
+        setError(`An unexpected error occurred: ${error.message}`);
       } finally {
         setIsLoading(false);
       }
     };
     
-    // Helper function to generate mock events
     const generateMockEvents = (artist: Artist) => {
       const mockEvents: CalendarEvent[] = [];
       const today = new Date();
@@ -166,7 +251,7 @@ const ArtistProfile = () => {
       setEvents(mockEvents);
     };
     
-    fetchArtist();
+    fetchArtistAndMedia();
   }, [artistId, artistSlug]);
 
   if (isLoading) {
@@ -434,29 +519,34 @@ const ArtistProfile = () => {
                 <div className="space-y-4">
                   <h2 className="text-xl font-bold">Media</h2>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-muted/20 p-4 rounded-lg">
-                      <div className="flex items-center mb-2">
-                        <Music className="h-5 w-5 mr-2" />
-                        <h3 className="font-medium">Latest Release</h3>
-                      </div>
-                      <div className="aspect-video bg-muted rounded-md flex items-center justify-center">
-                        <ExternalLink className="h-8 w-8 text-muted-foreground" />
-                      </div>
-                      <p className="mt-2 text-sm">Song Title - Album Name</p>
+                  {mediaItems.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {mediaItems.map(item => (
+                        <div key={item.id} className="bg-muted/20 p-4 rounded-lg">
+                          <div className="flex items-center mb-2">
+                            {item.type === 'album' && <Music className="h-5 w-5 mr-2" />}
+                            {item.type === 'song' && <Mic2 className="h-5 w-5 mr-2" />}
+                            {item.type === 'artwork' && <User className="h-5 w-5 mr-2" />}
+                            <h3 className="font-medium">{item.name}</h3>
+                          </div>
+                          {item.image_url && (
+                            <div className="aspect-video bg-muted rounded-md mb-2 flex items-center justify-center overflow-hidden">
+                              <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                            </div>
+                          )}
+                          <p className="text-sm text-muted-foreground">Type: {item.subtype || item.type}</p>
+                          {item.album_name && <p className="text-sm text-muted-foreground">Album: {item.album_name}</p>}
+                          {item.duration && <p className="text-sm text-muted-foreground">Duration: {item.duration}</p>}
+                          {item.release_date && <p className="text-sm text-muted-foreground">Released: {new Date(item.release_date).toLocaleDateString()}</p>}
+                          {item.medium && <p className="text-sm text-muted-foreground">Medium: {item.medium}</p>}
+                          {item.dimensions && <p className="text-sm text-muted-foreground">Dimensions: {item.dimensions}</p>}
+                          {item.description && <p className="text-xs mt-1 line-clamp-2">{item.description}</p>}
+                        </div>
+                      ))}
                     </div>
-                    
-                    <div className="bg-muted/20 p-4 rounded-lg">
-                      <div className="flex items-center mb-2">
-                        <Mic2 className="h-5 w-5 mr-2" />
-                        <h3 className="font-medium">Live Performance</h3>
-                      </div>
-                      <div className="aspect-video bg-muted rounded-md flex items-center justify-center">
-                        <ExternalLink className="h-8 w-8 text-muted-foreground" />
-                      </div>
-                      <p className="mt-2 text-sm">Live at Venue - Date</p>
-                    </div>
-                  </div>
+                  ) : (
+                    <p className="text-muted-foreground">No media items found for this artist yet.</p>
+                  )}
                 </div>
               </TabsContent>
               
