@@ -1,9 +1,10 @@
-
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Project, ProjectComponent, ProjectTask, ProjectOwnershipType } from '@/types/project';
 import { toast } from 'sonner';
 import { useUser } from '@/hooks/use-user';
+
+export type ProjectStatus = 'pending' | 'planning' | 'in_progress' | 'completed' | 'cancelled';
 
 export const useGetProject = (projectId?: string) => {
     return useQuery({

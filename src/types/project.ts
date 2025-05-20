@@ -1,4 +1,3 @@
-
 export type ProjectOwnershipType = 'personal' | 'brand' | 'artist' | 'community';
 
 export interface Project {
@@ -74,9 +73,12 @@ export interface ProjectEvent {
 
 export interface ReferenceItem {
   id: string;
-  type: 'component' | 'task';
   name: string;
-  status?: string; // Add status field
+  type: string;
+  url?: string;
+  description?: string;
+  version?: string; 
+  status?: string; // Added status property
 }
 
 export type ProjectTaskStatus = 'pending' | 'in_progress' | 'completed';

@@ -38,6 +38,8 @@ export interface ContentItemProps {
   onClick?: () => void;
   isSelected?: boolean;
   selectionMode?: boolean;
+  // Add status for ProjectDetail reference items
+  status?: string;
 }
 
 // Tour planning types
@@ -81,8 +83,12 @@ export interface GearItem {
   weight?: number; // in pounds or kg
   quantity: number;
   essential: boolean;
-  packed: boolean;
+  packed: boolean; // Was is_packed before, renamed to packed
   notes?: string;
+  list_id?: string; // Added missing property
+  created_at?: string;
+  updated_at?: string;
+  assigned_to?: string; // Added missing property
 }
 
 export interface GearCategory {
@@ -103,4 +109,5 @@ export interface GearList {
   updated_at?: string;
   shared_with?: string[];
   tour_id?: string;
+  type: string; // Added missing property
 }

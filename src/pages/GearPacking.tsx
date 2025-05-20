@@ -58,8 +58,6 @@ const GearPacking: React.FC = () => {
       ...item,
       id: `item-${Date.now()}`,
       list_id: selectedList.id,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
     };
     
     const updatedList = {
@@ -120,7 +118,7 @@ const GearPacking: React.FC = () => {
     if (!selectedList) return;
     
     const updatedItems = selectedList.items.map(item => 
-      item.id === itemId ? { ...item, is_packed: isPacked, updated_at: new Date().toISOString() } : item
+      item.id === itemId ? { ...item, packed: isPacked, updated_at: new Date().toISOString() } : item
     );
     
     const updatedList = {
@@ -200,15 +198,15 @@ const GearPacking: React.FC = () => {
                       key={item.id} 
                       className={cn(
                         "flex items-center justify-between p-3 border rounded-lg",
-                        item.is_packed && "bg-muted/50"
+                        item.packed && "bg-muted/50"
                       )}
                     >
                       <div className="flex items-center space-x-3">
                         <Checkbox 
-                          checked={item.is_packed} 
+                          checked={item.packed} 
                           onCheckedChange={(checked) => toggleItemPacked(item.id, checked === true)}
                         />
-                        <div className={cn(item.is_packed && "line-through text-muted-foreground")}>
+                        <div className={cn(item.packed && "line-through text-muted-foreground")}>
                           <span className="font-medium">{item.name}</span>
                           {item.quantity > 1 && <span className="ml-2 text-muted-foreground">x{item.quantity}</span>}
                           {item.notes && <p className="text-sm text-muted-foreground">{item.notes}</p>}
@@ -242,7 +240,7 @@ const GearPacking: React.FC = () => {
               <div className="flex justify-between">
                 <div>
                   <p className="text-muted-foreground">Total Items: {selectedList.items.length}</p>
-                  <p className="text-muted-foreground">Packed: {selectedList.items.filter(item => item.is_packed).length}</p>
+                  <p className="text-muted-foreground">Packed: {selectedList.items.filter(item => item.packed).length}</p>
                 </div>
                 <Button variant="outline" onClick={() => setSelectedList(null)}>
                   Back to Lists
@@ -329,7 +327,7 @@ const GearPacking: React.FC = () => {
                               <div>
                                 <h3 className="font-medium text-lg">{list.name}</h3>
                                 <p className="text-sm text-muted-foreground">
-                                  {list.items.length} items • {list.items.filter(item => item.is_packed).length} packed
+                                  {list.items.length} items • {list.items.filter(item => item.packed).length} packed
                                 </p>
                               </div>
                               <Button 
@@ -417,6 +415,7 @@ const GearListForm: React.FC<GearListFormProps> = ({ type, onSubmit, onCancel })
       owner_id: 'current-user', // In a real app, use the actual user ID
       type,
       items: [],
+      categories: [],
     });
   };
   
@@ -458,7 +457,7 @@ const GearItemForm: React.FC<GearItemFormProps> = ({ categories, initialData, on
   const [quantity, setQuantity] = useState(initialData?.quantity || 1);
   const [notes, setNotes] = useState(initialData?.notes || '');
   const [weight, setWeight] = useState(initialData?.weight || 0);
-  const [isPacked, setIsPacked] = useState(initialData?.is_packed || false);
+  const [isPacked, setIsPacked] = useState(initialData?.packed || false);
   const [assignedTo, setAssignedTo] = useState(initialData?.assigned_to || '');
   
   const handleSubmit = (e: React.FormEvent) => {
@@ -474,7 +473,7 @@ const GearItemForm: React.FC<GearItemFormProps> = ({ categories, initialData, on
         quantity,
         notes,
         weight: weight || undefined,
-        is_packed: isPacked,
+        packed: isPacked,
         assigned_to: assignedTo || undefined,
       });
     } else {
@@ -484,7 +483,7 @@ const GearItemForm: React.FC<GearItemFormProps> = ({ categories, initialData, on
         quantity,
         notes,
         weight: weight || undefined,
-        is_packed: isPacked,
+        packed: isPacked,
         assigned_to: assignedTo || undefined,
       });
     }
