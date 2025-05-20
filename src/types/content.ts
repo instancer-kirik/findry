@@ -24,9 +24,49 @@ export interface ContentItemProps {
   creation_date?: string;
   medium?: string;
   dimensions?: string;
+  // Add properties for event slot manager
+  isRequestOnly?: boolean;
+  email?: string;
+  link?: string;
+  // Add properties for bulk import
+  created_at?: string;
+  updated_at?: string;
   // Common selection properties
   onSelect?: () => void;
   onClick?: () => void;
   isSelected?: boolean;
   selectionMode?: boolean;
+}
+
+// Tour planning types
+export interface TourStop {
+  id: string;
+  tour_id?: string;
+  name: string;
+  location: string;
+  address?: string;
+  date: string;
+  arrival_time?: string;
+  departure_time?: string;
+  description?: string;
+  order: number;
+  accommodation?: string;
+  is_stop_point?: boolean;
+  venue_id?: string;
+  distance_from_previous?: string;
+  travel_time_from_previous?: string;
+}
+
+export interface TourPlan {
+  id?: string;
+  name: string;
+  description?: string;
+  start_date: string;
+  end_date: string;
+  is_public: boolean;
+  type: 'band_tour' | 'roadtrip';
+  stops: TourStop[];
+  owner_id: string;
+  created_at?: string;
+  updated_at?: string;
 }
