@@ -575,6 +575,8 @@ const CreateEvent = () => {
             setTicketPrice={setTicketPrice}
             ticketUrl={ticketUrl}
             setTicketUrl={setTicketUrl}
+            capacity={capacity}
+            setCapacity={setCapacity}
           />
 
           <FeaturedArtistsForm 
