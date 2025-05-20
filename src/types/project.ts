@@ -1,4 +1,3 @@
-
 export type ProjectOwnershipType = 'personal' | 'brand' | 'artist' | 'community';
 
 export interface Project {
@@ -32,6 +31,7 @@ export interface ProjectComponent {
   status: 'pending' | 'in_progress' | 'completed';
   assignedTo?: string;
   dueDate?: string;
+  projectId?: string; // Add projectId field
 }
 
 export interface ProjectTask {
@@ -43,6 +43,7 @@ export interface ProjectTask {
   assignedTo?: string;
   dueDate?: string;
   priority: 'low' | 'medium' | 'high';
+  projectId?: string; // Add projectId field
 }
 
 export interface ProjectMessage {

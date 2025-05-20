@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ProjectComponent, ProjectTask } from '@/types/project';
@@ -8,7 +7,7 @@ interface ProjectInteractionsParams {
   projectId: string;
 }
 
-export const useProjectInteractions = ({ projectId }: ProjectInteractionsParams) => {
+export const useProjectInteractions = (projectId: string) => {
   const [components, setComponents] = useState<ProjectComponent[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -41,7 +40,7 @@ export const useProjectInteractions = ({ projectId }: ProjectInteractionsParams)
           status: 'pending',
           projectId
         }
-      ] as ProjectComponent[];
+      ] as unknown as ProjectComponent[];
       
       setComponents(mockComponents);
     } catch (err) {

@@ -51,176 +51,70 @@ const ArtistProfile = () => {
           return;
         }
         
-        let profileQuery = supabase.from('profiles').select('*');
+        // Mock artist data for development
+        const mockArtist: Artist = {
+          id: artistId || 'mock-artist-id',
+          name: 'Mock Artist Name',
+          bio: 'This is a mock artist bio for development purposes.',
+          image_url: 'https://via.placeholder.com/400',
+          location: 'New York, NY',
+          disciplines: ['Music', 'Visual Art'],
+          styles: ['Contemporary', 'Experimental'],
+          tags: ['indie', 'performer'],
+          type: 'artist',
+          subtype: 'musician',
+          multidisciplinary: true,
+          social_links: ['instagram', 'twitter', 'website'],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
         
-        if (artistSlug) {
-          profileQuery = profileQuery.eq('username', artistSlug);
-        } else if (artistId) {
-          profileQuery = profileQuery.eq('id', artistId);
-        }
+        setArtist(mockArtist);
+        generateMockEvents(mockArtist);
         
-        const { data: profileData, error: fetchError } = await profileQuery.single();
-        
-        console.log('Profile query result:', { data: profileData, error: fetchError });
-        
-        let currentArtist: Artist | null = null;
-
-        if (fetchError) {
-          console.warn('Error fetching profile, trying artists table fallback:', fetchError);
-          // Fallback to 'artists' table if 'profiles' fetch fails or if it's the intended source
-          const { data: artistData, error: artistError } = await supabase
-            .from('artists')
-            .select('*')
-            .eq(artistId ? 'id' : 'slug', artistId || artistSlug) // Adjust based on whether artists table uses slug
-            .single();
-            
-          console.log('Fallback artist query result:', { artistData, error: artistError });
-          
-          if (artistError || !artistData) {
-            setError('Could not load artist profile. Please try again later.');
-            setIsLoading(false);
-            return;
+        // Generate mock media items
+        const mockMediaItems: ContentItemProps[] = [
+          {
+            id: "album-1",
+            type: "album",
+            name: "First Album",
+            image_url: "https://via.placeholder.com/300",
+            release_date: "2023-01-15",
+            description: "Debut album",
+            artist_id: mockArtist.id,
+            artist_name: mockArtist.name,
+            created_at: "2023-01-15T00:00:00Z",
+            location: "New York"
+          },
+          {
+            id: "song-1",
+            type: "song",
+            name: "First Song",
+            album_id: "album-1",
+            album_name: "First Album",
+            artist_id: mockArtist.id,
+            artist_name: mockArtist.name,
+            duration: "3:45",
+            description: "Lead single",
+            created_at: "2023-01-15T00:00:00Z",
+            location: "New York"
+          },
+          {
+            id: "artwork-1",
+            type: "artwork",
+            name: "Abstract Piece",
+            image_url: "https://via.placeholder.com/300",
+            medium: "Acrylic on canvas",
+            dimensions: "24x36 inches",
+            creation_date: "2023-03-10",
+            description: "Abstract painting with vibrant colors",
+            artist_id: mockArtist.id,
+            created_at: "2023-03-10T00:00:00Z",
+            location: "New York"
           }
-          
-          currentArtist = {
-            id: artistData.id,
-            name: artistData.name,
-            bio: artistData.bio || 'No bio available.',
-            image_url: artistData.image_url,
-            location: artistData.location || 'Unknown',
-            disciplines: artistData.disciplines || [],
-            styles: artistData.styles || [],
-            tags: artistData.tags || [],
-            type: 'artist',
-            subtype: artistData.subtype || 'artist',
-            multidisciplinary: artistData.multidisciplinary || false,
-            social_links: artistData.social_links || [],
-            created_at: artistData.created_at,
-            updated_at: artistData.updated_at
-          };
-        } else if (profileData) {
-          const profileTypes = profileData.profile_types || [];
-          // Ensure it's an artist profile or handle appropriately
-          if (!profileTypes.includes('artist')) {
-            console.warn('Profile fetched is not an artist type specifically:', profileData);
-            // Depending on requirements, you might setError here or proceed if attributes are compatible
-          }
-          
-          const roleAttrs = profileData.role_attributes as Record<string, any> || {};
-          currentArtist = {
-            id: profileData.id,
-            name: profileData.full_name || profileData.username,
-            bio: profileData.bio || 'No bio available.',
-            image_url: profileData.avatar_url,
-            location: roleAttrs.location || 'Unknown',
-            disciplines: roleAttrs.disciplines || [],
-            styles: roleAttrs.styles || [],
-            tags: roleAttrs.tags || [],
-            type: 'artist', 
-            subtype: (profileData.profile_types && profileData.profile_types.length > 0 ? profileData.profile_types.join(', ') : 'artist'),
-            multidisciplinary: roleAttrs.multidisciplinary || false,
-            social_links: roleAttrs.social_links || [],
-            created_at: profileData.created_at,
-            updated_at: profileData.updated_at
-          };
-        }
-
-        if (!currentArtist) {
-          setError('Artist not found');
-          setIsLoading(false);
-          return;
-        }
+        ];
         
-        setArtist(currentArtist);
-        generateMockEvents(currentArtist);
-
-        // Fetch media items from separate tables if artist ID is available
-        if (currentArtist.id) {
-          const fetchedMediaItems: ContentItemProps[] = [];
-
-          // 1. Fetch Albums
-          const { data: albumsData, error: albumsError } = await supabase
-            .from('content_albums')
-            .select('*')
-            .eq('artist_id', currentArtist.id)
-            .order('release_date', { ascending: false });
-
-          if (albumsError) {
-            console.error('Error fetching albums:', albumsError.message);
-          } else if (albumsData) {
-            for (const album of albumsData) {
-              fetchedMediaItems.push({
-                id: album.id,
-                type: 'album',
-                name: album.name,
-                image_url: album.image_url,
-                release_date: album.release_date,
-                description: album.description,
-                artist_id: album.artist_id,
-                created_at: album.created_at,
-              });
-
-              // 2. Fetch Songs for this Album
-              const { data: songsData, error: songsError } = await supabase
-                .from('content_songs')
-                .select('*')
-                .eq('album_id', album.id)
-                .order('track_number', { ascending: true });
-
-              if (songsError) {
-                console.error(`Error fetching songs for album ${album.id}:`, songsError.message);
-              } else if (songsData) {
-                songsData.forEach(song => {
-                  fetchedMediaItems.push({
-                    id: song.id,
-                    type: 'song',
-                    name: song.name,
-                    album_id: song.album_id,
-                    album_name: album.name, // Add album name for display context
-                    artist_id: song.artist_id || album.artist_id, // Fallback to album's artist_id
-                    duration: song.duration_seconds ? `${Math.floor(song.duration_seconds / 60)}:${String(song.duration_seconds % 60).padStart(2, '0')}` : undefined,
-                    // audio_url: song.audio_url, // Available if needed
-                    description: song.description,
-                    created_at: song.created_at,
-                  });
-                });
-              }
-            }
-          }
-
-          // 3. Fetch Artworks
-          const { data: artworksData, error: artworksError } = await supabase
-            .from('content_artworks')
-            .select('*')
-            .eq('artist_id', currentArtist.id)
-            .order('creation_date', { ascending: false });
-
-          if (artworksError) {
-            console.error('Error fetching artworks:', artworksError.message);
-          } else if (artworksData) {
-            artworksData.forEach(artwork => {
-              fetchedMediaItems.push({
-                id: artwork.id,
-                type: 'artwork',
-                name: artwork.title, // maps to 'name' in ContentItemProps
-                image_url: artwork.image_url,
-                medium: artwork.medium,
-                dimensions: artwork.dimensions,
-                creation_date: artwork.creation_date,
-                description: artwork.description,
-                artist_id: artwork.artist_id,
-                created_at: artwork.created_at,
-              });
-            });
-          }
-          
-          // Optionally, sort all fetchedMediaItems by a common field like created_at if a mixed chronological view is desired.
-          // For now, they will be grouped by albums (with their songs) first, then artworks.
-          // To sort all: fetchedMediaItems.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-          
-          setMediaItems(fetchedMediaItems);
-          console.log('Fetched and combined media items:', fetchedMediaItems);
-        }
+        setMediaItems(mockMediaItems);
 
       } catch (error: any) {
         console.error('Error in fetchArtistAndMedia:', error);

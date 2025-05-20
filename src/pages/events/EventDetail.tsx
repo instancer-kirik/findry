@@ -259,7 +259,7 @@ const EventDetail = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2">
             <div className="flex justify-between items-start mb-4">
-              <h1 className="text-3xl font-bold">{event?.name}</h1>
+              <h1 className="text-2xl font-bold mb-2">{event.name}</h1>
               {isOrganizer && (
                 <Badge variant="outline" className="bg-blue-100/10 text-blue-600 dark:text-blue-400">
                   You are the organizer

@@ -22,7 +22,7 @@ import { useSignOut } from '@/hooks/use-sign-out';
 import { Route } from 'lucide-react';
 
 export default function Navbar() {
-  const { session, user, isLoading } = useAuth();
+  const { session, user, loading } = useAuth();
   const { toast } = useToast()
   const navigate = useNavigate();
   const { signOut } = useSignOut();
@@ -75,7 +75,7 @@ export default function Navbar() {
             ) : null}
           </nav>
 
-          {isLoading ? (
+          {loading ? (
             <Skeleton className="h-8 w-[80px] rounded-full" />
           ) : session && user ? (
             <DropdownMenu>

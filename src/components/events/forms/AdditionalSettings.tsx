@@ -1,9 +1,21 @@
-
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { AdditionalSettingsProps } from '@/types/forms';
+
+interface AdditionalSettingsProps {
+  capacity: number;
+  setCapacity: React.Dispatch<React.SetStateAction<number>>;
+  isPrivate: boolean;
+  setIsPrivate: React.Dispatch<React.SetStateAction<boolean>>;
+  registrationRequired: boolean;
+  setRegistrationRequired: React.Dispatch<React.SetStateAction<boolean>>;
+  ticketPrice: string;
+  setTicketPrice: React.Dispatch<React.SetStateAction<string>>;
+  ticketUrl: string;
+  setTicketUrl: React.Dispatch<React.SetStateAction<string>>;
+}
 
 export const AdditionalSettings: React.FC<AdditionalSettingsProps> = ({
   isPrivate,
