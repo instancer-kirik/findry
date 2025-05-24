@@ -1,154 +1,126 @@
 
-import { useState } from 'react';
-import { ProjectMessage, ReferenceItem } from '@/types/project';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './use-auth';
+import { ProjectMessage } from '@/types/project';
+import { toast } from 'sonner';
+import { useUser } from '@/hooks/use-user';
 
-export const useProjectChat = (projectId: string) => {
-  const [messages, setMessages] = useState<ProjectMessage[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const { user } = useAuth();
+export const useProjectChat = (projectId?: string) => {
+  const queryClient = useQueryClient();
+  const { user } = useUser();
 
-  const fetchMessages = async () => {
-    try {
-      setLoading(true);
+  const { data: messages = [], isLoading } = useQuery({
+    queryKey: ['project-messages', projectId],
+    queryFn: async (): Promise<ProjectMessage[]> => {
+      if (!projectId) return [];
       
-      // This is a mock implementation since the project_messages table doesn't exist in the provided schema
-      // In a real implementation, you would fetch from the actual table
-      // Mocking the fetch for now to make TypeScript happy
-      const mockMessages: ProjectMessage[] = [];
-      setMessages(mockMessages);
-      
-      // The commented code below would be the real implementation
-      // const { data, error } = await supabase
-      //   .from('project_messages')
-      //   .select('*')
-      //   .eq('project_id', projectId)
-      //   .order('created_at', { ascending: true });
-      // 
-      // if (error) throw error;
-      // setMessages(data as ProjectMessage[]);
-    } catch (err) {
-      console.error('Error fetching project messages:', err);
-      setError(err as Error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const addMessage = async (content: string, reference?: ReferenceItem) => {
-    if (!user) return;
-    
-    try {
-      // Mock function for recordEvent
-      const recordEvent = (eventType: string, projectId: string) => {
-        console.log(`Event ${eventType} recorded for project ${projectId}`);
-        return Promise.resolve();
-      };
-      
-      // Record chat event
-      await recordEvent('chat_message', projectId);
-      
-      const newMessage: Omit<ProjectMessage, 'id' | 'createdAt'> = {
-        projectId,
-        userId: user.id,
-        userName: user.email || 'Anonymous',
-        userAvatar: user.user_metadata?.avatar_url,
-        content,
-        isNotification: false
-      };
-      
-      if (reference) {
-        newMessage.reference = {
-          type: reference.type,
-          id: reference.id,
-          name: reference.name,
-          status: reference.status
-        };
+      try {
+        // Mock implementation since project_messages table doesn't exist
+        // Return empty array for now
+        return [];
+      } catch (error: any) {
+        console.error('Error fetching project messages:', error);
+        toast.error(`Error fetching messages: ${error.message}`);
+        return [];
       }
-      
-      // Mock implementation
-      const mockData = {
-        ...newMessage,
-        id: `mock-${Date.now()}`,
-        createdAt: new Date().toISOString(),
-      } as ProjectMessage;
-      
-      setMessages(prev => [...prev, mockData]);
-      return mockData;
-      
-      // The commented code below would be the real implementation
-      // const { data, error } = await supabase
-      //   .from('project_messages')
-      //   .insert(newMessage)
-      //   .select()
-      //   .single();
-      // 
-      // if (error) throw error;
-      // 
-      // setMessages(prev => [...prev, data as ProjectMessage]);
-      // return data;
-    } catch (err) {
-      console.error('Error adding message:', err);
-      throw err;
-    }
-  };
-  
-  const addSystemNotification = async (content: string, reference?: ReferenceItem) => {
-    if (!user) return;
-    
-    try {
-      const newNotification: Omit<ProjectMessage, 'id' | 'createdAt'> = {
-        projectId,
-        userId: user.id,
-        userName: 'System',
-        content,
-        isNotification: true
+    },
+    enabled: !!projectId
+  });
+
+  const addMessage = useMutation({
+    mutationFn: async (newMessage: { 
+      content: string; 
+      isNotification?: boolean;
+      reference?: {
+        type: 'component' | 'task';
+        id: string;
+        name: string;
+        status?: string;
       };
+    }) => {
+      if (!projectId || !user) throw new Error('Missing required data');
       
-      if (reference) {
-        newNotification.reference = {
-          type: reference.type,
-          id: reference.id,
-          name: reference.name,
-          status: reference.status
+      try {
+        // Mock implementation since project_messages table doesn't exist
+        const message: ProjectMessage = {
+          id: Date.now().toString(),
+          projectId,
+          userId: user.id,
+          userName: user.email || 'Unknown User',
+          userAvatar: undefined,
+          content: newMessage.content,
+          createdAt: new Date().toISOString(),
+          isNotification: newMessage.isNotification || false,
+          reference: newMessage.reference ? {
+            type: newMessage.reference.type as 'component' | 'task',
+            id: newMessage.reference.id,
+            name: newMessage.reference.name,
+            status: newMessage.reference.status
+          } : undefined
         };
+        
+        return message;
+      } catch (error: any) {
+        console.error('Error adding message:', error);
+        throw error;
       }
-      
-      // Mock implementation
-      const mockData = {
-        ...newNotification,
-        id: `mock-${Date.now()}`,
-        createdAt: new Date().toISOString(),
-      } as ProjectMessage;
-      
-      setMessages(prev => [...prev, mockData]);
-      return mockData;
-      
-      // The commented code below would be the real implementation
-      // const { data, error } = await supabase
-      //   .from('project_messages')
-      //   .insert(newNotification)
-      //   .select()
-      //   .single();
-      // 
-      // if (error) throw error;
-      // 
-      // setMessages(prev => [...prev, data as ProjectMessage]);
-      // return data;
-    } catch (err) {
-      console.error('Error adding notification:', err);
-      throw err;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['project-messages', projectId] });
+      toast.success('Message sent');
+    },
+    onError: (error: any) => {
+      toast.error(`Error sending message: ${error.message}`);
     }
-  };
+  });
+
+  const addSystemMessage = useMutation({
+    mutationFn: async (content: string, reference?: { 
+      type: 'component' | 'task'; 
+      id: string; 
+      name: string;
+      status?: string;
+    }) => {
+      if (!projectId) throw new Error('Project ID required');
+      
+      try {
+        // Mock implementation since project_messages table doesn't exist
+        const message: ProjectMessage = {
+          id: Date.now().toString(),
+          projectId,
+          userId: 'system',
+          userName: 'System',
+          userAvatar: undefined,
+          content,
+          createdAt: new Date().toISOString(),
+          isNotification: true,
+          reference: reference ? {
+            type: reference.type as 'component' | 'task',
+            id: reference.id,
+            name: reference.name,
+            status: reference.status
+          } : undefined
+        };
+        
+        return message;
+      } catch (error: any) {
+        console.error('Error adding system message:', error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['project-messages', projectId] });
+    },
+    onError: (error: any) => {
+      console.error('Error adding system message:', error);
+    }
+  });
 
   return {
     messages,
-    loading,
-    error,
-    fetchMessages,
-    addMessage,
-    addSystemNotification
+    isLoading,
+    addMessage: addMessage.mutateAsync,
+    addSystemMessage: addSystemMessage.mutateAsync,
+    isAddingMessage: addMessage.isPending || addSystemMessage.isPending
   };
 };

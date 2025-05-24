@@ -1,3 +1,4 @@
+
 export interface ContentItemProps {
   id: string;
   name: string;
@@ -120,8 +121,8 @@ export interface AdditionalSettingsProps {
   setTicketPrice: React.Dispatch<React.SetStateAction<string>>;
   ticketUrl: string;
   setTicketUrl: React.Dispatch<React.SetStateAction<string>>;
-  capacity: number;
-  setCapacity: React.Dispatch<React.SetStateAction<number>>;
+  capacity: string;
+  setCapacity: (capacity: string) => void;
 }
 export type FilterType = 'all' | 'artists' | 'venues' | 'resources' | 'brands' | 'communities';
 export type RecurrenceType = 'none' | 'daily' | 'weekly' | 'monthly';
@@ -131,8 +132,8 @@ export interface EventContentItem {
   name: string;
   image_url?: string;
   description?: string;
-  type?: string;
-  location?: string;
+  type: string; // Make type required to match ContentItemProps
+  location: string; // Make location required to match ContentItemProps
   selected?: boolean;
 }
 
@@ -147,6 +148,8 @@ export interface EventDetailsFormProps {
   setCapacity: (capacity: string) => void;
   eventType: string;
   setEventType: (type: string) => void;
+  tags?: string[];
+  setTags?: (tags: string[]) => void;
 }
 
 export interface DateTimeFormProps {
@@ -158,6 +161,8 @@ export interface DateTimeFormProps {
   setStartTime: (time: string) => void;
   endTime: string;
   setEndTime: (time: string) => void;
+  recurrenceType?: RecurrenceType;
+  setRecurrenceType?: (type: RecurrenceType) => void;
 }
 
 export interface PosterUploadProps {

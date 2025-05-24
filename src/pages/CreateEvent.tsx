@@ -46,7 +46,7 @@ const CreateEvent = () => {
   const [endDate, setEndDate] = useState<Date>();
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
-  const [capacity, setCapacity] = useState<number>(0); // Changed from string to number
+  const [capacity, setCapacity] = useState<string>(''); // Changed to string
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [posterImage, setPosterImage] = useState<File | null>(null);
   const [posterUrl, setPosterUrl] = useState<string>('');
@@ -557,6 +557,8 @@ const CreateEvent = () => {
             setStartTime={setStartTime}
             endTime={endTime}
             setEndTime={setEndTime}
+            recurrenceType={recurrenceType}
+            setRecurrenceType={setRecurrenceType}
           />
 
           <PosterUpload
