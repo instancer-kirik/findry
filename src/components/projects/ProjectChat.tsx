@@ -1,200 +1,175 @@
-import React, { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
-import { Button } from '@/components/ui/button';
+import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Project, ProjectTask, ProjectComponent } from '@/types/project';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Send, X, MessageSquare, ExternalLink } from 'lucide-react';
+import { Project, ProjectStatus } from '@/types/project';
+import { useProjectChat } from '@/hooks/use-project-chat';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 export interface ReferenceItem {
-  type: 'component' | 'task';
   id: string;
   name: string;
+  type: string;
+  url?: string;
+  description?: string;
+  version?: string;
+  status?: string;
 }
 
-export interface ProjectChatProps {
+interface ProjectChatProps extends React.HTMLAttributes<HTMLDivElement> {
   project: Project;
-  className?: string;
   onReferenceClick?: {
-    component: (componentId: string) => void;
-    task: (taskId: string) => void;
+    component?: (componentId: string) => void;
+    task?: (taskId: string) => void;
   };
-  onStatusChange?: (newStatus: 'pending' | 'completed' | 'in_progress') => Promise<void>;
+  onStatusChange?: (newStatus: ProjectStatus) => Promise<void>;
 }
 
-export interface ProjectChatRef {
+interface ChatInputRef {
   addReference: (item: ReferenceItem) => void;
 }
 
-const ProjectChat = forwardRef<ProjectChatRef, ProjectChatProps>(({
-  project,
-  className = '',
-  onReferenceClick,
-  onStatusChange
-}, ref) => {
-  const [messages, setMessages] = useState<any[]>([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [referencesMenu, setReferencesMenu] = useState(false);
-  const [references, setReferences] = useState<ReferenceItem[]>([]);
+const ProjectChat = forwardRef<ChatInputRef, ProjectChatProps>(({ project, className, onReferenceClick, onStatusChange, ...props }, ref) => {
+  const [message, setMessage] = useState('');
+  const [reference, setReference] = useState<ReferenceItem | null>(null);
+  const { messages, addMessage, isLoading, addSystemMessage, isAddingMessage } = useProjectChat(project.id);
+  const chatBottomRef = useRef<HTMLDivElement>(null);
 
-  // Expose methods to parent components
   useImperativeHandle(ref, () => ({
     addReference: (item: ReferenceItem) => {
-      setReferences(prev => [...prev, item]);
-    }
+      setReference(item);
+      toast.info(`Referencing ${item.type} "${item.name}" in your next message.`, {
+        action: {
+          label: 'Clear',
+          onClick: () => setReference(null),
+        },
+      });
+    },
   }));
 
-  useEffect(() => {
-    // Load initial messages
-    const initialMessages = [
-      {
-        id: '1',
-        sender: 'System',
-        content: `Project "${project.name}" created`,
-        timestamp: new Date().toISOString(),
-        isNotification: true
+  const scrollToBottom = () => {
+    chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleSendMessage = async () => {
+    if (!message.trim()) return;
+
+    try {
+      await addMessage({
+        content: message,
+        reference: reference
+          ? {
+            type: reference.type as 'component' | 'task',
+            id: reference.id,
+            name: reference.name,
+            status: reference.status
+          }
+          : undefined,
+      });
+      setMessage('');
+      setReference(null);
+      scrollToBottom();
+    } catch (error: any) {
+      toast.error(`Failed to send message: ${error.message}`);
+    }
+  };
+
+  const handleStatusChange = async (newStatus: ProjectStatus) => {
+    try {
+      if (onStatusChange) {
+        await onStatusChange(newStatus);
+        await addSystemMessage(`Project status changed to ${newStatus}`, {
+          type: 'status',
+          id: project.id,
+          name: project.name,
+          status: newStatus,
+        });
+        scrollToBottom();
+      } else {
+        toast.error('You are not authorized to change the project status.');
       }
-    ];
-    
-    setMessages(initialMessages);
-  }, [project.id]);
-
-  const handleSendMessage = () => {
-    if (!newMessage.trim()) return;
-    
-    // Create new message
-    const message = {
-      id: Date.now().toString(),
-      sender: 'You',
-      content: newMessage,
-      timestamp: new Date().toISOString(),
-      references: [...references]
-    };
-    
-    setMessages(prev => [...prev, message]);
-    setNewMessage('');
-    setReferences([]);
-  };
-
-  useEffect(() => {
-    // Scroll to bottom when messages change
-    const chatContainer = document.getElementById('project-chat-messages');
-    if (chatContainer) {
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
-  }, [messages]);
-
-  const handleReferenceClick = (reference: ReferenceItem) => {
-    if (!onReferenceClick) return;
-    
-    if (reference.type === 'component') {
-      onReferenceClick.component(reference.id);
-    } else if (reference.type === 'task') {
-      onReferenceClick.task(reference.id);
+    } catch (error: any) {
+      toast.error(`Failed to update status: ${error.message}`);
     }
   };
 
-  const removeReference = (index: number) => {
-    setReferences(prev => prev.filter((_, i) => i !== index));
+  const handleReferenceClick = (item: ReferenceItem) => {
+    if (item.type === 'component' && onReferenceClick?.component) {
+      onReferenceClick.component(item.id);
+    } else if (item.type === 'task' && onReferenceClick?.task) {
+      onReferenceClick.task(item.id);
+    } else {
+      toast.error('No action defined for this reference type.');
+    }
   };
 
   return (
-    <div className={`flex flex-col h-full ${className}`}>
-      <div id="project-chat-messages" className="flex-1 overflow-y-auto space-y-4 p-4">
-        {messages.map(message => (
-          <div key={message.id} className={`flex ${message.isNotification ? 'justify-center' : 'gap-2'}`}>
-            {message.isNotification ? (
-              <div className="text-xs text-muted-foreground bg-muted px-3 py-1 rounded-full">
-                {message.content}
-              </div>
-            ) : (
-              <>
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback>{message.sender.substring(0, 2)}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{message.sender}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(message.timestamp).toLocaleTimeString()}
-                    </span>
-                  </div>
-                  <div className="mt-1">{message.content}</div>
-                  
-                  {message.references && message.references.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {message.references.map((ref: ReferenceItem) => (
-                        <button 
-                          key={ref.id}
-                          className="inline-flex items-center text-xs bg-muted hover:bg-muted/80 px-2 py-1 rounded"
-                          onClick={() => handleReferenceClick(ref)}
-                        >
-                          {ref.type === 'component' ? '🧩' : '✓'} {ref.name}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-        ))}
-        
-        {loading && (
-          <div className="flex justify-center">
-            <div className="text-xs text-muted-foreground bg-muted px-3 py-1 rounded-full">
-              Loading...
-            </div>
-          </div>
-        )}
-      </div>
-      
-      {references.length > 0 && (
-        <div className="px-4 py-2 border-t flex flex-wrap gap-2">
-          {references.map((ref, index) => (
-            <div 
-              key={index} 
-              className="inline-flex items-center gap-1 text-xs bg-muted px-2 py-1 rounded"
-            >
-              {ref.type === 'component' ? '🧩' : '✓'} {ref.name}
-              <button 
-                className="ml-1 hover:text-destructive" 
-                onClick={() => removeReference(index)}
-              >
-                ×
-              </button>
-            </div>
-          ))}
+    <Card className={cn("w-full rounded-md border", className)} {...props}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium flex items-center gap-2">
+          <MessageSquare className="h-4 w-4 mr-1" /> Project Chat
+        </CardTitle>
+        <div className="flex items-center space-x-2">
+          <Badge variant="secondary">{project.status}</Badge>
         </div>
-      )}
-      
-      <div className="p-4 border-t">
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            onClick={() => setReferencesMenu(!referencesMenu)}
-            className="h-9 w-9"
-          >
-            +
-          </Button>
+      </CardHeader>
+      <CardContent className="pl-2 pr-2 pb-2 pt-0">
+        <div className="relative h-[400px] w-full overflow-hidden rounded-md border">
+          <ScrollArea className="h-full w-full pr-2">
+            <div className="flex flex-col gap-2 p-3">
+              {messages.map((msg) => (
+                <div key={msg.id} className="flex flex-col">
+                  <div className="flex items-center space-x-2">
+                    <div className="text-xs font-bold">{msg.userName}</div>
+                    <div className="text-xs text-gray-500">{new Date(msg.createdAt).toLocaleTimeString()}</div>
+                    {msg.isNotification && <Badge variant="outline">System</Badge>}
+                  </div>
+                  <div className="prose max-w-none break-words dark:prose-invert text-sm">
+                    {msg.content}
+                    {msg.reference && (
+                      <Button variant="link" className="p-0" onClick={() => handleReferenceClick(msg.reference as ReferenceItem)}>
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        {msg.reference.type}: {msg.reference.name}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+              <div ref={chatBottomRef} />
+            </div>
+          </ScrollArea>
+        </div>
+        <div className="mt-2 flex items-center space-x-2">
+          {reference && (
+            <Badge variant="secondary" className="relative">
+              Referencing {reference.type}: {reference.name}
+              <Button variant="ghost" size="icon" className="absolute -top-1 -right-1" onClick={() => setReference(null)}>
+                <X className="h-3 w-3" />
+              </Button>
+            </Badge>
+          )}
           <Input
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Type a message..."
-            className="flex-1"
-            onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+            type="text"
+            placeholder="Enter your message"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSendMessage();
+              }
+            }}
           />
-          <Button 
-            type="button" 
-            onClick={handleSendMessage}
-          >
+          <Button onClick={handleSendMessage} disabled={isAddingMessage}>
+            {isAddingMessage ? <span className="animate-pulse">Sending...</span> : <Send className="h-4 w-4 mr-2" />}
             Send
           </Button>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 });
 

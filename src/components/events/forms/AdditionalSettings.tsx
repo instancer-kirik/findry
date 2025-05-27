@@ -55,7 +55,7 @@ const AdditionalSettings: React.FC<AdditionalSettingsProps> = ({
                 type="number"
                 placeholder="Maximum number of attendees" 
                 value={capacity} 
-                onChange={(e) => setCapacity(parseInt(e.target.value) || 0)} 
+                onChange={(e) => setCapacity(e.target.value)} 
               />
             </div>
             

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -102,14 +101,13 @@ const ProjectDetail: React.FC = () => {
     }
   }, [project]);
 
-  const handleStatusChange = async (newStatus: Project['status']): Promise<boolean> => {
-    if (!project) return false;
+  const handleStatusChange = async (newStatus: Project['status']): Promise<void> => {
+    if (!project) return;
     
     if (isOwner) {
-      return await updateProjectStatus(project, newStatus);
+      await updateProjectStatus(project, newStatus);
     } else {
       toast.error('Only the project owner can change the project status');
-      return false;
     }
   };
 
