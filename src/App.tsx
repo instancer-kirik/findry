@@ -104,6 +104,7 @@ const App: React.FC = () => {
           <Route path="/meetings" element={<MeetingScheduler />} />
           <Route path="/projects/:projectId" element={<ProjectDetail />} />
           <Route path="/create-project" element={<CreateProject />} />
+          <Route path="/projects/create" element={<CreateProject />} />
           <Route path="/grouper" element={<Grouper />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/:id" element={<ProfilePage />} />
@@ -124,6 +125,7 @@ const App: React.FC = () => {
           <Route path="/shops/:shopId" element={<ShopDetail />} />
           <Route path="/shops/:shopId/products/:productId" element={<ProductDetail />} />
           <Route path="/create-shop" element={<CreateShop />} />
+          <Route path="/shops/create" element={<CreateShop />} />
           <Route path="/eventbrite/callback" element={<EventbriteCallback />} />
           <Route path="/eventbrite/orders" element={<EventbriteOrders />} />
           <Route path="/brands/:brandId" element={<BrandDetail />} />
@@ -139,6 +141,8 @@ const App: React.FC = () => {
           <Route path="/glossary-examples" element={<GlossaryExample />} />
           <Route path="/tour-planner" element={<TourPlanner />} />
           <Route path="/gear-packing" element={<GearPacking />} />
+          <Route path="/submit" element={<ResourceIndexPage />} />
+          <Route path="/requests" element={<Offers />} />
           <Route path="*" element={<Navigate to="/not-found" replace />} />
         </Routes>
       </ThemeProvider>

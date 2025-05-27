@@ -27,8 +27,10 @@ import {
   Compass,
   Calendar,
   Users,
-  Plus
+  Plus,
+  Route
 } from "lucide-react";
+import { Icons } from "@/components/ui/icons";
 import { useTheme } from "@/components/ui/theme-provider";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -85,6 +87,13 @@ const Navbar = () => {
           </Link>
           
           <div className="hidden md:flex items-center gap-4">
+            <Link to="/tour-planner" className="text-sm font-medium transition-colors hover:text-primary">
+              <div className="flex items-center gap-1.5 px-3 py-2">
+                <Route className="h-4 w-4" />
+                <span>Tour Planner</span>
+              </div>
+            </Link>
+            
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -297,6 +306,29 @@ const Navbar = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            <Link to="/submit" className="text-sm font-medium transition-colors hover:text-primary">
+              <div className="flex items-center gap-1.5 px-3 py-2">
+                <Icons.submit className="h-4 w-4" />
+                <span>Submit</span>
+              </div>
+            </Link>
+            
+            <Link to="/requests" className="text-sm font-medium transition-colors hover:text-primary">
+              <div className="flex items-center gap-1.5 px-3 py-2">
+                <Icons.request className="h-4 w-4" />
+                <span>Requests</span>
+              </div>
+            </Link>
+            
+            {user && (
+              <Link to="/dashboard" className="text-sm font-medium transition-colors hover:text-primary">
+                <div className="flex items-center gap-1.5 px-3 py-2">
+                  <Icons.dashboard className="h-4 w-4" />
+                  <span>Dashboard</span>
+                </div>
+              </Link>
+            )}
           </div>
         </div>
 
@@ -405,6 +437,10 @@ const Navbar = () => {
                 )}
                 
                 <div className="space-y-2">
+                  <Link to="/tour-planner" className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Route className="h-5 w-5" />
+                    <span>Tour Planner</span>
+                  </Link>
                   <div className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md">
                     <Compass className="h-5 w-5" />
                     <span>Discover</span>
@@ -421,6 +457,14 @@ const Navbar = () => {
                     <Plus className="h-5 w-5" />
                     <span>Create</span>
                   </div>
+                  <Link to="/submit" className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Icons.submit className="h-5 w-5" />
+                    <span>Submit</span>
+                  </Link>
+                  <Link to="/requests" className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Icons.request className="h-5 w-5" />
+                    <span>Requests</span>
+                  </Link>
                 </div>
 
                 {user ? (

@@ -83,11 +83,7 @@ const ProjectChat = forwardRef<ChatInputRef, ProjectChatProps>(({ project, class
     try {
       if (onStatusChange) {
         await onStatusChange(newStatus);
-        await addSystemMessage(`Project status changed to ${newStatus}`, {
-          id: project.id,
-          name: project.name,
-          status: newStatus,
-        });
+        await addSystemMessage(`Project status changed to ${newStatus}`);
         scrollToBottom();
       } else {
         toast.error('You are not authorized to change the project status.');
