@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -83,7 +84,6 @@ const ProjectChat = forwardRef<ChatInputRef, ProjectChatProps>(({ project, class
       if (onStatusChange) {
         await onStatusChange(newStatus);
         await addSystemMessage(`Project status changed to ${newStatus}`, {
-          type: 'status',
           id: project.id,
           name: project.name,
           status: newStatus,
