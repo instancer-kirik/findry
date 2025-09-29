@@ -19,6 +19,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { PlusCircle, Edit } from 'lucide-react';
+import VehicleBuildProject from '@/components/projects/VehicleBuildProject';
 
 const ProjectDetail: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -302,6 +303,16 @@ const ProjectDetail: React.FC = () => {
         </div>
       </Layout>
     );
+  }
+  
+  // Check if this is a vehicle build project
+  const isVehicleBuild = project.tags?.some(tag => 
+    tag.toLowerCase().includes('vehicle') || 
+    tag.toLowerCase().includes('conversion')
+  ) || project.type === 'vehicle_build';
+
+  if (isVehicleBuild) {
+    return <VehicleBuildProject project={project} />;
   }
   
   return (

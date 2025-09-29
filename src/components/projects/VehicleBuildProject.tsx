@@ -1,505 +1,330 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-import {
-  Car,
-  Zap,
-  Sun,
-  Bed,
-  Radio,
-  Shield,
-  Package,
-  Thermometer,
-  Wrench,
-  CheckCircle2,
+import { 
+  CheckCircle2, 
+  Circle, 
   Clock,
-  AlertCircle,
   DollarSign,
-  Calendar,
-  User,
-  ExternalLink,
-  Camera,
+  Wrench,
+  Zap,
+  Droplets,
+  Wind,
+  Home,
+  Palette,
   FileText,
+  MapPin,
+  Calendar,
+  Tag,
+  ChevronRight,
+  ChevronDown,
   Settings
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-interface VehicleBuildPhase {
-  id: string;
-  name: string;
-  description: string;
-  icon: any;
-  status: 'not_started' | 'in_progress' | 'completed' | 'blocked';
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  estimatedCost: number;
-  actualCost?: number;
-  estimatedDuration: string;
-  actualDuration?: string;
-  startDate?: Date;
-  completedDate?: Date;
-  dependencies?: string[];
-  tasks: VehicleBuildTask[];
-  photos?: string[];
-  notes?: string;
-  vendors?: string[];
-  partsList?: VehiclePart[];
-}
-
-interface VehicleBuildTask {
-  id: string;
-  name: string;
-  completed: boolean;
-  notes?: string;
-  estimatedHours?: number;
-  actualHours?: number;
-}
-
-interface VehiclePart {
-  id: string;
-  name: string;
-  brand: string;
-  model?: string;
-  cost: number;
-  quantity: number;
-  vendor: string;
-  purchaseDate?: Date;
-  warrantyInfo?: string;
-  installationNotes?: string;
-}
+import type { Project } from '@/types/project';
 
 interface VehicleBuildProjectProps {
-  vehicleInfo: {
-    make: string;
-    model: string;
-    year: number;
-    type: 'van' | 'rv' | 'truck' | 'car';
-    mileage?: number;
-    purchaseDate?: Date;
-    purchasePrice?: number;
-  };
-  phases: VehicleBuildPhase[];
-  onPhaseUpdate: (phaseId: string, updates: Partial<VehicleBuildPhase>) => void;
-  onTaskToggle: (phaseId: string, taskId: string) => void;
+  project: Project;
 }
 
-const VehicleBuildProject: React.FC<VehicleBuildProjectProps> = ({
-  vehicleInfo,
-  phases,
-  onPhaseUpdate,
-  onTaskToggle
-}) => {
-  const [selectedPhase, setSelectedPhase] = useState<string | null>(null);
+const VehicleBuildProject = ({ project }: VehicleBuildProjectProps) => {
+  const [expandedPhases, setExpandedPhases] = useState<string[]>([]);
 
-  const getStatusColor = (status: VehicleBuildPhase['status']) => {
+  // Extract vehicle info from project data
+  const vehicleInfo = {
+    type: project.type || 'Bread Truck Conversion',
+    location: project.location || 'Portland, OR',
+    budget: project.budget || '$25,000',
+  };
+
+  // Map project components (phases) with their tasks
+  const phases = project.components.map((component, index) => {
+    // Distribute tasks across phases
+    // In the future, you might want to add a phase_id or component_id field to tasks
+    const tasksPerPhase = Math.ceil(project.tasks.length / project.components.length);
+    const startIdx = index * tasksPerPhase;
+    const endIdx = startIdx + tasksPerPhase;
+    const phaseTasks = project.tasks.slice(startIdx, endIdx);
+
+    const completedTasks = phaseTasks.filter(t => t.status === 'completed').length;
+    const phaseProgress = phaseTasks.length > 0 
+      ? Math.round((completedTasks / phaseTasks.length) * 100)
+      : 0;
+
+    // Assign icons based on phase name
+    let icon = Wrench;
+    const phaseName = component.name.toLowerCase();
+    if (phaseName.includes('electrical')) icon = Zap;
+    else if (phaseName.includes('plumbing')) icon = Droplets;
+    else if (phaseName.includes('insulation')) icon = Wind;
+    else if (phaseName.includes('interior')) icon = Home;
+    else if (phaseName.includes('finishing')) icon = Palette;
+    else if (phaseName.includes('planning') || phaseName.includes('assessment')) icon = FileText;
+
+    return {
+      id: component.id,
+      name: component.name,
+      icon,
+      status: component.status,
+      progress: phaseProgress,
+      tasks: phaseTasks.map(task => ({
+        id: task.id,
+        name: task.title || task.name,
+        status: task.status,
+        priority: task.priority,
+      })),
+      notes: component.description || '',
+    };
+  });
+
+  const stats = {
+    totalPhases: phases.length,
+    completedPhases: phases.filter(p => p.status === 'completed').length,
+    totalTasks: project.tasks.length,
+    completedTasks: project.tasks.filter(t => t.status === 'completed').length,
+    overallProgress: project.progress,
+  };
+
+  const togglePhase = (phaseId: string) => {
+    setExpandedPhases(prev => 
+      prev.includes(phaseId) 
+        ? prev.filter(id => id !== phaseId)
+        : [...prev, phaseId]
+    );
+  };
+
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'bg-green-500';
-      case 'in_progress': return 'bg-blue-500';
-      case 'blocked': return 'bg-red-500';
-      default: return 'bg-gray-400';
+      case 'completed':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'in_progress':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'pending':
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
-  const getStatusIcon = (status: VehicleBuildPhase['status']) => {
-    switch (status) {
-      case 'completed': return CheckCircle2;
-      case 'in_progress': return Clock;
-      case 'blocked': return AlertCircle;
-      default: return Clock;
-    }
-  };
-
-  const getPriorityColor = (priority: VehicleBuildPhase['priority']) => {
+  const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'critical': return 'bg-red-100 text-red-800 border-red-200';
-      case 'high': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'high':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'low':
+        return 'bg-green-100 text-green-800 border-green-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
-  const calculateOverallProgress = () => {
-    if (phases.length === 0) return 0;
-    const completedPhases = phases.filter(p => p.status === 'completed').length;
-    return Math.round((completedPhases / phases.length) * 100);
-  };
-
-  const calculateTotalBudget = () => {
-    return phases.reduce((total, phase) => total + phase.estimatedCost, 0);
-  };
-
-  const calculateActualSpend = () => {
-    return phases.reduce((total, phase) => total + (phase.actualCost || 0), 0);
+  const StatusIcon = ({ status }: { status: string }) => {
+    switch (status) {
+      case 'completed':
+        return <CheckCircle2 className="h-5 w-5 text-green-600" />;
+      case 'in_progress':
+        return <Clock className="h-5 w-5 text-blue-600" />;
+      default:
+        return <Circle className="h-5 w-5 text-gray-400" />;
+    }
   };
 
   return (
-    <div className="space-y-6">
-      {/* Vehicle Header */}
+    <div className="container mx-auto py-8 space-y-6">
+      {/* Project Header */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg">
-                <Car className="h-8 w-8" />
-              </div>
-              <div>
-                <CardTitle className="text-2xl">
-                  {vehicleInfo.year} {vehicleInfo.make} {vehicleInfo.model}
-                </CardTitle>
-                <p className="text-muted-foreground capitalize">
-                  {vehicleInfo.type} Build Project
-                  {vehicleInfo.mileage && ` • ${vehicleInfo.mileage.toLocaleString()} miles`}
-                </p>
-              </div>
+            <div>
+              <CardTitle className="text-2xl">{project.name}</CardTitle>
+              <CardDescription>
+                {project.description}
+              </CardDescription>
             </div>
-            <div className="text-right">
-              <div className="text-3xl font-bold text-primary">
-                {calculateOverallProgress()}%
-              </div>
-              <p className="text-sm text-muted-foreground">Complete</p>
-            </div>
+            <Badge variant="outline" className={getStatusColor(project.status)}>
+              {project.status.replace('_', ' ').toUpperCase()}
+            </Badge>
           </div>
-          <Progress value={calculateOverallProgress()} className="mt-4" />
         </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            {vehicleInfo.location && (
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">{vehicleInfo.location}</span>
+              </div>
+            )}
+            {vehicleInfo.budget && (
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">{vehicleInfo.budget}</span>
+              </div>
+            )}
+            {project.tags && project.tags.length > 0 && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <Tag className="h-4 w-4 text-muted-foreground" />
+                {project.tags.slice(0, 2).map(tag => (
+                  <Badge key={tag} variant="secondary" className="text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm text-muted-foreground">
+              <span>Overall Progress</span>
+              <span>{stats.overallProgress}%</span>
+            </div>
+            <Progress value={stats.overallProgress} className="h-3" />
+          </div>
+        </CardContent>
       </Card>
 
-      {/* Budget Overview */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
-          <CardContent className="p-4 text-center">
-            <DollarSign className="h-8 w-8 text-green-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold">${calculateTotalBudget().toLocaleString()}</div>
-            <p className="text-sm text-muted-foreground">Estimated Budget</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <DollarSign className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold">${calculateActualSpend().toLocaleString()}</div>
-            <p className="text-sm text-muted-foreground">Actual Spend</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <CheckCircle2 className="h-8 w-8 text-green-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold">
-              {phases.filter(p => p.status === 'completed').length}
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Total Phases</p>
+                <p className="text-2xl font-bold">{stats.totalPhases}</p>
+              </div>
+              <Wrench className="h-8 w-8 text-muted-foreground" />
             </div>
-            <p className="text-sm text-muted-foreground">Phases Complete</p>
           </CardContent>
         </Card>
+
         <Card>
-          <CardContent className="p-4 text-center">
-            <Clock className="h-8 w-8 text-orange-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold">
-              {phases.filter(p => p.status === 'in_progress').length}
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Completed</p>
+                <p className="text-2xl font-bold">{stats.completedPhases}</p>
+              </div>
+              <CheckCircle2 className="h-8 w-8 text-green-600" />
             </div>
-            <p className="text-sm text-muted-foreground">In Progress</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Total Tasks</p>
+                <p className="text-2xl font-bold">{stats.totalTasks}</p>
+              </div>
+              <FileText className="h-8 w-8 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Tasks Done</p>
+                <p className="text-2xl font-bold">{stats.completedTasks}</p>
+              </div>
+              <CheckCircle2 className="h-8 w-8 text-green-600" />
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="phases">Phases</TabsTrigger>
-          <TabsTrigger value="timeline">Timeline</TabsTrigger>
-          <TabsTrigger value="budget">Budget</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {phases.map((phase) => {
-              const StatusIcon = getStatusIcon(phase.status);
+      {/* Build Phases */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Build Phases</CardTitle>
+          <CardDescription>Track progress through each phase of the build</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {phases.map((phase, index) => {
               const Icon = phase.icon;
-              const completedTasks = phase.tasks.filter(t => t.completed).length;
-              const taskProgress = phase.tasks.length > 0
-                ? Math.round((completedTasks / phase.tasks.length) * 100)
-                : 0;
+              const isExpanded = expandedPhases.includes(phase.id);
 
               return (
-                <Card key={phase.id} className={cn(
-                  "cursor-pointer transition-all hover:shadow-lg",
-                  selectedPhase === phase.id && "ring-2 ring-primary"
-                )}>
-                  <CardHeader className="pb-3">
+                <Card key={phase.id} className="overflow-hidden">
+                  <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => togglePhase(phase.id)}>
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg">
-                          <Icon className="h-5 w-5" />
+                      <div className="flex items-center gap-4 flex-1">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground font-bold">
+                          {index + 1}
                         </div>
-                        <div>
-                          <CardTitle className="text-sm font-medium">{phase.name}</CardTitle>
-                          <Badge variant="outline" className={getPriorityColor(phase.priority)}>
-                            {phase.priority}
-                          </Badge>
+                        <Icon className="h-6 w-6 text-muted-foreground" />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold">{phase.name}</h3>
+                            <Badge variant="outline" className={getStatusColor(phase.status)}>
+                              {phase.status.replace('_', ' ')}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground line-clamp-1">{phase.notes}</p>
                         </div>
                       </div>
-                      <div className={cn(
-                        "w-3 h-3 rounded-full",
-                        getStatusColor(phase.status)
-                      )} />
+                      <div className="flex items-center gap-4">
+                        <div className="text-right min-w-[80px]">
+                          <div className="text-sm font-medium">{phase.progress}%</div>
+                          <div className="text-xs text-muted-foreground">
+                            {phase.tasks.filter(t => t.status === 'completed').length}/{phase.tasks.length} tasks
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="sm">
+                          {isExpanded ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
                     </div>
+                    <Progress value={phase.progress} className="mt-3" />
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                      {phase.description}
-                    </p>
 
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Tasks: {completedTasks}/{phase.tasks.length}</span>
-                        <span>{taskProgress}%</span>
+                  {isExpanded && (
+                    <CardContent className="pt-4 border-t">
+                      <div className="space-y-3">
+                        <h4 className="font-medium mb-3">Tasks</h4>
+                        {phase.tasks.map(task => (
+                          <div 
+                            key={task.id}
+                            className={cn(
+                              "flex items-center gap-3 p-3 rounded-lg border",
+                              task.status === 'completed' && 'bg-muted/50'
+                            )}
+                          >
+                            <StatusIcon status={task.status} />
+                            <div className="flex-1">
+                              <div className={cn(
+                                "font-medium",
+                                task.status === 'completed' && 'line-through text-muted-foreground'
+                              )}>
+                                {task.name}
+                              </div>
+                            </div>
+                            <Badge variant="outline" className={getPriorityColor(task.priority)}>
+                              {task.priority}
+                            </Badge>
+                            <Badge variant="outline" className={getStatusColor(task.status)}>
+                              {task.status}
+                            </Badge>
+                          </div>
+                        ))}
                       </div>
-                      <Progress value={taskProgress} className="h-2" />
-                    </div>
-
-                    <div className="flex justify-between items-center mt-3 text-xs text-muted-foreground">
-                      <span>${phase.estimatedCost.toLocaleString()}</span>
-                      <span>{phase.estimatedDuration}</span>
-                    </div>
-
-                    <div className="flex items-center justify-between mt-3">
-                      <div className="flex items-center space-x-1">
-                        <StatusIcon className="h-4 w-4" />
-                        <span className="text-sm capitalize">
-                          {phase.status.replace('_', ' ')}
-                        </span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedPhase(
-                          selectedPhase === phase.id ? null : phase.id
-                        )}
-                      >
-                        {selectedPhase === phase.id ? 'Collapse' : 'Expand'}
-                      </Button>
-                    </div>
-                  </CardContent>
+                    </CardContent>
+                  )}
                 </Card>
               );
             })}
           </div>
-        </TabsContent>
-
-        <TabsContent value="phases">
-          <div className="space-y-4">
-            {phases.map((phase, index) => (
-              <Card key={phase.id}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="flex items-center justify-center w-8 h-8 bg-primary text-primary-foreground rounded-full text-sm font-bold">
-                        {index + 1}
-                      </div>
-                      <div>
-                        <CardTitle className="flex items-center space-x-2">
-                          <phase.icon className="h-5 w-5" />
-                          <span>{phase.name}</span>
-                        </CardTitle>
-                        <p className="text-sm text-muted-foreground">{phase.description}</p>
-                      </div>
-                    </div>
-                    <Badge variant="outline" className={getPriorityColor(phase.priority)}>
-                      {phase.priority}
-                    </Badge>
-                  </div>
-                </CardHeader>
-
-                {selectedPhase === phase.id && (
-                  <CardContent>
-                    <Tabs defaultValue="tasks">
-                      <TabsList className="mb-4">
-                        <TabsTrigger value="tasks">Tasks</TabsTrigger>
-                        <TabsTrigger value="parts">Parts</TabsTrigger>
-                        <TabsTrigger value="photos">Photos</TabsTrigger>
-                        <TabsTrigger value="notes">Notes</TabsTrigger>
-                      </TabsList>
-
-                      <TabsContent value="tasks">
-                        <div className="space-y-2">
-                          {phase.tasks.map((task) => (
-                            <div
-                              key={task.id}
-                              className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={task.completed}
-                                onChange={() => onTaskToggle(phase.id, task.id)}
-                                className="rounded"
-                              />
-                              <div className="flex-1">
-                                <p className={cn(
-                                  "font-medium",
-                                  task.completed && "line-through text-muted-foreground"
-                                )}>
-                                  {task.name}
-                                </p>
-                                {task.notes && (
-                                  <p className="text-sm text-muted-foreground">{task.notes}</p>
-                                )}
-                              </div>
-                              {task.estimatedHours && (
-                                <Badge variant="outline">
-                                  {task.actualHours || task.estimatedHours}h
-                                </Badge>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </TabsContent>
-
-                      <TabsContent value="parts">
-                        <div className="space-y-3">
-                          {phase.partsList?.map((part) => (
-                            <div key={part.id} className="p-3 border rounded-lg">
-                              <div className="flex justify-between items-start mb-2">
-                                <div>
-                                  <h4 className="font-medium">{part.name}</h4>
-                                  <p className="text-sm text-muted-foreground">
-                                    {part.brand} {part.model}
-                                  </p>
-                                </div>
-                                <Badge variant="outline">
-                                  ${part.cost * part.quantity}
-                                </Badge>
-                              </div>
-                              <div className="text-xs text-muted-foreground space-y-1">
-                                <p>Qty: {part.quantity} • Vendor: {part.vendor}</p>
-                                {part.warrantyInfo && <p>Warranty: {part.warrantyInfo}</p>}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </TabsContent>
-
-                      <TabsContent value="photos">
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                          {phase.photos?.map((photo, idx) => (
-                            <div key={idx} className="aspect-square bg-muted rounded-lg flex items-center justify-center">
-                              <Camera className="h-8 w-8 text-muted-foreground" />
-                            </div>
-                          ))}
-                          <Button variant="outline" className="aspect-square">
-                            <Camera className="h-6 w-6" />
-                          </Button>
-                        </div>
-                      </TabsContent>
-
-                      <TabsContent value="notes">
-                        <div className="space-y-3">
-                          <textarea
-                            className="w-full h-32 p-3 border rounded-lg resize-none"
-                            placeholder="Add notes about this phase..."
-                            value={phase.notes || ''}
-                            onChange={(e) => onPhaseUpdate(phase.id, { notes: e.target.value })}
-                          />
-                        </div>
-                      </TabsContent>
-                    </Tabs>
-                  </CardContent>
-                )}
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="timeline">
-          <Card>
-            <CardHeader>
-              <CardTitle>Project Timeline</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {phases.map((phase, index) => (
-                  <div key={phase.id} className="flex items-center space-x-4">
-                    <div className={cn(
-                      "w-4 h-4 rounded-full border-2",
-                      phase.status === 'completed' ? 'bg-green-500 border-green-500' :
-                      phase.status === 'in_progress' ? 'bg-blue-500 border-blue-500' :
-                      'bg-gray-200 border-gray-300'
-                    )} />
-                    <div className="flex-1">
-                      <p className="font-medium">{phase.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {phase.estimatedDuration} • ${phase.estimatedCost.toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {phase.startDate && phase.startDate.toLocaleDateString()}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="budget">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Budget Breakdown</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {phases.map((phase) => (
-                    <div key={phase.id} className="flex justify-between items-center">
-                      <span className="text-sm">{phase.name}</span>
-                      <div className="text-right">
-                        <div className="font-medium">
-                          ${(phase.actualCost || phase.estimatedCost).toLocaleString()}
-                        </div>
-                        {phase.actualCost && phase.actualCost !== phase.estimatedCost && (
-                          <div className={cn(
-                            "text-xs",
-                            phase.actualCost > phase.estimatedCost ? "text-red-500" : "text-green-500"
-                          )}>
-                            {phase.actualCost > phase.estimatedCost ? '+' : ''}
-                            ${(phase.actualCost - phase.estimatedCost).toLocaleString()}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Spending vs Budget</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span>Budget Progress</span>
-                      <span>{Math.round((calculateActualSpend() / calculateTotalBudget()) * 100)}%</span>
-                    </div>
-                    <Progress value={(calculateActualSpend() / calculateTotalBudget()) * 100} />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="text-center p-3 bg-muted/30 rounded-lg">
-                      <div className="font-bold text-lg">${calculateTotalBudget().toLocaleString()}</div>
-                      <div className="text-muted-foreground">Budget</div>
-                    </div>
-                    <div className="text-center p-3 bg-muted/30 rounded-lg">
-                      <div className="font-bold text-lg">${calculateActualSpend().toLocaleString()}</div>
-                      <div className="text-muted-foreground">Spent</div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 };
