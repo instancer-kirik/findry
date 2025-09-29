@@ -24,7 +24,7 @@ import {
   ExternalLink,
   Camera,
   FileText,
-  Tools
+  Settings
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
