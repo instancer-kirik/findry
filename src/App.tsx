@@ -1,59 +1,59 @@
-
-import React, { useState, useEffect } from 'react';
-import { Route, Routes, useLocation, Link, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import Index from './pages/Index';
-import About from './pages/About';
-import Dashboard from './pages/Dashboard';
-import Contact from './pages/Contact';
-import ProfilePage from './pages/ProfilePage';
-import ProfileSetup from './pages/ProfileSetup';
-import SignUp from './pages/SignUp';
-import Login from './pages/Login';
-import ResetPassword from './pages/ResetPassword';
-import Discover from './pages/Discover';
-import ArtistProfile from './pages/ArtistProfile';
-import VenueDetail from './pages/VenueDetail';
-import BrandDetail from './pages/BrandDetail';
-import ResourceDetail from './pages/ResourceDetail';
-import ResourceIndexPage from './pages/ResourceIndexPage';
-import CreateEvent from './pages/CreateEvent';
-import EventDetail from './pages/events/EventDetail';
-import EditEvent from './pages/events/EditEvent';
-import EventsUpcoming from './pages/EventsUpcoming';
-import EventsInterested from './pages/EventsInterested';
-import EventbriteCallback from './pages/EventbriteCallback';
-import EventbriteOrders from './pages/EventbriteOrders';
-import Communities from './pages/Communities';
-import CommunityDashboard from './pages/CommunityDashboard';
-import CommunityEvents from './pages/CommunityEvents';
-import Projects from './pages/Projects';
-import CreateProject from './pages/CreateProject';
-import ProjectDetail from './pages/ProjectDetail';
-import Shops from './pages/Shops';
-import CreateShop from './pages/CreateShop';
-import Collaboration from './pages/Collaboration';
-import Chats from './pages/Chats';
-import MeetingScheduler from './pages/MeetingScheduler';
-import Offers from './pages/Offers';
-import Items from './pages/Items';
-import NotFound from './pages/NotFound';
+import React, { useState, useEffect } from "react";
+import { Route, Routes, useLocation, Link, Navigate } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import Index from "./pages/Index";
+import About from "./pages/About";
+import Dashboard from "./pages/Dashboard";
+import Contact from "./pages/Contact";
+import ProfilePage from "./pages/ProfilePage";
+import ProfileSetup from "./pages/ProfileSetup";
+import SignUp from "./pages/SignUp";
+import Login from "./pages/Login";
+import ResetPassword from "./pages/ResetPassword";
+import Discover from "./pages/Discover";
+import ArtistProfile from "./pages/ArtistProfile";
+import VenueDetail from "./pages/VenueDetail";
+import BrandDetail from "./pages/BrandDetail";
+import ResourceDetail from "./pages/ResourceDetail";
+import ResourceIndexPage from "./pages/ResourceIndexPage";
+import CreateEvent from "./pages/CreateEvent";
+import EventDetail from "./pages/events/EventDetail";
+import EditEvent from "./pages/events/EditEvent";
+import EventsUpcoming from "./pages/EventsUpcoming";
+import EventsInterested from "./pages/EventsInterested";
+import EventbriteCallback from "./pages/EventbriteCallback";
+import EventbriteOrders from "./pages/EventbriteOrders";
+import Communities from "./pages/Communities";
+import CommunityDashboard from "./pages/CommunityDashboard";
+import CommunityEvents from "./pages/CommunityEvents";
+import Projects from "./pages/Projects";
+import CreateProject from "./pages/CreateProject";
+import ProjectDetail from "./pages/ProjectDetail";
+import Shops from "./pages/Shops";
+import CreateShop from "./pages/CreateShop";
+import Collaboration from "./pages/Collaboration";
+import Chats from "./pages/Chats";
+import MeetingScheduler from "./pages/MeetingScheduler";
+import Offers from "./pages/Offers";
+import Items from "./pages/Items";
+import NotFound from "./pages/NotFound";
 import { ThemeProvider } from "@/components/ui/theme-provider";
-import { Toaster } from "@/components/ui/toaster"
-import { useAuth } from '@/hooks/use-auth';
-import { Profile } from '@/types/profile';
+import { Toaster } from "@/components/ui/toaster";
+import { useAuth } from "@/hooks/use-auth";
+import { Profile } from "@/types/profile";
 
-import ShopDetail from './pages/ShopDetail';
-import ProductDetail from './pages/ProductDetail';
-import TandemXShop from './pages/TandemXShop';
-import ResourcerProfile from './pages/ResourcerProfile';
-import Grouper from './pages/Grouper';
-import GlossaryPage from './pages/GlossaryPage';
-import CreateGlossaryEntry from './pages/CreateGlossaryEntry';
-import GlossaryEntryDetail from './pages/GlossaryEntryDetail';
-import GlossaryExample from './pages/GlossaryExample';
-import TourPlanner from './pages/TourPlanner';
-import GearPacking from './pages/GearPacking';
+import ShopDetail from "./pages/ShopDetail";
+import ProductDetail from "./pages/ProductDetail";
+import TandemXShop from "./pages/TandemXShop";
+import ResourcerProfile from "./pages/ResourcerProfile";
+import Grouper from "./pages/Grouper";
+import GlossaryPage from "./pages/GlossaryPage";
+import CreateGlossaryEntry from "./pages/CreateGlossaryEntry";
+import GlossaryEntryDetail from "./pages/GlossaryEntryDetail";
+import GlossaryExample from "./pages/GlossaryExample";
+import TourPlanner from "./pages/TourPlanner";
+import GearPacking from "./pages/GearPacking";
+import VehicleBuildShowcase from "./pages/VehicleBuildShowcase";
 
 const queryClient = new QueryClient();
 
@@ -65,17 +65,20 @@ const App: React.FC = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       if (user) {
-        console.log('Fetching profile for user:', user);
+        console.log("Fetching profile for user:", user);
         setProfile({
           id: user.id,
-          username: user.user_metadata.user_name || user.email?.split('@')[0] || 'Unknown',
-          full_name: user.user_metadata.full_name || 'Full Name',
-          avatar_url: user.user_metadata.avatar_url || '',
-          bio: user.user_metadata.bio || '',
-          created_at: '',
-          updated_at: '',
+          username:
+            user.user_metadata.user_name ||
+            user.email?.split("@")[0] ||
+            "Unknown",
+          full_name: user.user_metadata.full_name || "Full Name",
+          avatar_url: user.user_metadata.avatar_url || "",
+          bio: user.user_metadata.bio || "",
+          created_at: "",
+          updated_at: "",
           role_attributes: {},
-          profile_types: []
+          profile_types: [],
         });
       } else {
         setProfile(null);
@@ -123,7 +126,10 @@ const App: React.FC = () => {
           <Route path="/tandemx-shop" element={<TandemXShop />} />
           <Route path="/shops" element={<Shops />} />
           <Route path="/shops/:shopId" element={<ShopDetail />} />
-          <Route path="/shops/:shopId/products/:productId" element={<ProductDetail />} />
+          <Route
+            path="/shops/:shopId/products/:productId"
+            element={<ProductDetail />}
+          />
           <Route path="/create-shop" element={<CreateShop />} />
           <Route path="/shops/create" element={<CreateShop />} />
           <Route path="/eventbrite/callback" element={<EventbriteCallback />} />
@@ -134,7 +140,10 @@ const App: React.FC = () => {
           <Route path="/resources/:resourceId" element={<ResourceDetail />} />
           <Route path="/chats" element={<Chats />} />
           <Route path="/artist/:artistId" element={<ArtistProfile />} />
-          <Route path="/resourcer/:resourcerId" element={<ResourcerProfile />} />
+          <Route
+            path="/resourcer/:resourcerId"
+            element={<ResourcerProfile />}
+          />
           <Route path="/glossary" element={<GlossaryPage />} />
           <Route path="/glossary/create" element={<CreateGlossaryEntry />} />
           <Route path="/glossary/:entryId" element={<GlossaryEntryDetail />} />
@@ -143,6 +152,7 @@ const App: React.FC = () => {
           <Route path="/gear-packing" element={<GearPacking />} />
           <Route path="/submit" element={<ResourceIndexPage />} />
           <Route path="/requests" element={<Offers />} />
+          <Route path="/vehicle-build" element={<VehicleBuildShowcase />} />
           <Route path="*" element={<Navigate to="/not-found" replace />} />
         </Routes>
       </ThemeProvider>

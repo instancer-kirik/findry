@@ -1,51 +1,63 @@
-
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarIcon, Clock } from 'lucide-react';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { TourStop } from '@/types/content';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar as CalendarIcon, Clock } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { TourStop } from "@/types/content";
 
 interface CreateStopFormProps {
-  tourType: 'band_tour' | 'roadtrip';
-  onSubmit: (stop: Omit<TourStop, 'id' | 'tour_id'>) => void;
+  onSubmit: (stop: Omit<TourStop, "id" | "tour_id">) => void;
   onCancel: () => void;
-  defaultOrder: number;
+  order: number;
 }
 
-const CreateStopForm: React.FC<CreateStopFormProps> = ({ tourType, onSubmit, onCancel, defaultOrder }) => {
-  const [name, setName] = useState('');
-  const [location, setLocation] = useState('');
-  const [address, setAddress] = useState('');
+const CreateStopForm: React.FC<CreateStopFormProps> = ({
+  onSubmit,
+  onCancel,
+  order: defaultOrder,
+}) => {
+  const [name, setName] = useState("");
+  const [location, setLocation] = useState("");
+  const [address, setAddress] = useState("");
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [arrivalTime, setArrivalTime] = useState('');
-  const [departureTime, setDepartureTime] = useState('');
-  const [description, setDescription] = useState('');
+  const [arrivalTime, setArrivalTime] = useState("");
+  const [departureTime, setDepartureTime] = useState("");
+  const [description, setDescription] = useState("");
   const [order, setOrder] = useState(defaultOrder);
-  const [accommodation, setAccommodation] = useState('');
+  const [accommodation, setAccommodation] = useState("");
   const [isStopPoint, setIsStopPoint] = useState(false);
-  const [venueId, setVenueId] = useState('');
+  const [venueId, setVenueId] = useState("");
   const [venueOptions] = useState([
-    { id: 'venue-1', name: 'The Fillmore' },
-    { id: 'venue-2', name: 'Red Rocks Amphitheatre' },
-    { id: 'venue-3', name: 'House of Blues' },
-    { id: 'venue-4', name: 'Madison Square Garden' },
+    { id: "venue-1", name: "The Fillmore" },
+    { id: "venue-2", name: "Red Rocks Amphitheatre" },
+    { id: "venue-3", name: "House of Blues" },
+    { id: "venue-4", name: "Madison Square Garden" },
   ]);
-  
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!name || !location || !date) {
       return; // Basic validation
     }
-    
+
     onSubmit({
       name,
       location,
@@ -57,10 +69,10 @@ const CreateStopForm: React.FC<CreateStopFormProps> = ({ tourType, onSubmit, onC
       order,
       accommodation,
       is_stop_point: isStopPoint,
-      venue_id: venueId || undefined
+      venue_id: venueId || undefined,
     });
   };
-  
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -74,7 +86,7 @@ const CreateStopForm: React.FC<CreateStopFormProps> = ({ tourType, onSubmit, onC
             required
           />
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="order">Order</Label>
           <Input
@@ -87,7 +99,7 @@ const CreateStopForm: React.FC<CreateStopFormProps> = ({ tourType, onSubmit, onC
           />
         </div>
       </div>
-      
+
       <div className="space-y-2">
         <Label htmlFor="location">City/Location</Label>
         <Input
@@ -98,7 +110,7 @@ const CreateStopForm: React.FC<CreateStopFormProps> = ({ tourType, onSubmit, onC
           required
         />
       </div>
-      
+
       <div className="space-y-2">
         <Label htmlFor="address">Full Address</Label>
         <Input
@@ -108,23 +120,23 @@ const CreateStopForm: React.FC<CreateStopFormProps> = ({ tourType, onSubmit, onC
           onChange={(e) => setAddress(e.target.value)}
         />
       </div>
-      
-      {tourType === 'band_tour' && (
-        <div className="space-y-2">
-          <Label htmlFor="venue">Venue</Label>
-          <Select value={venueId} onValueChange={setVenueId}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a venue (optional)" />
-            </SelectTrigger>
-            <SelectContent>
-              {venueOptions.map((venue) => (
-                <SelectItem key={venue.id} value={venue.id}>{venue.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-      
+
+      <div className="space-y-2">
+        <Label htmlFor="venue">Venue</Label>
+        <Select value={venueId} onValueChange={setVenueId}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a venue (optional)" />
+          </SelectTrigger>
+          <SelectContent>
+            {venueOptions.map((venue) => (
+              <SelectItem key={venue.id} value={venue.id}>
+                {venue.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label>Date</Label>
@@ -134,7 +146,7 @@ const CreateStopForm: React.FC<CreateStopFormProps> = ({ tourType, onSubmit, onC
                 variant="outline"
                 className={cn(
                   "w-full pl-3 text-left font-normal",
-                  !date && "text-muted-foreground"
+                  !date && "text-muted-foreground",
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
@@ -151,7 +163,7 @@ const CreateStopForm: React.FC<CreateStopFormProps> = ({ tourType, onSubmit, onC
             </PopoverContent>
           </Popover>
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="arrival">Arrival Time</Label>
           <div className="flex">
@@ -167,7 +179,7 @@ const CreateStopForm: React.FC<CreateStopFormProps> = ({ tourType, onSubmit, onC
             />
           </div>
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="departure">Departure Time</Label>
           <div className="flex">
@@ -184,7 +196,7 @@ const CreateStopForm: React.FC<CreateStopFormProps> = ({ tourType, onSubmit, onC
           </div>
         </div>
       </div>
-      
+
       <div className="space-y-2">
         <Label htmlFor="accommodation">Accommodation</Label>
         <Input
@@ -194,7 +206,7 @@ const CreateStopForm: React.FC<CreateStopFormProps> = ({ tourType, onSubmit, onC
           onChange={(e) => setAccommodation(e.target.value)}
         />
       </div>
-      
+
       <div className="space-y-2">
         <Label htmlFor="description">Notes</Label>
         <Textarea
@@ -205,7 +217,7 @@ const CreateStopForm: React.FC<CreateStopFormProps> = ({ tourType, onSubmit, onC
           rows={2}
         />
       </div>
-      
+
       <div className="flex items-center space-x-2">
         <Switch
           id="stop-point"
@@ -213,17 +225,15 @@ const CreateStopForm: React.FC<CreateStopFormProps> = ({ tourType, onSubmit, onC
           onCheckedChange={setIsStopPoint}
         />
         <Label htmlFor="stop-point">
-          This is just a stop point (not a {tourType === 'band_tour' ? 'performance' : 'main destination'})
+          This is just a stop point (not a main destination)
         </Label>
       </div>
-      
+
       <div className="flex justify-end space-x-2 pt-4">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit">
-          Add Stop
-        </Button>
+        <Button type="submit">Add Stop</Button>
       </div>
     </form>
   );
