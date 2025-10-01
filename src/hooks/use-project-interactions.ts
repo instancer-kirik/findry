@@ -155,7 +155,14 @@ export const useProjectInteractions = ({ projectId }: ProjectInteractionsProps) 
       
       const { error } = await supabase
         .from('project_components')
-        .update(component)
+        .update({
+          name: component.name,
+          type: component.type,
+          description: component.description,
+          status: component.status,
+          assigned_to: component.assignedTo,
+          due_date: component.dueDate,
+        })
         .eq('id', component.id);
       
       if (error) throw error;
@@ -207,7 +214,15 @@ export const useProjectInteractions = ({ projectId }: ProjectInteractionsProps) 
       
       const { error } = await supabase
         .from('project_tasks')
-        .update(task)
+        .update({
+          name: task.name,
+          title: task.title,
+          description: task.description,
+          status: task.status,
+          priority: task.priority,
+          assigned_to: task.assignedTo,
+          due_date: task.dueDate,
+        })
         .eq('id', task.id);
       
       if (error) throw error;
