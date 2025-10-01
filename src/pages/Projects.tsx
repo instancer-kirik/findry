@@ -32,7 +32,7 @@ const Projects: React.FC = () => {
   };
 
   const handleViewProject = (projectId: string) => {
-    navigate(`/project/${projectId}`);
+    navigate(`/projects/${projectId}`);
   };
 
   if (isLoading) {
