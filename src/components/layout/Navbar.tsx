@@ -139,7 +139,10 @@ const Navbar = () => {
                   <div>
                     <DropdownMenuLabel className="text-primary mb-1">More</DropdownMenuLabel>
                     <DropdownMenuItem asChild>
-                      <Link to="/projects" className="w-full cursor-pointer">Projects</Link>
+                      <Link to="/discover/projects" className="w-full cursor-pointer">Public Projects</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/projects" className="w-full cursor-pointer">My Projects</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to="/brands" className="w-full cursor-pointer">Brands</Link>

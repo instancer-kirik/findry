@@ -29,6 +29,7 @@ import CommunityEvents from "./pages/CommunityEvents";
 import Projects from "./pages/Projects";
 import CreateProject from "./pages/CreateProject";
 import ProjectDetail from "./pages/ProjectDetail";
+import ProjectsShowcase from "./pages/ProjectsShowcase";
 import Shops from "./pages/Shops";
 import CreateShop from "./pages/CreateShop";
 import Collaboration from "./pages/Collaboration";
@@ -104,10 +105,10 @@ const App: React.FC = () => {
           <Route path="/discover" element={<Discover />} />
           <Route path="/items" element={<Items />} />
           <Route path="/projects" element={<Projects />} />
-          <Route path="/meetings" element={<MeetingScheduler />} />
           <Route path="/projects/:projectId" element={<ProjectDetail />} />
           <Route path="/create-project" element={<CreateProject />} />
           <Route path="/projects/create" element={<CreateProject />} />
+          <Route path="/discover/projects" element={<ProjectsShowcase />} />
           <Route path="/grouper" element={<Grouper />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/:id" element={<ProfilePage />} />

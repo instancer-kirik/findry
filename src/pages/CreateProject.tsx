@@ -18,6 +18,7 @@ interface ProjectFormData {
   ownershipType: ProjectOwnershipType;
   ownerId?: string;
   tags: string[];
+  isPublic: boolean;
 }
 
 const CreateProject = () => {
@@ -30,7 +31,8 @@ const CreateProject = () => {
     name: '',
     description: '',
     ownershipType: 'personal',
-    tags: []
+    tags: [],
+    isPublic: false
   });
   
   // Parse and format tag inputs
@@ -57,7 +59,11 @@ const CreateProject = () => {
         progress: 0,
         tags: formData.tags,
         ownerType: formData.ownershipType,
-        ownerId: formData.ownerId || user.id
+        ownerId: formData.ownerId || user.id,
+        owner_type: formData.ownershipType,
+        owner_id: formData.ownerId || user.id,
+        created_by: user.id,
+        is_public: formData.isPublic
       });
 
       navigate('/projects');
@@ -138,6 +144,19 @@ const CreateProject = () => {
                 placeholder="e.g. design, development, marketing"
                 />
               </div>
+
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="isPublic"
+                checked={formData.isPublic}
+                onChange={(e) => setFormData({ ...formData, isPublic: e.target.checked })}
+                className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary"
+              />
+              <Label htmlFor="isPublic" className="cursor-pointer">
+                Make this project public
+              </Label>
+            </div>
               
             <div className="flex justify-end">
               <Button 

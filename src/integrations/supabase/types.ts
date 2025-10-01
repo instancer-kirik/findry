@@ -4133,12 +4133,18 @@ export type Database = {
           budget: string | null
           category: Database["public"]["Enums"]["project_category"] | null
           created_at: string
+          created_by: string | null
           description: string | null
           documentation_references: Json | null
+          featured: boolean | null
           id: string
           image_url: string | null
+          is_public: boolean | null
+          like_count: number | null
           location: string | null
           name: string
+          owner_id: string | null
+          owner_type: string | null
           progress: number | null
           repo_url: string | null
           source_control_details: Json | null
@@ -4149,17 +4155,24 @@ export type Database = {
           type: string | null
           updated_at: string
           version: string | null
+          view_count: number | null
         }
         Insert: {
           budget?: string | null
           category?: Database["public"]["Enums"]["project_category"] | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
           documentation_references?: Json | null
+          featured?: boolean | null
           id?: string
           image_url?: string | null
+          is_public?: boolean | null
+          like_count?: number | null
           location?: string | null
           name: string
+          owner_id?: string | null
+          owner_type?: string | null
           progress?: number | null
           repo_url?: string | null
           source_control_details?: Json | null
@@ -4170,17 +4183,24 @@ export type Database = {
           type?: string | null
           updated_at?: string
           version?: string | null
+          view_count?: number | null
         }
         Update: {
           budget?: string | null
           category?: Database["public"]["Enums"]["project_category"] | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
           documentation_references?: Json | null
+          featured?: boolean | null
           id?: string
           image_url?: string | null
+          is_public?: boolean | null
+          like_count?: number | null
           location?: string | null
           name?: string
+          owner_id?: string | null
+          owner_type?: string | null
           progress?: number | null
           repo_url?: string | null
           source_control_details?: Json | null
@@ -4191,8 +4211,17 @@ export type Database = {
           type?: string | null
           updated_at?: string
           version?: string | null
+          view_count?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "projects_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       radio_channels: {
         Row: {

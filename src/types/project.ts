@@ -22,6 +22,14 @@ export interface Project {
   type?: string;
   image_url?: string;
   repo_url?: string;
+  // New fields for ownership and discovery
+  owner_type?: string;
+  owner_id?: string;
+  created_by?: string;
+  is_public?: boolean;
+  featured?: boolean;
+  view_count?: number;
+  like_count?: number;
 }
 
 export interface ProjectComponent {
