@@ -98,6 +98,28 @@ const ProjectDetail: React.FC = () => {
 
     const checkOwnership = async () => {
       try {
+        // Check if user owns via project table directly
+        const { data: projectData, error: projectError } = await supabase
+          .from("projects")
+          .select("owner_id, created_by")
+          .eq("id", projectId)
+          .maybeSingle();
+
+        if (projectError) {
+          console.error("Error checking project ownership:", projectError);
+          setIsOwner(false);
+          return;
+        }
+
+        // User is owner if they match owner_id or created_by
+        const isProjectOwner = projectData?.owner_id === user.id || projectData?.created_by === user.id;
+        
+        if (isProjectOwner) {
+          setIsOwner(true);
+          return;
+        }
+
+        // Also check content_ownership table as fallback
         const { data, error } = await supabase
           .from("content_ownership")
           .select("*")
