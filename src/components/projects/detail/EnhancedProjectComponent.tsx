@@ -325,7 +325,7 @@ const EnhancedProjectComponent: React.FC<EnhancedProjectComponentProps> = ({
                     )
                   }
                 >
-                  {task.title || task.name}
+                  {task.title}
                 </span>
                 <div className="flex items-center gap-2">
                   {task.assignedTo && (

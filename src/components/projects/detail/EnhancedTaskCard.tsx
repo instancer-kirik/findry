@@ -116,7 +116,7 @@ const EnhancedTaskCard: React.FC<EnhancedTaskCardProps> = ({
                     )
                   }
                 >
-                  {task.title || task.name}
+                  {task.title}
                 </h3>
                 {task.description && (
                   <p className="text-sm text-muted-foreground mt-1 line-clamp-2">

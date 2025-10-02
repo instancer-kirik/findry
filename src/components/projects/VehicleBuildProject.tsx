@@ -78,7 +78,7 @@ const VehicleBuildProject = ({ project }: VehicleBuildProjectProps) => {
       progress: phaseProgress,
       tasks: phaseTasks.map((task) => ({
         id: task.id,
-        name: task.title || task.name,
+        name: task.title,
         status: task.status,
         priority: task.priority,
       })),

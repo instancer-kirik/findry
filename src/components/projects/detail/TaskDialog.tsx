@@ -28,7 +28,6 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
 }) => {
   const [formData, setFormData] = React.useState<Partial<ProjectTask>>({
     title: '',
-    name: '',
     description: '',
     status: 'pending',
     priority: 'medium',
@@ -39,14 +38,16 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
   React.useEffect(() => {
     if (task) {
       setFormData({
-        ...task,
-        title: task.title || task.name || '',
-        name: task.name || task.title || '',
+        title: task.title || '',
+        description: task.description || '',
+        status: task.status,
+        priority: task.priority,
+        assignedTo: task.assignedTo || '',
+        dueDate: task.dueDate || '',
       });
     } else {
       setFormData({
         title: '',
-        name: '',
         description: '',
         status: 'pending',
         priority: 'medium',
@@ -61,18 +62,13 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
     if (!formData.title) {
       return;
     }
-    onSave({
-      ...formData,
-      name: formData.title, // Ensure name matches title
-    });
+    onSave(formData);
   };
 
   const handleChange = (field: keyof ProjectTask, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value,
-      // Keep name and title in sync
-      ...(field === 'title' ? { name: value } : {}),
     }));
   };
 

@@ -81,8 +81,7 @@ export const useGetProject = (projectId?: string) => {
           })) : [],
           tasks: tasksData ? tasksData.map((t: any) => ({
             id: t.id,
-            name: t.name || t.title, // Support both name and title
-            title: t.title || t.name, // Support both name and title
+            title: t.title,
             description: t.description || '',
             status: t.status || 'pending',
             assignedTo: t.assigned_to,

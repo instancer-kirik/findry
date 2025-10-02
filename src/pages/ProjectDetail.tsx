@@ -283,7 +283,7 @@ const ProjectDetail: React.FC = () => {
     if (task) {
       setEditingTask(task);
       setNewTask({
-        title: task.title || task.name,
+        title: task.title,
         description: task.description || "",
         status: task.status,
         priority: task.priority,
@@ -320,7 +320,6 @@ const ProjectDetail: React.FC = () => {
     } else {
       success = await addProjectTask({
         title: taskData.title,
-        name: taskData.title,
         description: taskData.description || "",
         status: taskData.status as "pending" | "in_progress" | "completed",
         priority: taskData.priority as "low" | "medium" | "high",
@@ -385,7 +384,6 @@ const ProjectDetail: React.FC = () => {
 
     return project.tasks.filter(
       (task) =>
-        task.name?.toLowerCase().includes(component.name.toLowerCase()) ||
         task.title?.toLowerCase().includes(component.name.toLowerCase()) ||
         task.description?.toLowerCase().includes(component.name.toLowerCase()),
     );
@@ -587,7 +585,7 @@ const ProjectDetail: React.FC = () => {
                           addReferenceToChat({
                             id: task.id,
                             type: "task",
-                            name: task.title || task.name,
+                            name: task.title,
                             status: task.status,
                           })
                         }

@@ -45,14 +45,13 @@ export interface ProjectComponent {
 
 export interface ProjectTask {
   id: string;
-  name: string;
-  title?: string;
+  title: string;
   description?: string;
   status: 'pending' | 'in_progress' | 'completed';
   assignedTo?: string;
   dueDate?: string;
   priority: 'low' | 'medium' | 'high';
-  projectId?: string; // Add projectId field
+  projectId?: string;
 }
 
 export interface ProjectMessage {

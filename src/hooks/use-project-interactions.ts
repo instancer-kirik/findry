@@ -192,8 +192,12 @@ export const useProjectInteractions = ({ projectId }: ProjectInteractionsProps) 
       const { error } = await supabase
         .from('project_tasks')
         .insert({
-          ...taskData,
-          name: taskData.name || taskData.title, // Ensure name is set
+          title: taskData.title,
+          description: taskData.description,
+          status: taskData.status,
+          priority: taskData.priority,
+          assigned_to: taskData.assignedTo,
+          due_date: taskData.dueDate,
           project_id: projectId
         });
       
@@ -215,7 +219,6 @@ export const useProjectInteractions = ({ projectId }: ProjectInteractionsProps) 
       const { error } = await supabase
         .from('project_tasks')
         .update({
-          name: task.name,
           title: task.title,
           description: task.description,
           status: task.status,
