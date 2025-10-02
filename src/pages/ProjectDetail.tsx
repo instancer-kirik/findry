@@ -488,8 +488,30 @@ const ProjectDetail: React.FC = () => {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-              <Button variant="outline">Edit Project</Button>
-              <Button variant="destructive">Delete Project</Button>
+              <Button variant="outline" onClick={() => navigate(`/projects/${projectId}/edit`)}>Edit Project</Button>
+              <Button 
+                variant="destructive"
+                onClick={async () => {
+                  if (confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
+                    try {
+                      const { error } = await supabase
+                        .from('projects')
+                        .delete()
+                        .eq('id', projectId);
+                      
+                      if (error) throw error;
+                      
+                      toast.success('Project deleted successfully');
+                      navigate('/projects');
+                    } catch (error) {
+                      console.error('Error deleting project:', error);
+                      toast.error('Failed to delete project');
+                    }
+                  }
+                }}
+              >
+                Delete Project
+              </Button>
             </div>
           )}
         </div>
