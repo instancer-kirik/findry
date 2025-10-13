@@ -55,23 +55,23 @@ const Roadmap: React.FC = () => {
               <div>
                 <div className="flex justify-between mb-2">
                   <span className="font-semibold">Phase 1: Core Platform (MVP)</span>
-                  <span className="text-muted-foreground">~85%</span>
+                  <span className="text-muted-foreground">~90%</span>
                 </div>
-                <Progress value={85} className="h-3" />
+                <Progress value={90} className="h-3" />
               </div>
               <div>
                 <div className="flex justify-between mb-2">
-                  <span className="font-semibold">Phase 2: Growth & Enhancement</span>
-                  <span className="text-muted-foreground">~40%</span>
+                  <span className="font-semibold">Phase 2: Polish & Enhancement</span>
+                  <span className="text-muted-foreground">~55%</span>
                 </div>
-                <Progress value={40} className="h-3" />
+                <Progress value={55} className="h-3" />
               </div>
               <div>
                 <div className="flex justify-between mb-2">
                   <span className="font-semibold">Phase 3: Ecosystem Growth</span>
-                  <span className="text-muted-foreground">~15%</span>
+                  <span className="text-muted-foreground">~25%</span>
                 </div>
-                <Progress value={15} className="h-3" />
+                <Progress value={25} className="h-3" />
               </div>
             </CardContent>
           </Card>
@@ -158,6 +158,34 @@ const Roadmap: React.FC = () => {
 
               <Separator />
 
+              {/* Discovery & Marketplace */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  Discovery & Marketplace
+                  {getStatusBadge('progress')}
+                </h3>
+                <ul className="space-y-2 ml-8">
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('complete')}
+                    <span>Unified discovery page (Artists, Resources, Events, Venues, Brands, Shops)</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('complete')}
+                    <span>Advanced filtering and search</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('complete')}
+                    <span>Selection mode for bulk operations</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('issue')}
+                    <span>UI/UX polish and mobile responsiveness</span>
+                  </li>
+                </ul>
+              </div>
+
+              <Separator />
+
               {/* Event Platform */}
               <div>
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -167,7 +195,7 @@ const Roadmap: React.FC = () => {
                 <ul className="space-y-2 ml-8">
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
-                    <span>Event discovery and browsing</span>
+                    <span>Event creation, editing, and detail pages</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
@@ -175,11 +203,119 @@ const Roadmap: React.FC = () => {
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
-                    <span>Event creation and editing</span>
+                    <span>Event component grouping (Grouper)</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
                     <span>Eventbrite integration for ticketing</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('complete')}
+                    <span>Art gallery and featured artists</span>
+                  </li>
+                </ul>
+              </div>
+
+              <Separator />
+
+              {/* Projects & Collaboration */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  Projects & Collaboration
+                  {getStatusBadge('progress')}
+                </h3>
+                <ul className="space-y-2 ml-8">
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('complete')}
+                    <span>Project creation and listing</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('complete')}
+                    <span>Collaboration pipeline (stages: ideation, planning, production, review, complete)</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('complete')}
+                    <span>Component and task management</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('complete')}
+                    <span>Vehicle build projects</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('issue')}
+                    <span>Edit UI visibility and ownership validation</span>
+                  </li>
+                </ul>
+              </div>
+
+              <Separator />
+
+              {/* Tour & Travel */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  Tour & Road Trip Planning
+                  {getStatusBadge('complete')}
+                </h3>
+                <ul className="space-y-2 ml-8">
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('complete')}
+                    <span>Trip planning wizard (basics, destinations, vehicle, accommodation, budget)</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('complete')}
+                    <span>Interactive tour mapping</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('complete')}
+                    <span>Tour stops and itinerary management</span>
+                  </li>
+                </ul>
+              </div>
+
+              <Separator />
+
+              {/* Resources & Knowledge */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  Resources & Knowledge Base
+                  {getStatusBadge('complete')}
+                </h3>
+                <ul className="space-y-2 ml-8">
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('complete')}
+                    <span>Resources index and detail pages</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('complete')}
+                    <span>Glossary system with categories</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('complete')}
+                    <span>Term definitions and examples</span>
+                  </li>
+                </ul>
+              </div>
+
+              <Separator />
+
+              {/* Business Entities */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  Business & Venue Management
+                  {getStatusBadge('complete')}
+                </h3>
+                <ul className="space-y-2 ml-8">
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('complete')}
+                    <span>Venue profiles and detail pages</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('complete')}
+                    <span>Brand profiles and hierarchies</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('complete')}
+                    <span>Shop listings and product catalogs</span>
                   </li>
                 </ul>
               </div>
@@ -210,24 +346,20 @@ const Roadmap: React.FC = () => {
 
               <Separator />
 
-              {/* Artist Features */}
+              {/* External Integrations */}
               <div>
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  Artist Tools
+                  External Integrations
                   {getStatusBadge('complete')}
                 </h3>
                 <ul className="space-y-2 ml-8">
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
-                    <span>Portfolio management</span>
+                    <span>DivvyQueue contract management integration</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
-                    <span>Availability calendar</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    {getStatusIcon('complete')}
-                    <span>Booking and gig discovery</span>
+                    <span>Eventbrite ticketing and checkout</span>
                   </li>
                 </ul>
               </div>
@@ -237,27 +369,85 @@ const Roadmap: React.FC = () => {
           {/* Phase 2: Growth */}
           <Card className="mb-12">
             <CardHeader>
-              <CardTitle>Phase 2: Growth & Enhancement</CardTitle>
+              <CardTitle>Phase 2: Polish & Enhancement</CardTitle>
               <CardDescription>Post-launch improvements (Q3-Q4 2025)</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  Enhanced Media Management
+                  UI/UX Refinements
                   {getStatusBadge('progress')}
                 </h3>
                 <ul className="space-y-2 ml-8">
                   <li className="flex items-center gap-2">
+                    {getStatusIcon('progress')}
+                    <span>Discover page design overhaul</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('progress')}
+                    <span>Mobile responsiveness improvements across all pages</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('progress')}
+                    <span>Enhanced filtering and search UX</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('planned')}
+                    <span>Accessibility (WCAG 2.1 AA compliance)</span>
+                  </li>
+                </ul>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  Content Management Improvements
+                  {getStatusBadge('progress')}
+                </h3>
+                <ul className="space-y-2 ml-8">
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('progress')}
+                    <span>Enhanced edit controls for projects, components, and tasks</span>
+                  </li>
+                  <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
-                    <span>Photo uploads and social archive</span>
+                    <span>Photo uploads and media galleries</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('planned')}
-                    <span>Content organization improvements</span>
+                    <span>Bulk editing and batch operations</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('planned')}
-                    <span>Advanced media search</span>
+                    <span>Content versioning and history</span>
+                  </li>
+                </ul>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  Advanced Features
+                  {getStatusBadge('progress')}
+                </h3>
+                <ul className="space-y-2 ml-8">
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('planned')}
+                    <span>Real-time collaboration on projects</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('planned')}
+                    <span>Advanced analytics dashboard</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('planned')}
+                    <span>Automated recommendations engine</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('planned')}
+                    <span>Export and import functionality</span>
                   </li>
                 </ul>
               </div>
@@ -267,43 +457,24 @@ const Roadmap: React.FC = () => {
               <div>
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   Booking & Financial Tools
-                  {getStatusBadge('progress')}
-                </h3>
-                <ul className="space-y-2 ml-8">
-                  <li className="flex items-center gap-2">
-                    {getStatusIcon('complete')}
-                    <span>Basic contract creation</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    {getStatusIcon('planned')}
-                    <span>Payment processing integration</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    {getStatusIcon('planned')}
-                    <span>Booking confirmation flow</span>
-                  </li>
-                </ul>
-              </div>
-
-              <Separator />
-
-              <div>
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  Platform Analytics
                   {getStatusBadge('planned')}
                 </h3>
                 <ul className="space-y-2 ml-8">
                   <li className="flex items-center gap-2">
-                    {getStatusIcon('planned')}
-                    <span>User engagement dashboard</span>
+                    {getStatusIcon('complete')}
+                    <span>Contract management via DivvyQueue</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('planned')}
-                    <span>Event performance metrics</span>
+                    <span>In-platform payment processing</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('planned')}
-                    <span>Community growth analytics</span>
+                    <span>Invoice generation and tracking</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('planned')}
+                    <span>Booking confirmation workflow</span>
                   </li>
                 </ul>
               </div>
