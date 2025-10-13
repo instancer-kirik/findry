@@ -55,6 +55,7 @@ import GlossaryExample from "./pages/GlossaryExample";
 import TourPlanner from "./pages/TourPlanner";
 import GearPacking from "./pages/GearPacking";
 import VehicleBuildShowcase from "./pages/VehicleBuildShowcase";
+import Roadmap from "./pages/Roadmap";
 
 const queryClient = new QueryClient();
 
@@ -99,6 +100,7 @@ const App: React.FC = () => {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/about" element={<About />} />
+          <Route path="/roadmap" element={<Roadmap />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/not-found" element={<NotFound />} />
