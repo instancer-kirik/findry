@@ -88,6 +88,7 @@ const ProjectDetail: React.FC = () => {
     assignedTo: "",
     dueDate: "",
   });
+  const [preselectedComponentId, setPreselectedComponentId] = useState<string | undefined>(undefined);
 
   // Progress dialog state
   const [progressDialogOpen, setProgressDialogOpen] = useState(false);
@@ -301,7 +302,7 @@ const ProjectDetail: React.FC = () => {
   };
 
   // Task handlers
-  const handleOpenTaskDialog = (task?: ProjectTask) => {
+  const handleOpenTaskDialog = (task?: ProjectTask, componentId?: string) => {
     if (task) {
       setEditingTask(task);
       setNewTask({
@@ -311,7 +312,9 @@ const ProjectDetail: React.FC = () => {
         priority: task.priority,
         assignedTo: task.assignedTo || "",
         dueDate: task.dueDate || "",
+        componentId: task.componentId || componentId,
       });
+      setPreselectedComponentId(task.componentId || componentId);
     } else {
       setEditingTask(null);
       setNewTask({
@@ -321,9 +324,15 @@ const ProjectDetail: React.FC = () => {
         priority: "medium",
         assignedTo: "",
         dueDate: "",
+        componentId: componentId,
       });
+      setPreselectedComponentId(componentId);
     }
     setTaskDialogOpen(true);
+  };
+
+  const handleAddTaskFromComponent = (componentId: string) => {
+    handleOpenTaskDialog(undefined, componentId);
   };
 
   const handleSaveTask = async (taskData: Partial<ProjectTask>) => {
@@ -347,6 +356,7 @@ const ProjectDetail: React.FC = () => {
         priority: taskData.priority as "low" | "medium" | "high",
         assignedTo: taskData.assignedTo || "",
         dueDate: taskData.dueDate || "",
+        componentId: taskData.componentId,
       });
     }
 
@@ -406,6 +416,9 @@ const ProjectDetail: React.FC = () => {
 
     return project.tasks.filter(
       (task) =>
+        // Direct component relationship
+        task.componentId === component.id ||
+        // Legacy text-based matching
         task.title?.toLowerCase().includes(component.name.toLowerCase()) ||
         task.description?.toLowerCase().includes(component.name.toLowerCase()),
     );
@@ -588,6 +601,7 @@ const ProjectDetail: React.FC = () => {
                           })
                         }
                         onTaskStatusChange={handleTaskStatusChange}
+                        onAddTask={handleAddTaskFromComponent}
                       />
                     ))}
                   </div>
@@ -735,6 +749,8 @@ const ProjectDetail: React.FC = () => {
           isEditing={!!editingTask}
           isLoading={isAddingTask || isEditingTask}
           onSave={handleSaveTask}
+          components={project?.components || []}
+          preselectedComponentId={preselectedComponentId}
         />
       </div>
     </Layout>

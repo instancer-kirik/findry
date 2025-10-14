@@ -185,6 +185,7 @@ export const useProjectInteractions = ({ projectId }: ProjectInteractionsProps) 
     priority: 'low' | 'medium' | 'high';
     assignedTo?: string;
     dueDate?: string;
+    componentId?: string;
   }): Promise<boolean> => {
     try {
       setIsAddingTask(true);
@@ -198,7 +199,8 @@ export const useProjectInteractions = ({ projectId }: ProjectInteractionsProps) 
           priority: taskData.priority,
           assigned_to: taskData.assignedTo,
           due_date: taskData.dueDate,
-          project_id: projectId
+          project_id: projectId,
+          component_id: taskData.componentId
         });
       
       if (error) throw error;

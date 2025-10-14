@@ -52,6 +52,7 @@ export interface ProjectTask {
   dueDate?: string;
   priority: 'low' | 'medium' | 'high';
   projectId?: string;
+  componentId?: string;
 }
 
 export interface ProjectMessage {

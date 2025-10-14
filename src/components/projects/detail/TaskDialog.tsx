@@ -6,8 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, User, Flag } from 'lucide-react';
-import { ProjectTask } from '@/types/project';
+import { Calendar, User, Flag, Package } from 'lucide-react';
+import { ProjectTask, ProjectComponent } from '@/types/project';
 
 interface TaskDialogProps {
   open: boolean;
@@ -16,6 +16,8 @@ interface TaskDialogProps {
   isEditing: boolean;
   isLoading: boolean;
   onSave: (task: Partial<ProjectTask>) => void;
+  components?: ProjectComponent[];
+  preselectedComponentId?: string;
 }
 
 const TaskDialog: React.FC<TaskDialogProps> = ({
@@ -25,6 +27,8 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
   isEditing,
   isLoading,
   onSave,
+  components = [],
+  preselectedComponentId,
 }) => {
   const [formData, setFormData] = React.useState<Partial<ProjectTask>>({
     title: '',
@@ -33,6 +37,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
     priority: 'medium',
     assignedTo: '',
     dueDate: '',
+    componentId: preselectedComponentId || undefined,
   });
 
   React.useEffect(() => {
@@ -44,6 +49,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
         priority: task.priority,
         assignedTo: task.assignedTo || '',
         dueDate: task.dueDate || '',
+        componentId: task.componentId || preselectedComponentId || undefined,
       });
     } else {
       setFormData({
@@ -53,9 +59,10 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
         priority: 'medium',
         assignedTo: '',
         dueDate: '',
+        componentId: preselectedComponentId || undefined,
       });
     }
-  }, [task, open]);
+  }, [task, open, preselectedComponentId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,6 +125,42 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
               />
             </div>
 
+            {/* Component Selector */}
+            {components.length > 0 && (
+              <div>
+                <Label htmlFor="componentId" className="flex items-center gap-2">
+                  <Package className="h-4 w-4" />
+                  Related Component
+                </Label>
+                <Select
+                  value={formData.componentId || "none"}
+                  onValueChange={(value) => handleChange('componentId' as keyof ProjectTask, value === "none" ? "" : value)}
+                >
+                  <SelectTrigger id="componentId" className="mt-1">
+                    <SelectValue placeholder="Select a component (optional)" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background z-50">
+                    <SelectItem value="none">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        No component
+                      </div>
+                    </SelectItem>
+                    {components.map((component) => (
+                      <SelectItem key={component.id} value={component.id}>
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${
+                            component.status === 'completed' ? 'bg-green-500' :
+                            component.status === 'in_progress' ? 'bg-blue-500' : 'bg-yellow-500'
+                          }`}></div>
+                          {component.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             {/* Description */}
             <div>
               <Label htmlFor="description">Description</Label>
@@ -142,7 +185,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
                   <SelectTrigger id="status" className="mt-1">
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-background z-50">
                     <SelectItem value="pending">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
@@ -174,7 +217,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
                   <SelectTrigger id="priority" className="mt-1">
                     <SelectValue placeholder="Select priority" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-background z-50">
                     <SelectItem value="low">
                       <div className="flex items-center gap-2">
                         <Flag className="h-3 w-3 text-green-500" />
