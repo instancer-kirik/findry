@@ -1,21 +1,102 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useProject } from "@/hooks/use-project";
 import { Project } from "@/types/project";
 import { useAuth } from "@/hooks/use-auth";
-import { Car, Wrench, ExternalLink, Calendar } from "lucide-react";
+import { Car, Wrench, ExternalLink, Calendar, MoreVertical, Edit, Trash2, CheckCircle2, Circle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const Projects: React.FC = () => {
   const navigate = useNavigate();
   const { useGetProjects } = useProject();
-  const { data: projects = [], isLoading, error } = useGetProjects();
+  const { data: projects = [], isLoading, error, refetch } = useGetProjects();
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
+  const [projectOwnership, setProjectOwnership] = useState<Record<string, boolean>>({});
+  const [projectTasks, setProjectTasks] = useState<Record<string, any[]>>({});
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+
+  // Check ownership for all projects
+  useEffect(() => {
+    if (!user || projects.length === 0) return;
+
+    const checkAllOwnership = async () => {
+      const ownershipMap: Record<string, boolean> = {};
+      
+      for (const project of projects) {
+        try {
+          const { data: projectData } = await supabase
+            .from("projects")
+            .select("owner_id, created_by")
+            .eq("id", project.id)
+            .maybeSingle();
+
+          ownershipMap[project.id] = 
+            projectData?.owner_id === user.id || 
+            projectData?.created_by === user.id;
+        } catch (err) {
+          console.error(`Error checking ownership for ${project.id}:`, err);
+          ownershipMap[project.id] = false;
+        }
+      }
+      
+      setProjectOwnership(ownershipMap);
+    };
+
+    checkAllOwnership();
+  }, [user, projects]);
+
+  // Fetch tasks for all projects
+  useEffect(() => {
+    if (projects.length === 0) return;
+
+    const fetchAllTasks = async () => {
+      const tasksMap: Record<string, any[]> = {};
+      
+      for (const project of projects) {
+        try {
+          const { data: tasks } = await supabase
+            .from("project_tasks")
+            .select("*")
+            .eq("project_id", project.id)
+            .order("created_at", { ascending: false })
+            .limit(3);
+
+          tasksMap[project.id] = tasks || [];
+        } catch (err) {
+          console.error(`Error fetching tasks for ${project.id}:`, err);
+          tasksMap[project.id] = [];
+        }
+      }
+      
+      setProjectTasks(tasksMap);
+    };
+
+    fetchAllTasks();
+  }, [projects]);
 
   const filteredProjects = projects.filter(
     (project) =>
@@ -33,6 +114,43 @@ const Projects: React.FC = () => {
 
   const handleViewProject = (projectId: string) => {
     navigate(`/projects/${projectId}`);
+  };
+
+  const handleEditProject = (projectId: string) => {
+    navigate(`/projects/${projectId}`);
+  };
+
+  const handleDeleteProject = async () => {
+    if (!projectToDelete) return;
+
+    try {
+      // Delete related records first
+      await supabase.from("project_tasks").delete().eq("project_id", projectToDelete);
+      await supabase.from("project_components").delete().eq("project_id", projectToDelete);
+      await supabase.from("content_ownership").delete().eq("content_id", projectToDelete);
+      
+      // Delete the project
+      const { error } = await supabase
+        .from("projects")
+        .delete()
+        .eq("id", projectToDelete);
+
+      if (error) throw error;
+
+      toast.success("Project deleted successfully");
+      refetch();
+    } catch (error: any) {
+      console.error("Error deleting project:", error);
+      toast.error(`Failed to delete project: ${error.message}`);
+    } finally {
+      setDeleteDialogOpen(false);
+      setProjectToDelete(null);
+    }
+  };
+
+  const openDeleteDialog = (projectId: string) => {
+    setProjectToDelete(projectId);
+    setDeleteDialogOpen(true);
   };
 
   if (isLoading) {
@@ -164,52 +282,125 @@ const Projects: React.FC = () => {
               </CardFooter>
             </Card>
 
-            {filteredProjects.map((project: Project) => (
-              <Card key={project.id} className="flex flex-col h-full">
-                <CardContent className="pt-6 flex-grow">
-                  <h2 className="text-xl font-semibold mb-2 line-clamp-2">
-                    {project.name}
-                  </h2>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {project.tags &&
-                      project.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="inline-block bg-muted px-2 py-0.5 rounded-full text-xs"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                  </div>
-                  <p className="text-muted-foreground mb-4 line-clamp-3">
-                    {project.description || "No description provided"}
-                  </p>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="text-muted-foreground">Status</p>
-                      <p className="font-medium capitalize">
-                        {project.status.replace("_", " ")}
-                      </p>
+            {filteredProjects.map((project: Project) => {
+              const tasks = projectTasks[project.id] || [];
+              const isOwner = projectOwnership[project.id] || false;
+              const completedTasks = tasks.filter(t => t.status === 'completed').length;
+              
+              return (
+                <Card key={project.id} className="flex flex-col h-full">
+                  <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+                    <div className="flex-1">
+                      <h2 className="text-xl font-semibold mb-2 line-clamp-2">
+                        {project.name}
+                      </h2>
                     </div>
-                    <div>
-                      <p className="text-muted-foreground">Progress</p>
-                      <p className="font-medium">{project.progress}%</p>
+                    {isOwner && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEditProject(project.id)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit Project
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => openDeleteDialog(project.id)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete Project
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </CardHeader>
+                  <CardContent className="flex-grow">
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {project.tags &&
+                        project.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="inline-block bg-muted px-2 py-0.5 rounded-full text-xs"
+                          >
+                            {tag}
+                          </span>
+                        ))}
                     </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="pt-0">
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => handleViewProject(project.id)}
-                  >
-                    View Project
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
+                    <p className="text-muted-foreground mb-4 line-clamp-3">
+                      {project.description || "No description provided"}
+                    </p>
+                    
+                    {/* Tasks Preview */}
+                    {tasks.length > 0 && (
+                      <div className="mb-4 space-y-2">
+                        <p className="text-sm font-medium text-muted-foreground">
+                          Recent Tasks ({completedTasks}/{tasks.length} completed)
+                        </p>
+                        <div className="space-y-1">
+                          {tasks.slice(0, 3).map((task) => (
+                            <div key={task.id} className="flex items-center text-sm">
+                              {task.status === 'completed' ? (
+                                <CheckCircle2 className="h-3 w-3 mr-2 text-green-500" />
+                              ) : (
+                                <Circle className="h-3 w-3 mr-2 text-muted-foreground" />
+                              )}
+                              <span className="line-clamp-1">{task.title}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Status</p>
+                        <p className="font-medium capitalize">
+                          {project.status.replace("_", " ")}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Progress</p>
+                        <p className="font-medium">{project.progress}%</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="pt-0">
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => handleViewProject(project.id)}
+                    >
+                      View Project
+                    </Button>
+                  </CardFooter>
+                </Card>
+              );
+            })}
           </div>
         )}
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Project</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this project? This action cannot be undone.
+                All project components and tasks will also be deleted.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteProject} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                Delete Project
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Layout>
   );

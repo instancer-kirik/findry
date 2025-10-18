@@ -3,7 +3,7 @@ import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Github, Globe, Heart, Lightbulb, MessageCircle, Users } from 'lucide-react';
+import { ArrowRight, Github, Globe, Heart, Lightbulb, MessageCircle, Users, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const About: React.FC = () => {
@@ -177,6 +177,30 @@ const About: React.FC = () => {
               </Card>
             </div>
           </section>
+
+          {/* Roadmap CTA */}
+          <Card className="mb-12 bg-primary/5 border-primary/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                Development Roadmap
+              </CardTitle>
+              <CardDescription>
+                See what we're working on and what's coming next
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                Findry is in active development. Check out our roadmap to see completed features, 
+                current priorities, and future plans. We're transparent about what's working and what needs improvement.
+              </p>
+              <Link to="/roadmap">
+                <Button variant="default">
+                  View Roadmap <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
 
           {/* Get Involved Section */}
           <section className="mb-12">

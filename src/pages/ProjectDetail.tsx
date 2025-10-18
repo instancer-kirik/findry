@@ -29,12 +29,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { useProject } from "@/hooks/use-project";
 import { useProjectInteractions } from "@/hooks/use-project-interactions";
-import {
-  Project,
-  ProjectComponent,
-  ProjectTask,
-  ProjectStatus,
-} from "@/types/project";
+import { Project, ProjectComponent, ProjectTask } from "@/types/project";
 import { supabase } from "@/integrations/supabase/client";
 import ProjectChat, { ReferenceItem } from "@/components/projects/ProjectChat";
 import ProjectInteractionProgress from "@/components/projects/ProjectInteractionProgress";
@@ -92,8 +87,8 @@ const ProjectDetail: React.FC = () => {
     priority: "medium",
     assignedTo: "",
     dueDate: "",
-    componentId: "",
   });
+  const [preselectedComponentId, setPreselectedComponentId] = useState<string | undefined>(undefined);
 
   // Progress dialog state
   const [progressDialogOpen, setProgressDialogOpen] = useState(false);
@@ -118,10 +113,8 @@ const ProjectDetail: React.FC = () => {
         }
 
         // User is owner if they match owner_id or created_by
-        const isProjectOwner =
-          projectData?.owner_id === user.id ||
-          projectData?.created_by === user.id;
-
+        const isProjectOwner = projectData?.owner_id === user.id || projectData?.created_by === user.id;
+        
         if (isProjectOwner) {
           setIsOwner(true);
           return;
@@ -192,10 +185,7 @@ const ProjectDetail: React.FC = () => {
       return;
     }
 
-    const success = await updateProjectStatus(
-      project,
-      newStatus as ProjectStatus,
-    );
+    const success = await updateProjectStatus(project, newStatus as any);
     if (success) {
       toast.success("Project status updated successfully");
       refetch();
@@ -322,8 +312,9 @@ const ProjectDetail: React.FC = () => {
         priority: task.priority,
         assignedTo: task.assignedTo || "",
         dueDate: task.dueDate || "",
-        componentId: (task as any).componentId || "",
+        componentId: task.componentId || componentId,
       });
+      setPreselectedComponentId(task.componentId || componentId);
     } else {
       setEditingTask(null);
       setNewTask({
@@ -333,10 +324,15 @@ const ProjectDetail: React.FC = () => {
         priority: "medium",
         assignedTo: "",
         dueDate: "",
-        componentId: componentId || "",
+        componentId: componentId,
       });
+      setPreselectedComponentId(componentId);
     }
     setTaskDialogOpen(true);
+  };
+
+  const handleAddTaskFromComponent = (componentId: string) => {
+    handleOpenTaskDialog(undefined, componentId);
   };
 
   const handleSaveTask = async (taskData: Partial<ProjectTask>) => {
@@ -360,7 +356,7 @@ const ProjectDetail: React.FC = () => {
         priority: taskData.priority as "low" | "medium" | "high",
         assignedTo: taskData.assignedTo || "",
         dueDate: taskData.dueDate || "",
-        componentId: (taskData as any).componentId || "",
+        componentId: taskData.componentId,
       });
     }
 
@@ -374,7 +370,6 @@ const ProjectDetail: React.FC = () => {
         priority: "medium",
         assignedTo: "",
         dueDate: "",
-        componentId: "",
       });
       toast.success(`Task ${editingTask ? "updated" : "added"} successfully`);
       refetch();
@@ -421,14 +416,11 @@ const ProjectDetail: React.FC = () => {
 
     return project.tasks.filter(
       (task) =>
-        // First check if task is directly associated with component via componentId
+        // Direct component relationship
         task.componentId === component.id ||
-        // Fallback to name/description matching for legacy tasks
-        (!task.componentId &&
-          (task.title?.toLowerCase().includes(component.name.toLowerCase()) ||
-            task.description
-              ?.toLowerCase()
-              .includes(component.name.toLowerCase()))),
+        // Legacy text-based matching
+        task.title?.toLowerCase().includes(component.name.toLowerCase()) ||
+        task.description?.toLowerCase().includes(component.name.toLowerCase()),
     );
   };
 
@@ -481,11 +473,6 @@ const ProjectDetail: React.FC = () => {
     return <ProductLandingPage project={project} />;
   }
 
-  // Check if this is a vehicle build project
-  if (project.type === "Vehicle Build") {
-    return <VehicleBuildProject project={project} />;
-  }
-
   return (
     <Layout>
       <div className="container mx-auto py-8 space-y-6">
@@ -536,33 +523,24 @@ const ProjectDetail: React.FC = () => {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-              <Button
-                variant="outline"
-                onClick={() => navigate(`/projects/${projectId}/edit`)}
-              >
-                Edit Project
-              </Button>
-              <Button
+              <Button variant="outline" onClick={() => navigate(`/projects/${projectId}/edit`)}>Edit Project</Button>
+              <Button 
                 variant="destructive"
                 onClick={async () => {
-                  if (
-                    confirm(
-                      "Are you sure you want to delete this project? This action cannot be undone.",
-                    )
-                  ) {
+                  if (confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
                     try {
                       const { error } = await supabase
-                        .from("projects")
+                        .from('projects')
                         .delete()
-                        .eq("id", projectId);
-
+                        .eq('id', projectId);
+                      
                       if (error) throw error;
-
-                      toast.success("Project deleted successfully");
-                      navigate("/projects");
+                      
+                      toast.success('Project deleted successfully');
+                      navigate('/projects');
                     } catch (error) {
-                      console.error("Error deleting project:", error);
-                      toast.error("Failed to delete project");
+                      console.error('Error deleting project:', error);
+                      toast.error('Failed to delete project');
                     }
                   }
                 }}
@@ -614,7 +592,7 @@ const ProjectDetail: React.FC = () => {
                         onEdit={handleOpenComponentDialog}
                         onDelete={handleDeleteComponent}
                         onStatusChange={handleComponentStatusChange}
-                        onAddReference={(comp) =>
+                        onReference={(comp) =>
                           addReferenceToChat({
                             id: comp.id,
                             type: "component",
@@ -623,9 +601,7 @@ const ProjectDetail: React.FC = () => {
                           })
                         }
                         onTaskStatusChange={handleTaskStatusChange}
-                        onAddTask={(componentId) =>
-                          handleOpenTaskDialog(undefined, componentId)
-                        }
+                        onAddTask={handleAddTaskFromComponent}
                       />
                     ))}
                   </div>
@@ -774,6 +750,7 @@ const ProjectDetail: React.FC = () => {
           isLoading={isAddingTask || isEditingTask}
           onSave={handleSaveTask}
           components={project?.components || []}
+          preselectedComponentId={preselectedComponentId}
         />
       </div>
     </Layout>

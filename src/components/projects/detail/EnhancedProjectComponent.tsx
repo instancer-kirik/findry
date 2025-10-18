@@ -47,7 +47,7 @@ interface EnhancedProjectComponentProps {
     task: ProjectTask,
     status: "pending" | "in_progress" | "completed",
   ) => void;
-  onAddTask?: (componentId: string) => void;
+  onAddTask: (componentId: string) => void;
 }
 
 const EnhancedProjectComponent: React.FC<EnhancedProjectComponentProps> = ({
@@ -212,7 +212,19 @@ const EnhancedProjectComponent: React.FC<EnhancedProjectComponentProps> = ({
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                  <DropdownMenuContent
+                    align="end"
+                    className="bg-background z-50"
+                  >
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAddTask(component.id);
+                      }}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Task
+                    </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={(e) => {
                         e.stopPropagation();
@@ -220,7 +232,7 @@ const EnhancedProjectComponent: React.FC<EnhancedProjectComponentProps> = ({
                       }}
                     >
                       <Edit className="h-4 w-4 mr-2" />
-                      Edit
+                      Edit Component
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem

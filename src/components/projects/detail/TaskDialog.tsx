@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, User, Flag, Component } from "lucide-react";
+import { Calendar, User, Flag, Package } from "lucide-react";
 import { ProjectTask, ProjectComponent } from "@/types/project";
 
 interface TaskDialogProps {
@@ -30,6 +30,7 @@ interface TaskDialogProps {
   isLoading: boolean;
   onSave: (task: Partial<ProjectTask>) => void;
   components?: ProjectComponent[];
+  preselectedComponentId?: string;
 }
 
 const TaskDialog: React.FC<TaskDialogProps> = ({
@@ -40,336 +41,296 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
   isLoading,
   onSave,
   components = [],
+  preselectedComponentId,
 }) => {
   const [formData, setFormData] = React.useState<Partial<ProjectTask>>({
     title: "",
     description: "",
-    status: "pending",
     priority: "medium",
+    status: "pending",
     assignedTo: "",
     dueDate: "",
-    componentId: "",
+    componentId: preselectedComponentId || "",
   });
 
   React.useEffect(() => {
     if (task) {
       setFormData({
-        title: task.title || "",
-        description: task.description || "",
-        status: task.status,
-        priority: task.priority,
-        assignedTo: task.assignedTo || "",
-        dueDate: task.dueDate || "",
-        componentId: (task as any).componentId || "",
+        ...task,
+        componentId: task.componentId || preselectedComponentId || "",
       });
     } else {
       setFormData({
         title: "",
         description: "",
-        status: "pending",
         priority: "medium",
+        status: "pending",
         assignedTo: "",
         dueDate: "",
-        componentId: "",
+        componentId: preselectedComponentId || "",
       });
     }
-  }, [task, open]);
+  }, [task, preselectedComponentId]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.title) {
-      return;
-    }
+  const handleSave = () => {
+    if (!formData.title?.trim()) return;
+
     onSave(formData);
   };
 
-  const handleChange = (field: keyof ProjectTask, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+  const handleInputChange = (field: keyof ProjectTask, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const getPriorityIcon = (priority: string) => {
+  const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "high":
-        return <Flag className="h-4 w-4 text-red-500" />;
+        return "bg-red-100 text-red-800";
       case "medium":
-        return <Flag className="h-4 w-4 text-yellow-500" />;
+        return "bg-yellow-100 text-yellow-800";
       case "low":
-        return <Flag className="h-4 w-4 text-green-500" />;
+        return "bg-green-100 text-green-800";
       default:
-        return <Flag className="h-4 w-4 text-gray-400" />;
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "completed":
+        return "bg-green-100 text-green-800";
+      case "in_progress":
+        return "bg-blue-100 text-blue-800";
+      case "pending":
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {getPriorityIcon(formData.priority || "medium")}
-            {isEditing ? "Edit Task" : "Add Task"}
+            <Flag className="h-5 w-5" />
+            {isEditing ? "Edit Task" : "Create New Task"}
           </DialogTitle>
           <DialogDescription>
             {isEditing
-              ? "Update the details of this task and track its progress."
-              : "Add a new task to your project and assign it to team members."}
+              ? "Update task details and track progress."
+              : "Add a new task to help organize your project work."}
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit}>
-          <div className="py-4 space-y-4">
-            {/* Task Title */}
-            <div>
-              <Label htmlFor="title" className="flex items-center gap-2">
-                Task Title *
-                <Badge variant="secondary" className="text-xs">
-                  Required
-                </Badge>
-              </Label>
-              <Input
-                id="title"
-                value={formData.title || ""}
-                onChange={(e) => handleChange("title", e.target.value)}
-                className="mt-1"
-                placeholder="e.g., Install electrical system, Complete wireframe design"
-                required
-              />
-            </div>
-
-            {/* Description */}
-            <div>
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description || ""}
-                onChange={(e) => handleChange("description", e.target.value)}
-                className="mt-1"
-                rows={3}
-                placeholder="Provide detailed information about what needs to be done..."
-              />
-            </div>
-
-            {/* Status and Priority Grid */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="status">Status</Label>
-                <Select
-                  value={formData.status || "pending"}
-                  onValueChange={(value) => handleChange("status", value)}
-                >
-                  <SelectTrigger id="status" className="mt-1">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-                        Pending
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="in_progress">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                        In Progress
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="completed">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                        Completed
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="priority">Priority</Label>
-                <Select
-                  value={formData.priority || "medium"}
-                  onValueChange={(value) => handleChange("priority", value)}
-                >
-                  <SelectTrigger id="priority" className="mt-1">
-                    <SelectValue placeholder="Select priority" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">
-                      <div className="flex items-center gap-2">
-                        <Flag className="h-3 w-3 text-green-500" />
-                        Low Priority
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="medium">
-                      <div className="flex items-center gap-2">
-                        <Flag className="h-3 w-3 text-yellow-500" />
-                        Medium Priority
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="high">
-                      <div className="flex items-center gap-2">
-                        <Flag className="h-3 w-3 text-red-500" />
-                        High Priority
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Component Assignment */}
-            {components.length > 0 && (
-              <div>
-                <Label
-                  htmlFor="componentId"
-                  className="flex items-center gap-2"
-                >
-                  <Component className="h-4 w-4" />
-                  Related Component (Optional)
-                </Label>
-                <Select
-                  value={formData.componentId || ""}
-                  onValueChange={(value) =>
-                    handleChange("componentId" as keyof ProjectTask, value)
-                  }
-                >
-                  <SelectTrigger id="componentId" className="mt-1">
-                    <SelectValue placeholder="Select a component (optional)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">No specific component</SelectItem>
-                    {components.map((component) => (
-                      <SelectItem key={component.id} value={component.id}>
-                        <div className="flex items-center gap-2">
-                          <div
-                            className={`w-2 h-2 rounded-full ${
-                              component.status === "completed"
-                                ? "bg-green-500"
-                                : component.status === "in_progress"
-                                  ? "bg-blue-500"
-                                  : "bg-yellow-500"
-                            }`}
-                          ></div>
-                          {component.name}
-                          <Badge variant="outline" className="text-xs ml-1">
-                            {component.type}
-                          </Badge>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {/* Assignment and Due Date */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="assignedTo" className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Assigned To
-                </Label>
-                <Input
-                  id="assignedTo"
-                  value={formData.assignedTo || ""}
-                  onChange={(e) => handleChange("assignedTo", e.target.value)}
-                  className="mt-1"
-                  placeholder="Name or email"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="dueDate" className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Due Date
-                </Label>
-                <Input
-                  id="dueDate"
-                  type="date"
-                  value={formData.dueDate || ""}
-                  onChange={(e) => handleChange("dueDate", e.target.value)}
-                  className="mt-1"
-                />
-              </div>
-            </div>
-
-            {/* Task Preview */}
-            {formData.title && (
-              <div className="mt-4 p-3 bg-muted/50 rounded-lg border">
-                <div className="text-sm text-muted-foreground mb-1">
-                  Preview:
-                </div>
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`w-2 h-2 rounded-full ${
-                      formData.status === "completed"
-                        ? "bg-green-500"
-                        : formData.status === "in_progress"
-                          ? "bg-blue-500"
-                          : "bg-yellow-500"
-                    }`}
-                  ></div>
-                  <span className="font-medium">{formData.title}</span>
-                  {formData.priority && (
-                    <Badge
-                      variant={
-                        formData.priority === "high"
-                          ? "destructive"
-                          : formData.priority === "medium"
-                            ? "default"
-                            : "secondary"
-                      }
-                      className="text-xs"
-                    >
-                      {formData.priority.toUpperCase()}
-                    </Badge>
-                  )}
-                  {formData.assignedTo && (
-                    <Badge variant="outline" className="text-xs">
-                      {formData.assignedTo}
-                    </Badge>
-                  )}
-                  {formData.componentId && components.length > 0 && (
-                    <Badge variant="secondary" className="text-xs">
-                      {
-                        components.find((c) => c.id === formData.componentId)
-                          ?.name
-                      }
-                    </Badge>
-                  )}
-                </div>
-                {formData.description && (
-                  <p className="text-sm text-muted-foreground mt-2">
-                    {formData.description}
-                  </p>
-                )}
-              </div>
-            )}
+        <div className="space-y-6 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="title" className="text-sm font-medium">
+              Task Title *
+            </Label>
+            <Input
+              id="title"
+              placeholder="Enter task title..."
+              value={formData.title || ""}
+              onChange={(e) => handleInputChange("title", e.target.value)}
+              className="w-full"
+            />
           </div>
 
-          <DialogFooter className="gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isLoading}
+          <div className="space-y-2">
+            <Label htmlFor="description" className="text-sm font-medium">
+              Description
+            </Label>
+            <Textarea
+              id="description"
+              placeholder="Describe what needs to be done..."
+              value={formData.description || ""}
+              onChange={(e) => handleInputChange("description", e.target.value)}
+              className="min-h-[80px] resize-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium flex items-center gap-2">
+                <Flag className="h-4 w-4" />
+                Priority
+              </Label>
+              <Select
+                value={formData.priority}
+                onValueChange={(value) => handleInputChange("priority", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className={getPriorityColor("low")}
+                      >
+                        Low
+                      </Badge>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="medium">
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className={getPriorityColor("medium")}
+                      >
+                        Medium
+                      </Badge>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="high">
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className={getPriorityColor("high")}
+                      >
+                        High
+                      </Badge>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Status</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) => handleInputChange("status", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pending">
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className={getStatusColor("pending")}
+                      >
+                        Pending
+                      </Badge>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="in_progress">
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className={getStatusColor("in_progress")}
+                      >
+                        In Progress
+                      </Badge>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="completed">
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className={getStatusColor("completed")}
+                      >
+                        Completed
+                      </Badge>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="assignedTo"
+              className="text-sm font-medium flex items-center gap-2"
             >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isLoading || !formData.title}
-              className="min-w-[100px]"
+              <User className="h-4 w-4" />
+              Assigned To
+            </Label>
+            <Input
+              id="assignedTo"
+              placeholder="Enter assignee name or email..."
+              value={formData.assignedTo || ""}
+              onChange={(e) => handleInputChange("assignedTo", e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="dueDate"
+              className="text-sm font-medium flex items-center gap-2"
             >
-              {isLoading
-                ? "Saving..."
-                : isEditing
-                  ? "Update Task"
-                  : "Create Task"}
-            </Button>
-          </DialogFooter>
-        </form>
+              <Calendar className="h-4 w-4" />
+              Due Date
+            </Label>
+            <Input
+              id="dueDate"
+              type="date"
+              value={formData.dueDate || ""}
+              onChange={(e) => handleInputChange("dueDate", e.target.value)}
+            />
+          </div>
+
+          {components.length > 0 && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium flex items-center gap-2">
+                <Package className="h-4 w-4" />
+                Related Component
+              </Label>
+              <Select
+                value={formData.componentId || ""}
+                onValueChange={(value) =>
+                  handleInputChange("componentId", value)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select component (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">
+                    <span className="text-muted-foreground">No component</span>
+                  </SelectItem>
+                  {components.map((component) => (
+                    <SelectItem key={component.id} value={component.id}>
+                      <div className="flex items-center gap-2">
+                        <span>{component.name}</span>
+                        {component.type && (
+                          <Badge variant="secondary" className="text-xs">
+                            {component.type}
+                          </Badge>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        </div>
+
+        <DialogFooter className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isLoading}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSave}
+            disabled={!formData.title?.trim() || isLoading}
+          >
+            {isLoading
+              ? "Saving..."
+              : isEditing
+                ? "Update Task"
+                : "Create Task"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

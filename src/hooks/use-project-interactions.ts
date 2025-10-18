@@ -218,8 +218,8 @@ export const useProjectInteractions = ({
         priority: taskData.priority,
         assigned_to: taskData.assignedTo,
         due_date: taskData.dueDate,
-        component_id: taskData.componentId,
         project_id: projectId,
+        component_id: taskData.componentId,
       });
 
       if (error) throw error;
