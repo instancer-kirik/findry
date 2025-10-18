@@ -1,13 +1,26 @@
-import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, User, Flag } from 'lucide-react';
-import { ProjectTask } from '@/types/project';
+import React from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, User, Flag, Component } from "lucide-react";
+import { ProjectTask, ProjectComponent } from "@/types/project";
 
 interface TaskDialogProps {
   open: boolean;
@@ -16,6 +29,7 @@ interface TaskDialogProps {
   isEditing: boolean;
   isLoading: boolean;
   onSave: (task: Partial<ProjectTask>) => void;
+  components?: ProjectComponent[];
 }
 
 const TaskDialog: React.FC<TaskDialogProps> = ({
@@ -25,34 +39,38 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
   isEditing,
   isLoading,
   onSave,
+  components = [],
 }) => {
   const [formData, setFormData] = React.useState<Partial<ProjectTask>>({
-    title: '',
-    description: '',
-    status: 'pending',
-    priority: 'medium',
-    assignedTo: '',
-    dueDate: '',
+    title: "",
+    description: "",
+    status: "pending",
+    priority: "medium",
+    assignedTo: "",
+    dueDate: "",
+    componentId: "",
   });
 
   React.useEffect(() => {
     if (task) {
       setFormData({
-        title: task.title || '',
-        description: task.description || '',
+        title: task.title || "",
+        description: task.description || "",
         status: task.status,
         priority: task.priority,
-        assignedTo: task.assignedTo || '',
-        dueDate: task.dueDate || '',
+        assignedTo: task.assignedTo || "",
+        dueDate: task.dueDate || "",
+        componentId: (task as any).componentId || "",
       });
     } else {
       setFormData({
-        title: '',
-        description: '',
-        status: 'pending',
-        priority: 'medium',
-        assignedTo: '',
-        dueDate: '',
+        title: "",
+        description: "",
+        status: "pending",
+        priority: "medium",
+        assignedTo: "",
+        dueDate: "",
+        componentId: "",
       });
     }
   }, [task, open]);
@@ -66,7 +84,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
   };
 
   const handleChange = (field: keyof ProjectTask, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -74,11 +92,11 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
 
   const getPriorityIcon = (priority: string) => {
     switch (priority) {
-      case 'high':
+      case "high":
         return <Flag className="h-4 w-4 text-red-500" />;
-      case 'medium':
+      case "medium":
         return <Flag className="h-4 w-4 text-yellow-500" />;
-      case 'low':
+      case "low":
         return <Flag className="h-4 w-4 text-green-500" />;
       default:
         return <Flag className="h-4 w-4 text-gray-400" />;
@@ -90,7 +108,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {getPriorityIcon(formData.priority || 'medium')}
+            {getPriorityIcon(formData.priority || "medium")}
             {isEditing ? "Edit Task" : "Add Task"}
           </DialogTitle>
           <DialogDescription>
@@ -106,12 +124,14 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
             <div>
               <Label htmlFor="title" className="flex items-center gap-2">
                 Task Title *
-                <Badge variant="secondary" className="text-xs">Required</Badge>
+                <Badge variant="secondary" className="text-xs">
+                  Required
+                </Badge>
               </Label>
               <Input
                 id="title"
                 value={formData.title || ""}
-                onChange={(e) => handleChange('title', e.target.value)}
+                onChange={(e) => handleChange("title", e.target.value)}
                 className="mt-1"
                 placeholder="e.g., Install electrical system, Complete wireframe design"
                 required
@@ -124,7 +144,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
               <Textarea
                 id="description"
                 value={formData.description || ""}
-                onChange={(e) => handleChange('description', e.target.value)}
+                onChange={(e) => handleChange("description", e.target.value)}
                 className="mt-1"
                 rows={3}
                 placeholder="Provide detailed information about what needs to be done..."
@@ -137,7 +157,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
                 <Label htmlFor="status">Status</Label>
                 <Select
                   value={formData.status || "pending"}
-                  onValueChange={(value) => handleChange('status', value)}
+                  onValueChange={(value) => handleChange("status", value)}
                 >
                   <SelectTrigger id="status" className="mt-1">
                     <SelectValue placeholder="Select status" />
@@ -169,7 +189,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
                 <Label htmlFor="priority">Priority</Label>
                 <Select
                   value={formData.priority || "medium"}
-                  onValueChange={(value) => handleChange('priority', value)}
+                  onValueChange={(value) => handleChange("priority", value)}
                 >
                   <SelectTrigger id="priority" className="mt-1">
                     <SelectValue placeholder="Select priority" />
@@ -198,6 +218,51 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
               </div>
             </div>
 
+            {/* Component Assignment */}
+            {components.length > 0 && (
+              <div>
+                <Label
+                  htmlFor="componentId"
+                  className="flex items-center gap-2"
+                >
+                  <Component className="h-4 w-4" />
+                  Related Component (Optional)
+                </Label>
+                <Select
+                  value={formData.componentId || ""}
+                  onValueChange={(value) =>
+                    handleChange("componentId" as keyof ProjectTask, value)
+                  }
+                >
+                  <SelectTrigger id="componentId" className="mt-1">
+                    <SelectValue placeholder="Select a component (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No specific component</SelectItem>
+                    {components.map((component) => (
+                      <SelectItem key={component.id} value={component.id}>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`w-2 h-2 rounded-full ${
+                              component.status === "completed"
+                                ? "bg-green-500"
+                                : component.status === "in_progress"
+                                  ? "bg-blue-500"
+                                  : "bg-yellow-500"
+                            }`}
+                          ></div>
+                          {component.name}
+                          <Badge variant="outline" className="text-xs ml-1">
+                            {component.type}
+                          </Badge>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             {/* Assignment and Due Date */}
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -208,7 +273,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
                 <Input
                   id="assignedTo"
                   value={formData.assignedTo || ""}
-                  onChange={(e) => handleChange('assignedTo', e.target.value)}
+                  onChange={(e) => handleChange("assignedTo", e.target.value)}
                   className="mt-1"
                   placeholder="Name or email"
                 />
@@ -223,7 +288,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
                   id="dueDate"
                   type="date"
                   value={formData.dueDate || ""}
-                  onChange={(e) => handleChange('dueDate', e.target.value)}
+                  onChange={(e) => handleChange("dueDate", e.target.value)}
                   className="mt-1"
                 />
               </div>
@@ -232,18 +297,28 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
             {/* Task Preview */}
             {formData.title && (
               <div className="mt-4 p-3 bg-muted/50 rounded-lg border">
-                <div className="text-sm text-muted-foreground mb-1">Preview:</div>
+                <div className="text-sm text-muted-foreground mb-1">
+                  Preview:
+                </div>
                 <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${
-                    formData.status === 'completed' ? 'bg-green-500' :
-                    formData.status === 'in_progress' ? 'bg-blue-500' : 'bg-yellow-500'
-                  }`}></div>
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      formData.status === "completed"
+                        ? "bg-green-500"
+                        : formData.status === "in_progress"
+                          ? "bg-blue-500"
+                          : "bg-yellow-500"
+                    }`}
+                  ></div>
                   <span className="font-medium">{formData.title}</span>
                   {formData.priority && (
                     <Badge
                       variant={
-                        formData.priority === 'high' ? 'destructive' :
-                        formData.priority === 'medium' ? 'default' : 'secondary'
+                        formData.priority === "high"
+                          ? "destructive"
+                          : formData.priority === "medium"
+                            ? "default"
+                            : "secondary"
                       }
                       className="text-xs"
                     >
@@ -253,6 +328,14 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
                   {formData.assignedTo && (
                     <Badge variant="outline" className="text-xs">
                       {formData.assignedTo}
+                    </Badge>
+                  )}
+                  {formData.componentId && components.length > 0 && (
+                    <Badge variant="secondary" className="text-xs">
+                      {
+                        components.find((c) => c.id === formData.componentId)
+                          ?.name
+                      }
                     </Badge>
                   )}
                 </div>
@@ -279,7 +362,11 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
               disabled={isLoading || !formData.title}
               className="min-w-[100px]"
             >
-              {isLoading ? "Saving..." : isEditing ? "Update Task" : "Create Task"}
+              {isLoading
+                ? "Saving..."
+                : isEditing
+                  ? "Update Task"
+                  : "Create Task"}
             </Button>
           </DialogFooter>
         </form>

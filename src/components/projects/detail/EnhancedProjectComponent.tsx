@@ -26,6 +26,7 @@ import {
   Edit,
   MoreVertical,
   Trash2,
+  Plus,
 } from "lucide-react";
 import { ProjectComponent, ProjectTask } from "@/types/project";
 import { cn } from "@/lib/utils";
@@ -41,11 +42,12 @@ interface EnhancedProjectComponentProps {
     component: ProjectComponent,
     status: "pending" | "in_progress" | "completed",
   ) => void;
-  onReference: (component: ProjectComponent) => void;
+  onAddReference: (component: ProjectComponent) => void;
   onTaskStatusChange: (
     task: ProjectTask,
     status: "pending" | "in_progress" | "completed",
   ) => void;
+  onAddTask?: (componentId: string) => void;
 }
 
 const EnhancedProjectComponent: React.FC<EnhancedProjectComponentProps> = ({
@@ -56,8 +58,9 @@ const EnhancedProjectComponent: React.FC<EnhancedProjectComponentProps> = ({
   onEdit,
   onDelete,
   onStatusChange,
-  onReference,
+  onAddReference,
   onTaskStatusChange,
+  onAddTask,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -192,7 +195,7 @@ const EnhancedProjectComponent: React.FC<EnhancedProjectComponentProps> = ({
                 className="shadow-sm"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onReference(component);
+                  onAddReference(component);
                 }}
               >
                 Reference
@@ -296,9 +299,25 @@ const EnhancedProjectComponent: React.FC<EnhancedProjectComponentProps> = ({
               <h4 className="font-medium text-sm text-muted-foreground">
                 Related Tasks ({relatedTasks.length})
               </h4>
-              <div className="text-xs text-muted-foreground">
-                {relatedTasks.filter((t) => t.status === "completed").length}{" "}
-                completed
+              <div className="flex items-center gap-2">
+                {onAddTask && isOwner && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAddTask(component.id);
+                    }}
+                  >
+                    <Plus className="h-3 w-3 mr-1" />
+                    Add Task
+                  </Button>
+                )}
+                <div className="text-xs text-muted-foreground">
+                  {relatedTasks.filter((t) => t.status === "completed").length}{" "}
+                  completed
+                </div>
               </div>
             </div>
             {relatedTasks.map((task) => (

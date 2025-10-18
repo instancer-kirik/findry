@@ -19,6 +19,7 @@ import ResourceIndexPage from "./pages/ResourceIndexPage";
 import CreateEvent from "./pages/CreateEvent";
 import EventDetail from "./pages/events/EventDetail";
 import EditEvent from "./pages/events/EditEvent";
+import EditProject from "./pages/EditProject";
 import EventsUpcoming from "./pages/EventsUpcoming";
 import EventsInterested from "./pages/EventsInterested";
 import EventbriteCallback from "./pages/EventbriteCallback";
@@ -106,6 +107,7 @@ const App: React.FC = () => {
           <Route path="/items" element={<Items />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/projects/:projectId" element={<ProjectDetail />} />
+          <Route path="/projects/:projectId/edit" element={<EditProject />} />
           <Route path="/create-project" element={<CreateProject />} />
           <Route path="/projects/create" element={<CreateProject />} />
           <Route path="/discover/projects" element={<ProjectsShowcase />} />

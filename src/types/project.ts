@@ -1,11 +1,14 @@
-
-export type ProjectOwnershipType = 'personal' | 'brand' | 'artist' | 'community';
+export type ProjectOwnershipType =
+  | "personal"
+  | "brand"
+  | "artist"
+  | "community";
 
 export interface Project {
   id: string;
   name: string;
   description: string;
-  status: 'planning' | 'in_progress' | 'completed' | 'cancelled';
+  status: "planning" | "in_progress" | "completed" | "cancelled";
   version: string;
   progress: number;
   tags: string[];
@@ -37,7 +40,7 @@ export interface ProjectComponent {
   name: string;
   type: string;
   description?: string;
-  status: 'pending' | 'in_progress' | 'completed';
+  status: "pending" | "in_progress" | "completed";
   assignedTo?: string;
   dueDate?: string;
   projectId?: string; // Add projectId field
@@ -47,11 +50,12 @@ export interface ProjectTask {
   id: string;
   title: string;
   description?: string;
-  status: 'pending' | 'in_progress' | 'completed';
+  status: "pending" | "in_progress" | "completed";
   assignedTo?: string;
   dueDate?: string;
-  priority: 'low' | 'medium' | 'high';
+  priority: "low" | "medium" | "high";
   projectId?: string;
+  componentId?: string;
 }
 
 export interface ProjectMessage {
@@ -64,7 +68,7 @@ export interface ProjectMessage {
   createdAt: string;
   isNotification: boolean;
   reference?: {
-    type: 'component' | 'task';
+    type: "component" | "task";
     id: string;
     name: string;
     status?: string; // Add status field
@@ -72,11 +76,16 @@ export interface ProjectMessage {
 }
 
 export interface ProjectEvent {
-  type: 'status_change' | 'task_update' | 'component_update' | 'comment' | 'member_joined';
+  type:
+    | "status_change"
+    | "task_update"
+    | "component_update"
+    | "comment"
+    | "member_joined";
   timestamp: string;
   userId: string;
   userName: string;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
 }
 
 export interface ReferenceItem {
@@ -85,9 +94,13 @@ export interface ReferenceItem {
   type: string;
   url?: string;
   description?: string;
-  version?: string; 
+  version?: string;
   status?: string; // Added status property
 }
 
-export type ProjectTaskStatus = 'pending' | 'in_progress' | 'completed';
-export type ProjectStatus = 'planning' | 'in_progress' | 'completed' | 'cancelled';
+export type ProjectTaskStatus = "pending" | "in_progress" | "completed";
+export type ProjectStatus =
+  | "planning"
+  | "in_progress"
+  | "completed"
+  | "cancelled";

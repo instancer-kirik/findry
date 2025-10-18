@@ -1,9 +1,16 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   CheckCircle2,
   Circle,
@@ -21,17 +28,26 @@ import {
   Tag,
   ChevronRight,
   ChevronDown,
-  Settings
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import type { Project } from '@/types/project';
+  Settings,
+  Edit,
+  ArrowLeft,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
+import type { Project } from "@/types/project";
 
 interface VehicleBuildProjectProps {
   project: Project;
 }
 
 const VehicleBuildProject = ({ project }: VehicleBuildProjectProps) => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [expandedPhases, setExpandedPhases] = useState<string[]>([]);
+
+  // Check if user is the project owner
+  const isOwner =
+    user && (project.owner_id === user.id || project.created_by === user.id);
 
   // Extract vehicle info from project data
   const vehicleInfo = {
@@ -142,6 +158,24 @@ const VehicleBuildProject = ({ project }: VehicleBuildProjectProps) => {
 
   return (
     <div className="container mx-auto py-8 space-y-6">
+      {/* Navigation Header */}
+      <div className="flex justify-between items-center">
+        <Button variant="ghost" onClick={() => navigate("/projects")}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Projects
+        </Button>
+
+        {isOwner && (
+          <Button
+            variant="outline"
+            onClick={() => navigate(`/projects/${project.id}/edit`)}
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            Edit Project
+          </Button>
+        )}
+      </div>
+
       {/* Project Header */}
       <Card>
         <CardHeader>

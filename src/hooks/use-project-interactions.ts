@@ -1,14 +1,21 @@
-
-import { useState } from 'react';
-import { Project, ProjectComponent, ProjectTask, ProjectStatus, ProjectTaskStatus } from '@/types/project';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './use-auth';
+import { useState } from "react";
+import {
+  Project,
+  ProjectComponent,
+  ProjectTask,
+  ProjectStatus,
+  ProjectTaskStatus,
+} from "@/types/project";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "./use-auth";
 
 interface ProjectInteractionsProps {
   projectId: string;
 }
 
-export const useProjectInteractions = ({ projectId }: ProjectInteractionsProps) => {
+export const useProjectInteractions = ({
+  projectId,
+}: ProjectInteractionsProps) => {
   const [components, setComponents] = useState<ProjectComponent[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -22,41 +29,43 @@ export const useProjectInteractions = ({ projectId }: ProjectInteractionsProps) 
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('project_components')
-        .select('*')
-        .eq('project_id', projectId);
-      
+        .from("project_components")
+        .select("*")
+        .eq("project_id", projectId);
+
       if (error) throw error;
-      
+
       setComponents(data as ProjectComponent[]);
     } catch (err) {
-      console.error('Error fetching project components:', err);
+      console.error("Error fetching project components:", err);
       setError(err as Error);
     } finally {
       setLoading(false);
     }
   };
 
-  const createComponent = async (component: Omit<ProjectComponent, 'id' | 'projectId'>) => {
+  const createComponent = async (
+    component: Omit<ProjectComponent, "id" | "projectId">,
+  ) => {
     try {
       setIsAddingComponent(true);
       const newComponent = {
         ...component,
-        project_id: projectId
+        project_id: projectId,
       };
-      
+
       const { data, error } = await supabase
-        .from('project_components')
+        .from("project_components")
         .insert(newComponent)
         .select()
         .single();
-      
+
       if (error) throw error;
-      
-      setComponents(prev => [...prev, data as ProjectComponent]);
+
+      setComponents((prev) => [...prev, data as ProjectComponent]);
       return data as ProjectComponent;
     } catch (err) {
-      console.error('Error creating component:', err);
+      console.error("Error creating component:", err);
       throw err;
     } finally {
       setIsAddingComponent(false);
@@ -67,20 +76,29 @@ export const useProjectInteractions = ({ projectId }: ProjectInteractionsProps) 
     try {
       setIsEditingComponent(true);
       const { data, error } = await supabase
-        .from('project_components')
-        .update(component)
-        .eq('id', component.id)
+        .from("project_components")
+        .update({
+          name: component.name,
+          type: component.type,
+          description: component.description,
+          status: component.status,
+          assigned_to: component.assignedTo,
+          due_date: component.dueDate,
+        })
+        .eq("id", component.id)
         .select()
         .single();
-      
+
       if (error) throw error;
-      
-      setComponents(prev => 
-        prev.map(c => c.id === component.id ? (data as ProjectComponent) : c)
+
+      setComponents((prev) =>
+        prev.map((c) =>
+          c.id === component.id ? (data as ProjectComponent) : c,
+        ),
       );
       return data as ProjectComponent;
     } catch (err) {
-      console.error('Error updating component:', err);
+      console.error("Error updating component:", err);
       throw err;
     } finally {
       setIsEditingComponent(false);
@@ -90,33 +108,36 @@ export const useProjectInteractions = ({ projectId }: ProjectInteractionsProps) 
   const deleteComponent = async (componentId: string) => {
     try {
       const { error } = await supabase
-        .from('project_components')
+        .from("project_components")
         .delete()
-        .eq('id', componentId);
-      
+        .eq("id", componentId);
+
       if (error) throw error;
-      
-      setComponents(prev => prev.filter(c => c.id !== componentId));
+
+      setComponents((prev) => prev.filter((c) => c.id !== componentId));
       return true;
     } catch (err) {
-      console.error('Error deleting component:', err);
+      console.error("Error deleting component:", err);
       throw err;
     }
   };
 
   // Project status management
-  const updateProjectStatus = async (project: Project, newStatus: ProjectStatus): Promise<boolean> => {
+  const updateProjectStatus = async (
+    project: Project,
+    newStatus: ProjectStatus,
+  ): Promise<boolean> => {
     try {
       const { error } = await supabase
-        .from('projects')
+        .from("projects")
         .update({ status: newStatus })
-        .eq('id', project.id);
-      
+        .eq("id", project.id);
+
       if (error) throw error;
-      
+
       return true;
     } catch (err) {
-      console.error('Error updating project status:', err);
+      console.error("Error updating project status:", err);
       return false;
     }
   };
@@ -126,35 +147,35 @@ export const useProjectInteractions = ({ projectId }: ProjectInteractionsProps) 
     name: string;
     type: string;
     description?: string;
-    status: 'pending' | 'in_progress' | 'completed';
+    status: "pending" | "in_progress" | "completed";
   }): Promise<boolean> => {
     try {
       setIsAddingComponent(true);
-      
-      const { error } = await supabase
-        .from('project_components')
-        .insert({
-          ...componentData,
-          project_id: projectId
-        });
-      
+
+      const { error } = await supabase.from("project_components").insert({
+        ...componentData,
+        project_id: projectId,
+      });
+
       if (error) throw error;
-      
+
       return true;
     } catch (err) {
-      console.error('Error adding project component:', err);
+      console.error("Error adding project component:", err);
       return false;
     } finally {
       setIsAddingComponent(false);
     }
   };
 
-  const updateProjectComponent = async (component: ProjectComponent): Promise<boolean> => {
+  const updateProjectComponent = async (
+    component: ProjectComponent,
+  ): Promise<boolean> => {
     try {
       setIsEditingComponent(true);
-      
+
       const { error } = await supabase
-        .from('project_components')
+        .from("project_components")
         .update({
           name: component.name,
           type: component.type,
@@ -163,13 +184,13 @@ export const useProjectInteractions = ({ projectId }: ProjectInteractionsProps) 
           assigned_to: component.assignedTo,
           due_date: component.dueDate,
         })
-        .eq('id', component.id);
-      
+        .eq("id", component.id);
+
       if (error) throw error;
-      
+
       return true;
     } catch (err) {
-      console.error('Error updating project component:', err);
+      console.error("Error updating project component:", err);
       return false;
     } finally {
       setIsEditingComponent(false);
@@ -181,31 +202,31 @@ export const useProjectInteractions = ({ projectId }: ProjectInteractionsProps) 
     title: string;
     name?: string;
     description?: string;
-    status: 'pending' | 'in_progress' | 'completed';
-    priority: 'low' | 'medium' | 'high';
+    status: "pending" | "in_progress" | "completed";
+    priority: "low" | "medium" | "high";
     assignedTo?: string;
     dueDate?: string;
+    componentId?: string;
   }): Promise<boolean> => {
     try {
       setIsAddingTask(true);
-      
-      const { error } = await supabase
-        .from('project_tasks')
-        .insert({
-          title: taskData.title,
-          description: taskData.description,
-          status: taskData.status,
-          priority: taskData.priority,
-          assigned_to: taskData.assignedTo,
-          due_date: taskData.dueDate,
-          project_id: projectId
-        });
-      
+
+      const { error } = await supabase.from("project_tasks").insert({
+        title: taskData.title,
+        description: taskData.description,
+        status: taskData.status,
+        priority: taskData.priority,
+        assigned_to: taskData.assignedTo,
+        due_date: taskData.dueDate,
+        component_id: taskData.componentId,
+        project_id: projectId,
+      });
+
       if (error) throw error;
-      
+
       return true;
     } catch (err) {
-      console.error('Error adding project task:', err);
+      console.error("Error adding project task:", err);
       return false;
     } finally {
       setIsAddingTask(false);
@@ -215,9 +236,9 @@ export const useProjectInteractions = ({ projectId }: ProjectInteractionsProps) 
   const updateProjectTask = async (task: ProjectTask): Promise<boolean> => {
     try {
       setIsEditingTask(true);
-      
+
       const { error } = await supabase
-        .from('project_tasks')
+        .from("project_tasks")
         .update({
           title: task.title,
           description: task.description,
@@ -225,14 +246,15 @@ export const useProjectInteractions = ({ projectId }: ProjectInteractionsProps) 
           priority: task.priority,
           assigned_to: task.assignedTo,
           due_date: task.dueDate,
+          component_id: (task as any).componentId,
         })
-        .eq('id', task.id);
-      
+        .eq("id", task.id);
+
       if (error) throw error;
-      
+
       return true;
     } catch (err) {
-      console.error('Error updating project task:', err);
+      console.error("Error updating project task:", err);
       return false;
     } finally {
       setIsEditingTask(false);
@@ -240,18 +262,21 @@ export const useProjectInteractions = ({ projectId }: ProjectInteractionsProps) 
   };
 
   // Project progress management
-  const updateProjectProgress = async (project: Project, progress: number): Promise<boolean> => {
+  const updateProjectProgress = async (
+    project: Project,
+    progress: number,
+  ): Promise<boolean> => {
     try {
       const { error } = await supabase
-        .from('projects')
+        .from("projects")
         .update({ progress })
-        .eq('id', project.id);
-      
+        .eq("id", project.id);
+
       if (error) throw error;
-      
+
       return true;
     } catch (err) {
-      console.error('Error updating project progress:', err);
+      console.error("Error updating project progress:", err);
       return false;
     }
   };
@@ -273,6 +298,6 @@ export const useProjectInteractions = ({ projectId }: ProjectInteractionsProps) 
     isAddingComponent,
     isAddingTask,
     isEditingComponent,
-    isEditingTask
+    isEditingTask,
   };
 };
