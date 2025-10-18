@@ -24,12 +24,18 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { PlusCircle, CheckCircle2, Wrench } from "lucide-react";
+import { PlusCircle, CheckCircle2, Wrench, Palette, Eye } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { useProject } from "@/hooks/use-project";
 import { useProjectInteractions } from "@/hooks/use-project-interactions";
-import { Project, ProjectComponent, ProjectTask } from "@/types/project";
+import {
+  Project,
+  ProjectComponent,
+  ProjectTask,
+  ProjectStatus,
+  ProjectLandingPage,
+} from "@/types/project";
 import { supabase } from "@/integrations/supabase/client";
 import ProjectChat, { ReferenceItem } from "@/components/projects/ProjectChat";
 import ProjectInteractionProgress from "@/components/projects/ProjectInteractionProgress";
@@ -40,6 +46,8 @@ import ComponentDialog from "@/components/projects/detail/ComponentDialog";
 import TaskDialog from "@/components/projects/detail/TaskDialog";
 import VehicleBuildProject from "@/components/projects/VehicleBuildProject";
 import ProductLandingPage from "@/components/projects/ProductLandingPage";
+import CustomLandingPage from "@/components/projects/landing/CustomLandingPage";
+import LandingPageEditor from "@/components/projects/landing/LandingPageEditor";
 
 const ProjectDetail: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -83,12 +91,16 @@ const ProjectDetail: React.FC = () => {
   const [newTask, setNewTask] = useState<Partial<ProjectTask>>({
     title: "",
     description: "",
-    status: "pending",
-    priority: "medium",
+    status: "pending" as const,
+    priority: "medium" as const,
     assignedTo: "",
     dueDate: "",
+    componentId: "",
   });
-  const [preselectedComponentId, setPreselectedComponentId] = useState<string | undefined>(undefined);
+
+  // Landing page states
+  const [landingPageEditorOpen, setLandingPageEditorOpen] = useState(false);
+  const [showCustomLanding, setShowCustomLanding] = useState(false);
 
   // Progress dialog state
   const [progressDialogOpen, setProgressDialogOpen] = useState(false);
@@ -113,8 +125,10 @@ const ProjectDetail: React.FC = () => {
         }
 
         // User is owner if they match owner_id or created_by
-        const isProjectOwner = projectData?.owner_id === user.id || projectData?.created_by === user.id;
-        
+        const isProjectOwner =
+          projectData?.owner_id === user.id ||
+          projectData?.created_by === user.id;
+
         if (isProjectOwner) {
           setIsOwner(true);
           return;
@@ -185,7 +199,10 @@ const ProjectDetail: React.FC = () => {
       return;
     }
 
-    const success = await updateProjectStatus(project, newStatus as any);
+    const success = await updateProjectStatus(
+      project,
+      newStatus as ProjectStatus,
+    );
     if (success) {
       toast.success("Project status updated successfully");
       refetch();
@@ -312,9 +329,9 @@ const ProjectDetail: React.FC = () => {
         priority: task.priority,
         assignedTo: task.assignedTo || "",
         dueDate: task.dueDate || "",
-        componentId: task.componentId || componentId,
+        componentId:
+          (task as ProjectTask & { componentId?: string }).componentId || "",
       });
-      setPreselectedComponentId(task.componentId || componentId);
     } else {
       setEditingTask(null);
       setNewTask({
@@ -324,15 +341,10 @@ const ProjectDetail: React.FC = () => {
         priority: "medium",
         assignedTo: "",
         dueDate: "",
-        componentId: componentId,
+        componentId: componentId || "",
       });
-      setPreselectedComponentId(componentId);
     }
     setTaskDialogOpen(true);
-  };
-
-  const handleAddTaskFromComponent = (componentId: string) => {
-    handleOpenTaskDialog(undefined, componentId);
   };
 
   const handleSaveTask = async (taskData: Partial<ProjectTask>) => {
@@ -356,7 +368,9 @@ const ProjectDetail: React.FC = () => {
         priority: taskData.priority as "low" | "medium" | "high",
         assignedTo: taskData.assignedTo || "",
         dueDate: taskData.dueDate || "",
-        componentId: taskData.componentId,
+        componentId:
+          (taskData as ProjectTask & { componentId?: string }).componentId ||
+          "",
       });
     }
 
@@ -370,6 +384,7 @@ const ProjectDetail: React.FC = () => {
         priority: "medium",
         assignedTo: "",
         dueDate: "",
+        componentId: "",
       });
       toast.success(`Task ${editingTask ? "updated" : "added"} successfully`);
       refetch();
@@ -416,12 +431,40 @@ const ProjectDetail: React.FC = () => {
 
     return project.tasks.filter(
       (task) =>
-        // Direct component relationship
+        // First check if task is directly associated with component via componentId
         task.componentId === component.id ||
-        // Legacy text-based matching
-        task.title?.toLowerCase().includes(component.name.toLowerCase()) ||
-        task.description?.toLowerCase().includes(component.name.toLowerCase()),
+        // Fallback to name/description matching for legacy tasks
+        (!task.componentId &&
+          (task.title?.toLowerCase().includes(component.name.toLowerCase()) ||
+            task.description
+              ?.toLowerCase()
+              .includes(component.name.toLowerCase()))),
     );
+  };
+
+  const handleSaveLandingPage = async (landingPageData: ProjectLandingPage) => {
+    try {
+      const { error } = await supabase
+        .from("projects")
+        .update({
+          landing_page: landingPageData,
+          has_custom_landing: true,
+        } as Record<string, unknown>)
+        .eq("id", projectId);
+
+      if (error) throw error;
+
+      toast.success("Landing page saved successfully!");
+      setLandingPageEditorOpen(false);
+      refetch();
+    } catch (error) {
+      console.error("Error saving landing page:", error);
+      toast.error("Failed to save landing page");
+    }
+  };
+
+  const handleToggleLandingView = () => {
+    setShowCustomLanding(!showCustomLanding);
   };
 
   if (isLoading) {
@@ -471,6 +514,30 @@ const ProjectDetail: React.FC = () => {
     project.name?.toLowerCase().includes("offwocken")
   ) {
     return <ProductLandingPage project={project} />;
+  }
+
+  // Show custom landing page if enabled and toggled
+  if (showCustomLanding && project.has_custom_landing && project.landing_page) {
+    return (
+      <CustomLandingPage
+        project={project}
+        landingPage={project.landing_page}
+        isOwner={isOwner}
+        onEdit={() => setLandingPageEditorOpen(true)}
+      />
+    );
+  }
+
+  // Show landing page editor
+  if (landingPageEditorOpen) {
+    return (
+      <LandingPageEditor
+        project={project}
+        landingPage={project.landing_page}
+        onSave={handleSaveLandingPage}
+        onCancel={() => setLandingPageEditorOpen(false)}
+      />
+    );
   }
 
   return (
@@ -523,24 +590,46 @@ const ProjectDetail: React.FC = () => {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-              <Button variant="outline" onClick={() => navigate(`/projects/${projectId}/edit`)}>Edit Project</Button>
-              <Button 
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/projects/${projectId}/edit`)}
+              >
+                Edit Project
+              </Button>
+              {project.has_custom_landing && (
+                <Button variant="outline" onClick={handleToggleLandingView}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  {showCustomLanding ? "Project View" : "Landing View"}
+                </Button>
+              )}
+              <Button
+                variant={project.has_custom_landing ? "outline" : "default"}
+                onClick={() => setLandingPageEditorOpen(true)}
+              >
+                <Palette className="h-4 w-4 mr-2" />
+                {project.has_custom_landing ? "Edit Landing" : "Create Landing"}
+              </Button>
+              <Button
                 variant="destructive"
                 onClick={async () => {
-                  if (confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
+                  if (
+                    confirm(
+                      "Are you sure you want to delete this project? This action cannot be undone.",
+                    )
+                  ) {
                     try {
                       const { error } = await supabase
-                        .from('projects')
+                        .from("projects")
                         .delete()
-                        .eq('id', projectId);
-                      
+                        .eq("id", projectId);
+
                       if (error) throw error;
-                      
-                      toast.success('Project deleted successfully');
-                      navigate('/projects');
+
+                      toast.success("Project deleted successfully");
+                      navigate("/projects");
                     } catch (error) {
-                      console.error('Error deleting project:', error);
-                      toast.error('Failed to delete project');
+                      console.error("Error deleting project:", error);
+                      toast.error("Failed to delete project");
                     }
                   }
                 }}
@@ -592,7 +681,7 @@ const ProjectDetail: React.FC = () => {
                         onEdit={handleOpenComponentDialog}
                         onDelete={handleDeleteComponent}
                         onStatusChange={handleComponentStatusChange}
-                        onReference={(comp) =>
+                        onAddReference={(comp) =>
                           addReferenceToChat({
                             id: comp.id,
                             type: "component",
@@ -601,7 +690,9 @@ const ProjectDetail: React.FC = () => {
                           })
                         }
                         onTaskStatusChange={handleTaskStatusChange}
-                        onAddTask={handleAddTaskFromComponent}
+                        onAddTask={(componentId) =>
+                          handleOpenTaskDialog(undefined, componentId)
+                        }
                       />
                     ))}
                   </div>
@@ -750,7 +841,6 @@ const ProjectDetail: React.FC = () => {
           isLoading={isAddingTask || isEditingTask}
           onSave={handleSaveTask}
           components={project?.components || []}
-          preselectedComponentId={preselectedComponentId}
         />
       </div>
     </Layout>

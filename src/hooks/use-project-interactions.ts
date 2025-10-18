@@ -246,7 +246,8 @@ export const useProjectInteractions = ({
           priority: task.priority,
           assigned_to: task.assignedTo,
           due_date: task.dueDate,
-          component_id: (task as any).componentId,
+          component_id: (task as ProjectTask & { componentId?: string })
+            .componentId,
         })
         .eq("id", task.id);
 

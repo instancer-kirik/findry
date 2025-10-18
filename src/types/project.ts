@@ -33,6 +33,55 @@ export interface Project {
   featured?: boolean;
   view_count?: number;
   like_count?: number;
+  // Landing page customization
+  landing_page?: ProjectLandingPage;
+  has_custom_landing?: boolean;
+}
+
+export interface ProjectLandingPage {
+  theme: "default" | "minimal" | "showcase" | "hype" | "technical";
+  hero_title?: string;
+  hero_subtitle?: string;
+  hero_image?: string;
+  hero_video?: string;
+  call_to_action?: string;
+  cta_link?: string;
+  sections: LandingPageSection[];
+  social_links?: SocialLink[];
+  custom_css?: string;
+  background_color?: string;
+  text_color?: string;
+  accent_color?: string;
+}
+
+export interface LandingPageSection {
+  id: string;
+  type:
+    | "text"
+    | "gallery"
+    | "features"
+    | "timeline"
+    | "team"
+    | "updates"
+    | "custom";
+  title?: string;
+  content?: string;
+  order: number;
+  visible: boolean;
+  config?: Record<string, unknown>;
+}
+
+export interface SocialLink {
+  platform:
+    | "github"
+    | "twitter"
+    | "discord"
+    | "youtube"
+    | "instagram"
+    | "website"
+    | "custom";
+  url: string;
+  label?: string;
 }
 
 export interface ProjectComponent {
