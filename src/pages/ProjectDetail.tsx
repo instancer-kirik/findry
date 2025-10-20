@@ -24,7 +24,15 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { PlusCircle, CheckCircle2, Wrench, Palette, Eye } from "lucide-react";
+import {
+  PlusCircle,
+  CheckCircle2,
+  Wrench,
+  Palette,
+  Eye,
+  Share2,
+  Copy,
+} from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { useProject } from "@/hooks/use-project";
@@ -101,6 +109,49 @@ const ProjectDetail: React.FC = () => {
   // Landing page states
   const [landingPageEditorOpen, setLandingPageEditorOpen] = useState(false);
   const [showCustomLanding, setShowCustomLanding] = useState(false);
+
+  // Share functionality
+  const handleShareLanding = async () => {
+    const landingUrl = `${window.location.origin}/projects/${projectId}/landing`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title:
+            project?.landing_page?.hero_title ||
+            project?.name ||
+            "Project Landing Page",
+          text:
+            project?.landing_page?.hero_subtitle ||
+            project?.description ||
+            "Check out this amazing project!",
+          url: landingUrl,
+        });
+        toast.success("Shared successfully!");
+      } catch (error) {
+        // User cancelled sharing, copy to clipboard instead
+        handleCopyLandingLink(landingUrl);
+      }
+    } else {
+      handleCopyLandingLink(landingUrl);
+    }
+  };
+
+  const handleCopyLandingLink = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Landing page link copied to clipboard!");
+    } catch (error) {
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea");
+      textArea.value = url;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      toast.success("Landing page link copied to clipboard!");
+    }
+  };
 
   // Progress dialog state
   const [progressDialogOpen, setProgressDialogOpen] = useState(false);
@@ -600,6 +651,12 @@ const ProjectDetail: React.FC = () => {
                 <Button variant="outline" onClick={handleToggleLandingView}>
                   <Eye className="h-4 w-4 mr-2" />
                   {showCustomLanding ? "Project View" : "Landing View"}
+                </Button>
+              )}
+              {project.has_custom_landing && project.is_public && (
+                <Button variant="outline" onClick={handleShareLanding}>
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Share Landing
                 </Button>
               )}
               <Button

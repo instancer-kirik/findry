@@ -487,6 +487,7 @@ const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
                       <SelectItem value="showcase">Showcase</SelectItem>
                       <SelectItem value="hype">Hype</SelectItem>
                       <SelectItem value="technical">Technical</SelectItem>
+                      <SelectItem value="sleek">Sleek</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

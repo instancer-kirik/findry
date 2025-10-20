@@ -39,7 +39,7 @@ export interface Project {
 }
 
 export interface ProjectLandingPage {
-  theme: "default" | "minimal" | "showcase" | "hype" | "technical";
+  theme: "default" | "minimal" | "showcase" | "hype" | "technical" | "sleek";
   hero_title?: string;
   hero_subtitle?: string;
   hero_image?: string;

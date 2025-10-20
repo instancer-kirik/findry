@@ -57,6 +57,7 @@ import TourPlanner from "./pages/TourPlanner";
 import GearPacking from "./pages/GearPacking";
 import VehicleBuildShowcase from "./pages/VehicleBuildShowcase";
 import Roadmap from "./pages/Roadmap";
+import PublicLanding from "./pages/PublicLanding";
 
 const queryClient = new QueryClient();
 
@@ -109,6 +110,10 @@ const App: React.FC = () => {
           <Route path="/items" element={<Items />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/projects/:projectId" element={<ProjectDetail />} />
+          <Route
+            path="/projects/:projectId/landing"
+            element={<PublicLanding />}
+          />
           <Route path="/projects/:projectId/edit" element={<EditProject />} />
           <Route path="/create-project" element={<CreateProject />} />
           <Route path="/projects/create" element={<CreateProject />} />
