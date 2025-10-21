@@ -11,10 +11,11 @@ interface ProfileTabsProps {
 const ProfileTabs: React.FC<ProfileTabsProps> = ({ profile, children, isOwnProfile = false }) => {
   return (
     <Tabs defaultValue="overview" className="w-full">
-      <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4">
+      <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5">
         <TabsTrigger value="overview">Overview</TabsTrigger>
         <TabsTrigger value="content">Content</TabsTrigger>
         <TabsTrigger value="events">Events</TabsTrigger>
+        <TabsTrigger value="resources">Resources</TabsTrigger>
         <TabsTrigger value="connections">Connections</TabsTrigger>
       </TabsList>
 
