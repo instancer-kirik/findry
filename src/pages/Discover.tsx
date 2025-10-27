@@ -1,21 +1,26 @@
-import { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Skeleton } from '@/components/ui/skeleton';
-import Layout from '@/components/layout/Layout';
-import DiscoverHeader from '@/components/discover/DiscoverHeader';
-import DiscoverSidebar from '@/components/discover/DiscoverSidebar';
-import DiscoverFilters from '@/components/discover/DiscoverFilters';
-import CategoryItemsGrid from '@/components/discover/CategoryItemsGrid';
-import SelectionPanel from '@/components/marketplace/SelectionPanel';
-import { cn } from '@/lib/utils';
-import { artistStyleFilters, disciplinaryFilters, resourceTypes, allTags } from '@/components/discover/DiscoverData';
-import { useDiscoverData } from '@/hooks/use-discover-data';
-import { ContentItemProps } from '@/types/content';
-import { Check, Grid, List, Upload, UserPlus, PlusCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import DiscoverMobileDrawer from '@/components/discover/DiscoverMobileDrawer';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useEffect, useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
+import Layout from "@/components/layout/Layout";
+import DiscoverHeader from "@/components/discover/DiscoverHeader";
+import DiscoverSidebar from "@/components/discover/DiscoverSidebar";
+import DiscoverFilters from "@/components/discover/DiscoverFilters";
+import CategoryItemsGrid from "@/components/discover/CategoryItemsGrid";
+import SelectionPanel from "@/components/marketplace/SelectionPanel";
+import { cn } from "@/lib/utils";
+import {
+  artistStyleFilters,
+  disciplinaryFilters,
+  resourceTypes,
+  allTags,
+} from "@/components/discover/DiscoverData";
+import { useDiscoverData } from "@/hooks/use-discover-data";
+import { ContentItemProps } from "@/types/content";
+import { Check, Grid, List, Upload, UserPlus, PlusCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import DiscoverMobileDrawer from "@/components/discover/DiscoverMobileDrawer";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Dialog,
   DialogContent,
@@ -23,19 +28,19 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose
-} from '@/components/ui/dialog';
-import ArtistBulkImport from '@/components/discover/ArtistBulkImport';
-import { toast } from '@/components/ui/use-toast';
+  DialogClose,
+} from "@/components/ui/dialog";
+import ArtistBulkImport from "@/components/discover/ArtistBulkImport";
+import { toast } from "@/components/ui/use-toast";
 
 const Discover = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const query = searchParams.get('q') || '';
-  const typeParam = searchParams.get('type') || '';
-  const selectionMode = searchParams.get('select') === 'true';
-  const selectionTarget = searchParams.get('target') || 'event';
-  const selectionType = searchParams.get('select_type') || 'all';
+  const query = searchParams.get("q") || "";
+  const typeParam = searchParams.get("type") || "";
+  const selectionMode = searchParams.get("select") === "true";
+  const selectionTarget = searchParams.get("target") || "event";
+  const selectionType = searchParams.get("select_type") || "all";
 
   const isMobile = useIsMobile();
 
@@ -43,34 +48,39 @@ const Discover = () => {
   const [headerSearchQuery, setHeaderSearchQuery] = useState(query);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [userType, setUserType] = useState('artist');
-  const [artistStyle, setArtistStyle] = useState('all');
-  const [disciplinaryType, setDisciplinaryType] = useState('all');
-  const [resourceType, setResourceType] = useState('all');
+  const [userType, setUserType] = useState("artist");
+  const [artistStyle, setArtistStyle] = useState("all");
+  const [disciplinaryType, setDisciplinaryType] = useState("all");
+  const [resourceType, setResourceType] = useState("all");
   const [selectedSubfilters, setSelectedSubfilters] = useState<string[]>([]);
-  
+
   // Define availableSubfilters here - this was missing and causing the error
-  const [availableSubfilters, setAvailableSubfilters] = useState<{ value: string; label: string }[]>([
-    { value: 'music', label: 'Music' },
-    { value: 'visual', label: 'Visual Arts' },
-    { value: 'performance', label: 'Performance' },
-    { value: 'digital', label: 'Digital' },
-    { value: 'traditional', label: 'Traditional' },
-    { value: 'contemporary', label: 'Contemporary' }
+  const [availableSubfilters, setAvailableSubfilters] = useState<
+    { value: string; label: string }[]
+  >([
+    { value: "music", label: "Music" },
+    { value: "visual", label: "Visual Arts" },
+    { value: "performance", label: "Performance" },
+    { value: "digital", label: "Digital" },
+    { value: "traditional", label: "Traditional" },
+    { value: "contemporary", label: "Contemporary" },
   ]);
 
   // State for DiscoverFilters
-  const [activeTab, setActiveTab] = useState(typeParam || 'artists');
-  const [activeSubTab, setActiveSubTab] = useState('all');
+  const [activeTab, setActiveTab] = useState(typeParam || "artists");
+  const [activeSubTab, setActiveSubTab] = useState("all");
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
 
   // State for selection panel
   const [selectedItems, setSelectedItems] = useState<ContentItemProps[]>([]);
-  const [isSelectionMinimized, setIsSelectionMinimized] = useState(!selectionMode);
+  const [isSelectionMinimized, setIsSelectionMinimized] =
+    useState(!selectionMode);
 
   // State for bulk import
   const [importDialogOpen, setImportDialogOpen] = useState(false);
-  const [importedArtists, setImportedArtists] = useState<ContentItemProps[]>([]);
+  const [importedArtists, setImportedArtists] = useState<ContentItemProps[]>(
+    [],
+  );
 
   // Use the custom hook for data fetching
   const { items, isLoading } = useDiscoverData(
@@ -81,30 +91,28 @@ const Discover = () => {
     artistStyle,
     disciplinaryType,
     activeSubTab,
-    selectedSubfilters
+    selectedSubfilters,
   );
 
   useEffect(() => {
     // Update search params when activeTab changes
     const params = new URLSearchParams(searchParams);
-    params.set('type', activeTab);
-    params.set('q', headerSearchQuery);
+    params.set("type", activeTab);
+    params.set("q", headerSearchQuery);
     setSearchParams(params);
   }, [activeTab, headerSearchQuery]);
 
   const handleTagSelect = (tag: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) 
-        ? prev.filter(t => t !== tag)
-        : [...prev, tag]
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
     );
   };
 
   const handleSubfilterSelect = (filter: string) => {
-    setSelectedSubfilters(prev => 
+    setSelectedSubfilters((prev) =>
       prev.includes(filter)
-        ? prev.filter(f => f !== filter)
-        : [...prev, filter]
+        ? prev.filter((f) => f !== filter)
+        : [...prev, filter],
     );
   };
 
@@ -114,13 +122,13 @@ const Discover = () => {
 
   const handleSelectItem = (item: ContentItemProps) => {
     // Check if the item is already selected
-    if (selectedItems.some(selectedItem => selectedItem.id === item.id)) {
+    if (selectedItems.some((selectedItem) => selectedItem.id === item.id)) {
       return;
     }
-    
+
     // Add the item to the selected items
-    setSelectedItems(prev => [...prev, item]);
-    
+    setSelectedItems((prev) => [...prev, item]);
+
     // If the selection panel is minimized, show it
     if (isSelectionMinimized) {
       setIsSelectionMinimized(false);
@@ -128,11 +136,11 @@ const Discover = () => {
   };
 
   const handleRemoveItem = (itemId: string) => {
-    setSelectedItems(prev => prev.filter(item => item.id !== itemId));
+    setSelectedItems((prev) => prev.filter((item) => item.id !== itemId));
   };
 
   const toggleSelectionPanel = () => {
-    setIsSelectionMinimized(prev => !prev);
+    setIsSelectionMinimized((prev) => !prev);
   };
 
   const handleItemClick = (item: ContentItemProps) => {
@@ -140,109 +148,122 @@ const Discover = () => {
       handleSelectItem(item);
       return;
     }
-    
+
     // Navigate to the appropriate detail page based on the item type
     switch (item.type) {
-      case 'artist':
+      case "artist":
         navigate(`/artist/${item.id}`);
         break;
-      case 'resource':
+      case "resource":
         navigate(`/resource/${item.id}`);
         break;
-      case 'project':
-        navigate(`/project/${item.id}`);
+      case "project":
+        navigate(`/projects/${item.id}`);
         break;
-      case 'event':
+      case "event":
         navigate(`/events/${item.id}`);
         break;
-      case 'venue':
+      case "venue":
         navigate(`/venue/${item.id}`);
         break;
-      case 'community':
+      case "community":
         navigate(`/community/${item.id}`);
         break;
-      case 'brand':
+      case "brand":
         navigate(`/brand/${item.id}`);
         break;
-      case 'shop':
+      case "shop":
         navigate(`/shop/${item.id}`);
         break;
       default:
-        console.log('No navigation defined for', item.type);
+        console.log("No navigation defined for", item.type);
     }
   };
 
-  const availableTabs = ['artists', 'resources', 'projects', 'events', 'venues', 'communities', 'brands'];
+  const availableTabs = [
+    "artists",
+    "resources",
+    "projects",
+    "events",
+    "venues",
+    "communities",
+    "brands",
+  ];
   const tabSubcategories = {
-    artists: ['music', 'visual', 'performance', 'digital'],
-    brands: ['record-label', 'fashion', 'tech', 'food-beverage'],
-    events: ['concert', 'exhibition', 'workshop', 'networking'],
-    content: ['music', 'video', 'article', 'podcast'],
-    resources: ['space', 'equipment', 'service', 'other'],
-    venues: ['concert-hall', 'club', 'theater', 'outdoor'],
-    communities: ['educational', 'professional', 'neighborhood', 'interest-based']
+    artists: ["music", "visual", "performance", "digital"],
+    brands: ["record-label", "fashion", "tech", "food-beverage"],
+    events: ["concert", "exhibition", "workshop", "networking"],
+    content: ["music", "video", "article", "podcast"],
+    resources: ["space", "equipment", "service", "other"],
+    venues: ["concert-hall", "club", "theater", "outdoor"],
+    communities: [
+      "educational",
+      "professional",
+      "neighborhood",
+      "interest-based",
+    ],
   };
 
   const getTabLabel = (tab: string) => {
-    return tab === 'all' ? 'All' : tab.charAt(0).toUpperCase() + tab.slice(1);
+    return tab === "all" ? "All" : tab.charAt(0).toUpperCase() + tab.slice(1);
   };
 
   // Get appropriate selection type based on active tab
   const getSelectionType = () => {
     switch (activeTab) {
-      case 'artists':
-        return 'artists';
-      case 'venues':
-        return 'venues';
-      case 'resources':
-        return 'resources';
+      case "artists":
+        return "artists";
+      case "venues":
+        return "venues";
+      case "resources":
+        return "resources";
       default:
-        return 'all';
+        return "all";
     }
   };
-  
+
   // Update available subfilters based on the active tab
   useEffect(() => {
     // Set available subfilters based on the active tab
-    if (activeTab === 'artists') {
+    if (activeTab === "artists") {
       setAvailableSubfilters([
-        { value: 'vocalist', label: 'Vocalist' },
-        { value: 'instrumentalist', label: 'Instrumentalist' },
-        { value: 'producer', label: 'Producer' },
-        { value: 'rapper', label: 'Rapper' },
-        { value: 'dj', label: 'DJ' },
-        { value: 'visual-artist', label: 'Visual Artist' },
-        { value: 'performance-artist', label: 'Performance Artist' }
+        { value: "vocalist", label: "Vocalist" },
+        { value: "instrumentalist", label: "Instrumentalist" },
+        { value: "producer", label: "Producer" },
+        { value: "rapper", label: "Rapper" },
+        { value: "dj", label: "DJ" },
+        { value: "visual-artist", label: "Visual Artist" },
+        { value: "performance-artist", label: "Performance Artist" },
       ]);
-    } else if (activeTab === 'resources') {
+    } else if (activeTab === "resources") {
       setAvailableSubfilters([
-        { value: 'studio', label: 'Studio' },
-        { value: 'gallery', label: 'Gallery' },
-        { value: 'practice-room', label: 'Practice Room' },
-        { value: 'equipment', label: 'Equipment' },
-        { value: 'service', label: 'Service' }
+        { value: "studio", label: "Studio" },
+        { value: "gallery", label: "Gallery" },
+        { value: "practice-room", label: "Practice Room" },
+        { value: "equipment", label: "Equipment" },
+        { value: "service", label: "Service" },
       ]);
-    } else if (activeTab === 'venues') {
+    } else if (activeTab === "venues") {
       setAvailableSubfilters([
-        { value: 'concert-hall', label: 'Concert Hall' },
-        { value: 'club', label: 'Club' },
-        { value: 'theater', label: 'Theater' },
-        { value: 'outdoor', label: 'Outdoor' },
-        { value: 'gallery', label: 'Gallery' }
+        { value: "concert-hall", label: "Concert Hall" },
+        { value: "club", label: "Club" },
+        { value: "theater", label: "Theater" },
+        { value: "outdoor", label: "Outdoor" },
+        { value: "gallery", label: "Gallery" },
       ]);
     } else {
       // Default subfilters for other tabs
       setAvailableSubfilters([
-        { value: 'trending', label: 'Trending' },
-        { value: 'new', label: 'New' },
-        { value: 'popular', label: 'Popular' }
+        { value: "trending", label: "Trending" },
+        { value: "new", label: "New" },
+        { value: "popular", label: "Popular" },
       ]);
     }
   }, [activeTab]);
 
   // Handler for import completion
   const handleImportComplete = (artists: ContentItemProps[]) => {
-    setImportedArtists(prev => [...prev, ...artists]);
+    setImportedArtists((prev) => [...prev, ...artists]);
     setImportDialogOpen(false);
     toast({
       title: "Artists Imported",
@@ -277,7 +298,7 @@ const Discover = () => {
           availableSubfilters={availableSubfilters}
           allTags={allTags}
         />
-        
+
         <div className="container mx-auto px-4 py-8">
           <DiscoverFilters
             activeTab={activeTab}
@@ -292,12 +313,15 @@ const Discover = () => {
             showFilters={showFilters}
             setShowFilters={setShowFilters}
           />
-          
+
           <div className="flex flex-col lg:flex-row gap-8 mt-4">
             {/* Sidebar - Left side */}
             {sidebarOpen && !isMobile && (
               <div className="lg:w-64 flex-shrink-0 sticky top-24 self-start">
-                <DiscoverSidebar activeTabData={items.slice(0, 3)} activeTab={activeTab} />
+                <DiscoverSidebar
+                  activeTabData={items.slice(0, 3)}
+                  activeTab={activeTab}
+                />
               </div>
             )}
 
@@ -309,26 +333,31 @@ const Discover = () => {
                   <div className="flex items-center">
                     <Check className="h-5 w-5 text-primary mr-2" />
                     <span className="text-sm font-medium">
-                      Selection Mode: {selectionTarget === 'event' ? 'Creating Event' : 'Building Collection'}
+                      Selection Mode:{" "}
+                      {selectionTarget === "event"
+                        ? "Creating Event"
+                        : "Building Collection"}
                     </span>
                   </div>
                   <div className="flex gap-2">
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant="outline"
                       onClick={toggleSelectionPanel}
                     >
-                      {isSelectionMinimized ? 'Show Selection' : 'Hide Selection'}
+                      {isSelectionMinimized
+                        ? "Show Selection"
+                        : "Hide Selection"}
                     </Button>
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant="destructive"
                       onClick={() => {
                         // Remove selection mode from URL
                         const params = new URLSearchParams(searchParams);
-                        params.delete('select');
-                        params.delete('target');
-                        params.delete('select_type');
+                        params.delete("select");
+                        params.delete("target");
+                        params.delete("select_type");
                         setSearchParams(params);
                         // Clear selected items
                         setSelectedItems([]);
@@ -341,20 +370,30 @@ const Discover = () => {
               )}
 
               {/* Actions Bar - Add, Import, etc. */}
-              {(activeTab === 'artists' || activeTab === 'albums' || activeTab === 'songs' || activeTab === 'artworks') && (
+              {(activeTab === "artists" ||
+                activeTab === "albums" ||
+                activeTab === "songs" ||
+                activeTab === "artworks") && (
                 <div className="flex flex-wrap gap-2 mb-4">
                   <Button
                     variant="outline"
                     size="sm"
                     className="flex items-center gap-1"
-                    onClick={() => {/* Add create functionality */}}
+                    onClick={() => {
+                      /* Add create functionality */
+                    }}
                   >
                     <PlusCircle className="h-4 w-4" />
-                    Add New {activeTab.slice(0, -1).charAt(0).toUpperCase() + activeTab.slice(0, -1).slice(1)}
+                    Add New{" "}
+                    {activeTab.slice(0, -1).charAt(0).toUpperCase() +
+                      activeTab.slice(0, -1).slice(1)}
                   </Button>
-                  
-                  {activeTab === 'artists' && (
-                    <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+
+                  {activeTab === "artists" && (
+                    <Dialog
+                      open={importDialogOpen}
+                      onOpenChange={setImportDialogOpen}
+                    >
                       <DialogTrigger asChild>
                         <Button
                           variant="outline"
@@ -373,7 +412,9 @@ const Discover = () => {
                           </DialogDescription>
                         </DialogHeader>
                         <div className="py-4">
-                          <ArtistBulkImport onImportComplete={handleImportComplete} />
+                          <ArtistBulkImport
+                            onImportComplete={handleImportComplete}
+                          />
                         </div>
                       </DialogContent>
                     </Dialog>
@@ -389,15 +430,27 @@ const Discover = () => {
                 </div>
               ) : items.length > 0 || importedArtists.length > 0 ? (
                 <CategoryItemsGrid
-                  items={activeTab === 'artists' ? [...importedArtists, ...items] : items}
-                  title={headerSearchQuery ? `Results for "${headerSearchQuery}"` : `Discover ${getTabLabel(activeTab)}`}
-                  onSelectItem={selectionMode ? handleSelectItem : handleItemClick}
+                  items={
+                    activeTab === "artists"
+                      ? [...importedArtists, ...items]
+                      : items
+                  }
+                  title={
+                    headerSearchQuery
+                      ? `Results for "${headerSearchQuery}"`
+                      : `Discover ${getTabLabel(activeTab)}`
+                  }
+                  onSelectItem={
+                    selectionMode ? handleSelectItem : handleItemClick
+                  }
                   selectedItems={selectionMode ? selectedItems : undefined}
                 />
               ) : (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground">
-                    {headerSearchQuery ? 'No results found' : 'No items found for the selected filters'}
+                    {headerSearchQuery
+                      ? "No results found"
+                      : "No items found for the selected filters"}
                   </p>
                 </div>
               )}
@@ -406,12 +459,20 @@ const Discover = () => {
             {/* Selection Panel - Right side (when in selection mode) */}
             {selectionMode && !isSelectionMinimized && (
               <div className="lg:w-80 flex-shrink-0">
-                <SelectionPanel 
+                <SelectionPanel
                   selectedItems={selectedItems}
                   onAddItem={handleSelectItem}
                   onRemoveItem={handleRemoveItem}
-                  selectionContext={selectionTarget as 'event' | 'collection' | 'circle'}
-                  selectionType={getSelectionType() as 'artists' | 'venues' | 'resources' | 'all'}
+                  selectionContext={
+                    selectionTarget as "event" | "collection" | "circle"
+                  }
+                  selectionType={
+                    getSelectionType() as
+                      | "artists"
+                      | "venues"
+                      | "resources"
+                      | "all"
+                  }
                   isMinimized={false}
                   onToggleMinimize={toggleSelectionPanel}
                 />
@@ -446,11 +507,15 @@ const Discover = () => {
 
       {/* Minimized Selection Panel */}
       {selectionMode && isSelectionMinimized && (
-        <SelectionPanel 
+        <SelectionPanel
           selectedItems={selectedItems}
           onRemoveItem={handleRemoveItem}
-          selectionContext={selectionTarget as 'event' | 'collection' | 'circle'} 
-          selectionType={getSelectionType() as 'artists' | 'venues' | 'resources' | 'all'}
+          selectionContext={
+            selectionTarget as "event" | "collection" | "circle"
+          }
+          selectionType={
+            getSelectionType() as "artists" | "venues" | "resources" | "all"
+          }
           isMinimized={true}
           onToggleMinimize={toggleSelectionPanel}
         />

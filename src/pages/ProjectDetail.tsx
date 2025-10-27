@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -25,6 +26,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
   PlusCircle,
   CheckCircle2,
   Wrench,
@@ -32,6 +40,15 @@ import {
   Eye,
   Share2,
   Copy,
+  Heart,
+  ExternalLink,
+  Star,
+  LinkIcon,
+  Twitter,
+  Facebook,
+  Linkedin,
+  MessageSquare,
+  Bookmark,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
@@ -110,46 +127,122 @@ const ProjectDetail: React.FC = () => {
   const [landingPageEditorOpen, setLandingPageEditorOpen] = useState(false);
   const [showCustomLanding, setShowCustomLanding] = useState(false);
 
+  // Social interaction states
+  const [liked, setLiked] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
+  const [likeCount, setLikeCount] = useState(project?.like_count || 0);
+  const [viewCount, setViewCount] = useState(project?.view_count || 0);
+
   // Share functionality
-  const handleShareLanding = async () => {
+  const handleShareProject = async (platform?: string) => {
+    const projectUrl = `${window.location.origin}/projects/${projectId}`;
     const landingUrl = `${window.location.origin}/projects/${projectId}/landing`;
+    const shareUrl = project?.has_custom_landing ? landingUrl : projectUrl;
+    const title =
+      project?.landing_page?.hero_title || project?.name || "Amazing Project";
+    const description =
+      project?.landing_page?.hero_subtitle ||
+      project?.description ||
+      "Check out this project on Findry!";
+
+    if (platform) {
+      let url = "";
+      switch (platform) {
+        case "twitter":
+          url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(shareUrl)}&hashtags=findry,project`;
+          break;
+        case "facebook":
+          url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+          break;
+        case "linkedin":
+          url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
+          break;
+        default:
+          return;
+      }
+      window.open(url, "_blank", "width=600,height=400");
+      return;
+    }
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title:
-            project?.landing_page?.hero_title ||
-            project?.name ||
-            "Project Landing Page",
-          text:
-            project?.landing_page?.hero_subtitle ||
-            project?.description ||
-            "Check out this amazing project!",
-          url: landingUrl,
+          title,
+          text: description,
+          url: shareUrl,
         });
         toast.success("Shared successfully!");
       } catch (error) {
         // User cancelled sharing, copy to clipboard instead
-        handleCopyLandingLink(landingUrl);
+        handleCopyProjectLink(shareUrl);
       }
     } else {
-      handleCopyLandingLink(landingUrl);
+      handleCopyProjectLink(shareUrl);
     }
   };
 
-  const handleCopyLandingLink = async (url: string) => {
+  const handleCopyProjectLink = async (url?: string) => {
+    const projectUrl = url || `${window.location.origin}/projects/${projectId}`;
     try {
-      await navigator.clipboard.writeText(url);
-      toast.success("Landing page link copied to clipboard!");
+      await navigator.clipboard.writeText(projectUrl);
+      toast.success("Project link copied to clipboard!");
     } catch (error) {
       // Fallback for older browsers
       const textArea = document.createElement("textarea");
-      textArea.value = url;
+      textArea.value = projectUrl;
       document.body.appendChild(textArea);
       textArea.select();
       document.execCommand("copy");
       document.body.removeChild(textArea);
-      toast.success("Landing page link copied to clipboard!");
+      toast.success("Project link copied to clipboard!");
+    }
+  };
+
+  // Social interaction handlers
+  const handleLike = async () => {
+    if (!user) {
+      toast.error("Please log in to like projects");
+      return;
+    }
+
+    try {
+      const newLiked = !liked;
+      const newLikeCount = newLiked ? likeCount + 1 : likeCount - 1;
+
+      setLiked(newLiked);
+      setLikeCount(newLikeCount);
+
+      const { error } = await supabase
+        .from("projects")
+        .update({ like_count: newLikeCount })
+        .eq("id", projectId);
+
+      if (error) throw error;
+
+      toast.success(newLiked ? "Project liked!" : "Like removed");
+    } catch (error: any) {
+      console.error("Error liking project:", error);
+      toast.error("Failed to like project");
+      // Revert optimistic update
+      setLiked(!liked);
+      setLikeCount(likeCount);
+    }
+  };
+
+  const handleBookmark = async () => {
+    if (!user) {
+      toast.error("Please log in to bookmark projects");
+      return;
+    }
+
+    try {
+      setBookmarked(!bookmarked);
+      toast.success(bookmarked ? "Bookmark removed" : "Project bookmarked!");
+      // TODO: Implement bookmark functionality in database
+    } catch (error: any) {
+      console.error("Error bookmarking project:", error);
+      toast.error("Failed to bookmark project");
+      setBookmarked(bookmarked);
     }
   };
 
@@ -213,8 +306,89 @@ const ProjectDetail: React.FC = () => {
   useEffect(() => {
     if (project) {
       setNewProgress(project.progress || 0);
+      setLikeCount(project.like_count || 0);
+      setViewCount(project.view_count || 0);
+
+      // Update document title and meta tags for SEO
+      const title = project.name || "Project";
+      const description = project.description || "An amazing project on Findry";
+
+      document.title = `${title} - Findry`;
+
+      // Update meta description
+      let metaDescription = document.querySelector('meta[name="description"]');
+      if (!metaDescription) {
+        metaDescription = document.createElement("meta");
+        metaDescription.setAttribute("name", "description");
+        document.head.appendChild(metaDescription);
+      }
+      metaDescription.setAttribute("content", description.substring(0, 160));
+
+      // Update Open Graph tags
+      const updateOGTag = (property: string, content: string) => {
+        let ogTag = document.querySelector(`meta[property="${property}"]`);
+        if (!ogTag) {
+          ogTag = document.createElement("meta");
+          ogTag.setAttribute("property", property);
+          document.head.appendChild(ogTag);
+        }
+        ogTag.setAttribute("content", content);
+      };
+
+      updateOGTag("og:title", title);
+      updateOGTag("og:description", description);
+      updateOGTag("og:type", "website");
+      updateOGTag("og:url", `${window.location.origin}/projects/${projectId}`);
+
+      if (project.image_url) {
+        updateOGTag("og:image", project.image_url);
+      }
+
+      // Update Twitter Card tags
+      const updateTwitterTag = (name: string, content: string) => {
+        let twitterTag = document.querySelector(`meta[name="${name}"]`);
+        if (!twitterTag) {
+          twitterTag = document.createElement("meta");
+          twitterTag.setAttribute("name", name);
+          document.head.appendChild(twitterTag);
+        }
+        twitterTag.setAttribute("content", content);
+      };
+
+      updateTwitterTag("twitter:card", "summary_large_image");
+      updateTwitterTag("twitter:title", title);
+      updateTwitterTag("twitter:description", description);
+
+      if (project.image_url) {
+        updateTwitterTag("twitter:image", project.image_url);
+      }
+
+      // Increment view count
+      const incrementView = async () => {
+        try {
+          const { error } = await supabase
+            .from("projects")
+            .update({ view_count: (project.view_count || 0) + 1 })
+            .eq("id", projectId);
+
+          if (!error) {
+            setViewCount((project.view_count || 0) + 1);
+          }
+        } catch (err) {
+          console.error("Error incrementing view count:", err);
+        }
+      };
+
+      incrementView();
     }
-  }, [project]);
+  }, [project, projectId]);
+
+  // Cleanup meta tags on unmount
+  useEffect(() => {
+    return () => {
+      document.title = "Findry";
+    };
+  }, []);
 
   const addReferenceToChat = (item: ReferenceItem) => {
     if (chatRef.current) {
@@ -494,28 +668,194 @@ const ProjectDetail: React.FC = () => {
   };
 
   const handleSaveLandingPage = async (landingPageData: ProjectLandingPage) => {
+    console.log("🔥 ProjectDetail: handleSaveLandingPage called");
+    console.log("🔥 ProjectDetail: user:", user?.id);
+    console.log("🔥 ProjectDetail: projectId:", projectId);
+    console.log("🔥 ProjectDetail: isOwner:", isOwner);
+    console.log(
+      "🔥 ProjectDetail: landingPageData:",
+      JSON.stringify(landingPageData, null, 2),
+    );
+
+    // Check user authentication
+    if (!user) {
+      console.error("❌ User not authenticated");
+      toast.error("You must be logged in to save landing pages");
+      return;
+    }
+
+    if (!projectId) {
+      console.error("❌ No project ID available");
+      toast.error("Project ID is missing");
+      return;
+    }
+
+    if (!landingPageData) {
+      console.error("❌ No landing page data provided");
+      toast.error("Landing page data is missing");
+      return;
+    }
+
+    // More lenient validation - just check if we have some content
+    if (!landingPageData.hero_title && !landingPageData.hero_subtitle) {
+      console.error("❌ Missing required fields");
+      toast.error("Please fill in at least a hero title or subtitle");
+      return;
+    }
+
     try {
-      const { error } = await supabase
+      console.log("🚀 ProjectDetail: Starting database update...");
+
+      // First check if user has permission to update this project
+      console.log("🔒 ProjectDetail: Checking project ownership...");
+      const { data: projectCheck, error: checkError } = await supabase
         .from("projects")
-        .update({
-          landing_page: landingPageData,
-          has_custom_landing: true,
-        } as Record<string, unknown>)
-        .eq("id", projectId);
+        .select("id, owner_id, created_by, name")
+        .eq("id", projectId)
+        .single();
 
-      if (error) throw error;
+      console.log("🔍 ProjectDetail: Project check data:", projectCheck);
+      console.log("🔍 ProjectDetail: Project check error:", checkError);
 
-      toast.success("Landing page saved successfully!");
+      if (checkError) {
+        throw new Error(`Permission check failed: ${checkError.message}`);
+      }
+
+      if (!projectCheck) {
+        throw new Error("Project not found");
+      }
+
+      const userOwnsProject =
+        projectCheck.owner_id === user.id ||
+        projectCheck.created_by === user.id;
+
+      if (!userOwnsProject) {
+        throw new Error("You don't have permission to edit this project");
+      }
+
+      console.log("✅ ProjectDetail: User has permission to edit project");
+
+      // Ensure we have valid JSON structure
+      const cleanLandingPageData = {
+        hero_title: landingPageData.hero_title || "",
+        hero_subtitle: landingPageData.hero_subtitle || "",
+        call_to_action: landingPageData.call_to_action || "Learn More",
+        cta_link: landingPageData.cta_link || "",
+        theme: landingPageData.theme || "default",
+        sections: landingPageData.sections || [],
+        social_links: landingPageData.social_links || [],
+        ...landingPageData, // Keep any additional fields
+      };
+
+      const updateData = {
+        landing_page: cleanLandingPageData,
+        has_custom_landing: true,
+        is_public: true,
+        updated_at: new Date().toISOString(),
+      };
+
+      console.log(
+        "📦 ProjectDetail: Clean update data:",
+        JSON.stringify(updateData, null, 2),
+      );
+
+      const { data, error } = await supabase
+        .from("projects")
+        .update(updateData)
+        .eq("id", projectId)
+        .eq("owner_id", user.id) // Double-check ownership in the query
+        .select("id, name, landing_page, has_custom_landing, is_public");
+
+      console.log("✅ ProjectDetail: Database response data:", data);
+      console.log("❌ ProjectDetail: Database response error:", error);
+
+      if (error) {
+        console.error("💥 ProjectDetail: Database error details:", {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code,
+        });
+
+        // Provide more specific error messages
+        if (error.code === "42501") {
+          throw new Error("Permission denied - you don't own this project");
+        } else if (error.code === "23503") {
+          throw new Error("Database constraint violation");
+        } else {
+          throw new Error(`Database error: ${error.message} (${error.code})`);
+        }
+      }
+
+      if (!data || data.length === 0) {
+        console.error(
+          "⚠️ ProjectDetail: No rows updated - this usually means permission denied",
+        );
+        throw new Error("No rows updated - check if you own this project");
+      }
+
+      console.log("🎉 ProjectDetail: Landing page saved successfully");
+      toast.success("Landing page saved successfully! 🎉");
+
       setLandingPageEditorOpen(false);
-      refetch();
-    } catch (error) {
-      console.error("Error saving landing page:", error);
-      toast.error("Failed to save landing page");
+
+      // Refetch project data to update UI
+      console.log("🔄 ProjectDetail: Refetching project data...");
+      try {
+        await refetch();
+        console.log("✅ ProjectDetail: Project data refetched");
+      } catch (refetchError) {
+        console.error("⚠️ ProjectDetail: Error refetching data:", refetchError);
+        // Don't throw here, save was successful
+      }
+
+      console.log("🏁 ProjectDetail: All save operations completed");
+    } catch (error: any) {
+      console.error("💥 ProjectDetail: Caught error saving landing page:", {
+        message: error.message,
+        stack: error.stack,
+        error: error,
+      });
+
+      toast.error(error.message || "Failed to save landing page");
     }
   };
 
   const handleToggleLandingView = () => {
     setShowCustomLanding(!showCustomLanding);
+  };
+
+  const handleShareLanding = async () => {
+    const landingUrl = `${window.location.origin}/projects/${projectId}/landing`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title:
+            project?.landing_page?.hero_title ||
+            project?.name ||
+            "Project Landing Page",
+          text:
+            project?.landing_page?.hero_subtitle ||
+            project?.description ||
+            "Check out this amazing project!",
+          url: landingUrl,
+        });
+        toast.success("Shared successfully!");
+      } catch (error) {
+        handleCopyProjectLink(landingUrl);
+      }
+    } else {
+      handleCopyProjectLink(landingUrl);
+    }
+  };
+
+  const handleViewLanding = () => {
+    if (project?.has_custom_landing || project?.landing_page) {
+      window.open(`/projects/${projectId}/landing`, "_blank");
+    } else {
+      toast.error("No landing page available for this project");
+    }
   };
 
   if (isLoading) {
@@ -645,12 +985,19 @@ const ProjectDetail: React.FC = () => {
                 variant="outline"
                 onClick={() => navigate(`/projects/${projectId}/edit`)}
               >
+                <PlusCircle className="h-4 w-4 mr-2" />
                 Edit Project
               </Button>
-              {project.has_custom_landing && (
+              {(project.has_custom_landing || project.landing_page) && (
                 <Button variant="outline" onClick={handleToggleLandingView}>
                   <Eye className="h-4 w-4 mr-2" />
                   {showCustomLanding ? "Project View" : "Landing View"}
+                </Button>
+              )}
+              {(project.has_custom_landing || project.landing_page) && (
+                <Button variant="outline" onClick={handleViewLanding}>
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  View Landing Page
                 </Button>
               )}
               {project.has_custom_landing && project.is_public && (
@@ -699,6 +1046,196 @@ const ProjectDetail: React.FC = () => {
 
         {/* Project Header */}
         <ProjectHeader project={project} />
+
+        {/* Social Interaction Bar */}
+        <div className="bg-muted/20 rounded-lg p-4 mb-6">
+          <div className="flex items-center justify-between">
+            {/* Stats */}
+            <div className="flex items-center gap-6 text-sm text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Eye className="h-4 w-4" />
+                {viewCount} views
+              </span>
+              <span className="flex items-center gap-1">
+                <Heart className="h-4 w-4" />
+                {likeCount} likes
+              </span>
+              {project.created_at && (
+                <span>
+                  Created {new Date(project.created_at).toLocaleDateString()}
+                </span>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2">
+              {/* Like Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLike}
+                className={`${
+                  liked
+                    ? "text-red-500 hover:text-red-600"
+                    : "hover:text-red-500"
+                }`}
+              >
+                <Heart
+                  className={`h-4 w-4 mr-1 ${liked ? "fill-current" : ""}`}
+                />
+                {liked ? "Liked" : "Like"}
+              </Button>
+
+              {/* Bookmark Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleBookmark}
+                className={`${
+                  bookmarked
+                    ? "text-blue-500 hover:text-blue-600"
+                    : "hover:text-blue-500"
+                }`}
+              >
+                <Bookmark
+                  className={`h-4 w-4 mr-1 ${bookmarked ? "fill-current" : ""}`}
+                />
+                {bookmarked ? "Saved" : "Save"}
+              </Button>
+
+              {/* Share Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Share2 className="h-4 w-4 mr-1" />
+                    Share
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => handleShareProject()}>
+                    <LinkIcon className="h-4 w-4 mr-2" />
+                    Copy Link
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => handleShareProject("twitter")}
+                  >
+                    <Twitter className="h-4 w-4 mr-2" />
+                    Share on Twitter
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => handleShareProject("facebook")}
+                  >
+                    <Facebook className="h-4 w-4 mr-2" />
+                    Share on Facebook
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => handleShareProject("linkedin")}
+                  >
+                    <Linkedin className="h-4 w-4 mr-2" />
+                    Share on LinkedIn
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  {project.has_custom_landing || project.landing_page ? (
+                    <DropdownMenuItem onClick={handleViewLanding}>
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      View Landing Page
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem
+                      onClick={() => setLandingPageEditorOpen(true)}
+                    >
+                      <Palette className="h-4 w-4 mr-2" />
+                      Create Landing Page
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Featured Badge */}
+              {project.featured && (
+                <Badge variant="default" className="ml-2">
+                  <Star className="h-3 w-3 mr-1" />
+                  Featured
+                </Badge>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Landing Page Section */}
+        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 rounded-lg p-6 mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">
+                {project.has_custom_landing || project.landing_page
+                  ? "Landing Page"
+                  : "Create a Landing Page"}
+              </h3>
+              <p className="text-muted-foreground">
+                {project.has_custom_landing || project.landing_page
+                  ? "This project has a custom landing page that can be shared publicly."
+                  : "Make your project stand out with a custom landing page that showcases your work."}
+              </p>
+              {/* Debug info for development */}
+              <div className="text-xs text-muted-foreground mt-1">
+                Landing: {project.has_custom_landing ? "✓" : "✗"} | Data:{" "}
+                {project.landing_page ? "✓" : "✗"} | Public:{" "}
+                {project.is_public ? "✓" : "✗"}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              {project.has_custom_landing || project.landing_page ? (
+                <>
+                  <Button variant="outline" onClick={handleViewLanding}>
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    View Landing
+                  </Button>
+                  {isOwner && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setLandingPageEditorOpen(true)}
+                    >
+                      <Palette className="h-4 w-4 mr-2" />
+                      Edit Landing
+                    </Button>
+                  )}
+                  <Button onClick={handleShareLanding}>
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Share Landing
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button onClick={() => setLandingPageEditorOpen(true)}>
+                    <Palette className="h-4 w-4 mr-2" />
+                    Create Landing Page
+                  </Button>
+                  {/* Test button for debugging */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const testData = {
+                        hero_title: `${project.name} - Test Landing`,
+                        hero_subtitle: `This is a test landing page for ${project.name}`,
+                        call_to_action: "Learn More",
+                        cta_link: `/projects/${projectId}`,
+                        theme: "default" as const,
+                        sections: [],
+                        social_links: [],
+                      };
+                      console.log("🧪 Manual test save clicked");
+                      handleSaveLandingPage(testData);
+                    }}
+                  >
+                    🧪 Test Save
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">

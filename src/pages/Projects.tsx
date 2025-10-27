@@ -2,13 +2,30 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useProject } from "@/hooks/use-project";
 import { Project } from "@/types/project";
 import { useAuth } from "@/hooks/use-auth";
-import { Car, Wrench, ExternalLink, Calendar, MoreVertical, Edit, Trash2, CheckCircle2, Circle } from "lucide-react";
+import {
+  Car,
+  Wrench,
+  ExternalLink,
+  Calendar,
+  MoreVertical,
+  Edit,
+  Trash2,
+  CheckCircle2,
+  Circle,
+  Eye,
+  PlusCircle,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
@@ -34,7 +51,9 @@ const Projects: React.FC = () => {
   const { data: projects = [], isLoading, error, refetch } = useGetProjects();
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  const [projectOwnership, setProjectOwnership] = useState<Record<string, boolean>>({});
+  const [projectOwnership, setProjectOwnership] = useState<
+    Record<string, boolean>
+  >({});
   const [projectTasks, setProjectTasks] = useState<Record<string, any[]>>({});
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
@@ -45,7 +64,7 @@ const Projects: React.FC = () => {
 
     const checkAllOwnership = async () => {
       const ownershipMap: Record<string, boolean> = {};
-      
+
       for (const project of projects) {
         try {
           const { data: projectData } = await supabase
@@ -54,15 +73,15 @@ const Projects: React.FC = () => {
             .eq("id", project.id)
             .maybeSingle();
 
-          ownershipMap[project.id] = 
-            projectData?.owner_id === user.id || 
+          ownershipMap[project.id] =
+            projectData?.owner_id === user.id ||
             projectData?.created_by === user.id;
         } catch (err) {
           console.error(`Error checking ownership for ${project.id}:`, err);
           ownershipMap[project.id] = false;
         }
       }
-      
+
       setProjectOwnership(ownershipMap);
     };
 
@@ -75,7 +94,7 @@ const Projects: React.FC = () => {
 
     const fetchAllTasks = async () => {
       const tasksMap: Record<string, any[]> = {};
-      
+
       for (const project of projects) {
         try {
           const { data: tasks } = await supabase
@@ -91,7 +110,7 @@ const Projects: React.FC = () => {
           tasksMap[project.id] = [];
         }
       }
-      
+
       setProjectTasks(tasksMap);
     };
 
@@ -125,10 +144,19 @@ const Projects: React.FC = () => {
 
     try {
       // Delete related records first
-      await supabase.from("project_tasks").delete().eq("project_id", projectToDelete);
-      await supabase.from("project_components").delete().eq("project_id", projectToDelete);
-      await supabase.from("content_ownership").delete().eq("content_id", projectToDelete);
-      
+      await supabase
+        .from("project_tasks")
+        .delete()
+        .eq("project_id", projectToDelete);
+      await supabase
+        .from("project_components")
+        .delete()
+        .eq("project_id", projectToDelete);
+      await supabase
+        .from("content_ownership")
+        .delete()
+        .eq("content_id", projectToDelete);
+
       // Delete the project
       const { error } = await supabase
         .from("projects")
@@ -265,28 +293,46 @@ const Projects: React.FC = () => {
                     <p className="font-medium">25%</p>
                   </div>
                 </div>
+                <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg">
+                  <p className="text-xs text-muted-foreground">
+                    ✨ This project has a custom landing page you can share!
+                  </p>
+                </div>
                 <div className="flex items-center text-xs text-muted-foreground mt-3">
                   <Calendar className="h-3 w-3 mr-1" />
                   Started Jan 2024
                 </div>
               </CardContent>
               <CardFooter className="pt-0">
-                <Button
-                  variant="default"
-                  className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-                  onClick={() => navigate("/vehicle-build")}
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  View Build Details
-                </Button>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant="default"
+                    className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                    onClick={() => navigate("/vehicle-build")}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    View Details
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      window.open("/projects/vehicle-build/landing", "_blank")
+                    }
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    Landing Page
+                  </Button>
+                </div>
               </CardFooter>
             </Card>
 
             {filteredProjects.map((project: Project) => {
               const tasks = projectTasks[project.id] || [];
               const isOwner = projectOwnership[project.id] || false;
-              const completedTasks = tasks.filter(t => t.status === 'completed').length;
-              
+              const completedTasks = tasks.filter(
+                (t) => t.status === "completed",
+              ).length;
+
               return (
                 <Card key={project.id} className="flex flex-col h-full">
                   <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
@@ -298,16 +344,22 @@ const Projects: React.FC = () => {
                     {isOwner && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                          >
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEditProject(project.id)}>
+                          <DropdownMenuItem
+                            onClick={() => handleEditProject(project.id)}
+                          >
                             <Edit className="h-4 w-4 mr-2" />
                             Edit Project
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             onClick={() => openDeleteDialog(project.id)}
                             className="text-destructive"
                           >
@@ -333,17 +385,21 @@ const Projects: React.FC = () => {
                     <p className="text-muted-foreground mb-4 line-clamp-3">
                       {project.description || "No description provided"}
                     </p>
-                    
+
                     {/* Tasks Preview */}
                     {tasks.length > 0 && (
                       <div className="mb-4 space-y-2">
                         <p className="text-sm font-medium text-muted-foreground">
-                          Recent Tasks ({completedTasks}/{tasks.length} completed)
+                          Recent Tasks ({completedTasks}/{tasks.length}{" "}
+                          completed)
                         </p>
                         <div className="space-y-1">
                           {tasks.slice(0, 3).map((task) => (
-                            <div key={task.id} className="flex items-center text-sm">
-                              {task.status === 'completed' ? (
+                            <div
+                              key={task.id}
+                              className="flex items-center text-sm"
+                            >
+                              {task.status === "completed" ? (
                                 <CheckCircle2 className="h-3 w-3 mr-2 text-green-500" />
                               ) : (
                                 <Circle className="h-3 w-3 mr-2 text-muted-foreground" />
@@ -354,7 +410,7 @@ const Projects: React.FC = () => {
                         </div>
                       </div>
                     )}
-                    
+
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <p className="text-muted-foreground">Status</p>
@@ -369,17 +425,74 @@ const Projects: React.FC = () => {
                     </div>
                   </CardContent>
                   <CardFooter className="pt-0">
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => handleViewProject(project.id)}
-                    >
-                      View Project
-                    </Button>
+                    {/* Show landing page button if available */}
+                    {project.has_custom_landing || project.landing_page ? (
+                      <div className="grid grid-cols-2 gap-2 w-full">
+                        <Button
+                          variant="outline"
+                          onClick={() => handleViewProject(project.id)}
+                        >
+                          View Project
+                        </Button>
+                        <Button
+                          variant="default"
+                          onClick={() =>
+                            window.open(
+                              `/projects/${project.id}/landing`,
+                              "_blank",
+                            )
+                          }
+                        >
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Landing
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => handleViewProject(project.id)}
+                      >
+                        View Project
+                      </Button>
+                    )}
                   </CardFooter>
                 </Card>
               );
             })}
+          </div>
+        )}
+
+        {/* Landing Page Info Section */}
+        {user && (
+          <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 rounded-lg p-6 mb-8">
+            <div className="max-w-4xl mx-auto text-center">
+              <h3 className="text-xl font-semibold mb-3">
+                🚀 Make Your Projects Stand Out with Landing Pages
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                Create beautiful, shareable landing pages for your projects.
+                Perfect for showcasing your work, building hype, and attracting
+                collaborators - just like ProductHunt!
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button
+                  variant="default"
+                  onClick={() => navigate("/create-project")}
+                  className="group"
+                >
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Create Project with Landing Page
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/discover/projects")}
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  See Example Landing Pages
+                </Button>
+              </div>
+            </div>
           </div>
         )}
 
@@ -389,13 +502,17 @@ const Projects: React.FC = () => {
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Project</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete this project? This action cannot be undone.
-                All project components and tasks will also be deleted.
+                Are you sure you want to delete this project? This action cannot
+                be undone. All project components and tasks will also be
+                deleted.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDeleteProject} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              <AlertDialogAction
+                onClick={handleDeleteProject}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
                 Delete Project
               </AlertDialogAction>
             </AlertDialogFooter>

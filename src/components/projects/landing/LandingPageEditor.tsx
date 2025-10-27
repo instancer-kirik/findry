@@ -53,6 +53,10 @@ interface LandingPageEditorProps {
 }
 
 const defaultLandingPage: ProjectLandingPage = {
+  hero_title: "",
+  hero_subtitle: "",
+  call_to_action: "Learn More",
+  cta_link: "",
   theme: "default",
   sections: [
     {
@@ -92,7 +96,31 @@ const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
   }, [landingPage]);
 
   const handleSave = () => {
+    console.log("LandingPageEditor: handleSave called");
+    console.log("LandingPageEditor: editingPage data:", editingPage);
+
+    // Basic validation
+    if (!editingPage.hero_title || !editingPage.hero_subtitle) {
+      alert("Please fill in both Hero Title and Hero Subtitle before saving.");
+      return;
+    }
+
+    console.log("LandingPageEditor: calling onSave with:", editingPage);
     onSave(editingPage);
+  };
+
+  const handleTestSave = () => {
+    const testData = {
+      hero_title: "Test Project",
+      hero_subtitle: "This is a test landing page",
+      call_to_action: "Learn More",
+      cta_link: `/projects/${project.id}`,
+      theme: "default" as const,
+      sections: [],
+      social_links: [],
+    };
+    console.log("LandingPageEditor: Test save with:", testData);
+    onSave(testData);
   };
 
   const updateField = (field: keyof ProjectLandingPage, value: unknown) => {
@@ -188,9 +216,12 @@ const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
             <Settings className="h-4 w-4 mr-2" />
             Edit Mode
           </Button>
-          <Button onClick={handleSave}>
+          <Button
+            onClick={handleSave}
+            disabled={!editingPage.hero_title || !editingPage.hero_subtitle}
+          >
             <Save className="h-4 w-4 mr-2" />
-            Save
+            Save Landing Page
           </Button>
         </div>
         <CustomLandingPage
@@ -216,9 +247,19 @@ const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
               <Button variant="outline" onClick={onCancel}>
                 Cancel
               </Button>
-              <Button onClick={handleSave}>
+              <Button
+                onClick={handleSave}
+                disabled={!editingPage.hero_title || !editingPage.hero_subtitle}
+              >
                 <Save className="h-4 w-4 mr-2" />
-                Save
+                Save Landing Page
+              </Button>
+              <Button
+                onClick={handleTestSave}
+                variant="outline"
+                className="ml-2"
+              >
+                Test Save
               </Button>
             </div>
           </div>
@@ -263,7 +304,11 @@ const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
                     placeholder="Your amazing project title"
                     value={editingPage.hero_title || ""}
                     onChange={(e) => updateField("hero_title", e.target.value)}
+                    required
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Current value: "{editingPage.hero_title || "empty"}"
+                  </p>
                 </div>
 
                 <div>
@@ -275,7 +320,11 @@ const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
                     onChange={(e) =>
                       updateField("hero_subtitle", e.target.value)
                     }
+                    required
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Current value: "{editingPage.hero_subtitle || "empty"}"
+                  </p>
                 </div>
 
                 <div>
