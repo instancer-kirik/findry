@@ -16,6 +16,7 @@ import VenueDetail from "./pages/VenueDetail";
 import BrandDetail from "./pages/BrandDetail";
 import ResourceDetail from "./pages/ResourceDetail";
 import ResourceIndexPage from "./pages/ResourceIndexPage";
+import CreateResource from "./pages/CreateResource";
 import CreateEvent from "./pages/CreateEvent";
 import EventDetail from "./pages/events/EventDetail";
 import EditEvent from "./pages/events/EditEvent";
@@ -148,6 +149,8 @@ const App: React.FC = () => {
           <Route path="/venues/:venueId" element={<VenueDetail />} />
           <Route path="/resources" element={<ResourceIndexPage />} />
           <Route path="/resources/:resourceId" element={<ResourceDetail />} />
+          <Route path="/resources/create" element={<Navigate to="/create-resource" replace />} />
+          <Route path="/create-resource" element={<CreateResource />} />
           <Route path="/chats" element={<Chats />} />
           <Route path="/artist/:artistId" element={<ArtistProfile />} />
           <Route

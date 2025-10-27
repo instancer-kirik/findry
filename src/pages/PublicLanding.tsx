@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import CustomLandingPage from "@/components/projects/landing/CustomLandingPage";
-import { Project, ProjectLandingPage } from "@/types/project";
+import { Project, ProjectLandingPage, ProjectOwnershipType } from "@/types/project";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,18 +22,14 @@ const PublicLanding: React.FC = () => {
       }
 
       try {
-        // Fetch the project with landing page data
-        const { data: projectData, error: projectError } = await supabase
-          .from("projects")
-          .select(`
-            *,
-            components:project_components(*),
-            tasks:project_tasks(*)
-          `)
+        // Fetch the project with landing page data  
+        const { data: projectData, error: projectError } = await (supabase
+          .from("projects") as any)
+          .select("*")
           .eq("id", projectId)
           .eq("is_public", true)
           .eq("has_custom_landing", true)
-          .single();
+          .maybeSingle();
 
         if (projectError) {
           if (projectError.code === "PGRST116") {
@@ -57,7 +53,39 @@ const PublicLanding: React.FC = () => {
           .update({ view_count: (projectData.view_count || 0) + 1 })
           .eq("id", projectId);
 
-        setProject(projectData as Project);
+        // Map database fields to Project type
+        const project: Project = {
+          id: projectData.id,
+          name: projectData.name || '',
+          description: projectData.description || '',
+          status: (projectData.status as Project['status']) || 'planning',
+          version: projectData.version || '1.0',
+          progress: projectData.progress || 0,
+          tags: projectData.tags || [],
+          components: [],
+          tasks: [],
+          ownerType: (projectData.owner_type as ProjectOwnershipType) || 'personal',
+          ownerId: projectData.owner_id || projectData.created_by || '',
+          createdAt: projectData.created_at || '',
+          updatedAt: projectData.updated_at || '',
+          budget: projectData.budget,
+          location: projectData.location,
+          timeline: projectData.timeline,
+          type: projectData.type,
+          image_url: projectData.image_url,
+          repo_url: projectData.repo_url,
+          owner_type: projectData.owner_type,
+          owner_id: projectData.owner_id,
+          created_by: projectData.created_by,
+          is_public: projectData.is_public,
+          featured: projectData.featured,
+          view_count: projectData.view_count,
+          like_count: projectData.like_count,
+          landing_page: projectData.landing_page as ProjectLandingPage,
+          has_custom_landing: projectData.has_custom_landing as boolean,
+        };
+
+        setProject(project);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching project:", err);

@@ -278,11 +278,12 @@ const Dashboard: React.FC = () => {
                 link="/offers"
               />
               <DashboardCard 
-                title="Discover" 
-                description="Explore new opportunities"
+                title="Resources" 
+                description="Manage your resources"
                 count={0}
-                icon={<Globe className="h-5 w-5 text-muted-foreground" />}
-                link="/discover"
+                icon={<Home className="h-5 w-5 text-muted-foreground" />}
+                link="/resources"
+                createLink="/create-resource"
               />
             </div>
             
