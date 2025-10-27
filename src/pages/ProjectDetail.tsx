@@ -748,7 +748,7 @@ const ProjectDetail: React.FC = () => {
       };
 
       const updateData = {
-        landing_page: cleanLandingPageData,
+        landing_page: cleanLandingPageData as any,
         has_custom_landing: true,
         is_public: true,
         updated_at: new Date().toISOString(),
@@ -1060,9 +1060,9 @@ const ProjectDetail: React.FC = () => {
                 <Heart className="h-4 w-4" />
                 {likeCount} likes
               </span>
-              {project.created_at && (
+              {project.createdAt && (
                 <span>
-                  Created {new Date(project.created_at).toLocaleDateString()}
+                  Created {new Date(project.createdAt).toLocaleDateString()}
                 </span>
               )}
             </div>

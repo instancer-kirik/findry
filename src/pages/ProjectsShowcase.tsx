@@ -121,7 +121,19 @@ const ProjectsShowcase = () => {
         .from("projects")
         .select(
           `
-          *,
+          id,
+          name,
+          description,
+          tags,
+          image_url,
+          view_count,
+          like_count,
+          featured,
+          created_at,
+          status,
+          progress,
+          has_custom_landing,
+          landing_page,
           profiles:owner_id(username)
         `,
         )
@@ -132,7 +144,7 @@ const ProjectsShowcase = () => {
       if (error) throw error;
 
       // Process data to include owner_username
-      const processedData = (data || []).map((project) => ({
+      const processedData = (data || []).map((project: any) => ({
         ...project,
         owner_username: project.profiles?.username,
       }));

@@ -4029,9 +4029,11 @@ export type Database = {
       }
       project_components: {
         Row: {
+          assigned_to: string | null
           created_at: string
           dependencies: string[] | null
           description: string | null
+          due_date: string | null
           id: string
           name: string
           project_id: string
@@ -4040,9 +4042,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          assigned_to?: string | null
           created_at?: string
           dependencies?: string[] | null
           description?: string | null
+          due_date?: string | null
           id?: string
           name: string
           project_id: string
@@ -4051,9 +4055,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          assigned_to?: string | null
           created_at?: string
           dependencies?: string[] | null
           description?: string | null
+          due_date?: string | null
           id?: string
           name?: string
           project_id?: string
@@ -4120,6 +4126,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "project_tasks_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "project_components_with_metrics"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "project_tasks_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
@@ -4137,9 +4150,11 @@ export type Database = {
           description: string | null
           documentation_references: Json | null
           featured: boolean | null
+          has_custom_landing: boolean
           id: string
           image_url: string | null
           is_public: boolean | null
+          landing_page: Json | null
           like_count: number | null
           location: string | null
           name: string
@@ -4165,9 +4180,11 @@ export type Database = {
           description?: string | null
           documentation_references?: Json | null
           featured?: boolean | null
+          has_custom_landing?: boolean
           id?: string
           image_url?: string | null
           is_public?: boolean | null
+          landing_page?: Json | null
           like_count?: number | null
           location?: string | null
           name: string
@@ -4193,9 +4210,11 @@ export type Database = {
           description?: string | null
           documentation_references?: Json | null
           featured?: boolean | null
+          has_custom_landing?: boolean
           id?: string
           image_url?: string | null
           is_public?: boolean | null
+          landing_page?: Json | null
           like_count?: number | null
           location?: string | null
           name?: string
@@ -5675,6 +5694,35 @@ export type Database = {
         }
         Relationships: []
       }
+      project_components_with_metrics: {
+        Row: {
+          assigned_to: string | null
+          completed_tasks: number | null
+          created_at: string | null
+          dependencies: string[] | null
+          description: string | null
+          due_date: string | null
+          id: string | null
+          in_progress_tasks: number | null
+          name: string | null
+          pending_tasks: number | null
+          project_id: string | null
+          status: string | null
+          task_completion_percentage: number | null
+          total_tasks: number | null
+          type: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_components_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recipes_with_latest_version: {
         Row: {
           average_rating: number | null
@@ -5815,10 +5863,11 @@ export type Database = {
         Args: { company_id: string }
         Returns: number
       }
-      cleanup_old_rotation_logs: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
+      calculate_component_progress: {
+        Args: { component_id_param: string }
+        Returns: number
       }
+      cleanup_old_rotation_logs: { Args: never; Returns: undefined }
       create_template_instance: {
         Args: {
           p_civilization_id?: string
@@ -5874,10 +5923,7 @@ export type Database = {
           warnings: string[]
         }[]
       }
-      get_average_rating: {
-        Args: { snack_id: string }
-        Returns: number
-      }
+      get_average_rating: { Args: { snack_id: string }; Returns: number }
       get_community_member_count: {
         Args: { community_id: string }
         Returns: number
@@ -5885,6 +5931,22 @@ export type Database = {
       get_community_post_count: {
         Args: { community_id: string }
         Returns: number
+      }
+      get_component_tasks: {
+        Args: { component_id_param: string }
+        Returns: {
+          assigned_to: string
+          component_id: string
+          created_at: string
+          description: string
+          due_date: string
+          id: string
+          priority: string
+          project_id: string
+          status: string
+          title: string
+          updated_at: string
+        }[]
       }
       get_context_drop_entities: {
         Args: { drop_id: string }
@@ -5917,6 +5979,12 @@ export type Database = {
           tags: string[]
           updated_at: string
         }[]
+        SetofOptions: {
+          from: "*"
+          to: "context_drops"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_instance_context_hierarchy: {
         Args: { instance_id: string }
@@ -5936,9 +6004,11 @@ export type Database = {
       get_project_components: {
         Args: { p_project_id: string }
         Returns: {
+          assigned_to: string | null
           created_at: string
           dependencies: string[] | null
           description: string | null
+          due_date: string | null
           id: string
           name: string
           project_id: string
@@ -5946,6 +6016,12 @@ export type Database = {
           type: string
           updated_at: string
         }[]
+        SetofOptions: {
+          from: "*"
+          to: "project_components"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_project_tasks: {
         Args: { p_project_id: string }
@@ -5962,11 +6038,14 @@ export type Database = {
           title: string
           updated_at: string
         }[]
+        SetofOptions: {
+          from: "*"
+          to: "project_tasks"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
-      get_rating_count: {
-        Args: { snack_id: string }
-        Returns: number
-      }
+      get_rating_count: { Args: { snack_id: string }; Returns: number }
       get_reading_order: {
         Args: { root_work_id: string }
         Returns: {
@@ -5987,7 +6066,7 @@ export type Database = {
         }[]
       }
       get_template_instances: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           civilization_id: string
           civilization_name: string
@@ -6138,15 +6217,23 @@ export type Database = {
           p_type: string
         }
         Returns: {
+          assigned_to: string | null
           created_at: string
           dependencies: string[] | null
           description: string | null
+          due_date: string | null
           id: string
           name: string
           project_id: string
           status: string
           type: string
           updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "project_components"
+          isOneToOne: true
+          isSetofReturn: false
         }
       }
       insert_project_task: {
@@ -6172,6 +6259,12 @@ export type Database = {
           title: string
           updated_at: string
         }
+        SetofOptions: {
+          from: "*"
+          to: "project_tasks"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       is_content_owner: {
         Args: {
@@ -6191,10 +6284,7 @@ export type Database = {
         }
         Returns: undefined
       }
-      refresh_work_discovery: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      refresh_work_discovery: { Args: never; Returns: undefined }
       search_context_drops: {
         Args: {
           limit_count?: number
@@ -6260,15 +6350,23 @@ export type Database = {
           p_type: string
         }
         Returns: {
+          assigned_to: string | null
           created_at: string
           dependencies: string[] | null
           description: string | null
+          due_date: string | null
           id: string
           name: string
           project_id: string
           status: string
           type: string
           updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "project_components"
+          isOneToOne: true
+          isSetofReturn: false
         }
       }
       update_project_task: {
@@ -6293,6 +6391,12 @@ export type Database = {
           status: string
           title: string
           updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "project_tasks"
+          isOneToOne: true
+          isSetofReturn: false
         }
       }
     }
