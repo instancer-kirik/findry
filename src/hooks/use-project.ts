@@ -127,6 +127,9 @@ export const useGetProject = (projectId?: string) => {
           featured: data.featured || false,
           view_count: data.view_count || 0,
           like_count: data.like_count || 0,
+          // Landing page fields
+          has_custom_landing: data.has_custom_landing || false,
+          landing_page: data.landing_page as any || null,
         };
 
         return project;
@@ -185,6 +188,9 @@ export const useGetProjects = () => {
           featured: p.featured || false,
           view_count: p.view_count || 0,
           like_count: p.like_count || 0,
+          // Landing page fields
+          has_custom_landing: p.has_custom_landing || false,
+          landing_page: p.landing_page as any || null,
         }));
       } catch (error) {
         const errorMessage =
