@@ -117,7 +117,8 @@ const ProjectsShowcase = () => {
 
   const fetchPublicProjects = async () => {
     try {
-      const { data, error } = await supabase
+      // First get all public projects
+      const { data: projectsData, error: projectsError } = await supabase
         .from("projects")
         .select(
           `
@@ -134,20 +135,61 @@ const ProjectsShowcase = () => {
           progress,
           has_custom_landing,
           landing_page,
-          profiles:owner_id(username)
+          owner_id,
+          created_by
         `,
         )
         .eq("is_public", true)
         .order("featured", { ascending: false })
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (projectsError) throw projectsError;
+
+      // Get all user IDs we need to fetch
+      const userIds = new Set<string>();
+      (projectsData || []).forEach((project: any) => {
+        if (project.owner_id) userIds.add(project.owner_id);
+        if (project.created_by) userIds.add(project.created_by);
+      });
+
+      // Also get owners from content_ownership table
+      const { data: ownershipData } = await supabase
+        .from("content_ownership")
+        .select("content_id, owner_id")
+        .eq("content_type", "project")
+        .in("content_id", (projectsData || []).map((p: any) => p.id));
+
+      // Add owners from content_ownership
+      (ownershipData || []).forEach((ownership: any) => {
+        if (ownership.owner_id) userIds.add(ownership.owner_id);
+      });
+
+      // Fetch all profiles at once
+      const { data: profilesData } = await supabase
+        .from("profiles")
+        .select("id, username")
+        .in("id", Array.from(userIds));
+
+      // Create a map of user IDs to usernames
+      const usernameMap = new Map(
+        (profilesData || []).map((profile: any) => [profile.id, profile.username])
+      );
+
+      // Create a map of project IDs to owner IDs from content_ownership
+      const ownershipMap = new Map(
+        (ownershipData || []).map((ownership: any) => [ownership.content_id, ownership.owner_id])
+      );
 
       // Process data to include owner_username
-      const processedData = (data || []).map((project: any) => ({
-        ...project,
-        owner_username: project.profiles?.username,
-      }));
+      const processedData = (projectsData || []).map((project: any) => {
+        // Determine the owner ID: prefer owner_id, then created_by, then content_ownership
+        const ownerId = project.owner_id || project.created_by || ownershipMap.get(project.id);
+        
+        return {
+          ...project,
+          owner_username: ownerId ? usernameMap.get(ownerId) : undefined,
+        };
+      });
 
       setProjects(processedData);
       setFilteredProjects(processedData);
