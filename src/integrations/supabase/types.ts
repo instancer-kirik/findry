@@ -4754,13 +4754,16 @@ export type Database = {
       resources: {
         Row: {
           availability: Json | null
+          capacity: number | null
           created_at: string
           description: string | null
           id: string
           image_url: string | null
           location: string | null
           name: string
+          price_per_hour: number | null
           size_sqft: number | null
+          specifications: Json | null
           subtype: string | null
           tags: string[] | null
           type: string
@@ -4768,13 +4771,16 @@ export type Database = {
         }
         Insert: {
           availability?: Json | null
+          capacity?: number | null
           created_at?: string
           description?: string | null
           id?: string
           image_url?: string | null
           location?: string | null
           name: string
+          price_per_hour?: number | null
           size_sqft?: number | null
+          specifications?: Json | null
           subtype?: string | null
           tags?: string[] | null
           type: string
@@ -4782,13 +4788,16 @@ export type Database = {
         }
         Update: {
           availability?: Json | null
+          capacity?: number | null
           created_at?: string
           description?: string | null
           id?: string
           image_url?: string | null
           location?: string | null
           name?: string
+          price_per_hour?: number | null
           size_sqft?: number | null
+          specifications?: Json | null
           subtype?: string | null
           tags?: string[] | null
           type?: string

@@ -26,18 +26,27 @@ const CreateResource: React.FC = () => {
     description: '',
     location: '',
     size_sqft: '',
+    capacity: '',
+    price_per_hour: '',
+    specifications: {} as Record<string, any>,
     tags: '',
     image_url: '',
   });
 
   const resourceTypes = [
-    'Studio Space',
-    'Equipment',
-    'Venue',
-    'Vehicle',
-    'Service',
-    'Other',
+    { label: 'Studio Space', value: 'studio_space' },
+    { label: 'Equipment', value: 'equipment' },
+    { label: 'Venue', value: 'venue' },
+    { label: 'Vehicle', value: 'vehicle' },
+    { label: 'Service', value: 'service' },
+    { label: 'Other', value: 'other' },
   ];
+
+  // Determine which fields to show based on type
+  const showSizeField = ['studio_space', 'venue'].includes(formData.type);
+  const showCapacityField = ['studio_space', 'venue'].includes(formData.type);
+  const showPriceField = ['studio_space', 'equipment', 'venue', 'service'].includes(formData.type);
+  const showSpecsField = ['equipment', 'vehicle'].includes(formData.type);
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -115,6 +124,9 @@ const CreateResource: React.FC = () => {
           description: formData.description || null,
           location: formData.location || null,
           size_sqft: formData.size_sqft ? parseInt(formData.size_sqft) : null,
+          capacity: formData.capacity ? parseInt(formData.capacity) : null,
+          price_per_hour: formData.price_per_hour ? parseFloat(formData.price_per_hour) : null,
+          specifications: Object.keys(formData.specifications).length > 0 ? formData.specifications : null,
           tags: formData.tags ? formData.tags.split(',').map((t) => t.trim()) : [],
           image_url: formData.image_url || null,
           availability: [],
@@ -185,8 +197,8 @@ const CreateResource: React.FC = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {resourceTypes.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -224,16 +236,69 @@ const CreateResource: React.FC = () => {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="size_sqft">Size (sq ft)</Label>
-                  <Input
-                    id="size_sqft"
-                    type="number"
-                    value={formData.size_sqft}
-                    onChange={(e) => handleChange('size_sqft', e.target.value)}
-                    placeholder="e.g., 500"
-                  />
-                </div>
+                {showSizeField && (
+                  <div className="space-y-2">
+                    <Label htmlFor="size_sqft">Size (sq ft)</Label>
+                    <Input
+                      id="size_sqft"
+                      type="number"
+                      value={formData.size_sqft}
+                      onChange={(e) => handleChange('size_sqft', e.target.value)}
+                      placeholder="e.g., 500"
+                    />
+                  </div>
+                )}
+
+                {showCapacityField && (
+                  <div className="space-y-2">
+                    <Label htmlFor="capacity">Capacity (max occupancy)</Label>
+                    <Input
+                      id="capacity"
+                      type="number"
+                      value={formData.capacity}
+                      onChange={(e) => handleChange('capacity', e.target.value)}
+                      placeholder="e.g., 10"
+                    />
+                  </div>
+                )}
+
+                {showPriceField && (
+                  <div className="space-y-2">
+                    <Label htmlFor="price_per_hour">Price per Hour ($)</Label>
+                    <Input
+                      id="price_per_hour"
+                      type="number"
+                      step="0.01"
+                      value={formData.price_per_hour}
+                      onChange={(e) => handleChange('price_per_hour', e.target.value)}
+                      placeholder="e.g., 50.00"
+                    />
+                  </div>
+                )}
+
+                {showSpecsField && (
+                  <div className="space-y-2">
+                    <Label htmlFor="specs">Specifications (one per line)</Label>
+                    <Textarea
+                      id="specs"
+                      value={Object.entries(formData.specifications).map(([k, v]) => `${k}: ${v}`).join('\n')}
+                      onChange={(e) => {
+                        const specs: Record<string, any> = {};
+                        e.target.value.split('\n').forEach(line => {
+                          const [key, ...valueParts] = line.split(':');
+                          if (key && valueParts.length > 0) {
+                            specs[key.trim()] = valueParts.join(':').trim();
+                          }
+                        });
+                        setFormData(prev => ({ ...prev, specifications: specs }));
+                      }}
+                      placeholder={formData.type === 'equipment' 
+                        ? "e.g.,\nBrand: Shure\nModel: SM7B\nCondition: Excellent"
+                        : "e.g.,\nMake: Ford\nModel: Transit\nYear: 2020"}
+                      rows={4}
+                    />
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="tags">Tags</Label>
