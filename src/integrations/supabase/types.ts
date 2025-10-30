@@ -3459,6 +3459,79 @@ export type Database = {
           },
         ]
       }
+      meeting_schedules: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          end_time: string
+          id: string
+          location: string | null
+          meeting_url: string | null
+          offer_id: string | null
+          organizer_id: string
+          participants: string[] | null
+          project_id: string | null
+          start_time: string
+          status: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          end_time: string
+          id?: string
+          location?: string | null
+          meeting_url?: string | null
+          offer_id?: string | null
+          organizer_id: string
+          participants?: string[] | null
+          project_id?: string | null
+          start_time: string
+          status?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          end_time?: string
+          id?: string
+          location?: string | null
+          meeting_url?: string | null
+          offer_id?: string | null
+          organizer_id?: string
+          participants?: string[] | null
+          project_id?: string | null
+          start_time?: string
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_schedules_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_schedules_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_schedules_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       names: {
         Row: {
           aliases: string[] | null
@@ -3493,6 +3566,83 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offers: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          expires_at: string | null
+          id: string
+          project_id: string | null
+          receiver_id: string
+          sender_id: string
+          service_request_id: string | null
+          status: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          project_id?: string | null
+          receiver_id: string
+          sender_id: string
+          service_request_id?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          project_id?: string | null
+          receiver_id?: string
+          sender_id?: string
+          service_request_id?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "service_requests"
             referencedColumns: ["id"]
           },
         ]
@@ -4805,6 +4955,60 @@ export type Database = {
         }
         Relationships: []
       }
+      service_proposals: {
+        Row: {
+          created_at: string | null
+          estimated_days: number | null
+          estimated_price: number | null
+          id: string
+          portfolio_links: string[] | null
+          proposal_text: string
+          service_request_id: string
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          estimated_days?: number | null
+          estimated_price?: number | null
+          id?: string
+          portfolio_links?: string[] | null
+          proposal_text: string
+          service_request_id: string
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          estimated_days?: number | null
+          estimated_price?: number | null
+          id?: string
+          portfolio_links?: string[] | null
+          proposal_text?: string
+          service_request_id?: string
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_proposals_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "service_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_proposals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_requests: {
         Row: {
           attachments: string[] | null
@@ -5135,6 +5339,51 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_connections: {
+        Row: {
+          connection_type: string | null
+          created_at: string | null
+          follower_id: string
+          following_id: string
+          id: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          connection_type?: string | null
+          created_at?: string | null
+          follower_id: string
+          following_id: string
+          id?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          connection_type?: string | null
+          created_at?: string | null
+          follower_id?: string
+          following_id?: string
+          id?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_connections_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_connections_following_id_fkey"
+            columns: ["following_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
         ]
