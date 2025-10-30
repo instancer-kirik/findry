@@ -59,6 +59,7 @@ import GearPacking from "./pages/GearPacking";
 import VehicleBuildShowcase from "./pages/VehicleBuildShowcase";
 import Roadmap from "./pages/Roadmap";
 import PublicLanding from "./pages/PublicLanding";
+import RequestService from "./pages/RequestService";
 
 const queryClient = new QueryClient();
 
@@ -165,6 +166,7 @@ const App: React.FC = () => {
           <Route path="/gear-packing" element={<GearPacking />} />
           <Route path="/submit" element={<ResourceIndexPage />} />
           <Route path="/requests" element={<Offers />} />
+          <Route path="/request-service" element={<RequestService />} />
           <Route path="/vehicle-build" element={<VehicleBuildShowcase />} />
           <Route path="*" element={<Navigate to="/not-found" replace />} />
         </Routes>
