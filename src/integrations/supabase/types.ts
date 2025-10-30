@@ -4805,6 +4805,65 @@ export type Database = {
         }
         Relationships: []
       }
+      service_requests: {
+        Row: {
+          attachments: string[] | null
+          budget_max: number | null
+          budget_min: number | null
+          category: string
+          created_at: string | null
+          delivery_days: number | null
+          description: string
+          id: string
+          requirements: string | null
+          skills_needed: string[] | null
+          status: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          attachments?: string[] | null
+          budget_max?: number | null
+          budget_min?: number | null
+          category: string
+          created_at?: string | null
+          delivery_days?: number | null
+          description: string
+          id?: string
+          requirements?: string | null
+          skills_needed?: string[] | null
+          status?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          attachments?: string[] | null
+          budget_max?: number | null
+          budget_min?: number | null
+          category?: string
+          created_at?: string | null
+          delivery_days?: number | null
+          description?: string
+          id?: string
+          requirements?: string | null
+          skills_needed?: string[] | null
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shops: {
         Row: {
           banner_image_url: string | null
