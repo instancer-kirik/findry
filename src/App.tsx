@@ -16,7 +16,7 @@ import VenueDetail from "./pages/VenueDetail";
 import BrandDetail from "./pages/BrandDetail";
 import ResourceDetail from "./pages/ResourceDetail";
 import ResourceIndexPage from "./pages/ResourceIndexPage";
-import KnowledgeHub from "./pages/KnowledgeHub";
+
 import CreateResource from "./pages/CreateResource";
 import CreateEvent from "./pages/CreateEvent";
 import EventDetail from "./pages/events/EventDetail";
@@ -149,7 +149,7 @@ const App: React.FC = () => {
           <Route path="/eventbrite/orders" element={<EventbriteOrders />} />
           <Route path="/brands/:brandId" element={<BrandDetail />} />
           <Route path="/venues/:venueId" element={<VenueDetail />} />
-          <Route path="/knowledge" element={<KnowledgeHub />} />
+          <Route path="/knowledge" element={<Navigate to="/discover?type=glossary" replace />} />
           <Route path="/resources" element={<ResourceIndexPage />} />
           <Route path="/resources/:resourceId" element={<ResourceDetail />} />
           <Route path="/resources/create" element={<Navigate to="/create-resource" replace />} />

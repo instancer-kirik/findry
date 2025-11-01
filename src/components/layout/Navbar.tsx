@@ -154,12 +154,27 @@ const Navbar = () => {
               </div>
             </Link>
             
-            <Link to="/knowledge" className="text-sm font-medium transition-colors hover:text-primary">
-              <div className="flex items-center gap-1.5 px-3 py-2">
-                <BookOpen className="h-4 w-4" />
-                <span>Knowledge</span>
-              </div>
-            </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className={`text-sm px-3 py-2 h-auto font-normal ${
+                    location.pathname.includes('/discover') && new URLSearchParams(location.search).get('type') === 'glossary' ? 'bg-primary/10 text-primary' : ''
+                  }`}
+                >
+                  <BookOpen className="h-4 w-4 mr-1.5" />
+                  Knowledge
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-[200px] bg-background">
+                <DropdownMenuItem asChild>
+                  <Link to="/discover?type=glossary" className="w-full cursor-pointer">Glossary</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/discover?type=resources" className="w-full cursor-pointer">Resources</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             
             {user && (
               <DropdownMenu>
@@ -317,7 +332,7 @@ const Navbar = () => {
                   <Link to="/projects" className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md" onClick={() => setIsMobileMenuOpen(false)}>
                     <span>Projects</span>
                   </Link>
-                  <Link to="/knowledge" className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Link to="/discover?type=glossary" className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md" onClick={() => setIsMobileMenuOpen(false)}>
                     <BookOpen className="h-5 w-5" />
                     <span>Knowledge</span>
                   </Link>

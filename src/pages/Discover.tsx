@@ -183,6 +183,7 @@ const Discover = () => {
   const availableTabs = [
     "artists",
     "resources",
+    "glossary",
     "projects",
     "events",
     "venues",
