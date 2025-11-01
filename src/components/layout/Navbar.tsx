@@ -28,7 +28,8 @@ import {
   Calendar,
   Users,
   Plus,
-  Route
+  Route,
+  BookOpen
 } from "lucide-react";
 import { Icons } from "@/components/ui/icons";
 import { useTheme } from "@/components/ui/theme-provider";
@@ -87,80 +88,31 @@ const Navbar = () => {
           </Link>
           
           <div className="hidden md:flex items-center gap-4">
-            <Link to="/tour-planner" className="text-sm font-medium transition-colors hover:text-primary">
-              <div className="flex items-center gap-1.5 px-3 py-2">
-                <Route className="h-4 w-4" />
-                <span>Tour Planner</span>
-              </div>
-            </Link>
-            
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
                   className={`text-sm px-3 py-2 h-auto font-normal ${
-                    location.pathname.includes('/discover') || 
-                    location.pathname.includes('/artists') || 
-                    location.pathname.includes('/venues') || 
-                    location.pathname.includes('/resources') ? 'bg-primary/10 text-primary' : ''
+                    location.pathname.includes('/discover') ? 'bg-primary/10 text-primary' : ''
                   }`}
                 >
+                  <Compass className="h-4 w-4 mr-1.5" />
                   Discover
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[400px] p-0 grid grid-cols-2 gap-0 bg-background">
-                <div className="p-4 space-y-4 border-r">
-                  <div>
-                    <DropdownMenuLabel className="text-primary mb-1">Browse Content</DropdownMenuLabel>
-                    <DropdownMenuItem asChild>
-                      <Link to="/discover" className="w-full cursor-pointer">All Content</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/resources" className="w-full cursor-pointer">Resources</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/artists" className="w-full cursor-pointer">Artists</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/venues" className="w-full cursor-pointer">Venues</Link>
-                    </DropdownMenuItem>
-                  </div>
-                  <div>
-                    <DropdownMenuLabel className="text-primary mb-1">My Items</DropdownMenuLabel>
-                    <DropdownMenuItem asChild>
-                      <Link to="/profile/resources" className="w-full cursor-pointer">My Resources</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/profile" className="w-full cursor-pointer">My Profile</Link>
-                    </DropdownMenuItem>
-                  </div>
-                </div>
-                <div className="p-4 space-y-4">
-                  <div>
-                    <DropdownMenuLabel className="text-primary mb-1">More</DropdownMenuLabel>
-                    <DropdownMenuItem asChild>
-                      <Link to="/discover/projects" className="w-full cursor-pointer">Public Projects</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/projects" className="w-full cursor-pointer">My Projects</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/brands" className="w-full cursor-pointer">Brands</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/shops" className="w-full cursor-pointer">Shops</Link>
-                    </DropdownMenuItem>
-                  </div>
-                  <div>
-                    <DropdownMenuLabel className="text-primary mb-1">Actions</DropdownMenuLabel>
-                    <DropdownMenuItem asChild>
-                      <Link to="/profile/resources" className="w-full cursor-pointer">Add Resource</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/search" className="w-full cursor-pointer">Advanced Search</Link>
-                    </DropdownMenuItem>
-                  </div>
-                </div>
+              <DropdownMenuContent align="start" className="w-[200px] bg-background">
+                <DropdownMenuItem asChild>
+                  <Link to="/discover" className="w-full cursor-pointer">Browse All</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/discover?type=artists" className="w-full cursor-pointer">Artists</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/discover?type=venues" className="w-full cursor-pointer">Venues</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/discover?type=brands" className="w-full cursor-pointer">Brands</Link>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             
@@ -172,157 +124,67 @@ const Navbar = () => {
                     location.pathname.includes('/events') ? 'bg-primary/10 text-primary' : ''
                   }`}
                 >
+                  <Calendar className="h-4 w-4 mr-1.5" />
                   Events
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[400px] p-0 grid grid-cols-2 gap-0 bg-background">
-                <div className="p-4 space-y-4 border-r">
-                  <div>
-                    <DropdownMenuLabel className="text-primary mb-1">Browse Events</DropdownMenuLabel>
-                    <DropdownMenuItem asChild>
-                      <Link to="/events" className="w-full cursor-pointer">All Events</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/events/calendar" className="w-full cursor-pointer">Calendar View</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/events/upcoming" className="w-full cursor-pointer">Upcoming Events</Link>
-                    </DropdownMenuItem>
-                  </div>
-                  <div>
-                    <DropdownMenuLabel className="text-primary mb-1">My Events</DropdownMenuLabel>
-                    <DropdownMenuItem asChild>
-                      <Link to="/events/interested" className="w-full cursor-pointer">Interested</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/profile/events" className="w-full cursor-pointer">My Events</Link>
-                    </DropdownMenuItem>
-                  </div>
-                </div>
-                <div className="p-4 space-y-4">
-                  <div>
-                    <DropdownMenuLabel className="text-primary mb-1">Create</DropdownMenuLabel>
-                    <DropdownMenuItem asChild>
-                      <Link to="/events/create" className="w-full cursor-pointer">Create Event</Link>
-                    </DropdownMenuItem>
-                  </div>
-                  <div>
-                    <DropdownMenuLabel className="text-primary mb-1">Integrations</DropdownMenuLabel>
-                    <DropdownMenuItem asChild>
-                      <Link to="/eventbrite/orders" className="w-full cursor-pointer">Eventbrite Orders</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/eventbrite/callback" className="w-full cursor-pointer">Eventbrite Settings</Link>
-                    </DropdownMenuItem>
-                  </div>
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className={`text-sm px-3 py-2 h-auto font-normal ${
-                    location.pathname.includes('/communities') || 
-                    location.pathname.includes('/collaboration') || 
-                    location.pathname.includes('/chats') || 
-                    location.pathname.includes('/meetings') ? 'bg-primary/10 text-primary' : ''
-                  }`}
-                >
-                  Connect
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[400px] p-0 grid grid-cols-2 gap-0 bg-background">
-                <div className="p-4 space-y-4 border-r">
-                  <div>
-                    <DropdownMenuLabel className="text-primary mb-1">Communities</DropdownMenuLabel>
-                    <DropdownMenuItem asChild>
-                      <Link to="/communities" className="w-full cursor-pointer">All Communities</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/community/events" className="w-full cursor-pointer">Community Events</Link>
-                    </DropdownMenuItem>
-                  </div>
-                  <div>
-                    <DropdownMenuLabel className="text-primary mb-1">Communication</DropdownMenuLabel>
-                    <DropdownMenuItem asChild>
-                      <Link to="/chats" className="w-full cursor-pointer">Chats</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/chats/new" className="w-full cursor-pointer">New Message</Link>
-                    </DropdownMenuItem>
-                  </div>
-                </div>
-                <div className="p-4 space-y-4">
-                  <div>
-                    <DropdownMenuLabel className="text-primary mb-1">Collaboration</DropdownMenuLabel>
-                    <DropdownMenuItem asChild>
-                      <Link to="/collaboration" className="w-full cursor-pointer">Collaborations</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/projects/create" className="w-full cursor-pointer">New Project</Link>
-                    </DropdownMenuItem>
-                  </div>
-                  <div>
-                    <DropdownMenuLabel className="text-primary mb-1">Scheduling</DropdownMenuLabel>
-                    <DropdownMenuItem asChild>
-                      <Link to="/meetings" className="w-full cursor-pointer">Meetings</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/meetings/schedule" className="w-full cursor-pointer">Schedule Meeting</Link>
-                    </DropdownMenuItem>
-                  </div>
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className={`text-sm px-3 py-2 h-auto font-normal ${
-                    location.pathname.includes('/create') || 
-                    location.pathname.includes('/add') || 
-                    location.pathname.includes('/profile/resources') ? 'bg-primary/10 text-primary' : ''
-                  }`}
-                >
-                  Create
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[250px] p-2 bg-background">
+              <DropdownMenuContent align="start" className="w-[200px] bg-background">
                 <DropdownMenuItem asChild>
-                  <Link to="/profile/resources" className="w-full cursor-pointer">Add Resource</Link>
+                  <Link to="/events" className="w-full cursor-pointer">All Events</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/events/upcoming" className="w-full cursor-pointer">Upcoming</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/events/create" className="w-full cursor-pointer">Create Event</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/projects/create" className="w-full cursor-pointer">Start Project</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/shops/create" className="w-full cursor-pointer">Open Shop</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/profile-setup" className="w-full cursor-pointer">Edit Profile</Link>
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-
-            <Link to="/submit" className="text-sm font-medium transition-colors hover:text-primary">
+            
+            <Link to="/communities" className="text-sm font-medium transition-colors hover:text-primary">
               <div className="flex items-center gap-1.5 px-3 py-2">
-                <Icons.submit className="h-4 w-4" />
-                <span>Submit</span>
+                <Users className="h-4 w-4" />
+                <span>Communities</span>
               </div>
             </Link>
             
-            <Link to="/requests" className="text-sm font-medium transition-colors hover:text-primary">
+            <Link to="/projects" className="text-sm font-medium transition-colors hover:text-primary">
               <div className="flex items-center gap-1.5 px-3 py-2">
-                <Icons.request className="h-4 w-4" />
-                <span>Requests</span>
+                <span>Projects</span>
               </div>
             </Link>
+            
+            <Link to="/knowledge" className="text-sm font-medium transition-colors hover:text-primary">
+              <div className="flex items-center gap-1.5 px-3 py-2">
+                <BookOpen className="h-4 w-4" />
+                <span>Knowledge</span>
+              </div>
+            </Link>
+            
+            {user && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="text-sm px-3 py-2 h-auto font-normal"
+                  >
+                    <Plus className="h-4 w-4 mr-1.5" />
+                    Create
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-[200px] bg-background">
+                  <DropdownMenuItem asChild>
+                    <Link to="/events/create" className="w-full cursor-pointer">Create Event</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/projects/create" className="w-full cursor-pointer">Start Project</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/request-service" className="w-full cursor-pointer">Request Service</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
             
             {user && (
               <Link to="/dashboard" className="text-sm font-medium transition-colors hover:text-primary">
@@ -440,33 +302,34 @@ const Navbar = () => {
                 )}
                 
                 <div className="space-y-2">
-                  <Link to="/tour-planner" className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Route className="h-5 w-5" />
-                    <span>Tour Planner</span>
-                  </Link>
-                  <div className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md">
+                  <Link to="/discover" className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md" onClick={() => setIsMobileMenuOpen(false)}>
                     <Compass className="h-5 w-5" />
                     <span>Discover</span>
-                  </div>
-                  <div className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md">
+                  </Link>
+                  <Link to="/events" className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md" onClick={() => setIsMobileMenuOpen(false)}>
                     <Calendar className="h-5 w-5" />
                     <span>Events</span>
-                  </div>
-                  <div className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md">
-                    <Users className="h-5 w-5" />
-                    <span>Connect</span>
-                  </div>
-                  <div className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md">
-                    <Plus className="h-5 w-5" />
-                    <span>Create</span>
-                  </div>
-                  <Link to="/submit" className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Icons.submit className="h-5 w-5" />
-                    <span>Submit</span>
                   </Link>
-                  <Link to="/requests" className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Link to="/communities" className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Users className="h-5 w-5" />
+                    <span>Communities</span>
+                  </Link>
+                  <Link to="/projects" className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md" onClick={() => setIsMobileMenuOpen(false)}>
+                    <span>Projects</span>
+                  </Link>
+                  <Link to="/knowledge" className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md" onClick={() => setIsMobileMenuOpen(false)}>
+                    <BookOpen className="h-5 w-5" />
+                    <span>Knowledge</span>
+                  </Link>
+                  {user && (
+                    <Link to="/events/create" className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Plus className="h-5 w-5" />
+                      <span>Create</span>
+                    </Link>
+                  )}
+                  <Link to="/request-service" className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md" onClick={() => setIsMobileMenuOpen(false)}>
                     <Icons.request className="h-5 w-5" />
-                    <span>Requests</span>
+                    <span>Request Service</span>
                   </Link>
                 </div>
 
