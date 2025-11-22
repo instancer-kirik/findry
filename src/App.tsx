@@ -61,6 +61,7 @@ import VehicleBuildShowcase from "./pages/VehicleBuildShowcase";
 import Roadmap from "./pages/Roadmap";
 import PublicLanding from "./pages/PublicLanding";
 import RequestService from "./pages/RequestService";
+import BathroomFinder from "./pages/BathroomFinder";
 
 const queryClient = new QueryClient();
 
@@ -149,10 +150,16 @@ const App: React.FC = () => {
           <Route path="/eventbrite/orders" element={<EventbriteOrders />} />
           <Route path="/brands/:brandId" element={<BrandDetail />} />
           <Route path="/venues/:venueId" element={<VenueDetail />} />
-          <Route path="/knowledge" element={<Navigate to="/discover?type=glossary" replace />} />
+          <Route
+            path="/knowledge"
+            element={<Navigate to="/discover?type=glossary" replace />}
+          />
           <Route path="/resources" element={<ResourceIndexPage />} />
           <Route path="/resources/:resourceId" element={<ResourceDetail />} />
-          <Route path="/resources/create" element={<Navigate to="/create-resource" replace />} />
+          <Route
+            path="/resources/create"
+            element={<Navigate to="/create-resource" replace />}
+          />
           <Route path="/create-resource" element={<CreateResource />} />
           <Route path="/chats" element={<Chats />} />
           <Route path="/artist/:artistId" element={<ArtistProfile />} />
@@ -169,6 +176,7 @@ const App: React.FC = () => {
           <Route path="/submit" element={<ResourceIndexPage />} />
           <Route path="/requests" element={<Offers />} />
           <Route path="/request-service" element={<RequestService />} />
+          <Route path="/bathroom-finder" element={<BathroomFinder />} />
           <Route path="/vehicle-build" element={<VehicleBuildShowcase />} />
           <Route path="*" element={<Navigate to="/not-found" replace />} />
         </Routes>
