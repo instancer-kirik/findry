@@ -22,13 +22,13 @@ const RecentActivity: React.FC<RecentActivityProps> = ({ activities }) => {
   const getStatusColor = (status?: string) => {
     switch (status) {
       case 'active':
-        return 'bg-green-500';
+        return 'bg-primary text-primary-foreground';
       case 'pending':
-        return 'bg-yellow-500';
+        return 'bg-accent text-accent-foreground';
       case 'completed':
-        return 'bg-blue-500';
+        return 'bg-secondary text-secondary-foreground';
       default:
-        return 'bg-gray-500';
+        return 'bg-muted text-muted-foreground';
     }
   };
 

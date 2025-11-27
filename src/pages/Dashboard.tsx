@@ -8,7 +8,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import DashboardCard from '@/components/home/DashboardCard';
 import RecentActivity, { ActivityItem } from '@/components/home/RecentActivity';
-import { Bell, Calendar, User, Briefcase, FileText, MessageSquare, Music, Users, Clock, Star, Globe, Home, Plus } from 'lucide-react';
+import UnifiedCalendar from '@/components/home/UnifiedCalendar';
+import { Bell, Calendar, User, Briefcase, FileText, MessageSquare, Music, Users, Clock, Star, Globe, Home, Plus, TrendingUp, ArrowUpRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface UserProfile {
@@ -171,62 +172,79 @@ const Dashboard: React.FC = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-8">
-          {/* User Profile Summary */}
-          <Card className="w-full md:w-auto">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <Avatar className="h-16 w-16">
-                  <AvatarImage src={userProfile?.avatar_url || undefined} alt={userProfile?.display_name || 'User'} />
-                  <AvatarFallback>{userProfile?.display_name?.[0] || userProfile?.full_name?.[0] || 'U'}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h1 className="text-2xl font-bold">{userProfile?.display_name || userProfile?.full_name || 'Welcome'}</h1>
-                  <p className="text-muted-foreground">@{userProfile?.username || 'username'}</p>
-                  <div className="flex gap-2 mt-2">
-                    {userProfile?.profile_types?.map((type, index) => (
-                      <Badge key={index} variant="secondary">{type}</Badge>
-                    ))}
-                  </div>
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        {/* Hero Section */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/20 p-8">
+          <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="flex items-center gap-6">
+              <Avatar className="h-20 w-20 border-4 border-background shadow-xl">
+                <AvatarImage src={userProfile?.avatar_url || undefined} alt={userProfile?.display_name || 'User'} />
+                <AvatarFallback className="text-2xl">{userProfile?.display_name?.[0] || userProfile?.full_name?.[0] || 'U'}</AvatarFallback>
+              </Avatar>
+              <div>
+                <h1 className="text-3xl font-bold mb-1">{userProfile?.display_name || userProfile?.full_name || 'Welcome Back'}</h1>
+                <p className="text-muted-foreground mb-3">@{userProfile?.username || 'username'}</p>
+                <div className="flex gap-2">
+                  {userProfile?.profile_types?.map((type, index) => (
+                    <Badge key={index} variant="secondary" className="shadow-sm">{type}</Badge>
+                  ))}
                 </div>
               </div>
-              <div className="flex gap-2 mt-4">
-                <Button variant="outline" size="sm" onClick={() => navigate('/profile')}>
-                  <User className="mr-2 h-4 w-4" />
-                  View Profile
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate('/profile/edit')}>
-                  Edit Profile
-                </Button>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => navigate('/profile')} className="shadow-sm">
+                <User className="mr-2 h-4 w-4" />
+                View Profile
+              </Button>
+              <Button size="sm" onClick={() => navigate('/profile/edit')} className="shadow-sm">
+                Edit Profile
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card className="hover-card border-l-4 border-l-primary">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <Clock className="h-5 w-5 text-primary" />
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </div>
+              <p className="text-3xl font-bold mb-1">2</p>
+              <p className="text-sm text-muted-foreground">Upcoming Events</p>
             </CardContent>
           </Card>
-
-          {/* Quick Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 w-full md:flex-1">
-            <Card>
-              <CardContent className="p-4 flex flex-col items-center justify-center">
-                <Clock className="h-5 w-5 text-muted-foreground mb-2" />
-                <p className="text-sm font-medium">Upcoming</p>
-                <p className="text-2xl font-bold">2</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 flex flex-col items-center justify-center">
-                <Star className="h-5 w-5 text-muted-foreground mb-2" />
-                <p className="text-sm font-medium">Reviews</p>
-                <p className="text-2xl font-bold">4.8</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 flex flex-col items-center justify-center">
-                <Bell className="h-5 w-5 text-muted-foreground mb-2" />
-                <p className="text-sm font-medium">Notifications</p>
-                <p className="text-2xl font-bold">3</p>
-              </CardContent>
-            </Card>
-          </div>
+          <Card className="hover-card border-l-4 border-l-accent">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <Star className="h-5 w-5 text-accent-foreground" />
+                <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <p className="text-3xl font-bold mb-1">4.8</p>
+              <p className="text-sm text-muted-foreground">Avg Rating</p>
+            </CardContent>
+          </Card>
+          <Card className="hover-card border-l-4 border-l-secondary">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <MessageSquare className="h-5 w-5 text-secondary-foreground" />
+                <Badge variant="secondary" className="h-5 px-2">{stats.messages}</Badge>
+              </div>
+              <p className="text-3xl font-bold mb-1">{stats.messages}</p>
+              <p className="text-sm text-muted-foreground">Unread Messages</p>
+            </CardContent>
+          </Card>
+          <Card className="hover-card border-l-4 border-l-muted">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <Bell className="h-5 w-5 text-muted-foreground" />
+                <Badge variant="outline" className="h-5 px-2">3</Badge>
+              </div>
+              <p className="text-3xl font-bold mb-1">3</p>
+              <p className="text-sm text-muted-foreground">Notifications</p>
+            </CardContent>
+          </Card>
         </div>
 
         <Tabs defaultValue="overview" className="space-y-4">
@@ -395,20 +413,7 @@ const Dashboard: React.FC = () => {
           </TabsContent>
           
           <TabsContent value="calendar" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Your Calendar</CardTitle>
-                <CardDescription>Upcoming events and appointments</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-center py-12">Calendar view will be displayed here</p>
-                <div className="flex justify-end">
-                  <Button onClick={() => navigate('/calendar')}>
-                    Open Full Calendar
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <UnifiedCalendar />
           </TabsContent>
           
           <TabsContent value="notifications" className="space-y-4">
