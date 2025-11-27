@@ -7,6 +7,7 @@ import EcosystemSection from "@/components/home/EcosystemSection";
 import ScreenshotGallery from "@/components/home/ScreenshotGallery";
 import EmailWaitlist from "@/components/home/EmailWaitlist";
 import FeaturedProjects from "@/components/home/FeaturedProjects";
+import UnifiedCalendar from "@/components/home/UnifiedCalendar";
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
@@ -100,6 +101,11 @@ const Landing: React.FC = () => {
 
       {/* Featured Projects Section */}
       <FeaturedProjects />
+
+      {/* Calendar Section */}
+      <div className="container mx-auto px-4 py-12">
+        <UnifiedCalendar />
+      </div>
 
       {/* Info Sections */}
       <FeatureSection />

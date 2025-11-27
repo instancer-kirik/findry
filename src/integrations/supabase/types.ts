@@ -410,6 +410,331 @@ export type Database = {
           },
         ]
       }
+      component_alternatives: {
+        Row: {
+          alternative_name: string
+          alternative_type: string | null
+          availability_status: string | null
+          base_component_id: string | null
+          compatibility_notes: string | null
+          cons: string[] | null
+          cost: number | null
+          created_at: string | null
+          description: string | null
+          efficiency_rating: number | null
+          estimated_shipping_days: number | null
+          id: string
+          power_difference_watts: number | null
+          pros: string[] | null
+          space_difference_pct: number | null
+          vendor: string | null
+          vendor_part_number: string | null
+          weight_difference_lbs: number | null
+        }
+        Insert: {
+          alternative_name: string
+          alternative_type?: string | null
+          availability_status?: string | null
+          base_component_id?: string | null
+          compatibility_notes?: string | null
+          cons?: string[] | null
+          cost?: number | null
+          created_at?: string | null
+          description?: string | null
+          efficiency_rating?: number | null
+          estimated_shipping_days?: number | null
+          id?: string
+          power_difference_watts?: number | null
+          pros?: string[] | null
+          space_difference_pct?: number | null
+          vendor?: string | null
+          vendor_part_number?: string | null
+          weight_difference_lbs?: number | null
+        }
+        Update: {
+          alternative_name?: string
+          alternative_type?: string | null
+          availability_status?: string | null
+          base_component_id?: string | null
+          compatibility_notes?: string | null
+          cons?: string[] | null
+          cost?: number | null
+          created_at?: string | null
+          description?: string | null
+          efficiency_rating?: number | null
+          estimated_shipping_days?: number | null
+          id?: string
+          power_difference_watts?: number | null
+          pros?: string[] | null
+          space_difference_pct?: number | null
+          vendor?: string | null
+          vendor_part_number?: string | null
+          weight_difference_lbs?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "component_alternatives_base_component_id_fkey"
+            columns: ["base_component_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_components"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      component_installation_quotes: {
+        Row: {
+          additional_fees: number | null
+          certifications: string[] | null
+          contact_info: Json | null
+          created_at: string | null
+          id: string
+          installation_time_estimate: string | null
+          is_certified: boolean | null
+          labor_cost: number | null
+          labor_hours: number | null
+          parts_cost: number | null
+          quote_amount: number
+          quote_valid_until: string | null
+          rating: number | null
+          reviews_count: number | null
+          service_location: string | null
+          service_provider: string
+          special_requirements: string | null
+          vehicle_component_id: string | null
+          warranty_period_months: number | null
+        }
+        Insert: {
+          additional_fees?: number | null
+          certifications?: string[] | null
+          contact_info?: Json | null
+          created_at?: string | null
+          id?: string
+          installation_time_estimate?: string | null
+          is_certified?: boolean | null
+          labor_cost?: number | null
+          labor_hours?: number | null
+          parts_cost?: number | null
+          quote_amount: number
+          quote_valid_until?: string | null
+          rating?: number | null
+          reviews_count?: number | null
+          service_location?: string | null
+          service_provider: string
+          special_requirements?: string | null
+          vehicle_component_id?: string | null
+          warranty_period_months?: number | null
+        }
+        Update: {
+          additional_fees?: number | null
+          certifications?: string[] | null
+          contact_info?: Json | null
+          created_at?: string | null
+          id?: string
+          installation_time_estimate?: string | null
+          is_certified?: boolean | null
+          labor_cost?: number | null
+          labor_hours?: number | null
+          parts_cost?: number | null
+          quote_amount?: number
+          quote_valid_until?: string | null
+          rating?: number | null
+          reviews_count?: number | null
+          service_location?: string | null
+          service_provider?: string
+          special_requirements?: string | null
+          vehicle_component_id?: string | null
+          warranty_period_months?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "component_installation_quotes_vehicle_component_id_fkey"
+            columns: ["vehicle_component_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_components"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      component_installment_options: {
+        Row: {
+          apr: number | null
+          created_at: string | null
+          credit_requirements: string | null
+          down_payment: number | null
+          financing_term_months: number | null
+          first_payment_due: string | null
+          id: string
+          installment_amount: number | null
+          installment_count: number | null
+          interest_rate: number | null
+          is_promotional: boolean | null
+          payment_frequency: string | null
+          promotional_end_date: string | null
+          special_terms: string | null
+          total_cost: number
+          total_interest: number | null
+          vehicle_component_id: string | null
+          vendor: string | null
+        }
+        Insert: {
+          apr?: number | null
+          created_at?: string | null
+          credit_requirements?: string | null
+          down_payment?: number | null
+          financing_term_months?: number | null
+          first_payment_due?: string | null
+          id?: string
+          installment_amount?: number | null
+          installment_count?: number | null
+          interest_rate?: number | null
+          is_promotional?: boolean | null
+          payment_frequency?: string | null
+          promotional_end_date?: string | null
+          special_terms?: string | null
+          total_cost: number
+          total_interest?: number | null
+          vehicle_component_id?: string | null
+          vendor?: string | null
+        }
+        Update: {
+          apr?: number | null
+          created_at?: string | null
+          credit_requirements?: string | null
+          down_payment?: number | null
+          financing_term_months?: number | null
+          first_payment_due?: string | null
+          id?: string
+          installment_amount?: number | null
+          installment_count?: number | null
+          interest_rate?: number | null
+          is_promotional?: boolean | null
+          payment_frequency?: string | null
+          promotional_end_date?: string | null
+          special_terms?: string | null
+          total_cost?: number
+          total_interest?: number | null
+          vehicle_component_id?: string | null
+          vendor?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "component_installment_options_vehicle_component_id_fkey"
+            columns: ["vehicle_component_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_components"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      component_maintenance_schedules: {
+        Row: {
+          created_at: string | null
+          estimated_cost: number | null
+          frequency_type: string | null
+          frequency_value: number
+          id: string
+          instructions: string | null
+          is_active: boolean | null
+          last_performed_at: string | null
+          last_performed_hours: number | null
+          last_performed_mileage: number | null
+          maintenance_type: string
+          next_due_at: string | null
+          next_due_hours: number | null
+          next_due_mileage: number | null
+          priority: string | null
+          vehicle_component_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          estimated_cost?: number | null
+          frequency_type?: string | null
+          frequency_value: number
+          id?: string
+          instructions?: string | null
+          is_active?: boolean | null
+          last_performed_at?: string | null
+          last_performed_hours?: number | null
+          last_performed_mileage?: number | null
+          maintenance_type: string
+          next_due_at?: string | null
+          next_due_hours?: number | null
+          next_due_mileage?: number | null
+          priority?: string | null
+          vehicle_component_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          estimated_cost?: number | null
+          frequency_type?: string | null
+          frequency_value?: number
+          id?: string
+          instructions?: string | null
+          is_active?: boolean | null
+          last_performed_at?: string | null
+          last_performed_hours?: number | null
+          last_performed_mileage?: number | null
+          maintenance_type?: string
+          next_due_at?: string | null
+          next_due_hours?: number | null
+          next_due_mileage?: number | null
+          priority?: string | null
+          vehicle_component_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "component_maintenance_schedules_vehicle_component_id_fkey"
+            columns: ["vehicle_component_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_components"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      component_status_history: {
+        Row: {
+          condition_score: number | null
+          hours_operated: number | null
+          id: string
+          mileage: number | null
+          notes: string | null
+          recorded_at: string | null
+          recorded_by: string | null
+          status: string | null
+          vehicle_component_id: string | null
+        }
+        Insert: {
+          condition_score?: number | null
+          hours_operated?: number | null
+          id?: string
+          mileage?: number | null
+          notes?: string | null
+          recorded_at?: string | null
+          recorded_by?: string | null
+          status?: string | null
+          vehicle_component_id?: string | null
+        }
+        Update: {
+          condition_score?: number | null
+          hours_operated?: number | null
+          id?: string
+          mileage?: number | null
+          notes?: string | null
+          recorded_at?: string | null
+          recorded_by?: string | null
+          status?: string | null
+          vehicle_component_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "component_status_history_vehicle_component_id_fkey"
+            columns: ["vehicle_component_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_components"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_ownership: {
         Row: {
           content_id: string
@@ -516,6 +841,106 @@ export type Database = {
           phrase?: string
         }
         Relationships: []
+      }
+      development_projects: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          progress: number
+          repo_url: string | null
+          status: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          progress?: number
+          repo_url?: string | null
+          status?: string
+          updated_at?: string
+          version?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          progress?: number
+          repo_url?: string | null
+          status?: string
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
+      development_tasks: {
+        Row: {
+          assigned_to: string | null
+          component_id: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: string
+          project_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          component_id?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string
+          project_id: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          component_id?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string
+          project_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "development_tasks_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "project_components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "development_tasks_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "project_components_with_metrics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "development_tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "development_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       event_community_relationships: {
         Row: {
@@ -934,6 +1359,69 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      inventory_items: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          dimensions_height: number | null
+          dimensions_length: number | null
+          dimensions_width: number | null
+          id: string
+          image_url: string | null
+          location: string | null
+          metadata: Json | null
+          name: string
+          quantity: number | null
+          status: string | null
+          tags: string[] | null
+          type: string | null
+          updated_at: string
+          volume_cubic_ft: number | null
+          weight_lbs: number | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          dimensions_height?: number | null
+          dimensions_length?: number | null
+          dimensions_width?: number | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          metadata?: Json | null
+          name: string
+          quantity?: number | null
+          status?: string | null
+          tags?: string[] | null
+          type?: string | null
+          updated_at?: string
+          volume_cubic_ft?: number | null
+          weight_lbs?: number | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          dimensions_height?: number | null
+          dimensions_length?: number | null
+          dimensions_width?: number | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          metadata?: Json | null
+          name?: string
+          quantity?: number | null
+          status?: string | null
+          tags?: string[] | null
+          type?: string | null
+          updated_at?: string
+          volume_cubic_ft?: number | null
+          weight_lbs?: number | null
+        }
+        Relationships: []
       }
       item_pairings: {
         Row: {
@@ -3459,6 +3947,56 @@ export type Database = {
           },
         ]
       }
+      market_research: {
+        Row: {
+          conducted_date: string | null
+          confidence_level: number | null
+          created_at: string | null
+          data_points: Json | null
+          findings: string | null
+          id: string
+          product_idea_id: string | null
+          research_type: string | null
+          source_url: string | null
+          summary: string | null
+          title: string
+        }
+        Insert: {
+          conducted_date?: string | null
+          confidence_level?: number | null
+          created_at?: string | null
+          data_points?: Json | null
+          findings?: string | null
+          id?: string
+          product_idea_id?: string | null
+          research_type?: string | null
+          source_url?: string | null
+          summary?: string | null
+          title: string
+        }
+        Update: {
+          conducted_date?: string | null
+          confidence_level?: number | null
+          created_at?: string | null
+          data_points?: Json | null
+          findings?: string | null
+          id?: string
+          product_idea_id?: string | null
+          research_type?: string | null
+          source_url?: string | null
+          summary?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_research_product_idea_id_fkey"
+            columns: ["product_idea_id"]
+            isOneToOne: false
+            referencedRelation: "product_ideas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meeting_schedules: {
         Row: {
           created_at: string | null
@@ -3643,6 +4181,107 @@ export type Database = {
             columns: ["service_request_id"]
             isOneToOne: false
             referencedRelation: "service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      packing_configuration_items: {
+        Row: {
+          created_at: string
+          id: string
+          inventory_item_id: string
+          is_packed: boolean | null
+          location_notes: string | null
+          packing_configuration_id: string
+          priority: number | null
+          quantity: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inventory_item_id: string
+          is_packed?: boolean | null
+          location_notes?: string | null
+          packing_configuration_id: string
+          priority?: number | null
+          quantity?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inventory_item_id?: string
+          is_packed?: boolean | null
+          location_notes?: string | null
+          packing_configuration_id?: string
+          priority?: number | null
+          quantity?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "packing_configuration_items_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "packing_configuration_items_packing_configuration_id_fkey"
+            columns: ["packing_configuration_id"]
+            isOneToOne: false
+            referencedRelation: "packing_configurations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      packing_configurations: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json | null
+          name: string
+          purpose: string | null
+          status: string | null
+          tags: string[] | null
+          total_volume_cubic_ft: number | null
+          total_weight_lbs: number | null
+          updated_at: string
+          vehicle_configuration_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          name: string
+          purpose?: string | null
+          status?: string | null
+          tags?: string[] | null
+          total_volume_cubic_ft?: number | null
+          total_weight_lbs?: number | null
+          updated_at?: string
+          vehicle_configuration_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          name?: string
+          purpose?: string | null
+          status?: string | null
+          tags?: string[] | null
+          total_volume_cubic_ft?: number | null
+          total_weight_lbs?: number | null
+          updated_at?: string
+          vehicle_configuration_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "packing_configurations_vehicle_configuration_id_fkey"
+            columns: ["vehicle_configuration_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_configurations"
             referencedColumns: ["id"]
           },
         ]
@@ -4088,6 +4727,160 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      product_categories: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          description: string | null
+          icon_name: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon_name?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon_name?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      product_features: {
+        Row: {
+          acceptance_criteria: string[] | null
+          complexity: string | null
+          created_at: string | null
+          dependencies: string[] | null
+          description: string | null
+          estimated_hours: number | null
+          feature_name: string
+          id: string
+          importance: string | null
+          product_idea_id: string | null
+          technical_notes: string | null
+          user_story: string | null
+        }
+        Insert: {
+          acceptance_criteria?: string[] | null
+          complexity?: string | null
+          created_at?: string | null
+          dependencies?: string[] | null
+          description?: string | null
+          estimated_hours?: number | null
+          feature_name: string
+          id?: string
+          importance?: string | null
+          product_idea_id?: string | null
+          technical_notes?: string | null
+          user_story?: string | null
+        }
+        Update: {
+          acceptance_criteria?: string[] | null
+          complexity?: string | null
+          created_at?: string | null
+          dependencies?: string[] | null
+          description?: string | null
+          estimated_hours?: number | null
+          feature_name?: string
+          id?: string
+          importance?: string | null
+          product_idea_id?: string | null
+          technical_notes?: string | null
+          user_story?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_features_product_idea_id_fkey"
+            columns: ["product_idea_id"]
+            isOneToOne: false
+            referencedRelation: "product_ideas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_ideas: {
+        Row: {
+          category_id: string | null
+          competitor_analysis: string | null
+          created_at: string | null
+          description: string | null
+          estimated_cost: number | null
+          estimated_development_time: string | null
+          feasibility_score: number | null
+          id: string
+          inspiration_sources: string[] | null
+          market_potential_score: number | null
+          name: string
+          priority_score: number | null
+          problem_statement: string | null
+          solution_approach: string | null
+          status: string | null
+          tags: string[] | null
+          target_market: string | null
+          unique_value_proposition: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category_id?: string | null
+          competitor_analysis?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_cost?: number | null
+          estimated_development_time?: string | null
+          feasibility_score?: number | null
+          id?: string
+          inspiration_sources?: string[] | null
+          market_potential_score?: number | null
+          name: string
+          priority_score?: number | null
+          problem_statement?: string | null
+          solution_approach?: string | null
+          status?: string | null
+          tags?: string[] | null
+          target_market?: string | null
+          unique_value_proposition?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category_id?: string | null
+          competitor_analysis?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_cost?: number | null
+          estimated_development_time?: string | null
+          feasibility_score?: number | null
+          id?: string
+          inspiration_sources?: string[] | null
+          market_potential_score?: number | null
+          name?: string
+          priority_score?: number | null
+          problem_statement?: string | null
+          solution_approach?: string | null
+          status?: string | null
+          tags?: string[] | null
+          target_market?: string | null
+          unique_value_proposition?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_ideas_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "product_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products: {
         Row: {
@@ -4901,6 +5694,56 @@ export type Database = {
         }
         Relationships: []
       }
+      resource_consumption_logs: {
+        Row: {
+          consumption_amount: number | null
+          consumption_rate: number | null
+          consumption_unit: string | null
+          id: string
+          mileage: number | null
+          notes: string | null
+          operating_conditions: Json | null
+          rate_unit: string | null
+          recorded_at: string | null
+          resource_type: string | null
+          vehicle_config_id: string | null
+        }
+        Insert: {
+          consumption_amount?: number | null
+          consumption_rate?: number | null
+          consumption_unit?: string | null
+          id?: string
+          mileage?: number | null
+          notes?: string | null
+          operating_conditions?: Json | null
+          rate_unit?: string | null
+          recorded_at?: string | null
+          resource_type?: string | null
+          vehicle_config_id?: string | null
+        }
+        Update: {
+          consumption_amount?: number | null
+          consumption_rate?: number | null
+          consumption_unit?: string | null
+          id?: string
+          mileage?: number | null
+          notes?: string | null
+          operating_conditions?: Json | null
+          rate_unit?: string | null
+          recorded_at?: string | null
+          resource_type?: string | null
+          vehicle_config_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resource_consumption_logs_vehicle_config_id_fkey"
+            columns: ["vehicle_config_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_configurations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       resources: {
         Row: {
           availability: Json | null
@@ -5068,6 +5911,65 @@ export type Database = {
           },
         ]
       }
+      shopping_list: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          estimated_cost: number | null
+          id: string
+          item_name: string
+          notes: string | null
+          owner_id: string | null
+          priority: string | null
+          project_link: string | null
+          purchased: boolean | null
+          purchased_at: string | null
+          quantity: number | null
+          updated_at: string | null
+          url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          estimated_cost?: number | null
+          id?: string
+          item_name: string
+          notes?: string | null
+          owner_id?: string | null
+          priority?: string | null
+          project_link?: string | null
+          purchased?: boolean | null
+          purchased_at?: string | null
+          quantity?: number | null
+          updated_at?: string | null
+          url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          estimated_cost?: number | null
+          id?: string
+          item_name?: string
+          notes?: string | null
+          owner_id?: string | null
+          priority?: string | null
+          project_link?: string | null
+          purchased?: boolean | null
+          purchased_at?: string | null
+          quantity?: number | null
+          updated_at?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shopping_list_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shops: {
         Row: {
           banner_image_url: string | null
@@ -5217,6 +6119,56 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      toon_projects: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          metadata: Json | null
+          name: string
+          owner_id: string | null
+          project_type: string | null
+          status: string | null
+          tags: string[] | null
+          toon_content: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          name: string
+          owner_id?: string | null
+          project_type?: string | null
+          status?: string | null
+          tags?: string[] | null
+          toon_content?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          name?: string
+          owner_id?: string | null
+          project_type?: string | null
+          status?: string | null
+          tags?: string[] | null
+          toon_content?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "toon_projects_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -5467,6 +6419,128 @@ export type Database = {
           },
         ]
       }
+      vehicle_components: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          height: number | null
+          id: string
+          is_system: boolean | null
+          name: string
+          packdown_visible: boolean | null
+          position_x: number | null
+          position_y: number | null
+          power_consumption_watts: number | null
+          propane_consumption_btu: number | null
+          rotation: number | null
+          updated_at: string | null
+          vehicle_config_id: string | null
+          water_consumption_gph: number | null
+          weight_lbs: number | null
+          width: number | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          height?: number | null
+          id?: string
+          is_system?: boolean | null
+          name: string
+          packdown_visible?: boolean | null
+          position_x?: number | null
+          position_y?: number | null
+          power_consumption_watts?: number | null
+          propane_consumption_btu?: number | null
+          rotation?: number | null
+          updated_at?: string | null
+          vehicle_config_id?: string | null
+          water_consumption_gph?: number | null
+          weight_lbs?: number | null
+          width?: number | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          height?: number | null
+          id?: string
+          is_system?: boolean | null
+          name?: string
+          packdown_visible?: boolean | null
+          position_x?: number | null
+          position_y?: number | null
+          power_consumption_watts?: number | null
+          propane_consumption_btu?: number | null
+          rotation?: number | null
+          updated_at?: string | null
+          vehicle_config_id?: string | null
+          water_consumption_gph?: number | null
+          weight_lbs?: number | null
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_components_vehicle_config_id_fkey"
+            columns: ["vehicle_config_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_configurations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_configurations: {
+        Row: {
+          created_at: string | null
+          current_layout_state: string | null
+          gvwr: number | null
+          id: string
+          interior_height: number | null
+          interior_length: number | null
+          interior_width: number | null
+          project_name: string | null
+          updated_at: string | null
+          vehicle_make: string | null
+          vehicle_model: string | null
+          vehicle_type: string | null
+          vehicle_year: number | null
+          wheelbase_length: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          current_layout_state?: string | null
+          gvwr?: number | null
+          id?: string
+          interior_height?: number | null
+          interior_length?: number | null
+          interior_width?: number | null
+          project_name?: string | null
+          updated_at?: string | null
+          vehicle_make?: string | null
+          vehicle_model?: string | null
+          vehicle_type?: string | null
+          vehicle_year?: number | null
+          wheelbase_length?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          current_layout_state?: string | null
+          gvwr?: number | null
+          id?: string
+          interior_height?: number | null
+          interior_length?: number | null
+          interior_width?: number | null
+          project_name?: string | null
+          updated_at?: string | null
+          vehicle_make?: string | null
+          vehicle_model?: string | null
+          vehicle_type?: string | null
+          vehicle_year?: number | null
+          wheelbase_length?: number | null
+        }
+        Relationships: []
+      }
       venues: {
         Row: {
           amenities: string[] | null
@@ -5508,6 +6582,219 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      video_projects: {
+        Row: {
+          budget: number | null
+          created_at: string | null
+          description: string | null
+          duration_estimate: unknown
+          id: string
+          metadata: Json | null
+          name: string
+          project_type: string | null
+          status: string | null
+          tags: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          budget?: number | null
+          created_at?: string | null
+          description?: string | null
+          duration_estimate?: unknown
+          id?: string
+          metadata?: Json | null
+          name: string
+          project_type?: string | null
+          status?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          budget?: number | null
+          created_at?: string | null
+          description?: string | null
+          duration_estimate?: unknown
+          id?: string
+          metadata?: Json | null
+          name?: string
+          project_type?: string | null
+          status?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      video_scenes: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          duration_estimate: unknown
+          id: string
+          interior_exterior: string | null
+          location: string | null
+          metadata: Json | null
+          notes: string | null
+          scene_number: number
+          shooting_status: string | null
+          shot_date: string | null
+          time_of_day: string | null
+          title: string | null
+          updated_at: string | null
+          video_script_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          duration_estimate?: unknown
+          id?: string
+          interior_exterior?: string | null
+          location?: string | null
+          metadata?: Json | null
+          notes?: string | null
+          scene_number: number
+          shooting_status?: string | null
+          shot_date?: string | null
+          time_of_day?: string | null
+          title?: string | null
+          updated_at?: string | null
+          video_script_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          duration_estimate?: unknown
+          id?: string
+          interior_exterior?: string | null
+          location?: string | null
+          metadata?: Json | null
+          notes?: string | null
+          scene_number?: number
+          shooting_status?: string | null
+          shot_date?: string | null
+          time_of_day?: string | null
+          title?: string | null
+          updated_at?: string | null
+          video_script_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_scenes_video_script_id_fkey"
+            columns: ["video_script_id"]
+            isOneToOne: false
+            referencedRelation: "video_scripts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_scripts: {
+        Row: {
+          content: string
+          created_at: string | null
+          estimated_duration: unknown
+          format: string | null
+          id: string
+          notes: string | null
+          page_count: number | null
+          title: string
+          updated_at: string | null
+          version: string | null
+          video_project_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          estimated_duration?: unknown
+          format?: string | null
+          id?: string
+          notes?: string | null
+          page_count?: number | null
+          title: string
+          updated_at?: string | null
+          version?: string | null
+          video_project_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          estimated_duration?: unknown
+          format?: string | null
+          id?: string
+          notes?: string | null
+          page_count?: number | null
+          title?: string
+          updated_at?: string | null
+          version?: string | null
+          video_project_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_scripts_video_project_id_fkey"
+            columns: ["video_project_id"]
+            isOneToOne: false
+            referencedRelation: "video_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_shots: {
+        Row: {
+          camera_movement: string | null
+          created_at: string | null
+          description: string | null
+          duration_estimate: unknown
+          equipment_needed: string[] | null
+          id: string
+          metadata: Json | null
+          notes: string | null
+          shot_number: string
+          shot_type: string | null
+          status: string | null
+          storyboard_url: string | null
+          updated_at: string | null
+          video_scene_id: string | null
+        }
+        Insert: {
+          camera_movement?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration_estimate?: unknown
+          equipment_needed?: string[] | null
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          shot_number: string
+          shot_type?: string | null
+          status?: string | null
+          storyboard_url?: string | null
+          updated_at?: string | null
+          video_scene_id?: string | null
+        }
+        Update: {
+          camera_movement?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration_estimate?: unknown
+          equipment_needed?: string[] | null
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          shot_number?: string
+          shot_type?: string | null
+          status?: string | null
+          storyboard_url?: string | null
+          updated_at?: string | null
+          video_scene_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_shots_video_scene_id_fkey"
+            columns: ["video_scene_id"]
+            isOneToOne: false
+            referencedRelation: "video_scenes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       waitlist: {
         Row: {
