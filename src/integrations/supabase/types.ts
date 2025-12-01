@@ -5913,6 +5913,8 @@ export type Database = {
       }
       shopping_list: {
         Row: {
+          actual_cost: number | null
+          category: string | null
           created_at: string | null
           description: string | null
           estimated_cost: number | null
@@ -5921,14 +5923,19 @@ export type Database = {
           notes: string | null
           owner_id: string | null
           priority: string | null
+          project_id: string | null
           project_link: string | null
           purchased: boolean | null
           purchased_at: string | null
           quantity: number | null
+          resource_id: string | null
+          status: string | null
           updated_at: string | null
           url: string | null
         }
         Insert: {
+          actual_cost?: number | null
+          category?: string | null
           created_at?: string | null
           description?: string | null
           estimated_cost?: number | null
@@ -5937,14 +5944,19 @@ export type Database = {
           notes?: string | null
           owner_id?: string | null
           priority?: string | null
+          project_id?: string | null
           project_link?: string | null
           purchased?: boolean | null
           purchased_at?: string | null
           quantity?: number | null
+          resource_id?: string | null
+          status?: string | null
           updated_at?: string | null
           url?: string | null
         }
         Update: {
+          actual_cost?: number | null
+          category?: string | null
           created_at?: string | null
           description?: string | null
           estimated_cost?: number | null
@@ -5953,10 +5965,13 @@ export type Database = {
           notes?: string | null
           owner_id?: string | null
           priority?: string | null
+          project_id?: string | null
           project_link?: string | null
           purchased?: boolean | null
           purchased_at?: string | null
           quantity?: number | null
+          resource_id?: string | null
+          status?: string | null
           updated_at?: string | null
           url?: string | null
         }
@@ -5966,6 +5981,20 @@ export type Database = {
             columns: ["owner_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shopping_list_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shopping_list_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
             referencedColumns: ["id"]
           },
         ]

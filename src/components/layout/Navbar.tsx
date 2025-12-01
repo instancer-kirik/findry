@@ -30,6 +30,7 @@ import {
   Route,
   BookOpen,
   MapPin,
+  ShoppingCart,
 } from "lucide-react";
 import { Icons } from "@/components/ui/icons";
 import { useTheme } from "@/components/ui/theme-provider";
@@ -205,6 +206,18 @@ const Navbar = () => {
               <div className="flex items-center gap-1.5 px-3 py-2">
                 <MapPin className="h-4 w-4" />
                 <span>Bathrooms</span>
+              </div>
+            </Link>
+
+            <Link
+              to="/shopping-list"
+              className={`text-sm font-medium transition-colors hover:text-primary ${
+                location.pathname === "/shopping-list" ? "text-primary" : ""
+              }`}
+            >
+              <div className="flex items-center gap-1.5 px-3 py-2">
+                <ShoppingCart className="h-4 w-4" />
+                <span>Shopping List</span>
               </div>
             </Link>
 
