@@ -305,14 +305,14 @@ export default function ShoppingList() {
                   <div className="col-span-2">
                     <Label htmlFor="project_link">Link to Project (optional)</Label>
                     <Select
-                      value={formData.project_link || ""}
-                      onValueChange={(value) => setFormData({ ...formData, project_link: value || undefined })}
+                      value={formData.project_link || "none"}
+                      onValueChange={(value) => setFormData({ ...formData, project_link: value === "none" ? undefined : value })}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select a project" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
                         {projects.map((project) => (
                           <SelectItem key={project.id} value={project.id}>
                             {project.name}
