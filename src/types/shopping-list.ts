@@ -27,8 +27,7 @@ export interface ShoppingListItem {
   purchased_at?: string;
   url?: string;
   notes?: string;
-  project_id?: string;
-  project_link?: string;
+  project_link?: string; // UUID linking to projects table
   resource_id?: string;
   owner_id?: string;
   created_at?: string;

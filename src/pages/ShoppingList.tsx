@@ -88,7 +88,7 @@ export default function ShoppingList() {
     quantity: 1,
     url: "",
     notes: "",
-    project_id: undefined,
+    project_link: undefined,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -115,7 +115,7 @@ export default function ShoppingList() {
       quantity: 1,
       url: "",
       notes: "",
-      project_id: undefined,
+      project_link: undefined,
     });
   };
 
@@ -303,10 +303,10 @@ export default function ShoppingList() {
                   </div>
 
                   <div className="col-span-2">
-                    <Label htmlFor="project_id">Link to Project (optional)</Label>
+                    <Label htmlFor="project_link">Link to Project (optional)</Label>
                     <Select
-                      value={formData.project_id}
-                      onValueChange={(value) => setFormData({ ...formData, project_id: value })}
+                      value={formData.project_link || ""}
+                      onValueChange={(value) => setFormData({ ...formData, project_link: value || undefined })}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select a project" />
@@ -475,11 +475,11 @@ export default function ShoppingList() {
                         <span className="font-medium">${item.actual_cost.toFixed(2)}</span>
                       </div>
                     )}
-                    {item.project_id && (
+                    {item.project_link && (
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Project:</span>
                         <span className="font-medium text-xs">
-                          {projects.find(p => p.id === item.project_id)?.name || "Linked"}
+                          {projects.find(p => p.id === item.project_link)?.name || "Linked"}
                         </span>
                       </div>
                     )}
