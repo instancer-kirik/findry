@@ -61,7 +61,7 @@ import VehicleBuildShowcase from "./pages/VehicleBuildShowcase";
 import Roadmap from "./pages/Roadmap";
 import PublicLanding from "./pages/PublicLanding";
 import RequestService from "./pages/RequestService";
-import BathroomFinder from "./pages/BathroomFinder";
+import TravelLocations from "./pages/TravelLocations";
 import ShoppingList from "./pages/ShoppingList";
 
 const queryClient = new QueryClient();
@@ -177,7 +177,7 @@ const App: React.FC = () => {
           <Route path="/submit" element={<ResourceIndexPage />} />
           <Route path="/requests" element={<Offers />} />
           <Route path="/request-service" element={<RequestService />} />
-          <Route path="/bathroom-finder" element={<BathroomFinder />} />
+          <Route path="/travel-locations" element={<TravelLocations />} />
           <Route path="/shopping-list" element={<ShoppingList />} />
           <Route path="/vehicle-build" element={<VehicleBuildShowcase />} />
           <Route path="*" element={<Navigate to="/not-found" replace />} />
