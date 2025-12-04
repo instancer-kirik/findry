@@ -6387,6 +6387,158 @@ export type Database = {
           },
         ]
       }
+      travel_location_reviews: {
+        Row: {
+          cleanliness_rating: number | null
+          comment: string | null
+          created_at: string
+          helpful_count: number | null
+          id: string
+          location_id: string
+          photos: string[] | null
+          rating: number
+          safety_rating: number | null
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cleanliness_rating?: number | null
+          comment?: string | null
+          created_at?: string
+          helpful_count?: number | null
+          id?: string
+          location_id: string
+          photos?: string[] | null
+          rating: number
+          safety_rating?: number | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cleanliness_rating?: number | null
+          comment?: string | null
+          created_at?: string
+          helpful_count?: number | null
+          id?: string
+          location_id?: string
+          photos?: string[] | null
+          rating?: number
+          safety_rating?: number | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "travel_location_reviews_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "travel_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "travel_location_reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      travel_locations: {
+        Row: {
+          accessibility: boolean | null
+          address: string | null
+          amenities: string[] | null
+          baby_changing: boolean | null
+          cleanliness_rating: number | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          free: boolean | null
+          hours: string | null
+          id: string
+          is_open_24h: boolean | null
+          latitude: number
+          longitude: number
+          name: string
+          phone: string | null
+          photos: string[] | null
+          rating: number | null
+          reported_issues: string[] | null
+          review_count: number | null
+          safety_rating: number | null
+          type: string
+          updated_at: string
+          verified: boolean | null
+          website: string | null
+        }
+        Insert: {
+          accessibility?: boolean | null
+          address?: string | null
+          amenities?: string[] | null
+          baby_changing?: boolean | null
+          cleanliness_rating?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          free?: boolean | null
+          hours?: string | null
+          id?: string
+          is_open_24h?: boolean | null
+          latitude: number
+          longitude: number
+          name: string
+          phone?: string | null
+          photos?: string[] | null
+          rating?: number | null
+          reported_issues?: string[] | null
+          review_count?: number | null
+          safety_rating?: number | null
+          type: string
+          updated_at?: string
+          verified?: boolean | null
+          website?: string | null
+        }
+        Update: {
+          accessibility?: boolean | null
+          address?: string | null
+          amenities?: string[] | null
+          baby_changing?: boolean | null
+          cleanliness_rating?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          free?: boolean | null
+          hours?: string | null
+          id?: string
+          is_open_24h?: boolean | null
+          latitude?: number
+          longitude?: number
+          name?: string
+          phone?: string | null
+          photos?: string[] | null
+          rating?: number | null
+          reported_issues?: string[] | null
+          review_count?: number | null
+          safety_rating?: number | null
+          type?: string
+          updated_at?: string
+          verified?: boolean | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "travel_locations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_artist_relationships: {
         Row: {
           artist_id: string | null
