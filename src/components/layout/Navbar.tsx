@@ -37,6 +37,7 @@ import {
   Briefcase,
   ChevronDown,
   Play,
+  Store,
 } from "lucide-react";
 import { Icons } from "@/components/ui/icons";
 import { useTheme } from "@/components/ui/theme-provider";
@@ -553,6 +554,14 @@ const Navbar = () => {
                     Discover
                   </p>
                   <Link
+                    to="/feed"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Play className="h-4 w-4" />
+                    <span>Feed</span>
+                  </Link>
+                  <Link
                     to="/discover"
                     className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -575,6 +584,14 @@ const Navbar = () => {
                   >
                     <MapPin className="h-4 w-4" />
                     <span>Venues</span>
+                  </Link>
+                  <Link
+                    to="/discover?type=brands"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Briefcase className="h-4 w-4" />
+                    <span>Brands</span>
                   </Link>
                 </div>
 
@@ -606,6 +623,14 @@ const Navbar = () => {
                   >
                     <FolderKanban className="h-4 w-4" />
                     <span>Projects</span>
+                  </Link>
+                  <Link
+                    to="/shops"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Store className="h-4 w-4" />
+                    <span>Shops</span>
                   </Link>
                 </div>
 
@@ -668,6 +693,14 @@ const Navbar = () => {
                   >
                     <Briefcase className="h-4 w-4" />
                     <span>Resources</span>
+                  </Link>
+                  <Link
+                    to="/roadmap"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Route className="h-4 w-4" />
+                    <span>Roadmap</span>
                   </Link>
                 </div>
 
