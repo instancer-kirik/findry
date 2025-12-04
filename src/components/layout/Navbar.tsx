@@ -146,34 +146,34 @@ const Navbar = () => {
                   Discover
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[500px] gap-3 p-4 md:grid-cols-2 lg:w-[600px]">
+                  <ul className="grid w-[500px] gap-3 p-4 md:grid-cols-2">
                     <ListItem
                       href="/feed"
                       title="Feed"
                       icon={<Play className="h-4 w-4" />}
                     >
-                      UGC content from artists, venues & brands
+                      UGC content from the community
                     </ListItem>
                     <ListItem
                       href="/discover"
                       title="Browse All"
                       icon={<Compass className="h-4 w-4" />}
                     >
-                      Explore artists, venues, brands, and resources
+                      Explore everything on the platform
                     </ListItem>
                     <ListItem
                       href="/discover?type=artists"
                       title="Artists"
                       icon={<UserRound className="h-4 w-4" />}
                     >
-                      Find talented creators and collaborators
+                      Creators and collaborators
                     </ListItem>
                     <ListItem
                       href="/discover?type=venues"
                       title="Venues"
                       icon={<MapPin className="h-4 w-4" />}
                     >
-                      Studios, galleries, and event spaces
+                      Studios, galleries, spaces
                     </ListItem>
                     <ListItem
                       href="/discover?type=brands"
@@ -187,7 +187,7 @@ const Navbar = () => {
                       title="Shops"
                       icon={<Store className="h-4 w-4" />}
                     >
-                      Browse marketplace shops and products
+                      Marketplace products
                     </ListItem>
                   </ul>
                 </NavigationMenuContent>
@@ -200,20 +200,20 @@ const Navbar = () => {
                   Events
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[350px] gap-3 p-4">
+                  <ul className="grid w-[320px] gap-3 p-4">
                     <ListItem
                       href="/events/upcoming"
                       title="Upcoming Events"
                       icon={<Calendar className="h-4 w-4" />}
                     >
-                      Browse upcoming events and shows
+                      Browse events and shows
                     </ListItem>
                     <ListItem
                       href="/events/interested"
                       title="My Interested"
                       icon={<Calendar className="h-4 w-4" />}
                     >
-                      Events you've marked as interested
+                      Events you're tracking
                     </ListItem>
                     {user && (
                       <ListItem
@@ -248,26 +248,38 @@ const Navbar = () => {
                       title="Communities"
                       icon={<Users className="h-4 w-4" />}
                     >
-                      Join groups and communities
+                      Join groups
+                    </ListItem>
+                    <ListItem
+                      href="/collaboration"
+                      title="Collaboration"
+                      icon={<Users className="h-4 w-4" />}
+                    >
+                      Manage collaborations
+                    </ListItem>
+                    <ListItem
+                      href="/request-service"
+                      title="Request Service"
+                      icon={<Briefcase className="h-4 w-4" />}
+                    >
+                      Post service requests
                     </ListItem>
                     {user && (
-                      <>
-                        <ListItem
-                          href="/projects/create"
-                          title="Start Project"
-                          icon={<Plus className="h-4 w-4" />}
-                        >
-                          Create a new project
-                        </ListItem>
-                        <ListItem
-                          href="/collaboration"
-                          title="Collaboration"
-                          icon={<Users className="h-4 w-4" />}
-                        >
-                          Manage collaborations
-                        </ListItem>
-                      </>
+                      <ListItem
+                        href="/projects/create"
+                        title="Start Project"
+                        icon={<Plus className="h-4 w-4" />}
+                      >
+                        Create a new project
+                      </ListItem>
                     )}
+                    <ListItem
+                      href="/chats"
+                      title="Messages"
+                      icon={<Users className="h-4 w-4" />}
+                    >
+                      Chat with collaborators
+                    </ListItem>
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
@@ -279,34 +291,48 @@ const Navbar = () => {
                   Tools
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2">
+                  <ul className="grid w-[450px] gap-3 p-4 md:grid-cols-2">
                     <ListItem
                       href="/travel-locations"
                       title="Travel Locations"
                       icon={<MapPin className="h-4 w-4" />}
                     >
-                      Find road resources, campsites & dump stations
-                    </ListItem>
-                    <ListItem
-                      href="/shopping-list"
-                      title="Shopping List"
-                      icon={<ShoppingCart className="h-4 w-4" />}
-                    >
-                      Track purchases and project supplies
+                      Road resources & campsites
                     </ListItem>
                     <ListItem
                       href="/tour-planner"
                       title="Tour Planner"
                       icon={<Route className="h-4 w-4" />}
                     >
-                      Plan trips and tour routes
+                      Plan trips and routes
+                    </ListItem>
+                    <ListItem
+                      href="/shopping-list"
+                      title="Shopping List"
+                      icon={<ShoppingCart className="h-4 w-4" />}
+                    >
+                      Track purchases & supplies
+                    </ListItem>
+                    <ListItem
+                      href="/gear-packing"
+                      title="Gear Packing"
+                      icon={<Briefcase className="h-4 w-4" />}
+                    >
+                      Organize gear and equipment
                     </ListItem>
                     <ListItem
                       href="/vehicle-build"
                       title="Vehicle Build"
                       icon={<Car className="h-4 w-4" />}
                     >
-                      Track vehicle conversion projects
+                      Track vehicle conversions
+                    </ListItem>
+                    <ListItem
+                      href="/grouper"
+                      title="Grouper"
+                      icon={<Users className="h-4 w-4" />}
+                    >
+                      Organize groups and teams
                     </ListItem>
                   </ul>
                 </NavigationMenuContent>
@@ -316,10 +342,31 @@ const Navbar = () => {
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="h-9">
                   <BookOpen className="h-4 w-4 mr-1.5" />
-                  Knowledge
+                  About
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="grid w-[350px] gap-3 p-4">
+                    <ListItem
+                      href="/about"
+                      title="About Us"
+                      icon={<CircleHelp className="h-4 w-4" />}
+                    >
+                      Learn about the platform
+                    </ListItem>
+                    <ListItem
+                      href="/compare"
+                      title="Platform Comparison"
+                      icon={<Scale className="h-4 w-4" />}
+                    >
+                      Compare with alternatives
+                    </ListItem>
+                    <ListItem
+                      href="/roadmap"
+                      title="Roadmap"
+                      icon={<Route className="h-4 w-4" />}
+                    >
+                      Development roadmap
+                    </ListItem>
                     <ListItem
                       href="/glossary"
                       title="Glossary"
@@ -332,21 +379,14 @@ const Navbar = () => {
                       title="Resources"
                       icon={<Briefcase className="h-4 w-4" />}
                     >
-                      Guides, tools, and references
+                      Guides and references
                     </ListItem>
                     <ListItem
-                      href="/roadmap"
-                      title="Roadmap"
-                      icon={<Route className="h-4 w-4" />}
+                      href="/contact"
+                      title="Contact"
+                      icon={<Users className="h-4 w-4" />}
                     >
-                      Platform development roadmap
-                    </ListItem>
-                    <ListItem
-                      href="/compare"
-                      title="Platform Comparison"
-                      icon={<Scale className="h-4 w-4" />}
-                    >
-                      Compare with other platforms
+                      Get in touch
                     </ListItem>
                   </ul>
                 </NavigationMenuContent>
@@ -601,16 +641,16 @@ const Navbar = () => {
                     <span>Venues</span>
                   </Link>
                   <Link
-                    to="/discover?type=brands"
+                    to="/shops"
                     className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <Briefcase className="h-4 w-4" />
-                    <span>Brands</span>
+                    <Store className="h-4 w-4" />
+                    <span>Shops</span>
                   </Link>
                 </div>
 
-                {/* Events & Communities Section */}
+                {/* Events & Projects Section */}
                 <div className="border-b pb-3 mb-2">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-4 mb-2">
                     Connect
@@ -624,14 +664,6 @@ const Navbar = () => {
                     <span>Events</span>
                   </Link>
                   <Link
-                    to="/communities"
-                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <Users className="h-4 w-4" />
-                    <span>Communities</span>
-                  </Link>
-                  <Link
                     to="/projects"
                     className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -640,12 +672,28 @@ const Navbar = () => {
                     <span>Projects</span>
                   </Link>
                   <Link
-                    to="/shops"
+                    to="/communities"
                     className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <Store className="h-4 w-4" />
-                    <span>Shops</span>
+                    <Users className="h-4 w-4" />
+                    <span>Communities</span>
+                  </Link>
+                  <Link
+                    to="/collaboration"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Users className="h-4 w-4" />
+                    <span>Collaboration</span>
+                  </Link>
+                  <Link
+                    to="/chats"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Users className="h-4 w-4" />
+                    <span>Messages</span>
                   </Link>
                 </div>
 
@@ -663,6 +711,14 @@ const Navbar = () => {
                     <span>Travel Locations</span>
                   </Link>
                   <Link
+                    to="/tour-planner"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Route className="h-4 w-4" />
+                    <span>Tour Planner</span>
+                  </Link>
+                  <Link
                     to="/shopping-list"
                     className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -671,12 +727,12 @@ const Navbar = () => {
                     <span>Shopping List</span>
                   </Link>
                   <Link
-                    to="/tour-planner"
+                    to="/gear-packing"
                     className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <Route className="h-4 w-4" />
-                    <span>Tour Planner</span>
+                    <Briefcase className="h-4 w-4" />
+                    <span>Gear Packing</span>
                   </Link>
                   <Link
                     to="/vehicle-build"
@@ -686,13 +742,45 @@ const Navbar = () => {
                     <Car className="h-4 w-4" />
                     <span>Vehicle Build</span>
                   </Link>
+                  <Link
+                    to="/grouper"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Users className="h-4 w-4" />
+                    <span>Grouper</span>
+                  </Link>
                 </div>
 
-                {/* Knowledge Section */}
+                {/* About Section */}
                 <div className="border-b pb-3 mb-2">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-4 mb-2">
-                    Knowledge
+                    About
                   </p>
+                  <Link
+                    to="/about"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <CircleHelp className="h-4 w-4" />
+                    <span>About Us</span>
+                  </Link>
+                  <Link
+                    to="/compare"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Scale className="h-4 w-4" />
+                    <span>Platform Comparison</span>
+                  </Link>
+                  <Link
+                    to="/roadmap"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Route className="h-4 w-4" />
+                    <span>Roadmap</span>
+                  </Link>
                   <Link
                     to="/glossary"
                     className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
@@ -710,20 +798,12 @@ const Navbar = () => {
                     <span>Resources</span>
                   </Link>
                   <Link
-                    to="/roadmap"
+                    to="/contact"
                     className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <Route className="h-4 w-4" />
-                    <span>Roadmap</span>
-                  </Link>
-                  <Link
-                    to="/compare"
-                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <Scale className="h-4 w-4" />
-                    <span>Platform Comparison</span>
+                    <Users className="h-4 w-4" />
+                    <span>Contact</span>
                   </Link>
                 </div>
 
