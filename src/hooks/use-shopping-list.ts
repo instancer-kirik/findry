@@ -10,10 +10,11 @@ export const useGetShoppingList = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
 
+      // Get items owned by user OR items with no owner (legacy data)
       const { data, error } = await supabase
         .from("shopping_list")
         .select("*")
-        .eq("owner_id", user.id)
+        .or(`owner_id.eq.${user.id},owner_id.is.null`)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
