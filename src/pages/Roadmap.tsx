@@ -2,30 +2,28 @@ import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Circle, AlertCircle, Wrench, TrendingUp } from 'lucide-react';
+import { CheckCircle2, Circle, Rocket, Wrench, TrendingUp, Calendar, Zap, Users, Star } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 
 const Roadmap: React.FC = () => {
-  const getStatusIcon = (status: 'complete' | 'progress' | 'planned' | 'issue') => {
+  const getStatusIcon = (status: 'complete' | 'progress' | 'planned') => {
     switch (status) {
       case 'complete':
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+        return <CheckCircle2 className="h-5 w-5 text-primary" />;
       case 'progress':
         return <Wrench className="h-5 w-5 text-yellow-500" />;
-      case 'issue':
-        return <AlertCircle className="h-5 w-5 text-red-500" />;
       default:
         return <Circle className="h-5 w-5 text-muted-foreground" />;
     }
   };
 
-  const getStatusBadge = (status: 'complete' | 'progress' | 'planned' | 'issue') => {
+  const getStatusBadge = (status: 'complete' | 'progress' | 'planned' | 'live') => {
     const variants: Record<typeof status, { variant: any; label: string }> = {
       complete: { variant: 'default', label: 'Complete' },
       progress: { variant: 'secondary', label: 'In Progress' },
       planned: { variant: 'outline', label: 'Planned' },
-      issue: { variant: 'destructive', label: 'Needs Work' },
+      live: { variant: 'default', label: 'Live' },
     };
     return <Badge variant={variants[status].variant}>{variants[status].label}</Badge>;
   };
@@ -45,84 +43,93 @@ const Roadmap: React.FC = () => {
             </p>
           </section>
 
+          {/* Launch Timeline */}
+          <Card className="mb-12 border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Rocket className="h-5 w-5 text-primary" />
+                Launch Timeline
+              </CardTitle>
+              <CardDescription>December 2024 Launch Schedule</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="relative">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
+                      <Zap className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">Beta Launch</h4>
+                      <p className="text-sm text-muted-foreground">Dec 4-6, 2024</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground ml-[52px]">
+                    Core features live, invite-only access, gathering initial feedback
+                  </p>
+                  <Badge className="ml-[52px] mt-2" variant="default">Current</Badge>
+                </div>
+
+                <div className="relative">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                      <Users className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">Soft Launch</h4>
+                      <p className="text-sm text-muted-foreground">Dec 7-13, 2024</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground ml-[52px]">
+                    Open registration, community building, bug fixes from feedback
+                  </p>
+                </div>
+
+                <div className="relative">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                      <Star className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">Public Launch</h4>
+                      <p className="text-sm text-muted-foreground">Dec 14, 2024</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground ml-[52px]">
+                    Full public access, marketing push, community events
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Overall Progress */}
           <Card className="mb-12">
             <CardHeader>
-              <CardTitle>Overall Platform Status</CardTitle>
-              <CardDescription>Current completion across all phases</CardDescription>
+              <CardTitle>Platform Completion</CardTitle>
+              <CardDescription>Current status across all development phases</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
                 <div className="flex justify-between mb-2">
                   <span className="font-semibold">Phase 1: Core Platform (MVP)</span>
-                  <span className="text-muted-foreground">~90%</span>
+                  <span className="text-primary font-medium">95%</span>
                 </div>
-                <Progress value={90} className="h-3" />
+                <Progress value={95} className="h-3" />
               </div>
               <div>
                 <div className="flex justify-between mb-2">
-                  <span className="font-semibold">Phase 2: Polish & Enhancement</span>
-                  <span className="text-muted-foreground">~55%</span>
+                  <span className="font-semibold">Phase 2: Enhancement & Polish</span>
+                  <span className="text-muted-foreground">60%</span>
                 </div>
-                <Progress value={55} className="h-3" />
+                <Progress value={60} className="h-3" />
               </div>
               <div>
                 <div className="flex justify-between mb-2">
                   <span className="font-semibold">Phase 3: Ecosystem Growth</span>
-                  <span className="text-muted-foreground">~25%</span>
+                  <span className="text-muted-foreground">30%</span>
                 </div>
-                <Progress value={25} className="h-3" />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Known Issues */}
-          <Card className="mb-12 border-destructive/50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-destructive" />
-                Known Issues & Priority Fixes
-              </CardTitle>
-              <CardDescription>Active issues being addressed</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-start gap-3">
-                {getStatusIcon('issue')}
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-semibold">Discover Page UI/UX</h4>
-                    {getStatusBadge('progress')}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Discover page needs design polish, improved filtering UX, and better mobile responsiveness.
-                  </p>
-                </div>
-              </div>
-              <Separator />
-              <div className="flex items-start gap-3">
-                {getStatusIcon('issue')}
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-semibold">404 Error Handling</h4>
-                    {getStatusBadge('progress')}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Some routes redirecting improperly. Improving error boundaries and route guards.
-                  </p>
-                </div>
-              </div>
-              <Separator />
-              <div className="flex items-start gap-3">
-                {getStatusIcon('issue')}
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-semibold">Project Detail Edit Flow</h4>
-                    {getStatusBadge('progress')}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Edit UI for tasks and components needs visibility improvements and ownership validation fixes.
-                  </p>
-                </div>
+                <Progress value={30} className="h-3" />
               </div>
             </CardContent>
           </Card>
@@ -130,8 +137,11 @@ const Roadmap: React.FC = () => {
           {/* Phase 1: Core Platform */}
           <Card className="mb-12">
             <CardHeader>
-              <CardTitle>Phase 1: Core Platform (MVP)</CardTitle>
-              <CardDescription>Launch-ready features</CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                Phase 1: Core Platform
+                <Badge variant="default" className="ml-2">Launch Ready</Badge>
+              </CardTitle>
+              <CardDescription>Essential features for launch</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* User Experience */}
@@ -143,31 +153,31 @@ const Roadmap: React.FC = () => {
                 <ul className="space-y-2 ml-8">
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
-                    <span>Multi-role signup flow (Consumer/Artist/Organizer)</span>
+                    <span>Multi-role signup (Consumer/Artist/Organizer)</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
                     <span>Profile customization and settings</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    {getStatusIcon('progress')}
-                    <span>Profile onboarding optimization</span>
+                    {getStatusIcon('complete')}
+                    <span>Profile wizard onboarding</span>
                   </li>
                 </ul>
               </div>
 
               <Separator />
 
-              {/* Discovery & Marketplace */}
+              {/* Discovery */}
               <div>
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   Discovery & Marketplace
-                  {getStatusBadge('progress')}
+                  {getStatusBadge('complete')}
                 </h3>
                 <ul className="space-y-2 ml-8">
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
-                    <span>Unified discovery page (Artists, Resources, Events, Venues, Brands, Shops)</span>
+                    <span>Unified discovery (Artists, Venues, Brands, Shops, Resources)</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
@@ -175,18 +185,18 @@ const Roadmap: React.FC = () => {
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
-                    <span>Selection mode for bulk operations</span>
+                    <span>UGC Feed with media uploads</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    {getStatusIcon('issue')}
-                    <span>UI/UX polish and mobile responsiveness</span>
+                    {getStatusIcon('complete')}
+                    <span>Selection mode for bulk operations</span>
                   </li>
                 </ul>
               </div>
 
               <Separator />
 
-              {/* Event Platform */}
+              {/* Events */}
               <div>
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   Event Management
@@ -199,11 +209,7 @@ const Roadmap: React.FC = () => {
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
-                    <span>Personal calendar management</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    {getStatusIcon('complete')}
-                    <span>Event component grouping (Grouper)</span>
+                    <span>Personal calendar and event tracking</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
@@ -218,20 +224,20 @@ const Roadmap: React.FC = () => {
 
               <Separator />
 
-              {/* Projects & Collaboration */}
+              {/* Projects */}
               <div>
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   Projects & Collaboration
-                  {getStatusBadge('progress')}
+                  {getStatusBadge('complete')}
                 </h3>
                 <ul className="space-y-2 ml-8">
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
-                    <span>Project creation and listing</span>
+                    <span>Project creation and showcase</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
-                    <span>Collaboration pipeline (stages: ideation, planning, production, review, complete)</span>
+                    <span>Collaboration pipeline (ideation → complete)</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
@@ -239,90 +245,50 @@ const Roadmap: React.FC = () => {
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
-                    <span>Vehicle build projects</span>
+                    <span>Project landing pages</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    {getStatusIcon('issue')}
-                    <span>Edit UI visibility and ownership validation</span>
+                    {getStatusIcon('complete')}
+                    <span>Service requests and proposals</span>
                   </li>
                 </ul>
               </div>
 
               <Separator />
 
-              {/* Tour & Travel */}
+              {/* Tools */}
               <div>
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  Tour & Road Trip Planning
+                  Creative Tools
                   {getStatusBadge('complete')}
                 </h3>
                 <ul className="space-y-2 ml-8">
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
-                    <span>Trip planning wizard (basics, destinations, vehicle, accommodation, budget)</span>
+                    <span>Tour planning wizard with budgeting</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
-                    <span>Interactive tour mapping</span>
+                    <span>Travel locations POI map</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
-                    <span>Tour stops and itinerary management</span>
+                    <span>Shopping list with project linking</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('complete')}
+                    <span>Vehicle build tracker</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('complete')}
+                    <span>Gear packing organizer</span>
                   </li>
                 </ul>
               </div>
 
               <Separator />
 
-              {/* Resources & Knowledge */}
-              <div>
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  Resources & Knowledge Base
-                  {getStatusBadge('complete')}
-                </h3>
-                <ul className="space-y-2 ml-8">
-                  <li className="flex items-center gap-2">
-                    {getStatusIcon('complete')}
-                    <span>Resources index and detail pages</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    {getStatusIcon('complete')}
-                    <span>Glossary system with categories</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    {getStatusIcon('complete')}
-                    <span>Term definitions and examples</span>
-                  </li>
-                </ul>
-              </div>
-
-              <Separator />
-
-              {/* Business Entities */}
-              <div>
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  Business & Venue Management
-                  {getStatusBadge('complete')}
-                </h3>
-                <ul className="space-y-2 ml-8">
-                  <li className="flex items-center gap-2">
-                    {getStatusIcon('complete')}
-                    <span>Venue profiles and detail pages</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    {getStatusIcon('complete')}
-                    <span>Brand profiles and hierarchies</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    {getStatusIcon('complete')}
-                    <span>Shop listings and product catalogs</span>
-                  </li>
-                </ul>
-              </div>
-
-              <Separator />
-
-              {/* Community Features */}
+              {/* Community */}
               <div>
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   Community & Communication
@@ -331,46 +297,50 @@ const Roadmap: React.FC = () => {
                 <ul className="space-y-2 ml-8">
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
-                    <span>Direct messaging and chat</span>
+                    <span>Direct messaging</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
                     <span>Community circles and groups</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    {getStatusIcon('progress')}
-                    <span>Notification system refinement</span>
+                    {getStatusIcon('complete')}
+                    <span>User networking (follows, connections)</span>
                   </li>
                 </ul>
               </div>
 
               <Separator />
 
-              {/* External Integrations */}
+              {/* Knowledge */}
               <div>
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  External Integrations
+                  Resources & Knowledge Base
                   {getStatusBadge('complete')}
                 </h3>
                 <ul className="space-y-2 ml-8">
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
-                    <span>DivvyQueue contract management integration</span>
+                    <span>Glossary with categories</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
-                    <span>Eventbrite ticketing and checkout</span>
+                    <span>Resource guides and references</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('complete')}
+                    <span>Platform comparison page</span>
                   </li>
                 </ul>
               </div>
             </CardContent>
           </Card>
 
-          {/* Phase 2: Growth */}
+          {/* Phase 2: Enhancement */}
           <Card className="mb-12">
             <CardHeader>
-              <CardTitle>Phase 2: Polish & Enhancement</CardTitle>
-              <CardDescription>Post-launch improvements (Q3-Q4 2025)</CardDescription>
+              <CardTitle>Phase 2: Enhancement & Polish</CardTitle>
+              <CardDescription>Post-launch improvements (Q1 2025)</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
@@ -380,21 +350,21 @@ const Roadmap: React.FC = () => {
                 </h3>
                 <ul className="space-y-2 ml-8">
                   <li className="flex items-center gap-2">
-                    {getStatusIcon('progress')}
-                    <span>Discover page design overhaul</span>
+                    {getStatusIcon('complete')}
+                    <span>Professional megamenu navigation</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('progress')}
-                    <span>Mobile responsiveness improvements across all pages</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    {getStatusIcon('progress')}
-                    <span>Enhanced filtering and search UX</span>
+                    <span>Mobile responsiveness improvements</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('planned')}
                     <span>Accessibility (WCAG 2.1 AA compliance)</span>
                   </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('planned')}
+                    <span>Performance optimization</span>
+                  </li>
                 </ul>
               </div>
 
@@ -402,25 +372,25 @@ const Roadmap: React.FC = () => {
 
               <div>
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  Content Management Improvements
+                  Enhanced Features
                   {getStatusBadge('progress')}
                 </h3>
                 <ul className="space-y-2 ml-8">
-                  <li className="flex items-center gap-2">
-                    {getStatusIcon('progress')}
-                    <span>Enhanced edit controls for projects, components, and tasks</span>
-                  </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('complete')}
-                    <span>Photo uploads and media galleries</span>
+                    <span>Media uploads and galleries</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('progress')}
+                    <span>Advanced notifications</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('planned')}
-                    <span>Bulk editing and batch operations</span>
+                    <span>Real-time collaboration features</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('planned')}
-                    <span>Content versioning and history</span>
+                    <span>Calendar import/export (iCal, Google)</span>
                   </li>
                 </ul>
               </div>
@@ -429,52 +399,21 @@ const Roadmap: React.FC = () => {
 
               <div>
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  Advanced Features
-                  {getStatusBadge('progress')}
-                </h3>
-                <ul className="space-y-2 ml-8">
-                  <li className="flex items-center gap-2">
-                    {getStatusIcon('planned')}
-                    <span>Real-time collaboration on projects</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    {getStatusIcon('planned')}
-                    <span>Advanced analytics dashboard</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    {getStatusIcon('planned')}
-                    <span>Automated recommendations engine</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    {getStatusIcon('planned')}
-                    <span>Export and import functionality</span>
-                  </li>
-                </ul>
-              </div>
-
-              <Separator />
-
-              <div>
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  Booking & Financial Tools
+                  Analytics & Insights
                   {getStatusBadge('planned')}
                 </h3>
                 <ul className="space-y-2 ml-8">
                   <li className="flex items-center gap-2">
-                    {getStatusIcon('complete')}
-                    <span>Contract management via DivvyQueue</span>
+                    {getStatusIcon('planned')}
+                    <span>Event analytics dashboard</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('planned')}
-                    <span>In-platform payment processing</span>
+                    <span>User engagement metrics</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('planned')}
-                    <span>Invoice generation and tracking</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    {getStatusIcon('planned')}
-                    <span>Booking confirmation workflow</span>
+                    <span>Content performance tracking</span>
                   </li>
                 </ul>
               </div>
@@ -485,32 +424,9 @@ const Roadmap: React.FC = () => {
           <Card className="mb-12">
             <CardHeader>
               <CardTitle>Phase 3: Ecosystem Growth</CardTitle>
-              <CardDescription>Future roadmap (2026)</CardDescription>
+              <CardDescription>Q2-Q3 2025</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  Business Integration
-                  {getStatusBadge('progress')}
-                </h3>
-                <ul className="space-y-2 ml-8">
-                  <li className="flex items-center gap-2">
-                    {getStatusIcon('complete')}
-                    <span>Business profiles and category management</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    {getStatusIcon('planned')}
-                    <span>Sponsorship tools and management</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    {getStatusIcon('planned')}
-                    <span>Business networking features</span>
-                  </li>
-                </ul>
-              </div>
-
-              <Separator />
-
               <div>
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   Platform Expansion
@@ -519,104 +435,101 @@ const Roadmap: React.FC = () => {
                 <ul className="space-y-2 ml-8">
                   <li className="flex items-center gap-2">
                     {getStatusIcon('planned')}
-                    <span>Mobile application development</span>
+                    <span>Mobile applications (iOS/Android)</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('planned')}
-                    <span>Public API for developers</span>
+                    <span>Public API and developer documentation</span>
                   </li>
                   <li className="flex items-center gap-2">
                     {getStatusIcon('planned')}
-                    <span>Third-party platform integrations</span>
+                    <span>Plugin/integration system</span>
+                  </li>
+                </ul>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  Business Features
+                  {getStatusBadge('planned')}
+                </h3>
+                <ul className="space-y-2 ml-8">
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('progress')}
+                    <span>Payment processing integration</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('planned')}
+                    <span>Subscription plans and premium features</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('planned')}
+                    <span>Venue booking and payments</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('planned')}
+                    <span>Artist booking system</span>
+                  </li>
+                </ul>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  Community Growth
+                  {getStatusBadge('planned')}
+                </h3>
+                <ul className="space-y-2 ml-8">
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('planned')}
+                    <span>Referral and ambassador program</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('planned')}
+                    <span>Community moderation tools</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {getStatusIcon('planned')}
+                    <span>Event sponsorship marketplace</span>
                   </li>
                 </ul>
               </div>
             </CardContent>
           </Card>
 
-          {/* Technical Priorities */}
-          <Card className="mb-12">
+          {/* Vision */}
+          <Card className="border-accent/30 bg-gradient-to-br from-accent/5 to-transparent">
             <CardHeader>
-              <CardTitle>Technical Focus Areas</CardTitle>
-              <CardDescription>Infrastructure and code quality</CardDescription>
+              <CardTitle>Our Vision</CardTitle>
+              <CardDescription>Building the creative venue ecosystem</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="font-semibold mb-3 text-yellow-600 dark:text-yellow-500">Immediate Priorities</h3>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-center gap-2">
-                      <Wrench className="h-4 w-4" />
-                      <span>Performance optimization</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Wrench className="h-4 w-4" />
-                      <span>Security audit completion</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Wrench className="h-4 w-4" />
-                      <span>Cross-browser compatibility</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Wrench className="h-4 w-4" />
-                      <span>Error tracking implementation</span>
-                    </li>
-                  </ul>
+            <CardContent className="prose prose-sm dark:prose-invert max-w-none">
+              <p className="text-muted-foreground">
+                Findry bridges the gap between indie venues, artists, and creative communities. We're building 
+                infrastructure for non-traditional spaces—maker studios, galleries, unconventional venues—that 
+                serve the creative economy. Our goal is to combine the reliability of enterprise venue management 
+                with the social virality and organic discovery that modern creators need.
+              </p>
+              <div className="grid md:grid-cols-3 gap-4 mt-6">
+                <div className="text-center p-4">
+                  <div className="text-3xl font-bold text-primary">Layer 1</div>
+                  <div className="text-sm text-muted-foreground">Resource Graph</div>
+                  <p className="text-xs mt-1">Venues, gear, services, availability</p>
                 </div>
-                <div>
-                  <h3 className="font-semibold mb-3 text-primary">Ongoing Improvements</h3>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-                      <span>Code refactoring & tech debt</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-                      <span>Component library standardization</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-                      <span>API endpoint optimization</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-                      <span>Testing coverage expansion</span>
-                    </li>
-                  </ul>
+                <div className="text-center p-4">
+                  <div className="text-3xl font-bold text-primary">Layer 2</div>
+                  <div className="text-sm text-muted-foreground">Event Engine</div>
+                  <p className="text-xs mt-1">Bookings, logistics, ticketing</p>
+                </div>
+                <div className="text-center p-4">
+                  <div className="text-3xl font-bold text-primary">Layer 3</div>
+                  <div className="text-sm text-muted-foreground">Social Feed</div>
+                  <p className="text-xs mt-1">UGC, discovery, collaboration</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Success Metrics */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Success Metrics</CardTitle>
-              <CardDescription>How we measure progress</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
-                <li className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-primary" />
-                  <span>User signup and onboarding completion rate</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-primary" />
-                  <span>Event creation and participation metrics</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-primary" />
-                  <span>Community engagement and growth</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-primary" />
-                  <span>Platform performance and stability</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-primary" />
-                  <span>User satisfaction and feedback scores</span>
-                </li>
-              </ul>
             </CardContent>
           </Card>
         </div>
