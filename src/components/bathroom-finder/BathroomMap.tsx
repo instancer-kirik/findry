@@ -10,7 +10,7 @@ interface PublicBathroom {
   address: string;
   latitude: number;
   longitude: number;
-  type: 'public' | 'business' | 'restaurant' | 'gas_station' | 'park' | 'shopping_center';
+  type: 'public' | 'business' | 'restaurant' | 'gas_station' | 'park' | 'shopping_center' | 'campsite' | 'rv_park' | 'dump_station' | 'water_station' | 'parts_store';
   rating: number;
   reviews: number;
   distance: number;
@@ -50,6 +50,11 @@ const BathroomMap: React.FC<BathroomMapProps> = ({
       case 'restaurant': return '#f59e0b';
       case 'gas_station': return '#ef4444';
       case 'shopping_center': return '#8b5cf6';
+      case 'campsite': return '#059669';
+      case 'rv_park': return '#0891b2';
+      case 'dump_station': return '#7c3aed';
+      case 'water_station': return '#0ea5e9';
+      case 'parts_store': return '#dc2626';
       default: return '#6b7280';
     }
   };
@@ -61,6 +66,11 @@ const BathroomMap: React.FC<BathroomMapProps> = ({
       case 'restaurant': return '🍽️';
       case 'gas_station': return '⛽';
       case 'shopping_center': return '🛍️';
+      case 'campsite': return '🏕️';
+      case 'rv_park': return '🚐';
+      case 'dump_station': return '🚰';
+      case 'water_station': return '💧';
+      case 'parts_store': return '🔧';
       default: return '🚻';
     }
   };

@@ -4,7 +4,7 @@ export interface PublicBathroom {
   address: string;
   latitude: number;
   longitude: number;
-  type: 'public' | 'business' | 'restaurant' | 'gas_station' | 'park' | 'shopping_center';
+  type: 'public' | 'business' | 'restaurant' | 'gas_station' | 'park' | 'shopping_center' | 'campsite' | 'rv_park' | 'dump_station' | 'water_station' | 'parts_store';
   rating: number;
   reviews: number;
   distance: number;
@@ -88,7 +88,7 @@ export interface BathroomSearchResult {
   searchTime: number;
 }
 
-export type BathroomType = 'public' | 'business' | 'restaurant' | 'gas_station' | 'park' | 'shopping_center';
+export type BathroomType = 'public' | 'business' | 'restaurant' | 'gas_station' | 'park' | 'shopping_center' | 'campsite' | 'rv_park' | 'dump_station' | 'water_station' | 'parts_store';
 
 export type ViewMode = 'list' | 'map';
 
@@ -109,6 +109,11 @@ export const BATHROOM_TYPES: Record<BathroomType, { label: string; icon: string;
   gas_station: { label: 'Gas Station', icon: '⛽', color: '#ef4444' },
   park: { label: 'Park', icon: '🏞️', color: '#22c55e' },
   shopping_center: { label: 'Shopping Center', icon: '🛍️', color: '#8b5cf6' },
+  campsite: { label: 'Campsite', icon: '🏕️', color: '#059669' },
+  rv_park: { label: 'RV Park', icon: '🚐', color: '#0891b2' },
+  dump_station: { label: 'Dump Station', icon: '🚰', color: '#7c3aed' },
+  water_station: { label: 'Water Fill', icon: '💧', color: '#0ea5e9' },
+  parts_store: { label: 'Parts Store', icon: '🔧', color: '#dc2626' },
 };
 
 export const COMMON_AMENITIES = [

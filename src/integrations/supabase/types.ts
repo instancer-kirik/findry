@@ -6038,6 +6038,53 @@ export type Database = {
         }
         Relationships: []
       }
+      snack_alcoholic: {
+        Row: {
+          abv_percentage: number | null
+          beverage_style: string | null
+          created_at: string
+          flavor_notes: string[] | null
+          id: string
+          origin_region: string | null
+          serving_temp: string | null
+          snack_id: string
+          updated_at: string
+          vintage_year: number | null
+        }
+        Insert: {
+          abv_percentage?: number | null
+          beverage_style?: string | null
+          created_at?: string
+          flavor_notes?: string[] | null
+          id?: string
+          origin_region?: string | null
+          serving_temp?: string | null
+          snack_id: string
+          updated_at?: string
+          vintage_year?: number | null
+        }
+        Update: {
+          abv_percentage?: number | null
+          beverage_style?: string | null
+          created_at?: string
+          flavor_notes?: string[] | null
+          id?: string
+          origin_region?: string | null
+          serving_temp?: string | null
+          snack_id?: string
+          updated_at?: string
+          vintage_year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "snack_alcoholic_snack_id_fkey"
+            columns: ["snack_id"]
+            isOneToOne: true
+            referencedRelation: "snacks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       snack_ratings: {
         Row: {
           comment: string | null
@@ -6082,6 +6129,106 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      snack_smokeables: {
+        Row: {
+          cbd_percentage: number | null
+          cbg_percentage: number | null
+          cbn_percentage: number | null
+          consumption_method: string | null
+          created_at: string
+          effects: string[] | null
+          flavor_notes: string[] | null
+          id: string
+          nicotine_mg: number | null
+          product_type: string
+          snack_id: string
+          strain_type: string | null
+          terpenes: string[] | null
+          thc_percentage: number | null
+          updated_at: string
+        }
+        Insert: {
+          cbd_percentage?: number | null
+          cbg_percentage?: number | null
+          cbn_percentage?: number | null
+          consumption_method?: string | null
+          created_at?: string
+          effects?: string[] | null
+          flavor_notes?: string[] | null
+          id?: string
+          nicotine_mg?: number | null
+          product_type?: string
+          snack_id: string
+          strain_type?: string | null
+          terpenes?: string[] | null
+          thc_percentage?: number | null
+          updated_at?: string
+        }
+        Update: {
+          cbd_percentage?: number | null
+          cbg_percentage?: number | null
+          cbn_percentage?: number | null
+          consumption_method?: string | null
+          created_at?: string
+          effects?: string[] | null
+          flavor_notes?: string[] | null
+          id?: string
+          nicotine_mg?: number | null
+          product_type?: string
+          snack_id?: string
+          strain_type?: string | null
+          terpenes?: string[] | null
+          thc_percentage?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "snack_smokeables_snack_id_fkey"
+            columns: ["snack_id"]
+            isOneToOne: true
+            referencedRelation: "snacks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      snack_spicy: {
+        Row: {
+          created_at: string
+          heat_level: string | null
+          id: string
+          pepper_types: string[] | null
+          scoville_units: number | null
+          snack_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          heat_level?: string | null
+          id?: string
+          pepper_types?: string[] | null
+          scoville_units?: number | null
+          snack_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          heat_level?: string | null
+          id?: string
+          pepper_types?: string[] | null
+          scoville_units?: number | null
+          snack_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "snack_spicy_snack_id_fkey"
+            columns: ["snack_id"]
+            isOneToOne: true
+            referencedRelation: "snacks"
             referencedColumns: ["id"]
           },
         ]
