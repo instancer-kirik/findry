@@ -59,7 +59,12 @@ interface PublicBathroom {
     | "restaurant"
     | "gas_station"
     | "park"
-    | "shopping_center";
+    | "shopping_center"
+    | "campsite"
+    | "rv_park"
+    | "dump_station"
+    | "water_station"
+    | "parts_store";
   rating: number;
   reviews: number;
   distance: number;
@@ -191,6 +196,111 @@ const sampleBathrooms: PublicBathroom[] = [
     cleanliness_rating: 3.8,
     safety_rating: 3.9,
   },
+  {
+    id: "6",
+    name: "Pine Ridge Campground",
+    address: "1500 Forest Service Rd",
+    latitude: 40.8012,
+    longitude: -73.9123,
+    type: "campsite",
+    rating: 4.0,
+    reviews: 45,
+    distance: 5.2,
+    isOpen: true,
+    hours: "Open seasonally",
+    amenities: ["toilet_paper", "soap"],
+    accessibility: false,
+    baby_changing: false,
+    free: false,
+    verified: true,
+    description: "National forest campground with pit toilets and water spigots.",
+    cleanliness_rating: 3.5,
+    safety_rating: 4.2,
+  },
+  {
+    id: "7",
+    name: "Sunny Acres RV Park",
+    address: "2200 RV Lane",
+    latitude: 40.7654,
+    longitude: -73.9501,
+    type: "rv_park",
+    rating: 4.6,
+    reviews: 128,
+    distance: 3.1,
+    isOpen: true,
+    hours: "24 hours (guests)",
+    amenities: ["toilet_paper", "soap", "hand_dryer", "mirror", "changing_table"],
+    accessibility: true,
+    baby_changing: true,
+    free: false,
+    verified: true,
+    description: "Full-service RV park with clean shower houses and laundry.",
+    cleanliness_rating: 4.5,
+    safety_rating: 4.8,
+  },
+  {
+    id: "8",
+    name: "Highway 101 Dump Station",
+    address: "Mile Marker 42, Highway 101",
+    latitude: 40.7321,
+    longitude: -73.9876,
+    type: "dump_station",
+    rating: 3.9,
+    reviews: 56,
+    distance: 4.5,
+    isOpen: true,
+    hours: "6:00 AM - 8:00 PM",
+    amenities: [],
+    accessibility: true,
+    baby_changing: false,
+    free: false,
+    verified: true,
+    description: "Public RV dump station with potable water fill. $10 per use.",
+    cleanliness_rating: 3.7,
+    safety_rating: 4.0,
+  },
+  {
+    id: "9",
+    name: "Fresh Water Fill Station",
+    address: "890 Utility Rd",
+    latitude: 40.7456,
+    longitude: -73.9234,
+    type: "water_station",
+    rating: 4.3,
+    reviews: 34,
+    distance: 2.8,
+    isOpen: true,
+    hours: "24 hours",
+    amenities: [],
+    accessibility: true,
+    baby_changing: false,
+    free: true,
+    verified: true,
+    description: "Free potable water fill station for RVs and campers.",
+    cleanliness_rating: 4.0,
+    safety_rating: 4.2,
+  },
+  {
+    id: "10",
+    name: "RV Parts & Supply",
+    address: "555 Auto Row",
+    latitude: 40.7789,
+    longitude: -73.9567,
+    type: "parts_store",
+    rating: 4.4,
+    reviews: 89,
+    distance: 1.9,
+    isOpen: true,
+    hours: "8:00 AM - 6:00 PM",
+    amenities: ["toilet_paper", "soap", "hand_dryer"],
+    accessibility: true,
+    baby_changing: false,
+    free: true,
+    verified: true,
+    description: "Full RV parts store with customer restrooms and dump valve parts.",
+    cleanliness_rating: 4.1,
+    safety_rating: 4.5,
+  },
 ];
 
 const BathroomFinder: React.FC = () => {
@@ -313,6 +423,16 @@ const BathroomFinder: React.FC = () => {
         return "⛽";
       case "shopping_center":
         return "🛍️";
+      case "campsite":
+        return "🏕️";
+      case "rv_park":
+        return "🚐";
+      case "dump_station":
+        return "🚰";
+      case "water_station":
+        return "💧";
+      case "parts_store":
+        return "🔧";
       default:
         return "🚻";
     }
@@ -330,6 +450,16 @@ const BathroomFinder: React.FC = () => {
         return "Gas Station";
       case "shopping_center":
         return "Shopping Center";
+      case "campsite":
+        return "Campsite";
+      case "rv_park":
+        return "RV Park";
+      case "dump_station":
+        return "Dump Station";
+      case "water_station":
+        return "Water Fill";
+      case "parts_store":
+        return "Parts Store";
       default:
         return "Public";
     }
@@ -488,6 +618,11 @@ const BathroomFinder: React.FC = () => {
                 <SelectItem value="gas_station">Gas Station</SelectItem>
                 <SelectItem value="park">Park</SelectItem>
                 <SelectItem value="shopping_center">Shopping Center</SelectItem>
+                <SelectItem value="campsite">Campsite</SelectItem>
+                <SelectItem value="rv_park">RV Park</SelectItem>
+                <SelectItem value="dump_station">Dump Station</SelectItem>
+                <SelectItem value="water_station">Water Fill</SelectItem>
+                <SelectItem value="parts_store">Parts Store</SelectItem>
               </SelectContent>
             </Select>
           </div>
