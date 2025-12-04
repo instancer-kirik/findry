@@ -145,7 +145,7 @@ const Navbar = () => {
                   Discover
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2">
+                  <ul className="grid w-[500px] gap-3 p-4 md:grid-cols-2 lg:w-[600px]">
                     <ListItem
                       href="/feed"
                       title="Feed"
@@ -180,6 +180,13 @@ const Navbar = () => {
                       icon={<Briefcase className="h-4 w-4" />}
                     >
                       Companies and organizations
+                    </ListItem>
+                    <ListItem
+                      href="/shops"
+                      title="Shops"
+                      icon={<Store className="h-4 w-4" />}
+                    >
+                      Browse marketplace shops and products
                     </ListItem>
                   </ul>
                 </NavigationMenuContent>
