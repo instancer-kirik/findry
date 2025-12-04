@@ -43,7 +43,11 @@ import {
   useUpdateShoppingListItem,
   useDeleteShoppingListItem,
 } from "@/hooks/use-shopping-list";
-import { ShoppingListItem, ShoppingListCategory, ShoppingListStatus } from "@/types/shopping-list";
+import {
+  ShoppingListItem,
+  ShoppingListCategory,
+  ShoppingListStatus,
+} from "@/types/shopping-list";
 import { useGetProjects } from "@/hooks/use-projects";
 
 const categories: ShoppingListCategory[] = [
@@ -97,7 +101,9 @@ export default function ShoppingList() {
       await updateItem.mutateAsync({ ...formData, id: editingItem.id });
       setEditingItem(null);
     } else {
-      await createItem.mutateAsync(formData as Omit<ShoppingListItem, "id" | "created_at" | "updated_at">);
+      await createItem.mutateAsync(
+        formData as Omit<ShoppingListItem, "id" | "created_at" | "updated_at">,
+      );
     }
     resetForm();
     setIsCreateOpen(false);
@@ -131,29 +137,52 @@ export default function ShoppingList() {
     }
   };
 
+  const handleTogglePurchased = async (item: ShoppingListItem) => {
+    const newPurchased = !item.purchased;
+    const newStatus = newPurchased ? "purchased" : "planned";
+
+    await updateItem.mutateAsync({
+      id: item.id,
+      purchased: newPurchased,
+      status: newStatus,
+      purchased_at: newPurchased ? new Date().toISOString() : undefined,
+    });
+  };
+
   const filteredItems = items.filter((item) => {
-    if (filterCategory !== "all" && item.category !== filterCategory) return false;
+    if (filterCategory !== "all" && item.category !== filterCategory)
+      return false;
     if (filterStatus !== "all" && item.status !== filterStatus) return false;
     return true;
   });
 
   const getStatusColor = (status?: ShoppingListStatus) => {
     switch (status) {
-      case "planned": return "bg-muted text-muted-foreground";
-      case "budgeted": return "bg-primary/20 text-primary";
-      case "ordered": return "bg-accent text-accent-foreground";
-      case "purchased": return "bg-secondary text-secondary-foreground";
-      case "received": return "bg-primary text-primary-foreground";
-      default: return "bg-muted text-muted-foreground";
+      case "planned":
+        return "bg-muted text-muted-foreground";
+      case "budgeted":
+        return "bg-primary/20 text-primary";
+      case "ordered":
+        return "bg-accent text-accent-foreground";
+      case "purchased":
+        return "bg-secondary text-secondary-foreground";
+      case "received":
+        return "bg-primary text-primary-foreground";
+      default:
+        return "bg-muted text-muted-foreground";
     }
   };
 
   const getPriorityColor = (priority?: string) => {
     switch (priority) {
-      case "high": return "destructive";
-      case "medium": return "default";
-      case "low": return "outline";
-      default: return "outline";
+      case "high":
+        return "destructive";
+      case "medium":
+        return "default";
+      case "low":
+        return "outline";
+      default:
+        return "outline";
     }
   };
 
@@ -168,13 +197,16 @@ export default function ShoppingList() {
               Track items you want to buy and link them to projects
             </p>
           </div>
-          <Dialog open={isCreateOpen} onOpenChange={(open) => {
-            setIsCreateOpen(open);
-            if (!open) {
-              setEditingItem(null);
-              resetForm();
-            }
-          }}>
+          <Dialog
+            open={isCreateOpen}
+            onOpenChange={(open) => {
+              setIsCreateOpen(open);
+              if (!open) {
+                setEditingItem(null);
+                resetForm();
+              }
+            }}
+          >
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
@@ -183,9 +215,13 @@ export default function ShoppingList() {
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>{editingItem ? "Edit Item" : "Add New Item"}</DialogTitle>
+                <DialogTitle>
+                  {editingItem ? "Edit Item" : "Add New Item"}
+                </DialogTitle>
                 <DialogDescription>
-                  {editingItem ? "Update the details of your shopping list item" : "Add a new item to your shopping list"}
+                  {editingItem
+                    ? "Update the details of your shopping list item"
+                    : "Add a new item to your shopping list"}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -195,7 +231,9 @@ export default function ShoppingList() {
                     <Input
                       id="item_name"
                       value={formData.item_name}
-                      onChange={(e) => setFormData({ ...formData, item_name: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, item_name: e.target.value })
+                      }
                       required
                     />
                   </div>
@@ -205,7 +243,12 @@ export default function ShoppingList() {
                     <Textarea
                       id="description"
                       value={formData.description || ""}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          description: e.target.value,
+                        })
+                      }
                       rows={3}
                     />
                   </div>
@@ -214,7 +257,12 @@ export default function ShoppingList() {
                     <Label htmlFor="category">Category</Label>
                     <Select
                       value={formData.category}
-                      onValueChange={(value) => setFormData({ ...formData, category: value as ShoppingListCategory })}
+                      onValueChange={(value) =>
+                        setFormData({
+                          ...formData,
+                          category: value as ShoppingListCategory,
+                        })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select category" />
@@ -233,7 +281,12 @@ export default function ShoppingList() {
                     <Label htmlFor="status">Status</Label>
                     <Select
                       value={formData.status}
-                      onValueChange={(value) => setFormData({ ...formData, status: value as ShoppingListStatus })}
+                      onValueChange={(value) =>
+                        setFormData({
+                          ...formData,
+                          status: value as ShoppingListStatus,
+                        })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -252,7 +305,12 @@ export default function ShoppingList() {
                     <Label htmlFor="priority">Priority</Label>
                     <Select
                       value={formData.priority}
-                      onValueChange={(value) => setFormData({ ...formData, priority: value as "low" | "medium" | "high" })}
+                      onValueChange={(value) =>
+                        setFormData({
+                          ...formData,
+                          priority: value as "low" | "medium" | "high",
+                        })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -260,7 +318,8 @@ export default function ShoppingList() {
                       <SelectContent>
                         {priorities.map((priority) => (
                           <SelectItem key={priority} value={priority}>
-                            {priority.charAt(0).toUpperCase() + priority.slice(1)}
+                            {priority.charAt(0).toUpperCase() +
+                              priority.slice(1)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -274,7 +333,12 @@ export default function ShoppingList() {
                       type="number"
                       min="1"
                       value={formData.quantity || 1}
-                      onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          quantity: parseInt(e.target.value),
+                        })
+                      }
                     />
                   </div>
 
@@ -286,7 +350,12 @@ export default function ShoppingList() {
                       step="0.01"
                       min="0"
                       value={formData.estimated_cost || ""}
-                      onChange={(e) => setFormData({ ...formData, estimated_cost: parseFloat(e.target.value) })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          estimated_cost: parseFloat(e.target.value),
+                        })
+                      }
                     />
                   </div>
 
@@ -298,15 +367,24 @@ export default function ShoppingList() {
                       step="0.01"
                       min="0"
                       value={formData.actual_cost || ""}
-                      onChange={(e) => setFormData({ ...formData, actual_cost: parseFloat(e.target.value) })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          actual_cost: parseFloat(e.target.value),
+                        })
+                      }
                     />
                   </div>
 
                   <div className="col-span-2">
-                    <Label htmlFor="project_id">Link to Project (optional)</Label>
+                    <Label htmlFor="project_id">
+                      Link to Project (optional)
+                    </Label>
                     <Select
                       value={formData.project_id}
-                      onValueChange={(value) => setFormData({ ...formData, project_id: value })}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, project_id: value })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select a project" />
@@ -328,7 +406,9 @@ export default function ShoppingList() {
                       id="url"
                       type="url"
                       value={formData.url || ""}
-                      onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, url: e.target.value })
+                      }
                       placeholder="https://..."
                     />
                   </div>
@@ -338,14 +418,19 @@ export default function ShoppingList() {
                     <Textarea
                       id="notes"
                       value={formData.notes || ""}
-                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, notes: e.target.value })
+                      }
                       rows={3}
                     />
                   </div>
                 </div>
 
                 <DialogFooter>
-                  <Button type="submit" disabled={createItem.isPending || updateItem.isPending}>
+                  <Button
+                    type="submit"
+                    disabled={createItem.isPending || updateItem.isPending}
+                  >
                     {editingItem ? "Update Item" : "Add Item"}
                   </Button>
                 </DialogFooter>
@@ -393,15 +478,17 @@ export default function ShoppingList() {
         {isLoading ? (
           <div className="text-center py-12">
             <ShoppingCart className="h-12 w-12 mx-auto mb-4 text-muted-foreground animate-pulse" />
-            <p className="text-muted-foreground">Loading your shopping list...</p>
+            <p className="text-muted-foreground">
+              Loading your shopping list...
+            </p>
           </div>
         ) : filteredItems.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
               <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-muted-foreground">
-                {items.length === 0 
-                  ? "No items yet. Start adding items to your shopping list!" 
+                {items.length === 0
+                  ? "No items yet. Start adding items to your shopping list!"
                   : "No items match the selected filters."}
               </p>
             </CardContent>
@@ -409,29 +496,47 @@ export default function ShoppingList() {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredItems.map((item) => (
-              <Card key={item.id} className="relative overflow-hidden hover:shadow-lg transition-shadow">
+              <Card
+                key={item.id}
+                className={`relative overflow-hidden transition-all duration-200 cursor-pointer ${
+                  item.purchased
+                    ? "bg-green-50 border-green-200 hover:shadow-lg"
+                    : "hover:shadow-lg hover:bg-gray-50"
+                }`}
+                onClick={() => handleTogglePurchased(item)}
+              >
                 <CardHeader>
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
-                      <CardTitle className="text-lg">{item.item_name}</CardTitle>
+                      <CardTitle className="text-lg">
+                        {item.item_name}
+                      </CardTitle>
                       {item.description && (
-                        <CardDescription className="mt-1">{item.description}</CardDescription>
+                        <CardDescription className="mt-1">
+                          {item.description}
+                        </CardDescription>
                       )}
                     </div>
                     <div className="flex gap-1">
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handleEdit(item)}
+                        className="h-8 w-8 z-10"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(item);
+                        }}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handleDelete(item.id)}
+                        className="h-8 w-8 z-10"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(item.id);
+                        }}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -439,14 +544,23 @@ export default function ShoppingList() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
+                  {item.purchased && (
+                    <div className="flex items-center gap-2 text-green-600 text-sm font-medium">
+                      <CheckCircle2 className="h-4 w-4" />
+                      Purchased
+                    </div>
+                  )}
                   <div className="flex flex-wrap gap-2">
                     {item.category && (
                       <Badge variant="outline">{item.category}</Badge>
                     )}
                     {item.status && (
                       <Badge className={getStatusColor(item.status)}>
-                        {item.status === "received" && <CheckCircle2 className="h-3 w-3 mr-1" />}
-                        {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                        {item.status === "received" && (
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                        )}
+                        {item.status.charAt(0).toUpperCase() +
+                          item.status.slice(1)}
                       </Badge>
                     )}
                     {item.priority && (
@@ -465,21 +579,28 @@ export default function ShoppingList() {
                     )}
                     {item.estimated_cost && (
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Estimated:</span>
-                        <span className="font-medium">${item.estimated_cost.toFixed(2)}</span>
+                        <span className="text-muted-foreground">
+                          Estimated:
+                        </span>
+                        <span className="font-medium">
+                          ${item.estimated_cost.toFixed(2)}
+                        </span>
                       </div>
                     )}
                     {item.actual_cost && (
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Actual:</span>
-                        <span className="font-medium">${item.actual_cost.toFixed(2)}</span>
+                        <span className="font-medium">
+                          ${item.actual_cost.toFixed(2)}
+                        </span>
                       </div>
                     )}
                     {item.project_id && (
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Project:</span>
                         <span className="font-medium text-xs">
-                          {projects.find(p => p.id === item.project_id)?.name || "Linked"}
+                          {projects.find((p) => p.id === item.project_id)
+                            ?.name || "Linked"}
                         </span>
                       </div>
                     )}
@@ -490,7 +611,8 @@ export default function ShoppingList() {
                       href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-primary hover:underline"
+                      className="flex items-center gap-2 text-sm text-primary hover:underline z-10 relative"
+                      onClick={(e) => e.stopPropagation()}
                     >
                       <ExternalLink className="h-3 w-3" />
                       View Product
