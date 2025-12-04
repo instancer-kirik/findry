@@ -4,13 +4,11 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, ChevronDown, Menu } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Drawer,
   DrawerClose,
@@ -19,8 +17,8 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-  DrawerTrigger,
 } from "@/components/ui/drawer";
+import { cn } from '@/lib/utils';
 
 interface DiscoverFiltersProps {
   activeTab: string;
@@ -51,25 +49,26 @@ const DiscoverFilters: React.FC<DiscoverFiltersProps> = ({
 }) => {
   const isMobile = useIsMobile();
   
-  // For desktop, show first 4 tabs directly, and the rest in a dropdown/dialog
+  // For desktop, show first 4 tabs directly, and the rest in a dropdown
   const visibleTabs = !isMobile ? availableTabs.slice(0, 4) : [];
   const dropdownTabs = !isMobile ? availableTabs.slice(4) : availableTabs;
   
-  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [categoryDrawerOpen, setCategoryDrawerOpen] = useState(false);
   
   const onTabSelect = (tab: string) => {
     handleTabChange(tab);
-    setCategoryDialogOpen(false);
     setCategoryDrawerOpen(false);
   };
 
+  // Check if current active tab is in the dropdown tabs
+  const isActiveInDropdown = dropdownTabs.includes(activeTab);
+
   return (
     <>
-      {/* Desktop view with main tabs and overflow in dialog */}
+      {/* Desktop view with main tabs and overflow in dropdown */}
       <div className="hidden md:block mb-6">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             <Tabs value={activeTab} onValueChange={handleTabChange} className="flex-grow">
               <TabsList className="inline-flex mr-2 space-x-1 overflow-x-auto">
                 {visibleTabs.map((tab) => (
@@ -81,33 +80,36 @@ const DiscoverFilters: React.FC<DiscoverFiltersProps> = ({
             </Tabs>
             
             {dropdownTabs.length > 0 && (
-              <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    More Categories <ChevronDown className="ml-1 h-4 w-4" />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant={isActiveInDropdown ? "default" : "outline"} 
+                    size="sm"
+                    className="gap-1"
+                  >
+                    {isActiveInDropdown ? getTabLabel(activeTab) : "More"}
+                    <ChevronDown className="h-4 w-4" />
                   </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Select Category</DialogTitle>
-                    <DialogDescription>
-                      Choose a category to explore content
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid grid-cols-2 gap-4 py-4">
-                    {dropdownTabs.map(tab => (
-                      <Button
-                        key={tab}
-                        variant={activeTab === tab ? "default" : "outline"}
-                        onClick={() => onTabSelect(tab)}
-                        className="justify-start"
-                      >
-                        {getTabLabel(tab)}
-                      </Button>
-                    ))}
-                  </div>
-                </DialogContent>
-              </Dialog>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent 
+                  align="start" 
+                  className="w-48 bg-background border shadow-lg z-50"
+                  sideOffset={4}
+                >
+                  {dropdownTabs.map(tab => (
+                    <DropdownMenuItem
+                      key={tab}
+                      onClick={() => onTabSelect(tab)}
+                      className={cn(
+                        "cursor-pointer",
+                        activeTab === tab && "bg-accent font-medium"
+                      )}
+                    >
+                      {getTabLabel(tab)}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
 
