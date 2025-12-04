@@ -31,10 +31,23 @@ import {
   BookOpen,
   MapPin,
   ShoppingCart,
+  Wrench,
+  Car,
+  FolderKanban,
+  Briefcase,
+  ChevronDown,
 } from "lucide-react";
 import { Icons } from "@/components/ui/icons";
 import { useTheme } from "@/components/ui/theme-provider";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 
 const Navbar = () => {
@@ -83,254 +96,322 @@ const Navbar = () => {
     }
   };
 
+  const ListItem = React.forwardRef<
+    React.ElementRef<"a">,
+    React.ComponentPropsWithoutRef<"a"> & { icon?: React.ReactNode }
+  >(({ className, title, children, icon, ...props }, ref) => {
+    return (
+      <li>
+        <NavigationMenuLink asChild>
+          <a
+            ref={ref}
+            className={cn(
+              "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+              className
+            )}
+            {...props}
+          >
+            <div className="flex items-center gap-2 text-sm font-medium leading-none">
+              {icon}
+              {title}
+            </div>
+            <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
+              {children}
+            </p>
+          </a>
+        </NavigationMenuLink>
+      </li>
+    );
+  });
+  ListItem.displayName = "ListItem";
+
   return (
-    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-6">
-          <Link to="/" className="font-bold text-xl">
+    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+      <div className="container flex h-14 items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link to="/" className="font-bold text-xl mr-2">
             Findry
           </Link>
 
-          <div className="hidden md:flex items-center gap-4">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className={`text-sm px-3 py-2 h-auto font-normal ${
-                    location.pathname.includes("/discover")
-                      ? "bg-primary/10 text-primary"
-                      : ""
-                  }`}
-                >
+          {/* Desktop Navigation with Megamenu */}
+          <NavigationMenu className="hidden lg:flex">
+            <NavigationMenuList>
+              {/* Discover Megamenu */}
+              <NavigationMenuItem>
+                <NavigationMenuTrigger className="h-9">
                   <Compass className="h-4 w-4 mr-1.5" />
                   Discover
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="start"
-                className="w-[200px] bg-background"
-              >
-                <DropdownMenuItem asChild>
-                  <Link to="/discover" className="w-full cursor-pointer">
-                    Browse All
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link
-                    to="/discover?type=artists"
-                    className="w-full cursor-pointer"
-                  >
-                    Artists
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link
-                    to="/discover?type=venues"
-                    className="w-full cursor-pointer"
-                  >
-                    Venues
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link
-                    to="/discover?type=brands"
-                    className="w-full cursor-pointer"
-                  >
-                    Brands
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2">
+                    <ListItem
+                      href="/discover"
+                      title="Browse All"
+                      icon={<Compass className="h-4 w-4" />}
+                    >
+                      Explore artists, venues, brands, and resources
+                    </ListItem>
+                    <ListItem
+                      href="/discover?type=artists"
+                      title="Artists"
+                      icon={<UserRound className="h-4 w-4" />}
+                    >
+                      Find talented creators and collaborators
+                    </ListItem>
+                    <ListItem
+                      href="/discover?type=venues"
+                      title="Venues"
+                      icon={<MapPin className="h-4 w-4" />}
+                    >
+                      Studios, galleries, and event spaces
+                    </ListItem>
+                    <ListItem
+                      href="/discover?type=brands"
+                      title="Brands"
+                      icon={<Briefcase className="h-4 w-4" />}
+                    >
+                      Companies and organizations
+                    </ListItem>
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className={`text-sm px-3 py-2 h-auto font-normal ${
-                    location.pathname.includes("/events")
-                      ? "bg-primary/10 text-primary"
-                      : ""
-                  }`}
-                >
+              {/* Events */}
+              <NavigationMenuItem>
+                <NavigationMenuTrigger className="h-9">
                   <Calendar className="h-4 w-4 mr-1.5" />
                   Events
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid w-[350px] gap-3 p-4">
+                    <ListItem
+                      href="/events/upcoming"
+                      title="Upcoming Events"
+                      icon={<Calendar className="h-4 w-4" />}
+                    >
+                      Browse upcoming events and shows
+                    </ListItem>
+                    <ListItem
+                      href="/events/interested"
+                      title="My Interested"
+                      icon={<Calendar className="h-4 w-4" />}
+                    >
+                      Events you've marked as interested
+                    </ListItem>
+                    {user && (
+                      <ListItem
+                        href="/events/create"
+                        title="Create Event"
+                        icon={<Plus className="h-4 w-4" />}
+                      >
+                        Host your own event
+                      </ListItem>
+                    )}
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+
+              {/* Projects & Communities */}
+              <NavigationMenuItem>
+                <NavigationMenuTrigger className="h-9">
+                  <FolderKanban className="h-4 w-4 mr-1.5" />
+                  Projects
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid w-[400px] gap-3 p-4 md:grid-cols-2">
+                    <ListItem
+                      href="/projects"
+                      title="All Projects"
+                      icon={<FolderKanban className="h-4 w-4" />}
+                    >
+                      Browse community projects
+                    </ListItem>
+                    <ListItem
+                      href="/communities"
+                      title="Communities"
+                      icon={<Users className="h-4 w-4" />}
+                    >
+                      Join groups and communities
+                    </ListItem>
+                    {user && (
+                      <>
+                        <ListItem
+                          href="/projects/create"
+                          title="Start Project"
+                          icon={<Plus className="h-4 w-4" />}
+                        >
+                          Create a new project
+                        </ListItem>
+                        <ListItem
+                          href="/collaboration"
+                          title="Collaboration"
+                          icon={<Users className="h-4 w-4" />}
+                        >
+                          Manage collaborations
+                        </ListItem>
+                      </>
+                    )}
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+
+              {/* Tools Megamenu */}
+              <NavigationMenuItem>
+                <NavigationMenuTrigger className="h-9">
+                  <Wrench className="h-4 w-4 mr-1.5" />
+                  Tools
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2">
+                    <ListItem
+                      href="/travel-locations"
+                      title="Travel Locations"
+                      icon={<MapPin className="h-4 w-4" />}
+                    >
+                      Find road resources, campsites & dump stations
+                    </ListItem>
+                    <ListItem
+                      href="/shopping-list"
+                      title="Shopping List"
+                      icon={<ShoppingCart className="h-4 w-4" />}
+                    >
+                      Track purchases and project supplies
+                    </ListItem>
+                    <ListItem
+                      href="/tour-planner"
+                      title="Tour Planner"
+                      icon={<Route className="h-4 w-4" />}
+                    >
+                      Plan trips and tour routes
+                    </ListItem>
+                    <ListItem
+                      href="/vehicle-build"
+                      title="Vehicle Build"
+                      icon={<Car className="h-4 w-4" />}
+                    >
+                      Track vehicle conversion projects
+                    </ListItem>
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+
+              {/* Knowledge */}
+              <NavigationMenuItem>
+                <NavigationMenuTrigger className="h-9">
+                  <BookOpen className="h-4 w-4 mr-1.5" />
+                  Knowledge
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid w-[350px] gap-3 p-4">
+                    <ListItem
+                      href="/glossary"
+                      title="Glossary"
+                      icon={<BookOpen className="h-4 w-4" />}
+                    >
+                      Terms and definitions
+                    </ListItem>
+                    <ListItem
+                      href="/resources"
+                      title="Resources"
+                      icon={<Briefcase className="h-4 w-4" />}
+                    >
+                      Guides, tools, and references
+                    </ListItem>
+                    <ListItem
+                      href="/roadmap"
+                      title="Roadmap"
+                      icon={<Route className="h-4 w-4" />}
+                    >
+                      Platform development roadmap
+                    </ListItem>
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+
+          {/* Compact desktop nav for medium screens */}
+          <div className="hidden md:flex lg:hidden items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-9">
+                  <Compass className="h-4 w-4 mr-1" />
+                  Discover
+                  <ChevronDown className="h-3 w-3 ml-1" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="start"
-                className="w-[200px] bg-background"
-              >
+              <DropdownMenuContent align="start" className="bg-background">
                 <DropdownMenuItem asChild>
-                  <Link to="/events" className="w-full cursor-pointer">
-                    All Events
-                  </Link>
+                  <Link to="/discover">Browse All</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/events/upcoming" className="w-full cursor-pointer">
-                    Upcoming
-                  </Link>
+                  <Link to="/discover?type=artists">Artists</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/events/create" className="w-full cursor-pointer">
-                    Create Event
-                  </Link>
+                  <Link to="/discover?type=venues">Venues</Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Link
-              to="/communities"
-              className="text-sm font-medium transition-colors hover:text-primary"
-            >
-              <div className="flex items-center gap-1.5 px-3 py-2">
-                <Users className="h-4 w-4" />
-                <span>Communities</span>
-              </div>
+            <Link to="/events/upcoming">
+              <Button variant="ghost" size="sm" className="h-9">
+                <Calendar className="h-4 w-4 mr-1" />
+                Events
+              </Button>
             </Link>
 
-            <Link
-              to="/projects"
-              className="text-sm font-medium transition-colors hover:text-primary"
-            >
-              <div className="flex items-center gap-1.5 px-3 py-2">
-                <span>Projects</span>
-              </div>
-            </Link>
-
-            <Link
-              to="/bathroom-finder"
-              className={`text-sm font-medium transition-colors hover:text-primary ${
-                location.pathname === "/bathroom-finder" ? "text-primary" : ""
-              }`}
-            >
-              <div className="flex items-center gap-1.5 px-3 py-2">
-                <MapPin className="h-4 w-4" />
-                <span>Bathrooms</span>
-              </div>
-            </Link>
-
-            <Link
-              to="/shopping-list"
-              className={`text-sm font-medium transition-colors hover:text-primary ${
-                location.pathname === "/shopping-list" ? "text-primary" : ""
-              }`}
-            >
-              <div className="flex items-center gap-1.5 px-3 py-2">
-                <ShoppingCart className="h-4 w-4" />
-                <span>Shopping List</span>
-              </div>
+            <Link to="/projects">
+              <Button variant="ghost" size="sm" className="h-9">
+                <FolderKanban className="h-4 w-4 mr-1" />
+                Projects
+              </Button>
             </Link>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className={`text-sm px-3 py-2 h-auto font-normal ${
-                    location.pathname.includes("/discover") &&
-                    new URLSearchParams(location.search).get("type") ===
-                      "glossary"
-                      ? "bg-primary/10 text-primary"
-                      : ""
-                  }`}
-                >
-                  <BookOpen className="h-4 w-4 mr-1.5" />
-                  Knowledge
+                <Button variant="ghost" size="sm" className="h-9">
+                  <Wrench className="h-4 w-4 mr-1" />
+                  Tools
+                  <ChevronDown className="h-3 w-3 ml-1" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="start"
-                className="w-[200px] bg-background"
-              >
+              <DropdownMenuContent align="start" className="bg-background">
                 <DropdownMenuItem asChild>
-                  <Link
-                    to="/discover?type=glossary"
-                    className="w-full cursor-pointer"
-                  >
-                    Glossary
-                  </Link>
+                  <Link to="/travel-locations">Travel Locations</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link
-                    to="/discover?type=resources"
-                    className="w-full cursor-pointer"
-                  >
-                    Resources
-                  </Link>
+                  <Link to="/shopping-list">Shopping List</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/tour-planner">Tour Planner</Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-
-            {user && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="text-sm px-3 py-2 h-auto font-normal"
-                  >
-                    <Plus className="h-4 w-4 mr-1.5" />
-                    Create
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="start"
-                  className="w-[200px] bg-background"
-                >
-                  <DropdownMenuItem asChild>
-                    <Link to="/events/create" className="w-full cursor-pointer">
-                      Create Event
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link
-                      to="/projects/create"
-                      className="w-full cursor-pointer"
-                    >
-                      Start Project
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link
-                      to="/request-service"
-                      className="w-full cursor-pointer"
-                    >
-                      Request Service
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-
-            {user && (
-              <Link
-                to="/dashboard"
-                className="text-sm font-medium transition-colors hover:text-primary"
-              >
-                <div className="flex items-center gap-1.5 px-3 py-2">
-                  <Icons.dashboard className="h-4 w-4" />
-                  <span>Dashboard</span>
-                </div>
-              </Link>
-            )}
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          {user && (
+            <Link to="/dashboard" className="hidden md:block">
+              <Button variant="ghost" size="sm" className="h-9">
+                <LayoutDashboard className="h-4 w-4 mr-1" />
+                Dashboard
+              </Button>
+            </Link>
+          )}
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <CircleHelp className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="h-9 w-9">
+                <CircleHelp className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-background">
               <DropdownMenuItem asChild>
-                <Link to="/about" className="w-full cursor-pointer">
-                  About Findry
-                </Link>
+                <Link to="/about">About Findry</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link to="/contact" className="w-full cursor-pointer">
-                  Contact Us
-                </Link>
+                <Link to="/contact">Contact Us</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
@@ -338,7 +419,6 @@ const Navbar = () => {
                   href="https://github.com/lovable/findry"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full cursor-pointer"
                 >
                   GitHub
                 </a>
@@ -350,10 +430,10 @@ const Navbar = () => {
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
-            className="hidden md:flex"
+            className="hidden md:flex h-9 w-9"
           >
-            <SunIcon className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <MoonIcon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <SunIcon className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <MoonIcon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
             <span className="sr-only">Toggle theme</span>
           </Button>
 
@@ -405,151 +485,250 @@ const Navbar = () => {
             </DropdownMenu>
           ) : (
             <div className="hidden md:flex items-center gap-2">
-              <Button variant="outline" asChild>
+              <Button variant="outline" size="sm" asChild>
                 <Link to="/login">
-                  <LogIn className="h-4 w-4 mr-2" />
+                  <LogIn className="h-4 w-4 mr-1" />
                   Log In
                 </Link>
               </Button>
-              <Button asChild>
+              <Button size="sm" asChild>
                 <Link to="/signup">Sign Up</Link>
               </Button>
             </div>
           )}
 
+          {/* Mobile Menu */}
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
+              <Button variant="ghost" size="icon" className="md:hidden h-9 w-9">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-full sm:w-64">
-              <div className="flex flex-col gap-4 py-4">
-                <div className="flex items-center justify-between">
-                  <Link to="/" className="font-bold text-xl">
+            <SheetContent side="right" className="w-full sm:w-80 overflow-y-auto">
+              <div className="flex flex-col gap-2 py-4">
+                <div className="flex items-center justify-between mb-4">
+                  <Link to="/" className="font-bold text-xl" onClick={() => setIsMobileMenuOpen(false)}>
                     Findry
                   </Link>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <X className="h-5 w-5" />
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="icon" onClick={toggleTheme}>
+                      <SunIcon className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                      <MoonIcon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <X className="h-5 w-5" />
+                    </Button>
+                  </div>
                 </div>
 
                 {user && (
                   <Link
                     to="/dashboard"
-                    className="flex items-center space-x-2 py-2 text-sm px-4 hover:bg-muted border-b"
+                    className="flex items-center gap-3 py-3 px-4 bg-primary/5 rounded-lg mb-2"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <LayoutDashboard className="h-5 w-5" />
-                    <span>Dashboard</span>
+                    <LayoutDashboard className="h-5 w-5 text-primary" />
+                    <span className="font-medium">Dashboard</span>
                   </Link>
                 )}
 
-                <div className="space-y-2">
+                {/* Discover Section */}
+                <div className="border-b pb-3 mb-2">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-4 mb-2">
+                    Discover
+                  </p>
                   <Link
                     to="/discover"
-                    className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <Compass className="h-5 w-5" />
-                    <span>Discover</span>
+                    <Compass className="h-4 w-4" />
+                    <span>Browse All</span>
                   </Link>
                   <Link
-                    to="/events"
-                    className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md"
+                    to="/discover?type=artists"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <Calendar className="h-5 w-5" />
+                    <UserRound className="h-4 w-4" />
+                    <span>Artists</span>
+                  </Link>
+                  <Link
+                    to="/discover?type=venues"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <MapPin className="h-4 w-4" />
+                    <span>Venues</span>
+                  </Link>
+                </div>
+
+                {/* Events & Communities Section */}
+                <div className="border-b pb-3 mb-2">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-4 mb-2">
+                    Connect
+                  </p>
+                  <Link
+                    to="/events/upcoming"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Calendar className="h-4 w-4" />
                     <span>Events</span>
                   </Link>
                   <Link
                     to="/communities"
-                    className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <Users className="h-5 w-5" />
+                    <Users className="h-4 w-4" />
                     <span>Communities</span>
                   </Link>
                   <Link
                     to="/projects"
-                    className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
+                    <FolderKanban className="h-4 w-4" />
                     <span>Projects</span>
-                  </Link>
-                  <Link
-                    to="/discover?type=glossary"
-                    className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <BookOpen className="h-5 w-5" />
-                    <span>Knowledge</span>
-                  </Link>
-                  <Link
-                    to="/bathroom-finder"
-                    className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <MapPin className="h-5 w-5" />
-                    <span>Bathrooms</span>
-                  </Link>
-                  {user && (
-                    <Link
-                      to="/events/create"
-                      className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <Plus className="h-5 w-5" />
-                      <span>Create</span>
-                    </Link>
-                  )}
-                  <Link
-                    to="/request-service"
-                    className="flex items-center space-x-2 py-2 px-4 hover:bg-muted rounded-md"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <Icons.request className="h-5 w-5" />
-                    <span>Request Service</span>
                   </Link>
                 </div>
 
-                {user ? (
-                  <div className="flex flex-col gap-2">
+                {/* Tools Section */}
+                <div className="border-b pb-3 mb-2">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-4 mb-2">
+                    Tools
+                  </p>
+                  <Link
+                    to="/travel-locations"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <MapPin className="h-4 w-4" />
+                    <span>Travel Locations</span>
+                  </Link>
+                  <Link
+                    to="/shopping-list"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <ShoppingCart className="h-4 w-4" />
+                    <span>Shopping List</span>
+                  </Link>
+                  <Link
+                    to="/tour-planner"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Route className="h-4 w-4" />
+                    <span>Tour Planner</span>
+                  </Link>
+                  <Link
+                    to="/vehicle-build"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Car className="h-4 w-4" />
+                    <span>Vehicle Build</span>
+                  </Link>
+                </div>
+
+                {/* Knowledge Section */}
+                <div className="border-b pb-3 mb-2">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-4 mb-2">
+                    Knowledge
+                  </p>
+                  <Link
+                    to="/glossary"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    <span>Glossary</span>
+                  </Link>
+                  <Link
+                    to="/resources"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Briefcase className="h-4 w-4" />
+                    <span>Resources</span>
+                  </Link>
+                </div>
+
+                {/* Create Actions */}
+                {user && (
+                  <div className="border-b pb-3 mb-2">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-4 mb-2">
+                      Create
+                    </p>
+                    <Link
+                      to="/events/create"
+                      className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span>Create Event</span>
+                    </Link>
+                    <Link
+                      to="/projects/create"
+                      className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span>Start Project</span>
+                    </Link>
+                    <Link
+                      to="/request-service"
+                      className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Icons.request className="h-4 w-4" />
+                      <span>Request Service</span>
+                    </Link>
+                  </div>
+                )}
+
+                {/* Auth Section */}
+                <div className="mt-auto pt-4">
+                  {user ? (
                     <Button
                       variant="outline"
+                      className="w-full"
                       onClick={() => {
                         handleSignOut();
                         setIsMobileMenuOpen(false);
                       }}
                     >
+                      <LogOut className="h-4 w-4 mr-2" />
                       Sign out
                     </Button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-2">
-                    <Button variant="ghost" asChild className="w-full">
-                      <Link
-                        to="/login"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <LogIn className="h-4 w-4 mr-2" />
-                        Log In
-                      </Link>
-                    </Button>
-                    <Button asChild className="w-full">
-                      <Link
-                        to="/signup"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        Sign Up
-                      </Link>
-                    </Button>
-                  </div>
-                )}
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      <Button variant="outline" asChild className="w-full">
+                        <Link
+                          to="/login"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <LogIn className="h-4 w-4 mr-2" />
+                          Log In
+                        </Link>
+                      </Button>
+                      <Button asChild className="w-full">
+                        <Link
+                          to="/signup"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          Sign Up
+                        </Link>
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
             </SheetContent>
           </Sheet>
