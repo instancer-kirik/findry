@@ -59,6 +59,7 @@ import TourPlanner from "./pages/TourPlanner";
 import GearPacking from "./pages/GearPacking";
 import VehicleBuildShowcase from "./pages/VehicleBuildShowcase";
 import Roadmap from "./pages/Roadmap";
+import PlatformComparison from "./pages/PlatformComparison";
 import PublicLanding from "./pages/PublicLanding";
 import RequestService from "./pages/RequestService";
 import TravelLocations from "./pages/TravelLocations";
@@ -109,6 +110,7 @@ const App: React.FC = () => {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/about" element={<About />} />
           <Route path="/roadmap" element={<Roadmap />} />
+          <Route path="/compare" element={<PlatformComparison />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/not-found" element={<NotFound />} />

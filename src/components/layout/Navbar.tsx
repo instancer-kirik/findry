@@ -38,6 +38,7 @@ import {
   ChevronDown,
   Play,
   Store,
+  Scale,
 } from "lucide-react";
 import { Icons } from "@/components/ui/icons";
 import { useTheme } from "@/components/ui/theme-provider";
@@ -339,6 +340,13 @@ const Navbar = () => {
                       icon={<Route className="h-4 w-4" />}
                     >
                       Platform development roadmap
+                    </ListItem>
+                    <ListItem
+                      href="/compare"
+                      title="Platform Comparison"
+                      icon={<Scale className="h-4 w-4" />}
+                    >
+                      Compare with other platforms
                     </ListItem>
                   </ul>
                 </NavigationMenuContent>
@@ -708,6 +716,14 @@ const Navbar = () => {
                   >
                     <Route className="h-4 w-4" />
                     <span>Roadmap</span>
+                  </Link>
+                  <Link
+                    to="/compare"
+                    className="flex items-center gap-3 py-2 px-4 hover:bg-muted rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Scale className="h-4 w-4" />
+                    <span>Platform Comparison</span>
                   </Link>
                 </div>
 
