@@ -36,6 +36,7 @@ import {
   FolderKanban,
   Briefcase,
   ChevronDown,
+  Play,
 } from "lucide-react";
 import { Icons } from "@/components/ui/icons";
 import { useTheme } from "@/components/ui/theme-provider";
@@ -144,6 +145,13 @@ const Navbar = () => {
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2">
+                    <ListItem
+                      href="/feed"
+                      title="Feed"
+                      icon={<Play className="h-4 w-4" />}
+                    >
+                      UGC content from artists, venues & brands
+                    </ListItem>
                     <ListItem
                       href="/discover"
                       title="Browse All"
@@ -341,6 +349,9 @@ const Navbar = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="bg-background">
+                <DropdownMenuItem asChild>
+                  <Link to="/feed">Feed</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/discover">Browse All</Link>
                 </DropdownMenuItem>

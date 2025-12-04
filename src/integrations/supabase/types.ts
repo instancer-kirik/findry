@@ -6539,6 +6539,183 @@ export type Database = {
           },
         ]
       }
+      ugc_comments: {
+        Row: {
+          author_id: string
+          content_id: string
+          created_at: string
+          id: string
+          text: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          content_id: string
+          created_at?: string
+          id?: string
+          text: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          content_id?: string
+          created_at?: string
+          id?: string
+          text?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ugc_comments_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ugc_comments_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "ugc_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ugc_content: {
+        Row: {
+          artist_id: string | null
+          author_id: string | null
+          brand_id: string | null
+          content_type: string
+          created_at: string
+          description: string | null
+          event_id: string | null
+          id: string
+          is_featured: boolean | null
+          is_public: boolean | null
+          likes_count: number | null
+          tags: string[] | null
+          thumbnail_url: string | null
+          title: string | null
+          updated_at: string
+          url: string
+          venue_id: string | null
+          views_count: number | null
+        }
+        Insert: {
+          artist_id?: string | null
+          author_id?: string | null
+          brand_id?: string | null
+          content_type: string
+          created_at?: string
+          description?: string | null
+          event_id?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_public?: boolean | null
+          likes_count?: number | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title?: string | null
+          updated_at?: string
+          url: string
+          venue_id?: string | null
+          views_count?: number | null
+        }
+        Update: {
+          artist_id?: string | null
+          author_id?: string | null
+          brand_id?: string | null
+          content_type?: string
+          created_at?: string
+          description?: string | null
+          event_id?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_public?: boolean | null
+          likes_count?: number | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title?: string | null
+          updated_at?: string
+          url?: string
+          venue_id?: string | null
+          views_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ugc_content_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ugc_content_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ugc_content_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ugc_content_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ugc_content_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ugc_likes: {
+        Row: {
+          content_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          content_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          content_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ugc_likes_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "ugc_content"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ugc_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_artist_relationships: {
         Row: {
           artist_id: string | null

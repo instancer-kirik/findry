@@ -63,6 +63,7 @@ import PublicLanding from "./pages/PublicLanding";
 import RequestService from "./pages/RequestService";
 import TravelLocations from "./pages/TravelLocations";
 import ShoppingList from "./pages/ShoppingList";
+import Feed from "./pages/Feed";
 
 const queryClient = new QueryClient();
 
@@ -179,6 +180,7 @@ const App: React.FC = () => {
           <Route path="/request-service" element={<RequestService />} />
           <Route path="/travel-locations" element={<TravelLocations />} />
           <Route path="/shopping-list" element={<ShoppingList />} />
+          <Route path="/feed" element={<Feed />} />
           <Route path="/vehicle-build" element={<VehicleBuildShowcase />} />
           <Route path="*" element={<Navigate to="/not-found" replace />} />
         </Routes>
