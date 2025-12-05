@@ -152,12 +152,11 @@ export default function PlatformComparison() {
             Platform Comparison
           </Badge>
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-            Built for <span className="text-primary">Creators</span>, Not Corporations
+            Built for <span className="text-primary">Creators</span> & <span className="text-primary">Corporations</span>
           </h1>
           <p className="text-lg text-muted-foreground">
-            Traditional venue management platforms focus on corporate events and hospitality. 
-            We're building something different—a creator venue ecosystem for indie spaces, 
-            artists, and unconventional communities.
+            Whether you're an indie artist booking your first venue or a corporation planning large-scale events,
+            we provide the infrastructure that scales with your vision—bridging creative communities with enterprise reliability.
           </p>
         </div>
 
@@ -166,18 +165,18 @@ export default function PlatformComparison() {
           <Card className="border-primary/20 bg-primary/5">
             <CardHeader>
               <Users className="h-8 w-8 text-primary mb-2" />
-              <CardTitle>Creator-First</CardTitle>
+              <CardTitle>Creator-Friendly</CardTitle>
               <CardDescription>
-                Built around artist profiles, collaboration tools, and creative community features
+                Artist profiles, collaboration tools, and creative community features for independent creators
               </CardDescription>
             </CardHeader>
           </Card>
           <Card className="border-primary/20 bg-primary/5">
             <CardHeader>
               <Wrench className="h-8 w-8 text-primary mb-2" />
-              <CardTitle>Hardware Ready</CardTitle>
+              <CardTitle>Enterprise-Ready</CardTitle>
               <CardDescription>
-                Full equipment tracking, technical specs, and gear sharing for AV-heavy events
+                Full equipment tracking, technical specs, and scalable infrastructure for large events
               </CardDescription>
             </CardHeader>
           </Card>
@@ -186,7 +185,7 @@ export default function PlatformComparison() {
               <Video className="h-8 w-8 text-primary mb-2" />
               <CardTitle>Social Discovery</CardTitle>
               <CardDescription>
-                UGC feed, venue tours, and organic discovery through community content
+                UGC feed, venue tours, and organic discovery—connecting creators with corporate opportunities
               </CardDescription>
             </CardHeader>
           </Card>
@@ -275,10 +274,10 @@ export default function PlatformComparison() {
         {/* CTA Section */}
         <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
           <CardContent className="py-12 text-center space-y-6">
-            <h2 className="text-3xl font-bold">Ready to Join the Creator Economy?</h2>
+            <h2 className="text-3xl font-bold">Ready to Scale Your Vision?</h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Whether you're an indie venue, touring artist, or creative community—we're building 
-              the infrastructure you actually need.
+              From indie venues to enterprise events, touring artists to corporate productions—we're building 
+              the infrastructure that grows with you.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Button asChild size="lg">
