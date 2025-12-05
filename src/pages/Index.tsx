@@ -107,8 +107,10 @@ const Landing: React.FC = () => {
         <UnifiedCalendar />
       </div>
 
-      {/* Info Sections */}
+      {/* Visual Feature Showcase */}
       <FeatureSection />
+
+      {/* Ecosystem */}
       <EcosystemSection />
 
       {/* Quick Links Section */}
