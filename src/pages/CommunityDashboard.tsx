@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Calendar, Users, Trophy, Video, MapPin, Clock, MessageSquare, Settings, Bell } from 'lucide-react';
+import { Calendar, Users, Trophy, Video, MapPin, Clock, MessageSquare, Settings, Bell, Phone } from 'lucide-react';
 import { useCommunities } from '@/hooks/use-communities';
 import { useAuth } from '@/hooks/use-auth';
 import CommunityForum from '@/components/communities/CommunityForum';
@@ -15,10 +15,12 @@ import CommunityEvents from '@/components/communities/CommunityEvents';
 import CreateEventModal from '@/components/communities/CreateEventModal';
 import { toast } from '@/components/ui/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
+import VideoCallModal from '@/components/video/VideoCallModal';
 
 const CommunityDashboard = () => {
   const { id: communityId } = useParams<{ id: string }>();
   const [selectedTab, setSelectedTab] = useState('overview');
+  const [showVideoCall, setShowVideoCall] = useState(false);
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { 
@@ -151,7 +153,7 @@ const CommunityDashboard = () => {
             </div>
             <p className="text-muted-foreground mb-4">{community.description || 'No description available'}</p>
           </div>
-          <div className="flex gap-4">
+          <div className="flex gap-4 flex-wrap">
             <Button 
               variant={community.isMember ? "outline" : "default"}
               onClick={community.isMember ? handleLeaveCommunity : handleJoinCommunity}
@@ -163,6 +165,12 @@ const CommunityDashboard = () => {
                   ? "Leave Community" 
                   : "Join Community"}
             </Button>
+            {community.isMember && (
+              <Button variant="outline" onClick={() => setShowVideoCall(true)}>
+                <Video className="h-4 w-4 mr-2" />
+                Start Video Call
+              </Button>
+            )}
             <Button variant="outline" size="icon">
               <Bell className="h-4 w-4" />
             </Button>
@@ -345,6 +353,17 @@ const CommunityDashboard = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Video Call Modal */}
+        <VideoCallModal
+          open={showVideoCall}
+          onClose={() => setShowVideoCall(false)}
+          roomName={`${community?.name || 'Community'} Video Call`}
+          participants={[
+            { id: '1', name: 'You' },
+            { id: '2', name: 'Community Members' }
+          ]}
+        />
       </div>
     </Layout>
   );
