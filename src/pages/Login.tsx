@@ -17,8 +17,9 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { ArrowRight, Loader2, Instagram } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { Separator } from '@/components/ui/separator';
 
 // Define the form schema with Zod
 const loginSchema = z.object({
@@ -55,6 +56,28 @@ const Login: React.FC = () => {
       rememberMe: false,
     },
   });
+
+  // Instagram OAuth handler
+  const handleInstagramLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook', // Instagram uses Facebook's OAuth
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+          scopes: 'instagram_basic',
+        },
+      });
+
+      if (error) throw error;
+    } catch (error: any) {
+      console.error('Instagram login error:', error);
+      toast({
+        title: 'Login failed',
+        description: error.message || 'Could not connect to Instagram',
+        variant: 'destructive',
+      });
+    }
+  };
 
   // Form submission handler
   const onSubmit = async (values: LoginFormValues) => {
@@ -117,6 +140,28 @@ const Login: React.FC = () => {
               Log in to your account to continue
             </p>
             
+            {/* Instagram OAuth Button */}
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 text-white border-0 hover:opacity-90"
+              onClick={handleInstagramLogin}
+            >
+              <Instagram className="h-5 w-5" />
+              Continue with Instagram
+            </Button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator className="w-full" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or continue with email
+                </span>
+              </div>
+            </div>
+
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <FormField
