@@ -42,6 +42,7 @@ export interface NavCategory {
   id: string;
   label: string;
   icon: LucideIcon;
+  href?: string;
   featured?: {
     title: string;
     description: string;
@@ -87,11 +88,12 @@ export const navigation: NavCategory[] = [
     id: "create",
     label: "Create",
     icon: FolderKanban,
+    href: "/create",
     featured: {
       title: "Build Together",
       description: "Launch projects, host events, and collaborate with the creative community.",
-      href: "/projects/create",
-      cta: "Start a Project",
+      href: "/create",
+      cta: "Open Create Hub",
       gradient: "from-accent/30 via-accent/15 to-transparent",
     },
     sections: [
