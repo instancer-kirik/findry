@@ -180,7 +180,15 @@ const Navbar = () => {
             <NavigationMenuList className="gap-1">
               {navigation.map((category) => (
                 <NavigationMenuItem key={category.id}>
-                  <NavigationMenuTrigger className="h-9 px-3 bg-transparent data-[state=open]:bg-accent/50">
+                  <NavigationMenuTrigger 
+                    className="h-9 px-3 bg-transparent data-[state=open]:bg-accent/50"
+                    onClick={(e) => {
+                      if (category.href) {
+                        e.preventDefault();
+                        navigate(category.href);
+                      }
+                    }}
+                  >
                     <category.icon className="h-4 w-4 mr-1.5" />
                     {category.label}
                   </NavigationMenuTrigger>
