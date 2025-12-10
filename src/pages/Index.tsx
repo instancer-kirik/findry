@@ -6,6 +6,7 @@ import FeatureSection from "@/components/home/FeatureSection";
 import EcosystemSection from "@/components/home/EcosystemSection";
 import ScreenshotGallery from "@/components/home/ScreenshotGallery";
 import EmailWaitlist from "@/components/home/EmailWaitlist";
+import FeedbackQuestionnaire from "@/components/home/FeedbackQuestionnaire";
 import FeaturedProjects from "@/components/home/FeaturedProjects";
 import UnifiedCalendar from "@/components/home/UnifiedCalendar";
 import { Button } from "@/components/ui/button";
@@ -80,6 +81,11 @@ const Landing: React.FC = () => {
       {/* Waitlist Section at the top */}
       <div className="container mx-auto px-4 pt-8">
         <EmailWaitlist />
+      </div>
+
+      {/* Feedback Questionnaire Section */}
+      <div className="container mx-auto px-4 py-12">
+        <FeedbackQuestionnaire />
       </div>
 
       {/* Hero Section */}
