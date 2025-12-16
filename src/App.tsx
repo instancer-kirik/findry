@@ -66,6 +66,7 @@ import TravelLocations from "./pages/TravelLocations";
 import ShoppingList from "./pages/ShoppingList";
 import Feed from "./pages/Feed";
 import CreateHub from "./pages/CreateHub";
+import AuthCallback from "./pages/AuthCallback";
 
 const queryClient = new QueryClient();
 
@@ -186,6 +187,7 @@ const App: React.FC = () => {
           <Route path="/feed" element={<Feed />} />
           <Route path="/create" element={<CreateHub />} />
           <Route path="/vehicle-build" element={<VehicleBuildShowcase />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="*" element={<Navigate to="/not-found" replace />} />
         </Routes>
       </ThemeProvider>

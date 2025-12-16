@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { useToast } from '@/hooks/use-toast';
-import Layout from '../components/layout/Layout';
-import AnimatedSection from '../components/ui-custom/AnimatedSection';
-import { Button } from '@/components/ui/button';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { useToast } from "@/hooks/use-toast";
+import Layout from "../components/layout/Layout";
+import AnimatedSection from "../components/ui-custom/AnimatedSection";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -14,17 +14,17 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowRight, Loader2, Instagram, Github } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { Separator } from '@/components/ui/separator';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ArrowRight, Loader2, Instagram, Github } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Separator } from "@/components/ui/separator";
 
 // Define the form schema with Zod
 const loginSchema = z.object({
-  email: z.string().email({ message: 'Please enter a valid email address' }),
-  password: z.string().min(1, { message: 'Password is required' }),
+  email: z.string().email({ message: "Please enter a valid email address" }),
+  password: z.string().min(1, { message: "Password is required" }),
   rememberMe: z.boolean().default(false),
 });
 
@@ -38,12 +38,14 @@ const Login: React.FC = () => {
   // Check if user is already logged in
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (session) {
-        navigate('/dashboard');
+        navigate("/dashboard");
       }
     };
-    
+
     checkSession();
   }, [navigate]);
 
@@ -51,8 +53,8 @@ const Login: React.FC = () => {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
       rememberMe: false,
     },
   });
@@ -61,20 +63,21 @@ const Login: React.FC = () => {
   const handleInstagramLogin = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'facebook', // Instagram uses Facebook's OAuth
+        provider: "facebook", // Instagram uses Facebook's OAuth
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
-          scopes: 'instagram_basic',
+          redirectTo: `${window.location.origin}/auth/callback`,
+          scopes:
+            "email,public_profile,instagram_basic,instagram_content_publish,pages_show_list",
         },
       });
 
       if (error) throw error;
     } catch (error: any) {
-      console.error('Instagram login error:', error);
+      console.error("Instagram login error:", error);
       toast({
-        title: 'Login failed',
-        description: error.message || 'Could not connect to Instagram',
-        variant: 'destructive',
+        title: "Login failed",
+        description: error.message || "Could not connect to Instagram",
+        variant: "destructive",
       });
     }
   };
@@ -83,7 +86,7 @@ const Login: React.FC = () => {
   const handleGithubLogin = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'github',
+        provider: "github",
         options: {
           redirectTo: `${window.location.origin}/dashboard`,
         },
@@ -91,11 +94,11 @@ const Login: React.FC = () => {
 
       if (error) throw error;
     } catch (error: any) {
-      console.error('GitHub login error:', error);
+      console.error("GitHub login error:", error);
       toast({
-        title: 'Login failed',
-        description: error.message || 'Could not connect to GitHub',
-        variant: 'destructive',
+        title: "Login failed",
+        description: error.message || "Could not connect to GitHub",
+        variant: "destructive",
       });
     }
   };
@@ -103,48 +106,48 @@ const Login: React.FC = () => {
   // Form submission handler
   const onSubmit = async (values: LoginFormValues) => {
     setIsSubmitting(true);
-    
+
     try {
-      console.log('Login attempt with:', values.email);
-      
+      console.log("Login attempt with:", values.email);
+
       // Sign in with Supabase
       const { data, error } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
       });
-      
+
       if (error) {
         throw error;
       }
 
       // Show success toast
       toast({
-        title: 'Login successful!',
-        description: data.user?.email_confirmed_at 
-          ? 'Welcome back.'
-          : 'Please check your email to verify your account. You can continue using the app while waiting for verification.',
+        title: "Login successful!",
+        description: data.user?.email_confirmed_at
+          ? "Welcome back."
+          : "Please check your email to verify your account. You can continue using the app while waiting for verification.",
       });
-      
+
       // Navigate to dashboard page instead of home
-      navigate('/dashboard');
+      navigate("/dashboard");
     } catch (error: any) {
-      console.error('Login error:', error);
-      
-      let errorMessage = 'Invalid email or password.';
+      console.error("Login error:", error);
+
+      let errorMessage = "Invalid email or password.";
       if (error.message) {
-        if (error.message.includes('Email not confirmed')) {
-          errorMessage = 'Please verify your email before logging in.';
-        } else if (error.message.includes('Invalid login credentials')) {
-          errorMessage = 'Invalid email or password.';
+        if (error.message.includes("Email not confirmed")) {
+          errorMessage = "Please verify your email before logging in.";
+        } else if (error.message.includes("Invalid login credentials")) {
+          errorMessage = "Invalid email or password.";
         } else {
           errorMessage = error.message;
         }
       }
-      
+
       toast({
-        title: 'Login failed',
+        title: "Login failed",
         description: errorMessage,
-        variant: 'destructive',
+        variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
@@ -160,7 +163,7 @@ const Login: React.FC = () => {
             <p className="text-muted-foreground mb-8">
               Log in to your account to continue
             </p>
-            
+
             {/* OAuth Buttons */}
             <div className="flex flex-col gap-3">
               <Button
@@ -172,7 +175,7 @@ const Login: React.FC = () => {
                 <Instagram className="h-5 w-5" />
                 Continue with Instagram
               </Button>
-              
+
               <Button
                 type="button"
                 variant="outline"
@@ -196,7 +199,10 @@ const Login: React.FC = () => {
             </div>
 
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-6"
+              >
                 <FormField
                   control={form.control}
                   name="email"
@@ -204,7 +210,11 @@ const Login: React.FC = () => {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="you@example.com" {...field} />
+                        <Input
+                          type="email"
+                          placeholder="you@example.com"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -218,7 +228,11 @@ const Login: React.FC = () => {
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="Enter your password" {...field} />
+                        <Input
+                          type="password"
+                          placeholder="Enter your password"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -245,13 +259,20 @@ const Login: React.FC = () => {
                       </FormItem>
                     )}
                   />
-                  
-                  <Link to="/forgot-password" className="text-sm text-primary font-medium">
+
+                  <Link
+                    to="/forgot-password"
+                    className="text-sm text-primary font-medium"
+                  >
                     Forgot password?
                   </Link>
                 </div>
 
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isSubmitting}
+                >
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -266,7 +287,7 @@ const Login: React.FC = () => {
                 </Button>
 
                 <div className="text-center text-sm">
-                  Don't have an account?{' '}
+                  Don't have an account?{" "}
                   <Link to="/signup" className="text-primary font-medium">
                     Sign up
                   </Link>
