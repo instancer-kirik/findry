@@ -151,6 +151,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "communities_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       community_members: {
@@ -188,6 +195,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -230,6 +244,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -760,15 +781,7 @@ export type Database = {
           owner_id?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "content_ownership_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       context_drops: {
         Row: {
@@ -980,6 +993,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "event_community_relationships_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "event_community_relationships_event_id_fkey"
             columns: ["event_id"]
             isOneToOne: false
@@ -1049,15 +1069,7 @@ export type Database = {
           type?: string | null
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "events_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       game_jam_resources: {
         Row: {
@@ -1485,13 +1497,6 @@ export type Database = {
             columns: ["item2_id"]
             isOneToOne: false
             referencedRelation: "snacks"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "item_pairings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -4055,13 +4060,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "meeting_schedules_organizer_id_fkey"
-            columns: ["organizer_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "meeting_schedules_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
@@ -4098,15 +4096,7 @@ export type Database = {
           type?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "names_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       offers: {
         Row: {
@@ -4160,20 +4150,6 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "offers_receiver_id_fkey"
-            columns: ["receiver_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "offers_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -4960,15 +4936,7 @@ export type Database = {
           updated_at?: string
           username?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       project_components: {
         Row: {
@@ -5175,15 +5143,7 @@ export type Database = {
           version?: string | null
           view_count?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "projects_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       radio_channels: {
         Row: {
@@ -5436,13 +5396,6 @@ export type Database = {
             referencedRelation: "recipes_with_latest_version"
             referencedColumns: ["latest_version_id"]
           },
-          {
-            foreignKeyName: "recipe_ratings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       recipe_steps: {
@@ -5586,13 +5539,6 @@ export type Database = {
             referencedRelation: "recipes_with_latest_version"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "recipe_versions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       recipes: {
@@ -5659,13 +5605,6 @@ export type Database = {
             columns: ["item_id"]
             isOneToOne: false
             referencedRelation: "snacks"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "recipes_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -5843,13 +5782,6 @@ export type Database = {
             referencedRelation: "service_requests"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "service_proposals_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       service_requests: {
@@ -5901,15 +5833,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "service_requests_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       shopping_list: {
         Row: {
@@ -5976,13 +5900,6 @@ export type Database = {
           url?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "shopping_list_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "shopping_list_project_id_fkey"
             columns: ["project_id"]
@@ -6122,13 +6039,6 @@ export type Database = {
             columns: ["snack_id"]
             isOneToOne: false
             referencedRelation: "snacks"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "snack_ratings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -6297,6 +6207,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "snacks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       toon_projects: {
@@ -6339,15 +6256,7 @@ export type Database = {
           toon_content?: string | null
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "toon_projects_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       topshelf_faves: {
         Row: {
@@ -6438,13 +6347,6 @@ export type Database = {
             referencedRelation: "travel_locations"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "travel_location_reviews_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       travel_locations: {
@@ -6529,15 +6431,7 @@ export type Database = {
           verified?: boolean | null
           website?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "travel_locations_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       ugc_comments: {
         Row: {
@@ -6565,13 +6459,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "ugc_comments_author_id_fkey"
-            columns: ["author_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "ugc_comments_content_id_fkey"
             columns: ["content_id"]
@@ -6651,13 +6538,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "ugc_content_author_id_fkey"
-            columns: ["author_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "ugc_content_brand_id_fkey"
             columns: ["brand_id"]
             isOneToOne: false
@@ -6707,13 +6587,6 @@ export type Database = {
             referencedRelation: "ugc_content"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "ugc_likes_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       user_artist_relationships: {
@@ -6754,6 +6627,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_artist_relationships_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -6798,6 +6678,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "user_brand_relationships_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_connections: {
@@ -6828,22 +6715,7 @@ export type Database = {
           status?: string | null
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_connections_follower_id_fkey"
-            columns: ["follower_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_connections_following_id_fkey"
-            columns: ["following_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_integrations: {
         Row: {
@@ -6882,15 +6754,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_integrations_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_roles: {
         Row: {
@@ -6914,15 +6778,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_roles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       vehicle_components: {
         Row: {
@@ -7467,13 +7323,6 @@ export type Database = {
             referencedRelation: "snacks"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "item_pairings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       loreum_creative_work_tree: {
@@ -7874,22 +7723,32 @@ export type Database = {
             referencedRelation: "snacks"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "recipes_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       user_profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
           created_at: string | null
-          email: string | null
+          full_name: string | null
           id: string | null
           username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          username?: string | null
         }
         Relationships: []
       }
@@ -7949,13 +7808,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "recipes_with_latest_version"
             referencedColumns: ["latest_version_id"]
-          },
-          {
-            foreignKeyName: "recipe_ratings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "recipes_item_id_fkey"
