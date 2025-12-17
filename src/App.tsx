@@ -67,6 +67,8 @@ import ShoppingList from "./pages/ShoppingList";
 import Feed from "./pages/Feed";
 import CreateHub from "./pages/CreateHub";
 import AuthCallback from "./pages/AuthCallback";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import DataDeletion from "./pages/DataDeletion";
 
 const queryClient = new QueryClient();
 
@@ -188,6 +190,8 @@ const App: React.FC = () => {
           <Route path="/create" element={<CreateHub />} />
           <Route path="/vehicle-build" element={<VehicleBuildShowcase />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/data-deletion" element={<DataDeletion />} />
           <Route path="*" element={<Navigate to="/not-found" replace />} />
         </Routes>
       </ThemeProvider>
