@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowRight, Loader2, Github } from "lucide-react";
+import { ArrowRight, Loader2, Github, Instagram } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
 
@@ -75,6 +75,28 @@ const Login: React.FC = () => {
       toast({
         title: "Login failed",
         description: error.message || "Could not connect to GitHub. Please ensure GitHub OAuth is configured in Supabase.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Instagram OAuth handler (uses Facebook provider in Supabase)
+  const handleInstagramLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "facebook",
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+          scopes: "instagram_basic,instagram_content_publish",
+        },
+      });
+
+      if (error) throw error;
+    } catch (error: any) {
+      console.error("Instagram login error:", error);
+      toast({
+        title: "Login failed",
+        description: error.message || "Could not connect to Instagram. Please ensure Facebook/Instagram OAuth is configured in Supabase.",
         variant: "destructive",
       });
     }
@@ -141,7 +163,7 @@ const Login: React.FC = () => {
               Log in to your account to continue
             </p>
 
-            {/* OAuth Buttons - GitHub only (Instagram/Facebook requires additional Supabase config) */}
+            {/* OAuth Buttons */}
             <div className="flex flex-col gap-3 mb-6">
               <Button
                 type="button"
@@ -151,6 +173,15 @@ const Login: React.FC = () => {
               >
                 <Github className="h-5 w-5" />
                 Continue with GitHub
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 text-white border-0 hover:opacity-90"
+                onClick={handleInstagramLogin}
+              >
+                <Instagram className="h-5 w-5" />
+                Continue with Instagram
               </Button>
             </div>
 
