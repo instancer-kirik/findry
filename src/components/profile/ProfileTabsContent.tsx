@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TabsContent } from '@/components/ui/tabs';
@@ -9,6 +8,7 @@ import { Plus, MapPin, Package } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
 import ProfileCalendar from './ProfileCalendar';
+import LinkedAccounts from './LinkedAccounts';
 
 interface ProfileTabsContentProps {
   profile: Profile;
@@ -189,6 +189,12 @@ const ProfileTabsContent: React.FC<ProfileTabsContentProps> = ({
           )}
         </div>
       </TabsContent>
+
+      {isOwnProfile && (
+        <TabsContent value="settings" className="space-y-6">
+          <LinkedAccounts />
+        </TabsContent>
+      )}
     </>
   );
 };
