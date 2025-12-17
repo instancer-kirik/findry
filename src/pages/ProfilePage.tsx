@@ -88,7 +88,7 @@ const ProfilePage: React.FC = () => {
         }}
       />
 
-      <ProfileTabs profile={profile}>
+      <ProfileTabs profile={profile} isOwnProfile={isOwnProfile}>
         <ProfileTabsContent profile={profile} isOwnProfile={isOwnProfile} />
       </ProfileTabs>
     </div>
