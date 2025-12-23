@@ -5297,18 +5297,18 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "recipe_ingredients_recipe_version_id_fkey"
-            columns: ["recipe_version_id"]
+            foreignKeyName: "recipe_ingredients_recipe_id_fkey"
+            columns: ["recipe_id"]
             isOneToOne: false
-            referencedRelation: "recipe_versions"
-            referencedColumns: ["id"]
+            referencedRelation: "user_recipe_ratings"
+            referencedColumns: ["recipe_id"]
           },
           {
             foreignKeyName: "recipe_ingredients_recipe_version_id_fkey"
             columns: ["recipe_version_id"]
             isOneToOne: false
-            referencedRelation: "recipes_with_latest_version"
-            referencedColumns: ["latest_version_id"]
+            referencedRelation: "recipe_versions"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -5383,18 +5383,18 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "recipe_ratings_recipe_version_id_fkey"
-            columns: ["recipe_version_id"]
+            foreignKeyName: "recipe_ratings_recipe_id_fkey"
+            columns: ["recipe_id"]
             isOneToOne: false
-            referencedRelation: "recipe_versions"
-            referencedColumns: ["id"]
+            referencedRelation: "user_recipe_ratings"
+            referencedColumns: ["recipe_id"]
           },
           {
             foreignKeyName: "recipe_ratings_recipe_version_id_fkey"
             columns: ["recipe_version_id"]
             isOneToOne: false
-            referencedRelation: "recipes_with_latest_version"
-            referencedColumns: ["latest_version_id"]
+            referencedRelation: "recipe_versions"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -5466,18 +5466,18 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "recipe_steps_recipe_version_id_fkey"
-            columns: ["recipe_version_id"]
+            foreignKeyName: "recipe_steps_recipe_id_fkey"
+            columns: ["recipe_id"]
             isOneToOne: false
-            referencedRelation: "recipe_versions"
-            referencedColumns: ["id"]
+            referencedRelation: "user_recipe_ratings"
+            referencedColumns: ["recipe_id"]
           },
           {
             foreignKeyName: "recipe_steps_recipe_version_id_fkey"
             columns: ["recipe_version_id"]
             isOneToOne: false
-            referencedRelation: "recipes_with_latest_version"
-            referencedColumns: ["latest_version_id"]
+            referencedRelation: "recipe_versions"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -5538,6 +5538,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "recipes_with_latest_version"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recipe_versions_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "user_recipe_ratings"
+            referencedColumns: ["recipe_id"]
           },
         ]
       }
@@ -7344,8 +7351,6 @@ export type Database = {
       loreum_discoverable_works: {
         Row: {
           collection: string | null
-          completion_percentage: number | null
-          component_count: number | null
           content: string | null
           content_format: string | null
           created_at: string | null
@@ -7375,10 +7380,79 @@ export type Database = {
           timeline_id: string | null
           title: string | null
           tone: string | null
-          total_word_count: number | null
           updated_at: string | null
           word_count: number | null
           world_id: string | null
+        }
+        Insert: {
+          collection?: string | null
+          content?: string | null
+          content_format?: string | null
+          created_at?: string | null
+          creative_type?: string | null
+          description?: string | null
+          external_links?: Json | null
+          featured_characters?: string[] | null
+          genre?: string | null
+          id?: string | null
+          is_public?: boolean | null
+          mood?: string | null
+          notes?: Json | null
+          outline?: string | null
+          parent_work_id?: string | null
+          pov_character_id?: string | null
+          primary_location_id?: string | null
+          referenced_cultures?: string[] | null
+          referenced_events?: string[] | null
+          referenced_locations?: string[] | null
+          sequence_number?: number | null
+          status?: string | null
+          style_notes?: string | null
+          summary?: string | null
+          tags?: string[] | null
+          target_word_count?: number | null
+          themes?: string[] | null
+          timeline_id?: string | null
+          title?: string | null
+          tone?: string | null
+          updated_at?: string | null
+          word_count?: number | null
+          world_id?: string | null
+        }
+        Update: {
+          collection?: string | null
+          content?: string | null
+          content_format?: string | null
+          created_at?: string | null
+          creative_type?: string | null
+          description?: string | null
+          external_links?: Json | null
+          featured_characters?: string[] | null
+          genre?: string | null
+          id?: string | null
+          is_public?: boolean | null
+          mood?: string | null
+          notes?: Json | null
+          outline?: string | null
+          parent_work_id?: string | null
+          pov_character_id?: string | null
+          primary_location_id?: string | null
+          referenced_cultures?: string[] | null
+          referenced_events?: string[] | null
+          referenced_locations?: string[] | null
+          sequence_number?: number | null
+          status?: string | null
+          style_notes?: string | null
+          summary?: string | null
+          tags?: string[] | null
+          target_word_count?: number | null
+          themes?: string[] | null
+          timeline_id?: string | null
+          title?: string | null
+          tone?: string | null
+          updated_at?: string | null
+          word_count?: number | null
+          world_id?: string | null
         }
         Relationships: [
           {
@@ -7464,19 +7538,13 @@ export type Database = {
       }
       loreum_template_discovery: {
         Row: {
-          collection_memberships: number | null
-          collection_names: string[] | null
           created_at: string | null
           description: string | null
           id: string | null
-          incoming_relationships: number | null
           instance_count: number | null
-          instance_tags: string[] | null
           is_deprecated: boolean | null
-          last_instanced: string | null
           metadata: Json | null
           name: string | null
-          outgoing_relationships: number | null
           parent_template_id: string | null
           tags: string[] | null
           template_category: string | null
@@ -7506,7 +7574,6 @@ export type Database = {
       loreum_template_instances_with_templates: {
         Row: {
           civilization_id: string | null
-          civilization_name: string | null
           created_at: string | null
           created_by_character_id: string | null
           discovered_year: number | null
@@ -7515,7 +7582,6 @@ export type Database = {
           instance_name: string | null
           local_variations: Json | null
           multiverse_id: string | null
-          multiverse_name: string | null
           notes: string | null
           origin_location: string | null
           override_metadata: Json | null
@@ -7528,12 +7594,9 @@ export type Database = {
           template_tags: string[] | null
           template_type: string | null
           timeline_id: string | null
-          timeline_name: string | null
           universe_id: string | null
-          universe_name: string | null
           updated_at: string | null
           world_id: string | null
-          world_name: string | null
         }
         Relationships: [
           {
@@ -7613,61 +7676,66 @@ export type Database = {
       }
       loreum_works_with_components: {
         Row: {
-          collection: string | null
-          component_content: string | null
           component_id: string | null
-          component_sequence: number | null
-          component_status: string | null
-          component_summary: string | null
           component_title: string | null
-          component_type: string | null
-          component_word_count: number | null
-          genre: string | null
-          work_description: string | null
-          work_direct_words: number | null
-          work_id: string | null
-          work_status: string | null
-          work_tags: string[] | null
-          work_target: number | null
-          work_title: string | null
-          work_type: string | null
-        }
-        Relationships: []
-      }
-      loreum_writing_progress: {
-        Row: {
-          child_count: number | null
-          completed_children: number | null
-          completion_percentage: number | null
           creative_type: string | null
-          id: string | null
-          last_session: string | null
-          sessions_this_week: number | null
           status: string | null
           target_word_count: number | null
           title: string | null
-          total_child_words: number | null
-          updated_at: string | null
           word_count: number | null
+          work_id: string | null
+          world_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loreum_creative_works_world_id_fkey"
+            columns: ["world_id"]
+            isOneToOne: false
+            referencedRelation: "loreum_worlds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loreum_writing_progress: {
+        Row: {
+          id: string | null
+          progress_percentage: number | null
+          status: string | null
+          target_word_count: number | null
+          title: string | null
+          word_count: number | null
+        }
+        Insert: {
+          id?: string | null
+          progress_percentage?: never
+          status?: string | null
+          target_word_count?: number | null
+          title?: string | null
+          word_count?: number | null
+        }
+        Update: {
+          id?: string | null
+          progress_percentage?: never
+          status?: string | null
+          target_word_count?: number | null
+          title?: string | null
+          word_count?: number | null
         }
         Relationships: []
       }
       project_components_with_metrics: {
         Row: {
           assigned_to: string | null
-          completed_tasks: number | null
+          completed_task_count: number | null
           created_at: string | null
           dependencies: string[] | null
           description: string | null
           due_date: string | null
           id: string | null
-          in_progress_tasks: number | null
           name: string | null
-          pending_tasks: number | null
           project_id: string | null
           status: string | null
-          task_completion_percentage: number | null
-          total_tasks: number | null
+          task_count: number | null
           type: string | null
           updated_at: string | null
         }
@@ -7683,35 +7751,23 @@ export type Database = {
       }
       recipes_with_latest_version: {
         Row: {
-          average_rating: number | null
           created_at: string | null
-          creator_username: string | null
           description: string | null
           difficulty: string | null
           id: string | null
           is_original: boolean | null
           is_public: boolean | null
           item_id: string | null
-          item_image_url: string | null
-          item_name: string | null
-          item_subtype: string | null
-          item_type: string | null
-          latest_version_changes: string | null
-          latest_version_description: string | null
-          latest_version_id: string | null
-          latest_version_name: string | null
-          latest_version_notes: string | null
-          latest_version_number: number | null
-          latest_version_rating: number | null
+          latest_version: number | null
           name: string | null
           notes: string | null
           prep_time_minutes: number | null
-          rating_count: number | null
           source_attribution: string | null
           source_url: string | null
           tags: string[] | null
           updated_at: string | null
           user_id: string | null
+          version_updated_at: string | null
           yield_amount: number | null
           yield_unit: string | null
         }
@@ -7732,6 +7788,7 @@ export type Database = {
           created_at: string | null
           full_name: string | null
           id: string | null
+          updated_at: string | null
           username: string | null
         }
         Insert: {
@@ -7740,6 +7797,7 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id?: string | null
+          updated_at?: string | null
           username?: string | null
         }
         Update: {
@@ -7748,75 +7806,19 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id?: string | null
+          updated_at?: string | null
           username?: string | null
         }
         Relationships: []
       }
       user_recipe_ratings: {
         Row: {
-          authenticity_rating: number | null
-          combined_rating: number | null
-          created_at: string | null
-          difficulty_assessment: string | null
-          ease_rating: number | null
-          id: string | null
-          item_id: string | null
-          item_image_url: string | null
-          item_name: string | null
-          item_type: string | null
-          modifications: string | null
-          overall_rating: number | null
-          presentation_rating: number | null
+          avg_rating: number | null
+          rating_count: number | null
           recipe_id: string | null
           recipe_name: string | null
-          recipe_version_id: string | null
-          review: string | null
-          serving_context: string | null
-          taste_rating: number | null
-          updated_at: string | null
-          user_id: string | null
-          username: string | null
-          version_name: string | null
-          version_number: number | null
-          would_make_again: boolean | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "recipe_ratings_recipe_id_fkey"
-            columns: ["recipe_id"]
-            isOneToOne: false
-            referencedRelation: "recipes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "recipe_ratings_recipe_id_fkey"
-            columns: ["recipe_id"]
-            isOneToOne: false
-            referencedRelation: "recipes_with_latest_version"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "recipe_ratings_recipe_version_id_fkey"
-            columns: ["recipe_version_id"]
-            isOneToOne: false
-            referencedRelation: "recipe_versions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "recipe_ratings_recipe_version_id_fkey"
-            columns: ["recipe_version_id"]
-            isOneToOne: false
-            referencedRelation: "recipes_with_latest_version"
-            referencedColumns: ["latest_version_id"]
-          },
-          {
-            foreignKeyName: "recipes_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "snacks"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Functions: {
