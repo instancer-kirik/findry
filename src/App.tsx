@@ -69,6 +69,7 @@ import CreateHub from "./pages/CreateHub";
 import AuthCallback from "./pages/AuthCallback";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import DataDeletion from "./pages/DataDeletion";
+import InstagramDemo from "./pages/InstagramDemo";
 
 const queryClient = new QueryClient();
 
@@ -192,6 +193,7 @@ const App: React.FC = () => {
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/data-deletion" element={<DataDeletion />} />
+          <Route path="/instagram-demo" element={<InstagramDemo />} />
           <Route path="*" element={<Navigate to="/not-found" replace />} />
         </Routes>
       </ThemeProvider>
