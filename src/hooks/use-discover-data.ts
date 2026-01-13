@@ -134,7 +134,30 @@ export const useDiscoverData = (
         // Map activeTab to appropriate data source
         switch(activeTab) {
           case 'artists':
-            data = [...artists];
+            // Fetch from Supabase
+            const { data: dbArtists, error: artistsError } = await supabase
+              .from('artists')
+              .select('*');
+            
+            if (artistsError) {
+              console.error('Error fetching artists:', artistsError);
+              data = [...artists]; // Fallback to demo data
+            } else if (dbArtists && dbArtists.length > 0) {
+              data = dbArtists.map(artist => ({
+                id: artist.id,
+                name: artist.name,
+                type: 'artist',
+                subtype: artist.subtype || artist.type || 'musician',
+                description: artist.bio || '',
+                location: artist.location || '',
+                tags: artist.tags || [],
+                image_url: artist.image_url || '',
+                styles: artist.styles || [],
+                disciplines: artist.disciplines || [],
+              }));
+            } else {
+              data = [...artists]; // Fallback to demo data if DB is empty
+            }
             break;
           case 'resources':
             data = [...resources];
