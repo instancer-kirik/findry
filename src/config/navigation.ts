@@ -58,6 +58,7 @@ export const navigation: NavCategory[] = [
     id: "explore",
     label: "Explore",
     icon: Compass,
+    href: "/discover",
     featured: {
       title: "Discover Creatives",
       description: "Find artists, venues, and brands in your area. Connect with the creative community.",
@@ -121,6 +122,7 @@ export const navigation: NavCategory[] = [
     id: "tools",
     label: "Tools",
     icon: Wrench,
+    href: "/tour-planner",
     featured: {
       title: "Creative Utilities",
       description: "Plan tours, track gear, manage vehicle builds, and organize your creative life.",
@@ -151,6 +153,7 @@ export const navigation: NavCategory[] = [
     id: "about",
     label: "About",
     icon: BookOpen,
+    href: "/about",
     sections: [
       {
         title: "Learn",
