@@ -86,34 +86,32 @@ export const navigation: NavCategory[] = [
     ],
   },
   {
-    id: "create",
-    label: "Create",
-    icon: FolderKanban,
-    href: "/create",
+    id: "connect",
+    label: "Connect",
+    icon: Users2,
+    href: "/communities",
     featured: {
       title: "Build Together",
-      description: "Launch projects, host events, and collaborate with the creative community.",
-      href: "/create",
-      cta: "Open Create Hub",
+      description: "Join communities, collaborate on projects, and connect with creatives.",
+      href: "/communities",
+      cta: "Find Communities",
       gradient: "from-accent/30 via-accent/15 to-transparent",
     },
     sections: [
+      {
+        title: "Community",
+        links: [
+          { href: "/communities", title: "Communities", description: "Join groups & circles", icon: Users2 },
+          { href: "/collaboration", title: "Collaboration", description: "Manage partnerships", icon: Handshake },
+          { href: "/chats", title: "Messages", description: "Chat with collaborators", icon: MessageSquare },
+        ],
+      },
       {
         title: "Events",
         links: [
           { href: "/events/upcoming", title: "Upcoming Events", description: "Browse shows & gatherings", icon: Calendar },
           { href: "/events/interested", title: "My Events", description: "Events you're tracking", icon: Heart },
-          { href: "/events/create", title: "Create Event", description: "Host your own event", icon: Plus },
-        ],
-      },
-      {
-        title: "Projects",
-        links: [
-          { href: "/projects", title: "All Projects", description: "Community projects", icon: FolderKanban },
-          { href: "/communities", title: "Communities", description: "Join groups & circles", icon: Users2 },
-          { href: "/collaboration", title: "Collaboration", description: "Manage partnerships", icon: Handshake },
-          { href: "/request-service", title: "Request Service", description: "Post service requests", icon: Briefcase },
-          { href: "/chats", title: "Messages", description: "Chat with collaborators", icon: MessageSquare },
+          { href: "/projects", title: "Projects", description: "Community projects", icon: FolderKanban },
         ],
       },
     ],
@@ -189,9 +187,9 @@ export const mobileNavSections = [
   {
     title: "Connect",
     links: [
+      { href: "/communities", title: "Communities", icon: Users2 },
       { href: "/events/upcoming", title: "Events", icon: Calendar },
       { href: "/projects", title: "Projects", icon: FolderKanban },
-      { href: "/communities", title: "Communities", icon: Users2 },
       { href: "/collaboration", title: "Collaboration", icon: Handshake },
       { href: "/chats", title: "Messages", icon: MessageSquare },
     ],
