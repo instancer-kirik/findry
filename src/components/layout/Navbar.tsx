@@ -180,25 +180,30 @@ const Navbar = () => {
             <NavigationMenuList className="gap-1">
               {navigation.map((category) => (
                 <NavigationMenuItem key={category.id}>
-                  <NavigationMenuTrigger 
-                    className="h-9 px-3 bg-transparent data-[state=open]:bg-accent/50"
-                  >
-                    {category.href ? (
-                      <Link 
-                        to={category.href}
-                        className="flex items-center"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <category.icon className="h-4 w-4 mr-1.5" />
-                        {category.label}
-                      </Link>
-                    ) : (
-                      <>
-                        <category.icon className="h-4 w-4 mr-1.5" />
-                        {category.label}
-                      </>
-                    )}
-                  </NavigationMenuTrigger>
+                  {category.href ? (
+                    <NavigationMenuTrigger 
+                      className="h-9 px-0 bg-transparent data-[state=open]:bg-accent/50"
+                      asChild
+                    >
+                      <div className="flex items-center">
+                        <Link 
+                          to={category.href}
+                          className="flex items-center h-9 px-3 rounded-md hover:bg-accent/30 transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <category.icon className="h-4 w-4 mr-1.5" />
+                          {category.label}
+                        </Link>
+                      </div>
+                    </NavigationMenuTrigger>
+                  ) : (
+                    <NavigationMenuTrigger 
+                      className="h-9 px-3 bg-transparent data-[state=open]:bg-accent/50"
+                    >
+                      <category.icon className="h-4 w-4 mr-1.5" />
+                      {category.label}
+                    </NavigationMenuTrigger>
+                  )}
                   <NavigationMenuContent>
                     <div className={cn(
                       "p-4",
