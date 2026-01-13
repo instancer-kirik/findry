@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,7 +18,7 @@ interface ContactFormData {
   phone?: string;
   subject: string;
   message: string;
-  contactType: 'general' | 'resource' | 'support' | 'partnership';
+  contactType: 'general' | 'resource' | 'support' | 'partnership' | 'contribution';
   resourceId?: string;
 }
 
@@ -35,6 +35,26 @@ const Contact: React.FC = () => {
     message: '',
     contactType: 'general'
   });
+
+  // Check for prefill data from Developer Wishlist
+  useEffect(() => {
+    const prefillData = localStorage.getItem('prefillContact');
+    if (prefillData) {
+      try {
+        const data = JSON.parse(prefillData);
+        setFormData(prev => ({
+          ...prev,
+          subject: data.subject || prev.subject,
+          message: data.message || prev.message,
+          contactType: 'contribution'
+        }));
+        // Clear the prefill data after using it
+        localStorage.removeItem('prefillContact');
+      } catch (e) {
+        console.error('Error parsing prefill data:', e);
+      }
+    }
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -166,6 +186,7 @@ const Contact: React.FC = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="general">General Inquiry</SelectItem>
+              <SelectItem value="contribution">Wishlist Contribution</SelectItem>
               <SelectItem value="resource">Resource Question</SelectItem>
               <SelectItem value="support">Technical Support</SelectItem>
               <SelectItem value="partnership">Partnership Opportunity</SelectItem>

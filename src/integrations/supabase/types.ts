@@ -4909,6 +4909,7 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          is_public: boolean | null
           profile_types: string[] | null
           role_attributes: Json | null
           updated_at: string
@@ -4920,6 +4921,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
+          is_public?: boolean | null
           profile_types?: string[] | null
           role_attributes?: Json | null
           updated_at?: string
@@ -4931,12 +4933,113 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          is_public?: boolean | null
           profile_types?: string[] | null
           role_attributes?: Json | null
           updated_at?: string
           username?: string | null
         }
         Relationships: []
+      }
+      project_aspects: {
+        Row: {
+          aspect_type: Database["public"]["Enums"]["project_aspect_type"]
+          bom_total: number | null
+          component_count: number | null
+          created_at: string
+          description: string | null
+          estimated_release: string | null
+          framework: string | null
+          id: string
+          language: string | null
+          linked_product_id: string | null
+          linked_vehicle_config_id: string | null
+          metadata: Json | null
+          name: string
+          preorder_available: boolean | null
+          price: number | null
+          pricing_model: string | null
+          progress: number | null
+          project_id: string
+          repo_url: string | null
+          service_type: string | null
+          sku: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          aspect_type: Database["public"]["Enums"]["project_aspect_type"]
+          bom_total?: number | null
+          component_count?: number | null
+          created_at?: string
+          description?: string | null
+          estimated_release?: string | null
+          framework?: string | null
+          id?: string
+          language?: string | null
+          linked_product_id?: string | null
+          linked_vehicle_config_id?: string | null
+          metadata?: Json | null
+          name: string
+          preorder_available?: boolean | null
+          price?: number | null
+          pricing_model?: string | null
+          progress?: number | null
+          project_id: string
+          repo_url?: string | null
+          service_type?: string | null
+          sku?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          aspect_type?: Database["public"]["Enums"]["project_aspect_type"]
+          bom_total?: number | null
+          component_count?: number | null
+          created_at?: string
+          description?: string | null
+          estimated_release?: string | null
+          framework?: string | null
+          id?: string
+          language?: string | null
+          linked_product_id?: string | null
+          linked_vehicle_config_id?: string | null
+          metadata?: Json | null
+          name?: string
+          preorder_available?: boolean | null
+          price?: number | null
+          pricing_model?: string | null
+          progress?: number | null
+          project_id?: string
+          repo_url?: string | null
+          service_type?: string | null
+          sku?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_aspects_linked_product_id_fkey"
+            columns: ["linked_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_aspects_linked_vehicle_config_id_fkey"
+            columns: ["linked_vehicle_config_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_configurations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_aspects_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       project_components: {
         Row: {
@@ -4981,6 +5084,48 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "project_components_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_products: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          product_id: string
+          project_id: string
+          relationship_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id: string
+          project_id: string
+          relationship_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id?: string
+          project_id?: string
+          relationship_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_products_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
@@ -5080,6 +5225,7 @@ export type Database = {
           timeline: string | null
           type: string | null
           updated_at: string
+          user_id: string | null
           version: string | null
           view_count: number | null
         }
@@ -5110,6 +5256,7 @@ export type Database = {
           timeline?: string | null
           type?: string | null
           updated_at?: string
+          user_id?: string | null
           version?: string | null
           view_count?: number | null
         }
@@ -5140,6 +5287,7 @@ export type Database = {
           timeline?: string | null
           type?: string | null
           updated_at?: string
+          user_id?: string | null
           version?: string | null
           view_count?: number | null
         }
@@ -5850,6 +5998,7 @@ export type Database = {
           description: string | null
           estimated_cost: number | null
           id: string
+          image_url: string | null
           item_name: string
           notes: string | null
           owner_id: string | null
@@ -5871,6 +6020,7 @@ export type Database = {
           description?: string | null
           estimated_cost?: number | null
           id?: string
+          image_url?: string | null
           item_name: string
           notes?: string | null
           owner_id?: string | null
@@ -5892,6 +6042,7 @@ export type Database = {
           description?: string | null
           estimated_cost?: number | null
           id?: string
+          image_url?: string | null
           item_name?: string
           notes?: string | null
           owner_id?: string | null
@@ -8374,6 +8525,15 @@ export type Database = {
         | "brand"
         | "shop"
       game_jam_status: "upcoming" | "active" | "completed"
+      project_aspect_type:
+        | "software"
+        | "hardware"
+        | "firmware"
+        | "product"
+        | "service"
+        | "documentation"
+        | "design"
+        | "research"
       project_category:
         | "web_application"
         | "mobile_application"
@@ -8528,6 +8688,16 @@ export const Constants = {
         "shop",
       ],
       game_jam_status: ["upcoming", "active", "completed"],
+      project_aspect_type: [
+        "software",
+        "hardware",
+        "firmware",
+        "product",
+        "service",
+        "documentation",
+        "design",
+        "research",
+      ],
       project_category: [
         "web_application",
         "mobile_application",

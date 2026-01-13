@@ -413,19 +413,18 @@ const Landing: React.FC = () => {
                     variant="outline"
                     className="w-full mt-4"
                     onClick={() => {
-                      // Store the selected resource in localStorage to pre-fill the form
+                      // Store the selected item in localStorage to pre-fill the contact form
                       localStorage.setItem(
-                        "prefillResource",
+                        "prefillContact",
                         JSON.stringify({
-                          name: item.title,
-                          description: item.description,
+                          subject: `Contribution: ${item.title}`,
+                          message: `I'd like to contribute to the Developer Wishlist item:\n\n${item.title}\n${item.description}\n\nHere's what I can offer:`,
                           type: item.type,
-                          tags: ["wishlist", "community project"],
                         }),
                       );
 
-                      // Navigate to the resource form
-                      navigate("/profile/resources");
+                      // Navigate to the contact page
+                      navigate("/contact");
                     }}
                   >
                     Contribute
