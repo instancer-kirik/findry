@@ -1,6 +1,7 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
+import { useAuth } from "@/hooks/use-auth";
 import Hero from "@/components/home/Hero";
 import FeatureSection from "@/components/home/FeatureSection";
 import EcosystemSection from "@/components/home/EcosystemSection";
@@ -18,6 +19,7 @@ import {
   Store,
   Users,
   ChevronDown,
+  ZoomIn,
 } from "lucide-react";
 import {
   Carousel,
@@ -28,11 +30,58 @@ import {
 } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { ZoomIn } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const Landing: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const divvyQueueRef = useRef<HTMLDivElement>(null);
+  const [contributeDialogOpen, setContributeDialogOpen] = useState(false);
+  const [selectedWishlistItem, setSelectedWishlistItem] = useState<{
+    title: string;
+    description: string;
+    type: string;
+  } | null>(null);
+
+  const handleContributeClick = (item: { title: string; description: string; type: string }) => {
+    if (user) {
+      // Logged in - go to create resource
+      navigate("/create-resource");
+    } else {
+      // Not logged in - show dialog
+      setSelectedWishlistItem(item);
+      setContributeDialogOpen(true);
+    }
+  };
+
+  const handleEmailUs = () => {
+    if (selectedWishlistItem) {
+      localStorage.setItem(
+        "prefillContact",
+        JSON.stringify({
+          subject: `Contribution: ${selectedWishlistItem.title}`,
+          message: `I'd like to contribute to the Developer Wishlist item:\n\n${selectedWishlistItem.title}\n${selectedWishlistItem.description}\n\nHere's what I can offer:`,
+          type: selectedWishlistItem.type,
+        })
+      );
+    }
+    setContributeDialogOpen(false);
+    navigate("/contact");
+  };
+
+  const handleLoginToContribute = () => {
+    setContributeDialogOpen(false);
+    navigate("/login");
+  };
 
   const platformScreenshots = [
     {
@@ -412,20 +461,7 @@ const Landing: React.FC = () => {
                   <Button
                     variant="outline"
                     className="w-full mt-4"
-                    onClick={() => {
-                      // Store the selected item in localStorage to pre-fill the contact form
-                      localStorage.setItem(
-                        "prefillContact",
-                        JSON.stringify({
-                          subject: `Contribution: ${item.title}`,
-                          message: `I'd like to contribute to the Developer Wishlist item:\n\n${item.title}\n${item.description}\n\nHere's what I can offer:`,
-                          type: item.type,
-                        }),
-                      );
-
-                      // Navigate to the contact page
-                      navigate("/contact");
-                    }}
+                    onClick={() => handleContributeClick(item)}
                   >
                     Contribute
                   </Button>
@@ -499,6 +535,32 @@ const Landing: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Contribute Dialog for non-logged-in users */}
+      <AlertDialog open={contributeDialogOpen} onOpenChange={setContributeDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>How would you like to contribute?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {selectedWishlistItem && (
+                <span>
+                  You're interested in contributing to <strong>{selectedWishlistItem.title}</strong>.
+                </span>
+              )}{" "}
+              You can either log in to list your resource directly, or send us a message.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <Button variant="outline" onClick={handleEmailUs}>
+              Email Us
+            </Button>
+            <AlertDialogAction onClick={handleLoginToContribute}>
+              Log In to List Resource
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 };
