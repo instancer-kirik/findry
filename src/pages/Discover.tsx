@@ -32,10 +32,13 @@ import {
 } from "@/components/ui/dialog";
 import ArtistBulkImport from "@/components/discover/ArtistBulkImport";
 import { toast } from "@/components/ui/use-toast";
+import { useAuth } from "@/hooks/use-auth";
+import AuthGateDialog from "@/components/auth/AuthGateDialog";
 
 const Discover = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const query = searchParams.get("q") || "";
   const typeParam = searchParams.get("type") || "";
   const selectionMode = searchParams.get("select") === "true";
@@ -81,6 +84,29 @@ const Discover = () => {
   const [importedArtists, setImportedArtists] = useState<ContentItemProps[]>(
     [],
   );
+
+  // State for auth gate dialog
+  const [authGateOpen, setAuthGateOpen] = useState(false);
+  const [authGateAction, setAuthGateAction] = useState("");
+
+  // Handler for add new button with auth check
+  const handleAddNew = (type: string) => {
+    const routes: Record<string, string> = {
+      artists: "/profile/setup", // Artists go to profile setup
+      events: "/events/create",
+      projects: "/projects/create",
+      resources: "/create-resource",
+      venues: "/create-resource", // Venues are a type of resource
+      communities: "/create-hub",
+    };
+
+    if (user) {
+      navigate(routes[type] || "/create-resource");
+    } else {
+      setAuthGateAction(`add a new ${type.slice(0, -1)}`);
+      setAuthGateOpen(true);
+    }
+  };
 
   // Use the custom hook for data fetching
   const { items, isLoading } = useDiscoverData(
@@ -372,17 +398,17 @@ const Discover = () => {
 
               {/* Actions Bar - Add, Import, etc. */}
               {(activeTab === "artists" ||
-                activeTab === "albums" ||
-                activeTab === "songs" ||
-                activeTab === "artworks") && (
+                activeTab === "events" ||
+                activeTab === "projects" ||
+                activeTab === "resources" ||
+                activeTab === "venues" ||
+                activeTab === "communities") && (
                 <div className="flex flex-wrap gap-2 mb-4">
                   <Button
                     variant="outline"
                     size="sm"
                     className="flex items-center gap-1"
-                    onClick={() => {
-                      /* Add create functionality */
-                    }}
+                    onClick={() => handleAddNew(activeTab)}
                   >
                     <PlusCircle className="h-4 w-4" />
                     Add New{" "}
@@ -521,6 +547,15 @@ const Discover = () => {
           onToggleMinimize={toggleSelectionPanel}
         />
       )}
+
+      {/* Auth Gate Dialog */}
+      <AuthGateDialog
+        open={authGateOpen}
+        onOpenChange={setAuthGateOpen}
+        actionType={authGateAction}
+        emailSubject={`Request to ${authGateAction}`}
+        emailMessage={`I'd like to ${authGateAction}. Here are the details:\n\n`}
+      />
     </Layout>
   );
 };
