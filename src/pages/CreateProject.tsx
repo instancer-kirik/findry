@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useProject } from '@/hooks/use-project';
 import { ProjectOwnershipType } from '@/types/project';
 import { toast } from 'sonner';
+import AuthGateDialog from '@/components/auth/AuthGateDialog';
 
 interface ProjectFormData {
   name: string;
@@ -22,11 +23,12 @@ interface ProjectFormData {
 }
 
 const CreateProject = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
   const { useCreateProject } = useProject();
   const createProject = useCreateProject();
 
+  const [authGateOpen, setAuthGateOpen] = useState(false);
   const [formData, setFormData] = useState<ProjectFormData>({
     name: '',
     description: '',
@@ -34,6 +36,13 @@ const CreateProject = () => {
     tags: [],
     isPublic: false
   });
+
+  // Show auth gate if not logged in after loading
+  React.useEffect(() => {
+    if (!loading && !user) {
+      setAuthGateOpen(true);
+    }
+  }, [loading, user]);
   
   // Parse and format tag inputs
   const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,7 +55,7 @@ const CreateProject = () => {
     e.preventDefault();
     
     if (!user) {
-      toast('You must be logged in to create a project');
+      setAuthGateOpen(true);
       return;
     }
 
@@ -161,12 +170,21 @@ const CreateProject = () => {
             <div className="flex justify-end">
               <Button 
                 type="submit" 
-                disabled={createProject.isPending}
+                disabled={createProject.isPending || !user}
               >
                 {createProject.isPending ? 'Creating...' : 'Create Project'}
               </Button>
             </div>
           </form>
+
+          {/* Auth Gate Dialog */}
+          <AuthGateDialog
+            open={authGateOpen}
+            onOpenChange={setAuthGateOpen}
+            actionType="create a project"
+            emailSubject="Request to Create a Project"
+            emailMessage={`I'd like to create a project${formData.name ? `: ${formData.name}` : ''}.\n\nDescription: ${formData.description || '(not provided yet)'}\n\nHere are more details:\n`}
+          />
           </div>
       </div>
     </Layout>

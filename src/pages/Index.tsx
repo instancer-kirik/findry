@@ -30,16 +30,7 @@ import {
 } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import AuthGateDialog from "@/components/auth/AuthGateDialog";
 
 const Landing: React.FC = () => {
   const navigate = useNavigate();
@@ -61,26 +52,6 @@ const Landing: React.FC = () => {
       setSelectedWishlistItem(item);
       setContributeDialogOpen(true);
     }
-  };
-
-  const handleEmailUs = () => {
-    if (selectedWishlistItem) {
-      localStorage.setItem(
-        "prefillContact",
-        JSON.stringify({
-          subject: `Contribution: ${selectedWishlistItem.title}`,
-          message: `I'd like to contribute to the Developer Wishlist item:\n\n${selectedWishlistItem.title}\n${selectedWishlistItem.description}\n\nHere's what I can offer:`,
-          type: selectedWishlistItem.type,
-        })
-      );
-    }
-    setContributeDialogOpen(false);
-    navigate("/contact");
-  };
-
-  const handleLoginToContribute = () => {
-    setContributeDialogOpen(false);
-    navigate("/login");
   };
 
   const platformScreenshots = [
@@ -537,30 +508,21 @@ const Landing: React.FC = () => {
       </div>
 
       {/* Contribute Dialog for non-logged-in users */}
-      <AlertDialog open={contributeDialogOpen} onOpenChange={setContributeDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>How would you like to contribute?</AlertDialogTitle>
-            <AlertDialogDescription>
-              {selectedWishlistItem && (
-                <span>
-                  You're interested in contributing to <strong>{selectedWishlistItem.title}</strong>.
-                </span>
-              )}{" "}
-              You can either log in to list your resource directly, or send us a message.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <Button variant="outline" onClick={handleEmailUs}>
-              Email Us
-            </Button>
-            <AlertDialogAction onClick={handleLoginToContribute}>
-              Log In to List Resource
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <AuthGateDialog
+        open={contributeDialogOpen}
+        onOpenChange={setContributeDialogOpen}
+        title="How would you like to contribute?"
+        description={selectedWishlistItem 
+          ? `You're interested in contributing to "${selectedWishlistItem.title}". You can log in to list your resource directly, or send us a message.`
+          : "You can log in to list your resource directly, or send us a message."
+        }
+        actionType="contribute a resource"
+        emailSubject={selectedWishlistItem ? `Contribution: ${selectedWishlistItem.title}` : "Contribution Inquiry"}
+        emailMessage={selectedWishlistItem 
+          ? `I'd like to contribute to the Developer Wishlist item:\n\n${selectedWishlistItem.title}\n${selectedWishlistItem.description}\n\nHere's what I can offer:`
+          : "I'd like to contribute. Here's what I can offer:"
+        }
+      />
     </Layout>
   );
 };

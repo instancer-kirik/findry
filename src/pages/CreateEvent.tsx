@@ -32,12 +32,14 @@ import PosterUpload from '@/components/events/forms/PosterUpload';
 import AdditionalSettings from '@/components/events/forms/AdditionalSettings';
 import ContentCard from '@/components/events/ContentCard';
 import FeaturedArtistsForm from '@/components/events/forms/FeaturedArtistsForm';
+import AuthGateDialog from '@/components/auth/AuthGateDialog';
 
 const CreateEvent = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const communityId = searchParams.get('communityId');
+  const [authGateOpen, setAuthGateOpen] = useState(false);
   
   const [eventName, setEventName] = useState('');
   const [description, setDescription] = useState('');
@@ -165,6 +167,13 @@ const CreateEvent = () => {
       location: 'Boston'
     }
   ]);
+
+  // Show auth gate if not logged in after loading
+  useEffect(() => {
+    if (!authLoading && !user) {
+      setAuthGateOpen(true);
+    }
+  }, [authLoading, user]);
 
   useEffect(() => {
     setSelectedObjects({
@@ -365,7 +374,7 @@ const CreateEvent = () => {
 
       if (!user) {
         console.log("DEBUG: User not logged in");
-        toast.error("You need to be logged in to create an event");
+        setAuthGateOpen(true);
         setLoading(false);
         isProcessing = false;
         return;
@@ -760,6 +769,15 @@ const CreateEvent = () => {
             </Button>
           </div>
         </form>
+
+        {/* Auth Gate Dialog */}
+        <AuthGateDialog
+          open={authGateOpen}
+          onOpenChange={setAuthGateOpen}
+          actionType="create an event"
+          emailSubject={eventName ? `Request to Create Event: ${eventName}` : "Request to Create an Event"}
+          emailMessage={`I'd like to create an event${eventName ? `: ${eventName}` : ''}.\n\nDescription: ${description || '(not provided yet)'}\nLocation: ${location || '(not provided yet)'}\n\nHere are more details:\n`}
+        />
       </div>
     </Layout>
   );
