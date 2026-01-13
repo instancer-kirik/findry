@@ -125,11 +125,12 @@ const Communities = () => {
   };
 
   const handleCommunityClick = (community: CommunityType) => {
-    setSelectedCommunity(community);
+    // Navigate directly to community page
+    navigate(`/communities/${community.id}`);
   };
 
   const handleViewFullProfile = (communityId: string) => {
-    navigate(`/community/${communityId}`);
+    navigate(`/communities/${communityId}`);
   };
 
   return (
