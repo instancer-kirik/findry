@@ -431,6 +431,9 @@ const createTestProject = async () => {
   }
 };
 
+// Named exports for direct use
+export { useUpdateTaskStatus };
+
 export const useProjects = () => {
   return {
     useGetProjects,
@@ -439,4 +442,4 @@ export const useProjects = () => {
     useUpdateTaskStatus,
     createTestProject
   };
-}; 
+};

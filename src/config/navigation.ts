@@ -23,6 +23,7 @@ import {
   Sparkles,
   Heart,
   Handshake,
+  CheckSquare,
   type LucideIcon,
 } from "lucide-react";
 
@@ -132,6 +133,7 @@ export const navigation: NavCategory[] = [
       {
         title: "Planning",
         links: [
+          { href: "/tasks", title: "Tasks", description: "Unified task view", icon: CheckSquare },
           { href: "/travel-locations", title: "Travel Locations", description: "Road resources & POIs", icon: MapPin },
           { href: "/tour-planner", title: "Tour Planner", description: "Plan trips & routes", icon: Route },
           { href: "/shopping-list", title: "Shopping List", description: "Track purchases", icon: ShoppingCart },
@@ -197,6 +199,7 @@ export const mobileNavSections = [
   {
     title: "Tools",
     links: [
+      { href: "/tasks", title: "Tasks", icon: CheckSquare },
       { href: "/travel-locations", title: "Travel Locations", icon: MapPin },
       { href: "/tour-planner", title: "Tour Planner", icon: Route },
       { href: "/shopping-list", title: "Shopping List", icon: ShoppingCart },
