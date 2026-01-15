@@ -64,6 +64,7 @@ import PublicLanding from "./pages/PublicLanding";
 import RequestService from "./pages/RequestService";
 import TravelLocations from "./pages/TravelLocations";
 import ShoppingList from "./pages/ShoppingList";
+import Tasks from "./pages/Tasks";
 import Feed from "./pages/Feed";
 import CreateHub from "./pages/CreateHub";
 import AuthCallback from "./pages/AuthCallback";
@@ -187,6 +188,7 @@ const App: React.FC = () => {
           <Route path="/request-service" element={<RequestService />} />
           <Route path="/travel-locations" element={<TravelLocations />} />
           <Route path="/shopping-list" element={<ShoppingList />} />
+          <Route path="/tasks" element={<Tasks />} />
           <Route path="/feed" element={<Feed />} />
           <Route path="/create" element={<CreateHub />} />
           <Route path="/vehicle-build" element={<VehicleBuildShowcase />} />
