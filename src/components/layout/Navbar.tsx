@@ -181,30 +181,28 @@ const Navbar = () => {
             <NavigationMenuList className="gap-1">
               {navigation.map((category) => (
                 <NavigationMenuItem key={category.id}>
-                  {category.href ? (
-                    // Categories with href: Link that navigates, hover shows menu
-                    <div className="relative">
-                      <Link
+                  <NavigationMenuTrigger 
+                    className="h-9 px-3 bg-transparent data-[state=open]:bg-accent/50"
+                    onPointerDown={(e) => e.preventDefault()}
+                    onClick={(e) => e.preventDefault()}
+                  >
+                    {category.href ? (
+                      <Link 
                         to={category.href}
-                        className={cn(
-                          "group inline-flex h-9 items-center justify-center rounded-md bg-transparent px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none"
-                        )}
+                        className="flex items-center"
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <category.icon className="h-4 w-4 mr-1.5" />
                         {category.label}
-                        <ChevronDown className="relative top-[1px] ml-1 h-3 w-3 transition duration-200" aria-hidden="true" />
                       </Link>
-                      <NavigationMenuTrigger className="absolute inset-0 opacity-0 cursor-pointer" aria-hidden="true">
-                        <span className="sr-only">{category.label} menu</span>
-                      </NavigationMenuTrigger>
-                    </div>
-                  ) : (
-                    // Categories without href: normal trigger behavior
-                    <NavigationMenuTrigger className="h-9 px-3 bg-transparent data-[state=open]:bg-accent/50">
-                      <category.icon className="h-4 w-4 mr-1.5" />
-                      {category.label}
-                    </NavigationMenuTrigger>
-                  )}
+                    ) : (
+                      <>
+                        <category.icon className="h-4 w-4 mr-1.5" />
+                        {category.label}
+                      </>
+                    )}
+                  </NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <div className={cn(
                       "p-4",
