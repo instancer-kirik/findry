@@ -87,9 +87,9 @@ export const navigation: NavCategory[] = [
     ],
   },
   {
-    id: "connect",
-    label: "Connect",
-    icon: Users2,
+    id: "abet",
+    label: "Abet",
+    icon: Handshake,
     href: "/communities",
     featured: {
       title: "Build Together",
@@ -118,8 +118,8 @@ export const navigation: NavCategory[] = [
     ],
   },
   {
-    id: "tools",
-    label: "Tools",
+    id: "aid",
+    label: "Aid",
     icon: Wrench,
     href: "/tour-planner",
     featured: {
@@ -187,7 +187,7 @@ export const mobileNavSections = [
     ],
   },
   {
-    title: "Connect",
+    title: "Abet",
     links: [
       { href: "/communities", title: "Communities", icon: Users2 },
       { href: "/events/upcoming", title: "Events", icon: Calendar },
@@ -197,7 +197,7 @@ export const mobileNavSections = [
     ],
   },
   {
-    title: "Tools",
+    title: "Aid",
     links: [
       { href: "/tasks", title: "Tasks", icon: CheckSquare },
       { href: "/travel-locations", title: "Travel Locations", icon: MapPin },
