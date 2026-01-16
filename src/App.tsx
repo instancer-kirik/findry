@@ -71,7 +71,8 @@ import AuthCallback from "./pages/AuthCallback";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import DataDeletion from "./pages/DataDeletion";
 import InstagramDemo from "./pages/InstagramDemo";
-
+import Garages from "./pages/Garages";
+import CreateGarage from "./pages/CreateGarage";
 const queryClient = new QueryClient();
 
 const App: React.FC = () => {
@@ -192,6 +193,8 @@ const App: React.FC = () => {
           <Route path="/feed" element={<Feed />} />
           <Route path="/create" element={<CreateHub />} />
           <Route path="/vehicle-build" element={<VehicleBuildShowcase />} />
+          <Route path="/garages" element={<Garages />} />
+          <Route path="/garages/create" element={<CreateGarage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/data-deletion" element={<DataDeletion />} />

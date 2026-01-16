@@ -1328,6 +1328,122 @@ export type Database = {
         }
         Relationships: []
       }
+      garage_invites: {
+        Row: {
+          created_at: string
+          garage_id: string
+          id: string
+          invited_by: string
+          invited_user_id: string
+          status: string | null
+        }
+        Insert: {
+          created_at?: string
+          garage_id: string
+          id?: string
+          invited_by: string
+          invited_user_id: string
+          status?: string | null
+        }
+        Update: {
+          created_at?: string
+          garage_id?: string
+          id?: string
+          invited_by?: string
+          invited_user_id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "garage_invites_garage_id_fkey"
+            columns: ["garage_id"]
+            isOneToOne: false
+            referencedRelation: "garages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      garages: {
+        Row: {
+          address: string | null
+          bay_count: number | null
+          coordinates: Json | null
+          created_at: string
+          daily_rate: number | null
+          description: string | null
+          has_air_compressor: boolean | null
+          has_electricity: boolean | null
+          has_lift: boolean | null
+          has_storage: boolean | null
+          has_tools: boolean | null
+          has_welding: boolean | null
+          hourly_rate: number | null
+          id: string
+          image_url: string | null
+          is_available_for_rent: boolean | null
+          lift_capacity_lbs: number | null
+          location: string | null
+          name: string
+          owner_id: string
+          privacy_level: Database["public"]["Enums"]["privacy_level"] | null
+          storage_sqft: number | null
+          tags: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          bay_count?: number | null
+          coordinates?: Json | null
+          created_at?: string
+          daily_rate?: number | null
+          description?: string | null
+          has_air_compressor?: boolean | null
+          has_electricity?: boolean | null
+          has_lift?: boolean | null
+          has_storage?: boolean | null
+          has_tools?: boolean | null
+          has_welding?: boolean | null
+          hourly_rate?: number | null
+          id?: string
+          image_url?: string | null
+          is_available_for_rent?: boolean | null
+          lift_capacity_lbs?: number | null
+          location?: string | null
+          name: string
+          owner_id: string
+          privacy_level?: Database["public"]["Enums"]["privacy_level"] | null
+          storage_sqft?: number | null
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          bay_count?: number | null
+          coordinates?: Json | null
+          created_at?: string
+          daily_rate?: number | null
+          description?: string | null
+          has_air_compressor?: boolean | null
+          has_electricity?: boolean | null
+          has_lift?: boolean | null
+          has_storage?: boolean | null
+          has_tools?: boolean | null
+          has_welding?: boolean | null
+          hourly_rate?: number | null
+          id?: string
+          image_url?: string | null
+          is_available_for_rent?: boolean | null
+          lift_capacity_lbs?: number | null
+          location?: string | null
+          name?: string
+          owner_id?: string
+          privacy_level?: Database["public"]["Enums"]["privacy_level"] | null
+          storage_sqft?: number | null
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ingredients: {
         Row: {
           alternatives: string[] | null
@@ -6796,6 +6912,30 @@ export type Database = {
           },
         ]
       }
+      user_blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
       user_brand_relationships: {
         Row: {
           brand_id: string | null
@@ -7981,6 +8121,15 @@ export type Database = {
         Args: { component_id_param: string }
         Returns: number
       }
+      can_view_garage: {
+        Args: {
+          garage_id: string
+          garage_owner_id: string
+          garage_privacy: Database["public"]["Enums"]["privacy_level"]
+          viewer_id: string
+        }
+        Returns: boolean
+      }
       cleanup_old_rotation_logs: { Args: never; Returns: undefined }
       create_template_instance: {
         Args: {
@@ -8513,6 +8662,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      users_can_see_each_other: {
+        Args: { user_a: string; user_b: string }
+        Returns: boolean
+      }
     }
     Enums: {
       content_type:
@@ -8525,6 +8678,7 @@ export type Database = {
         | "brand"
         | "shop"
       game_jam_status: "upcoming" | "active" | "completed"
+      privacy_level: "public" | "friends_only" | "private" | "invite_only"
       project_aspect_type:
         | "software"
         | "hardware"
@@ -8688,6 +8842,7 @@ export const Constants = {
         "shop",
       ],
       game_jam_status: ["upcoming", "active", "completed"],
+      privacy_level: ["public", "friends_only", "private", "invite_only"],
       project_aspect_type: [
         "software",
         "hardware",
