@@ -119,8 +119,8 @@ export const navigation: NavCategory[] = [
     ],
   },
   {
-    id: "aid",
-    label: "Aid",
+    id: "aim",
+    label: "Aim",
     icon: Wrench,
     href: "/tour-planner",
     featured: {
@@ -199,7 +199,7 @@ export const mobileNavSections = [
     ],
   },
   {
-    title: "Aid",
+    title: "Aim",
     links: [
       { href: "/tasks", title: "Tasks", icon: CheckSquare },
       { href: "/garages", title: "Garages", icon: Warehouse },
