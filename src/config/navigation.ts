@@ -24,6 +24,7 @@ import {
   Heart,
   Handshake,
   CheckSquare,
+  Warehouse,
   type LucideIcon,
 } from "lucide-react";
 
@@ -142,6 +143,7 @@ export const navigation: NavCategory[] = [
       {
         title: "Organization",
         links: [
+          { href: "/garages", title: "Garages", description: "Workshop spaces & lifts", icon: Warehouse },
           { href: "/gear-packing", title: "Gear Packing", description: "Organize equipment", icon: Briefcase },
           { href: "/vehicle-build", title: "Vehicle Build", description: "Track conversions", icon: Car },
           { href: "/grouper", title: "Grouper", description: "Organize groups", icon: Layers },
@@ -200,6 +202,7 @@ export const mobileNavSections = [
     title: "Aid",
     links: [
       { href: "/tasks", title: "Tasks", icon: CheckSquare },
+      { href: "/garages", title: "Garages", icon: Warehouse },
       { href: "/travel-locations", title: "Travel Locations", icon: MapPin },
       { href: "/tour-planner", title: "Tour Planner", icon: Route },
       { href: "/shopping-list", title: "Shopping List", icon: ShoppingCart },
