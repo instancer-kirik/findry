@@ -73,6 +73,7 @@ import DataDeletion from "./pages/DataDeletion";
 import InstagramDemo from "./pages/InstagramDemo";
 import Garages from "./pages/Garages";
 import CreateGarage from "./pages/CreateGarage";
+import Admin from "./pages/Admin";
 const queryClient = new QueryClient();
 
 const App: React.FC = () => {
@@ -199,6 +200,7 @@ const App: React.FC = () => {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/data-deletion" element={<DataDeletion />} />
           <Route path="/instagram-demo" element={<InstagramDemo />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="*" element={<Navigate to="/not-found" replace />} />
         </Routes>
       </ThemeProvider>
