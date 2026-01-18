@@ -20,6 +20,9 @@ Findry is a holistic event discovery and organization platform that bridges the 
   - [x] Profile customization and settings
   - [x] Privacy controls and social connections
   - [ ] Profile onboarding optimization
+  - [ ] GitHub OAuth login
+  - [ ] Instagram OAuth login
+  - [ ] Secure token encryption via edge functions
 
 ### Event Platform
 - [x] Calendar Integration
