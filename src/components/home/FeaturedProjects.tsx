@@ -37,10 +37,7 @@ const FeaturedProjects: React.FC = () => {
       // Fetch featured projects
       const { data: featured, error: featuredError } = await supabase
         .from('projects')
-        .select(`
-          *,
-          profiles:owner_id(username)
-        `)
+        .select('*')
         .eq('is_public', true)
         .eq('featured', true)
         .order('view_count', { ascending: false })
@@ -51,10 +48,7 @@ const FeaturedProjects: React.FC = () => {
       // Fetch trending projects (high view count, recent activity)
       const { data: trending, error: trendingError } = await supabase
         .from('projects')
-        .select(`
-          *,
-          profiles:owner_id(username)
-        `)
+        .select('*')
         .eq('is_public', true)
         .gte('view_count', 10)
         .order('view_count', { ascending: false })
@@ -65,10 +59,7 @@ const FeaturedProjects: React.FC = () => {
       // Fetch recent projects
       const { data: recent, error: recentError } = await supabase
         .from('projects')
-        .select(`
-          *,
-          profiles:owner_id(username)
-        `)
+        .select('*')
         .eq('is_public', true)
         .order('created_at', { ascending: false })
         .limit(3);
@@ -80,7 +71,7 @@ const FeaturedProjects: React.FC = () => {
       setRecentProjects(recent || []);
     } catch (error: any) {
       console.error('Error fetching projects:', error);
-      toast.error('Failed to load featured projects');
+      // Don't show error toast for empty results - just log it
     } finally {
       setLoading(false);
     }
