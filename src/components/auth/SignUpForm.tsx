@@ -80,6 +80,11 @@ const SignUpForm: React.FC = () => {
         throw new Error('Failed to create user account');
       }
 
+      // Check for repeated signup (Supabase returns empty identities for existing users to prevent email enumeration)
+      if (authData.user.identities && authData.user.identities.length === 0) {
+        throw new Error('This email is already registered. Please try logging in or use a different email.');
+      }
+
       // Profile is created automatically by the database trigger (handle_new_user)
       // No need to manually insert the profile here
 
