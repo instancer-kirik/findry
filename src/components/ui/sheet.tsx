@@ -1,4 +1,5 @@
 import * as SheetPrimitive from "@radix-ui/react-dialog"
+import * as VisuallyHiddenPrimitive from "@radix-ui/react-visually-hidden"
 import { cva, type VariantProps } from "class-variance-authority"
 import { X } from "lucide-react"
 import * as React from "react"
@@ -49,32 +50,57 @@ const sheetVariants = cva(
 
 interface SheetContentProps
   extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
-  VariantProps<typeof sheetVariants> { }
+  VariantProps<typeof sheetVariants> {
+  hideCloseButton?: boolean;
+}
 
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
->(({ side = "right", className, children, ...props }, ref) => (
-  <SheetPortal>
-    <SheetOverlay />
-    <SheetPrimitive.Content
-      ref={ref}
-      className={cn(sheetVariants({ side }), className)}
-      role="dialog"
-      aria-modal="true"
-      {...props}
-    >
-      {children}
-      <SheetPrimitive.Close 
-        className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary"
-        aria-label="Close"
+>(({ side = "right", className, children, hideCloseButton = false, ...props }, ref) => {
+  // Check if children contains a SheetTitle
+  const hasTitle = React.Children.toArray(children).some(
+    (child) =>
+      React.isValidElement(child) &&
+      (child.type === SheetTitle ||
+        (child.props &&
+          React.Children.toArray(child.props.children).some(
+            (grandchild) =>
+              React.isValidElement(grandchild) &&
+              grandchild.type === SheetTitle,
+          ))),
+  );
+
+  return (
+    <SheetPortal>
+      <SheetOverlay />
+      <SheetPrimitive.Content
+        ref={ref}
+        className={cn(sheetVariants({ side }), className)}
+        role="dialog"
+        aria-modal="true"
+        {...props}
       >
-        <X className="h-4 w-4" />
-        <span className="sr-only">Close</span>
-      </SheetPrimitive.Close>
-    </SheetPrimitive.Content>
-  </SheetPortal>
-))
+        {/* Add visually hidden title if none provided for accessibility */}
+        {!hasTitle && (
+          <VisuallyHiddenPrimitive.Root asChild>
+            <SheetPrimitive.Title>Menu</SheetPrimitive.Title>
+          </VisuallyHiddenPrimitive.Root>
+        )}
+        {children}
+        {!hideCloseButton && (
+          <SheetPrimitive.Close 
+            className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary"
+            aria-label="Close"
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </SheetPrimitive.Close>
+        )}
+      </SheetPrimitive.Content>
+    </SheetPortal>
+  );
+})
 SheetContent.displayName = SheetPrimitive.Content.displayName
 
 const SheetHeader = ({
