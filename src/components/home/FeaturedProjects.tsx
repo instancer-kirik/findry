@@ -7,6 +7,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Eye, Heart, ArrowRight, Star, TrendingUp, Clock } from "lucide-react";
 import { toast } from "sonner";
 
+interface ProjectProfile {
+  username: string | null;
+  full_name: string | null;
+  avatar_url: string | null;
+}
+
 interface FeaturedProject {
   id: string;
   name: string;
@@ -19,7 +25,7 @@ interface FeaturedProject {
   created_at: string;
   status: string;
   progress: number;
-  owner_username?: string;
+  profiles?: ProjectProfile | null;
 }
 
 const FeaturedProjects: React.FC = () => {
@@ -34,10 +40,13 @@ const FeaturedProjects: React.FC = () => {
 
   const fetchProjects = async () => {
     try {
-      // Fetch featured projects
+      // Fetch featured projects with creator profile
       const { data: featured, error: featuredError } = await supabase
         .from('projects')
-        .select('*')
+        .select(`
+          *,
+          profiles:created_by(username, full_name, avatar_url)
+        `)
         .eq('is_public', true)
         .eq('featured', true)
         .order('view_count', { ascending: false })
@@ -48,7 +57,10 @@ const FeaturedProjects: React.FC = () => {
       // Fetch trending projects (high view count, recent activity)
       const { data: trending, error: trendingError } = await supabase
         .from('projects')
-        .select('*')
+        .select(`
+          *,
+          profiles:created_by(username, full_name, avatar_url)
+        `)
         .eq('is_public', true)
         .gte('view_count', 10)
         .order('view_count', { ascending: false })
@@ -59,7 +71,10 @@ const FeaturedProjects: React.FC = () => {
       // Fetch recent projects
       const { data: recent, error: recentError } = await supabase
         .from('projects')
-        .select('*')
+        .select(`
+          *,
+          profiles:created_by(username, full_name, avatar_url)
+        `)
         .eq('is_public', true)
         .order('created_at', { ascending: false })
         .limit(3);
@@ -189,9 +204,9 @@ const FeaturedProjects: React.FC = () => {
                 {project.like_count || 0}
               </span>
             </div>
-            {project.owner_username && (
+            {project.profiles?.username && (
               <span className="text-xs">
-                by @{project.owner_username}
+                by @{project.profiles.username}
               </span>
             )}
           </div>
