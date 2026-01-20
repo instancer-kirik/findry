@@ -54,6 +54,9 @@ const SignUpForm: React.FC = () => {
     setIsSubmitting(true);
     
     try {
+      // Sign out any existing session first to prevent session conflicts
+      await supabase.auth.signOut();
+      
       // Sign up with Supabase
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: values.email,
