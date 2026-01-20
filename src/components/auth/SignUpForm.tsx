@@ -77,24 +77,8 @@ const SignUpForm: React.FC = () => {
         throw new Error('Failed to create user account');
       }
 
-      // Create profile directly
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert([{
-          id: authData.user.id,
-          username: values.name.toLowerCase().replace(/[^a-z0-9]/g, '_'),
-          full_name: values.name,
-          profile_types: ['regular'],
-          updated_at: new Date().toISOString()
-        }]);
-
-      if (profileError) {
-        console.error('Error creating profile:', profileError);
-        if (profileError.code === '42501') {
-          throw new Error('Unable to create profile due to security restrictions. Please try again or contact support.');
-        }
-        throw profileError;
-      }
+      // Profile is created automatically by the database trigger (handle_new_user)
+      // No need to manually insert the profile here
 
       toast({
         title: 'Account created!',
