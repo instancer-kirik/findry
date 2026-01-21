@@ -5424,6 +5424,81 @@ export type Database = {
           },
         ]
       }
+      projects_catalog: {
+        Row: {
+          created_at: string
+          description: string
+          dev_project_id: string | null
+          domain: string
+          emoji: string | null
+          featured: boolean | null
+          featured_order: number | null
+          features: string[] | null
+          id: string
+          name: string
+          path: string | null
+          product_idea_id: string | null
+          project_type: string | null
+          source_url: string | null
+          status: string
+          tech_stack: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          dev_project_id?: string | null
+          domain: string
+          emoji?: string | null
+          featured?: boolean | null
+          featured_order?: number | null
+          features?: string[] | null
+          id?: string
+          name: string
+          path?: string | null
+          product_idea_id?: string | null
+          project_type?: string | null
+          source_url?: string | null
+          status?: string
+          tech_stack?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          dev_project_id?: string | null
+          domain?: string
+          emoji?: string | null
+          featured?: boolean | null
+          featured_order?: number | null
+          features?: string[] | null
+          id?: string
+          name?: string
+          path?: string | null
+          product_idea_id?: string | null
+          project_type?: string | null
+          source_url?: string | null
+          status?: string
+          tech_stack?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_catalog_dev_project_id_fkey"
+            columns: ["dev_project_id"]
+            isOneToOne: false
+            referencedRelation: "development_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_catalog_product_idea_id_fkey"
+            columns: ["product_idea_id"]
+            isOneToOne: false
+            referencedRelation: "product_ideas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       radio_channels: {
         Row: {
           created_at: string
@@ -8086,6 +8161,40 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      unified_projects: {
+        Row: {
+          category_color: string | null
+          category_icon: string | null
+          category_name: string | null
+          created_at: string | null
+          description: string | null
+          dev_progress: number | null
+          dev_project_id: string | null
+          dev_repo_url: string | null
+          dev_version: string | null
+          domain: string | null
+          emoji: string | null
+          feasibility_score: number | null
+          featured: boolean | null
+          featured_order: number | null
+          features: string[] | null
+          id: string | null
+          idea_category_id: string | null
+          idea_id: string | null
+          market_potential_score: number | null
+          name: string | null
+          priority_score: number | null
+          problem_statement: string | null
+          project_type: string | null
+          solution_approach: string | null
+          source_url: string | null
+          status: string | null
+          target_market: string | null
+          tech_stack: string[] | null
+          updated_at: string | null
+        }
+        Relationships: []
       }
       user_profiles: {
         Row: {
