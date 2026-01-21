@@ -108,33 +108,33 @@ const FeedbackQuestionnaire: React.FC = () => {
             <div className="grid md:grid-cols-2 gap-4">
               <Card className="bg-background/50">
                 <CardContent className="p-4">
-                  <p className="text-sm font-medium mb-2">About You:</p>
+                  <p className="text-sm font-medium mb-2">Your Work:</p>
                   <p className="text-sm text-muted-foreground">
-                    What type of creative work or community involvement interests you most?
+                    What do you do? (Artist, Videographer, Musician, Creative Director, etc.)
                   </p>
                 </CardContent>
               </Card>
               <Card className="bg-background/50">
                 <CardContent className="p-4">
-                  <p className="text-sm font-medium mb-2">Platform Features:</p>
+                  <p className="text-sm font-medium mb-2">Finding Opportunities:</p>
                   <p className="text-sm text-muted-foreground">
-                    Which collaboration tools would be most valuable for your projects?
+                    How do you typically find paid opportunities or brand partnerships?
                   </p>
                 </CardContent>
               </Card>
               <Card className="bg-background/50">
                 <CardContent className="p-4">
-                  <p className="text-sm font-medium mb-2">Community Building:</p>
+                  <p className="text-sm font-medium mb-2">Collaboration Challenges:</p>
                   <p className="text-sm text-muted-foreground">
-                    How do you currently find and connect with like-minded creators?
+                    What's the hardest part about collaborating with brands or venues?
                   </p>
                 </CardContent>
               </Card>
               <Card className="bg-background/50">
                 <CardContent className="p-4">
-                  <p className="text-sm font-medium mb-2">Future Vision:</p>
+                  <p className="text-sm font-medium mb-2">Platform Trust:</p>
                   <p className="text-sm text-muted-foreground">
-                    What features would make creative collaboration more accessible?
+                    What would a platform need to have to earn your trust?
                   </p>
                 </CardContent>
               </Card>
