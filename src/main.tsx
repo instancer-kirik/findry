@@ -7,10 +7,10 @@ import './index.css'
 
 const root = createRoot(document.getElementById("root")!);
 
-// Add loading state
+// Add subtle loading state
 root.render(
-  <div className="fixed inset-0 flex items-center justify-center bg-background">
-    <div className="animate-pulse text-muted-foreground">Loading...</div>
+  <div className="fixed inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+    <div className="text-muted-foreground/60 text-sm">Loading...</div>
   </div>
 );
 
