@@ -175,7 +175,58 @@ export const useDiscoverData = (
             data = [...brands];
             break;
           case 'projects':
-            data = [...projects];
+            // Fetch unified projects from all three tables
+            const [projectsRes, devProjectsRes, productIdeasRes] = await Promise.all([
+              supabase.from('projects').select('*'),
+              supabase.from('development_projects').select('*'),
+              supabase.from('product_ideas').select('*'),
+            ]);
+            
+            const unifiedProjects: ContentItemProps[] = [];
+            
+            // Map projects table
+            if (projectsRes.data) {
+              projectsRes.data.forEach(p => unifiedProjects.push({
+                id: p.id,
+                name: p.name,
+                type: 'project',
+                subtype: p.status || 'active',
+                description: p.description || '',
+                location: '',
+                tags: p.tags || [],
+                image_url: p.image_url || '',
+              }));
+            }
+            
+            // Map development_projects table
+            if (devProjectsRes.data) {
+              devProjectsRes.data.forEach(p => unifiedProjects.push({
+                id: p.id,
+                name: p.name,
+                type: 'project',
+                subtype: p.status || 'active',
+                description: p.description || '',
+                location: '',
+                tags: [],
+                image_url: '',
+              }));
+            }
+            
+            // Map product_ideas table
+            if (productIdeasRes.data) {
+              productIdeasRes.data.forEach(p => unifiedProjects.push({
+                id: p.id,
+                name: p.name,
+                type: 'project',
+                subtype: 'idea',
+                description: p.description || '',
+                location: '',
+                tags: p.tags || [],
+                image_url: '',
+              }));
+            }
+            
+            data = unifiedProjects.length > 0 ? unifiedProjects : [...projects];
             break;
           case 'albums':
             data = [...albums];

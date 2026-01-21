@@ -7,10 +7,10 @@ import './index.css'
 
 const root = createRoot(document.getElementById("root")!);
 
-// Add subtle loading state
+// Add subtle dark loading state
 root.render(
-  <div className="fixed inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-    <div className="text-muted-foreground/60 text-sm">Loading...</div>
+  <div className="fixed inset-0 flex items-center justify-center bg-zinc-950">
+    <div className="text-zinc-500 text-sm">Loading...</div>
   </div>
 );
 
