@@ -41,7 +41,7 @@ import MeetingScheduler from "./pages/MeetingScheduler";
 import Offers from "./pages/Offers";
 import Items from "./pages/Items";
 import NotFound from "./pages/NotFound";
-import { ThemeProvider } from "@/components/ui/theme-provider";
+
 import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/hooks/use-auth";
 import { Profile } from "@/types/profile";
@@ -109,101 +109,99 @@ const App: React.FC = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="theme">
-        <Toaster />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/roadmap" element={<Roadmap />} />
-          <Route path="/compare" element={<PlatformComparison />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/not-found" element={<NotFound />} />
-          <Route path="/discover" element={<Discover />} />
-          <Route path="/items" element={<Items />} />
-          <Route path="/projects" element={<Projects />} />
-          <Route path="/projects/:projectId" element={<ProjectDetail />} />
-          <Route
-            path="/projects/:projectId/landing"
-            element={<PublicLanding />}
-          />
-          <Route path="/projects/:projectId/edit" element={<EditProject />} />
-          <Route path="/create-project" element={<CreateProject />} />
-          <Route path="/projects/create" element={<CreateProject />} />
-          <Route path="/discover/projects" element={<ProjectsShowcase />} />
-          <Route path="/grouper" element={<Grouper />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/profile/:id" element={<ProfilePage />} />
-          <Route path="/profile-setup" element={<ProfileSetup />} />
-          <Route path="/create-event" element={<CreateEvent />} />
-          <Route path="/events/create" element={<CreateEvent />} />
-          <Route path="/events/edit/:eventId" element={<EditEvent />} />
-          <Route path="/events/interested" element={<EventsInterested />} />
-          <Route path="/events/upcoming" element={<EventsUpcoming />} />
-          <Route path="/events/:eventId" element={<EventDetail />} />
-          <Route path="/communities" element={<Communities />} />
-          <Route path="/communities/:id" element={<CommunityDashboard />} />
-          <Route path="/community-events" element={<CommunityEvents />} />
-          <Route path="/collaboration" element={<Collaboration />} />
-          <Route path="/offers" element={<Offers />} />
-          <Route path="/tandemx-shop" element={<TandemXShop />} />
-          <Route path="/shops" element={<Shops />} />
-          <Route path="/shops/:shopId" element={<ShopDetail />} />
-          <Route
-            path="/shops/:shopId/products/:productId"
-            element={<ProductDetail />}
-          />
-          <Route path="/create-shop" element={<CreateShop />} />
-          <Route path="/shops/create" element={<CreateShop />} />
-          <Route path="/eventbrite/callback" element={<EventbriteCallback />} />
-          <Route path="/eventbrite/orders" element={<EventbriteOrders />} />
-          <Route path="/brands/:brandId" element={<BrandDetail />} />
-          <Route path="/venues/:venueId" element={<VenueDetail />} />
-          <Route
-            path="/knowledge"
-            element={<Navigate to="/discover?type=glossary" replace />}
-          />
-          <Route path="/resources" element={<ResourceIndexPage />} />
-          <Route path="/resources/:resourceId" element={<ResourceDetail />} />
-          <Route
-            path="/resources/create"
-            element={<Navigate to="/create-resource" replace />}
-          />
-          <Route path="/create-resource" element={<CreateResource />} />
-          <Route path="/chats" element={<Chats />} />
-          <Route path="/artist/:artistId" element={<ArtistProfile />} />
-          <Route
-            path="/resourcer/:resourcerId"
-            element={<ResourcerProfile />}
-          />
-          <Route path="/glossary" element={<GlossaryPage />} />
-          <Route path="/glossary/create" element={<CreateGlossaryEntry />} />
-          <Route path="/glossary/:entryId" element={<GlossaryEntryDetail />} />
-          <Route path="/glossary-examples" element={<GlossaryExample />} />
-          <Route path="/tour-planner" element={<TourPlanner />} />
-          <Route path="/gear-packing" element={<GearPacking />} />
-          <Route path="/submit" element={<ResourceIndexPage />} />
-          <Route path="/requests" element={<Offers />} />
-          <Route path="/request-service" element={<RequestService />} />
-          <Route path="/travel-locations" element={<TravelLocations />} />
-          <Route path="/shopping-list" element={<ShoppingList />} />
-          <Route path="/tasks" element={<Tasks />} />
-          <Route path="/feed" element={<Feed />} />
-          <Route path="/create" element={<CreateHub />} />
-          <Route path="/vehicle-build" element={<VehicleBuildShowcase />} />
-          <Route path="/garages" element={<Garages />} />
-          <Route path="/garages/create" element={<CreateGarage />} />
-          <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/data-deletion" element={<DataDeletion />} />
-          <Route path="/instagram-demo" element={<InstagramDemo />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="*" element={<Navigate to="/not-found" replace />} />
-        </Routes>
-      </ThemeProvider>
+      <Toaster />
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/roadmap" element={<Roadmap />} />
+        <Route path="/compare" element={<PlatformComparison />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/not-found" element={<NotFound />} />
+        <Route path="/discover" element={<Discover />} />
+        <Route path="/items" element={<Items />} />
+        <Route path="/projects" element={<Projects />} />
+        <Route path="/projects/:projectId" element={<ProjectDetail />} />
+        <Route
+          path="/projects/:projectId/landing"
+          element={<PublicLanding />}
+        />
+        <Route path="/projects/:projectId/edit" element={<EditProject />} />
+        <Route path="/create-project" element={<CreateProject />} />
+        <Route path="/projects/create" element={<CreateProject />} />
+        <Route path="/discover/projects" element={<ProjectsShowcase />} />
+        <Route path="/grouper" element={<Grouper />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile/:id" element={<ProfilePage />} />
+        <Route path="/profile-setup" element={<ProfileSetup />} />
+        <Route path="/create-event" element={<CreateEvent />} />
+        <Route path="/events/create" element={<CreateEvent />} />
+        <Route path="/events/edit/:eventId" element={<EditEvent />} />
+        <Route path="/events/interested" element={<EventsInterested />} />
+        <Route path="/events/upcoming" element={<EventsUpcoming />} />
+        <Route path="/events/:eventId" element={<EventDetail />} />
+        <Route path="/communities" element={<Communities />} />
+        <Route path="/communities/:id" element={<CommunityDashboard />} />
+        <Route path="/community-events" element={<CommunityEvents />} />
+        <Route path="/collaboration" element={<Collaboration />} />
+        <Route path="/offers" element={<Offers />} />
+        <Route path="/tandemx-shop" element={<TandemXShop />} />
+        <Route path="/shops" element={<Shops />} />
+        <Route path="/shops/:shopId" element={<ShopDetail />} />
+        <Route
+          path="/shops/:shopId/products/:productId"
+          element={<ProductDetail />}
+        />
+        <Route path="/create-shop" element={<CreateShop />} />
+        <Route path="/shops/create" element={<CreateShop />} />
+        <Route path="/eventbrite/callback" element={<EventbriteCallback />} />
+        <Route path="/eventbrite/orders" element={<EventbriteOrders />} />
+        <Route path="/brands/:brandId" element={<BrandDetail />} />
+        <Route path="/venues/:venueId" element={<VenueDetail />} />
+        <Route
+          path="/knowledge"
+          element={<Navigate to="/discover?type=glossary" replace />}
+        />
+        <Route path="/resources" element={<ResourceIndexPage />} />
+        <Route path="/resources/:resourceId" element={<ResourceDetail />} />
+        <Route
+          path="/resources/create"
+          element={<Navigate to="/create-resource" replace />}
+        />
+        <Route path="/create-resource" element={<CreateResource />} />
+        <Route path="/chats" element={<Chats />} />
+        <Route path="/artist/:artistId" element={<ArtistProfile />} />
+        <Route
+          path="/resourcer/:resourcerId"
+          element={<ResourcerProfile />}
+        />
+        <Route path="/glossary" element={<GlossaryPage />} />
+        <Route path="/glossary/create" element={<CreateGlossaryEntry />} />
+        <Route path="/glossary/:entryId" element={<GlossaryEntryDetail />} />
+        <Route path="/glossary-examples" element={<GlossaryExample />} />
+        <Route path="/tour-planner" element={<TourPlanner />} />
+        <Route path="/gear-packing" element={<GearPacking />} />
+        <Route path="/submit" element={<ResourceIndexPage />} />
+        <Route path="/requests" element={<Offers />} />
+        <Route path="/request-service" element={<RequestService />} />
+        <Route path="/travel-locations" element={<TravelLocations />} />
+        <Route path="/shopping-list" element={<ShoppingList />} />
+        <Route path="/tasks" element={<Tasks />} />
+        <Route path="/feed" element={<Feed />} />
+        <Route path="/create" element={<CreateHub />} />
+        <Route path="/vehicle-build" element={<VehicleBuildShowcase />} />
+        <Route path="/garages" element={<Garages />} />
+        <Route path="/garages/create" element={<CreateGarage />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/data-deletion" element={<DataDeletion />} />
+        <Route path="/instagram-demo" element={<InstagramDemo />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="*" element={<Navigate to="/not-found" replace />} />
+      </Routes>
     </QueryClientProvider>
   );
 };
