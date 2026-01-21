@@ -10,6 +10,7 @@ import EmailWaitlist from "@/components/home/EmailWaitlist";
 import FeedbackQuestionnaire from "@/components/home/FeedbackQuestionnaire";
 import FeaturedProjects from "@/components/home/FeaturedProjects";
 import UnifiedCalendar from "@/components/home/UnifiedCalendar";
+import { InstanceProjects } from "@/components/home/InstanceProjects";
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
@@ -135,6 +136,9 @@ const Landing: React.FC = () => {
 
       {/* Visual Feature Showcase */}
       <FeatureSection />
+
+      {/* OverHere Enterprise Projects */}
+      <InstanceProjects />
 
       {/* Ecosystem */}
       <EcosystemSection />
