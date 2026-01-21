@@ -55,51 +55,68 @@ export const useGetProjects = () => {
   const { user } = useUser();
   
   return useQuery({
-    queryKey: ['projects'],
+    queryKey: ['projects', user?.id],
     queryFn: async (): Promise<Project[]> => {
       try {
-        let projectsData;
+        let projectsData: ProjectRecord[] = [];
         
         if (user) {
-          // First get the IDs of projects owned by the user
-          const { data: ownershipData, error: ownershipError } = await supabase
-            .from('content_ownership')
-            .select('content_id')
-            .eq('content_type', 'project')
-            .eq('owner_id', user.id);
-
-          if (ownershipError) throw ownershipError;
+          // Get projects through multiple methods:
+          // 1. Via content_ownership table
+          // 2. Via owner_id on projects table
+          // 3. Public projects (is_public = true)
           
-          if (!ownershipData || ownershipData.length === 0) {
-            // If no owned projects, get public projects instead
-            const { data, error } = await supabase
+          const [ownershipResult, directOwnerResult, publicResult] = await Promise.all([
+            // Projects via content_ownership
+            supabase
+              .from('content_ownership')
+              .select('content_id')
+              .eq('content_type', 'project')
+              .eq('owner_id', user.id),
+            // Projects with owner_id directly on the table
+            supabase
               .from('projects')
               .select('*')
-              .limit(10);
-              
-            if (error) throw error;
-            projectsData = data;
-          } else {
-            const projectIds = ownershipData.map(item => item.content_id);
-            
-            // Then fetch the actual projects
-            const { data, error } = await supabase
+              .eq('owner_id', user.id),
+            // Public projects
+            supabase
               .from('projects')
               .select('*')
-              .in('id', projectIds);
+              .eq('is_public', true)
+          ]);
 
-            if (error) throw error;
-            projectsData = data;
+          // Collect project IDs from content_ownership
+          const ownershipIds = (ownershipResult.data || []).map(item => item.content_id);
+          
+          // Fetch projects from content_ownership if any
+          let ownershipProjects: ProjectRecord[] = [];
+          if (ownershipIds.length > 0) {
+            const { data } = await supabase
+              .from('projects')
+              .select('*')
+              .in('id', ownershipIds);
+            ownershipProjects = data || [];
           }
+
+          // Combine all projects and deduplicate by id
+          const allProjects = [
+            ...ownershipProjects,
+            ...(directOwnerResult.data || []),
+            ...(publicResult.data || [])
+          ];
+          
+          const projectMap = new Map<string, ProjectRecord>();
+          allProjects.forEach(p => projectMap.set(p.id, p));
+          projectsData = Array.from(projectMap.values());
         } else {
-          // If not logged in, just load all public projects
+          // If not logged in, just load public projects
           const { data, error } = await supabase
             .from('projects')
             .select('*')
-            .limit(10);
+            .eq('is_public', true);
             
           if (error) throw error;
-          projectsData = data;
+          projectsData = data || [];
         }
         
         // Process the data to match our Project interface
