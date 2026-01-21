@@ -25,9 +25,16 @@ import {
   Circle,
   Eye,
   PlusCircle,
+  Upload,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { ToonImporter } from "@/components/projects/ToonImporter";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,6 +64,7 @@ const Projects: React.FC = () => {
   const [projectTasks, setProjectTasks] = useState<Record<string, any[]>>({});
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
 
   // Check ownership for all projects
   useEffect(() => {
@@ -208,9 +216,25 @@ const Projects: React.FC = () => {
         <div className="flex flex-wrap justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Projects</h1>
           {user && (
-            <Button onClick={handleCreateProject} className="mt-4 sm:mt-0">
-              Create Project
-            </Button>
+            <div className="flex gap-2 mt-4 sm:mt-0">
+              <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <Upload className="h-4 w-4 mr-2" />
+                    Import .toon
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <ToonImporter onComplete={() => {
+                    setImportDialogOpen(false);
+                    refetch();
+                  }} />
+                </DialogContent>
+              </Dialog>
+              <Button onClick={handleCreateProject}>
+                Create Project
+              </Button>
+            </div>
           )}
         </div>
 
