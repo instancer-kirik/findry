@@ -331,6 +331,16 @@ export const useDiscoverData = (
           });
         }
         
+        // Filter projects by status/type
+        if (activeTab === 'projects' && activeSubTab !== 'all') {
+          data = data.filter(item => {
+            const subtype = (item.subtype || '').toLowerCase();
+            const status = (item.status || '').toLowerCase();
+            const filterValue = activeSubTab.toLowerCase();
+            return subtype === filterValue || status === filterValue;
+          });
+        }
+        
         // Filter by subfilters if any are selected
         if (selectedSubfilters.length > 0) {
           data = data.filter(item => {
@@ -343,6 +353,11 @@ export const useDiscoverData = (
             }
             if (activeTab === 'venues' && item.subtype) {
               return selectedSubfilters.includes(item.subtype);
+            }
+            if (activeTab === 'projects') {
+              // Filter by domain (stored in location field for projects)
+              const domain = (item.location || '').toLowerCase();
+              return selectedSubfilters.some(filter => domain.includes(filter.toLowerCase()));
             }
             return false;
           });

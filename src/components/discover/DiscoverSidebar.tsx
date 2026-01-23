@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { PlusCircle, Calendar, Users, Tags, Star, MessageSquare, AlertCircle, BookOpen } from 'lucide-react';
+import { 
+  PlusCircle, Calendar, Users, Tags, Star, MessageSquare, 
+  AlertCircle, BookOpen, Folder, Code, Lightbulb, Rocket,
+  ExternalLink, Github, Wrench, TrendingUp
+} from 'lucide-react';
 import AnimatedSection from '../ui-custom/AnimatedSection';
 import { Button } from '@/components/ui/button';
 import { 
@@ -118,13 +122,128 @@ const LearningResources = () => {
   );
 };
 
-const DiscoverSidebar: React.FC<DiscoverSidebarProps> = ({ 
-  activeTabData = [],
-  activeTab = 'events'
-}) => {
+// Project-specific sidebar content
+const ProjectQuickActions = () => (
+  <Card>
+    <CardHeader className="pb-3">
+      <CardTitle className="text-lg flex items-center gap-2">
+        <Rocket className="h-4 w-4" />
+        Quick Actions
+      </CardTitle>
+    </CardHeader>
+    <CardContent className="space-y-2">
+      <Button className="w-full justify-start" asChild>
+        <Link to="/create-project">
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Create Project
+        </Link>
+      </Button>
+      <Button className="w-full justify-start" variant="outline" asChild>
+        <Link to="/projects">
+          <Folder className="mr-2 h-4 w-4" />
+          My Projects
+        </Link>
+      </Button>
+    </CardContent>
+  </Card>
+);
+
+const ProjectCategories = () => {
+  const domains = [
+    { name: 'Development Tools', icon: Code, count: 12, color: 'text-blue-500' },
+    { name: 'Creative Tools', icon: Lightbulb, count: 8, color: 'text-purple-500' },
+    { name: 'System Tools', icon: Wrench, count: 5, color: 'text-green-500' },
+    { name: 'Gaming', icon: Rocket, count: 4, color: 'text-orange-500' },
+  ];
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg flex items-center gap-2">
+          <Tags className="h-4 w-4" />
+          Project Domains
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ScrollArea className="h-[160px]">
+          <div className="space-y-2">
+            {domains.map((domain, idx) => (
+              <div key={idx} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded-md transition-colors cursor-pointer">
+                <div className="flex items-center gap-2">
+                  <domain.icon className={`h-4 w-4 ${domain.color}`} />
+                  <span className="text-sm">{domain.name}</span>
+                </div>
+                <Badge variant="secondary" className="text-xs">{domain.count}</Badge>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+      </CardContent>
+    </Card>
+  );
+};
+
+const ProjectTechStack = () => {
+  const techTags = [
+    'TypeScript', 'React', 'Zig', 'Rust', 'Python', 
+    'Go', 'Node.js', 'PostgreSQL', 'Supabase'
+  ];
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg flex items-center gap-2">
+          <Code className="h-4 w-4 text-blue-500" />
+          Tech Stack Filter
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-wrap gap-1.5">
+          {techTags.map(tag => (
+            <Badge key={tag} variant="outline" className="cursor-pointer hover:bg-primary/10 text-xs">
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+const FeaturedProjects = ({ projects }: { projects: ContentItemProps[] }) => (
+  <Card>
+    <CardHeader className="pb-3">
+      <CardTitle className="text-lg flex items-center gap-2">
+        <TrendingUp className="h-4 w-4 text-green-500" />
+        Featured Projects
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      <ScrollArea className="h-[140px]">
+        <div className="space-y-2">
+          {projects.slice(0, 4).map((project, idx) => (
+            <Link 
+              key={idx} 
+              to={`/projects/${project.id}`}
+              className="flex items-start gap-2 p-2 hover:bg-muted/50 rounded-md transition-colors block"
+            >
+              <span className="text-lg">{project.emoji || '📦'}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium line-clamp-1">{project.name}</p>
+                <p className="text-xs text-muted-foreground line-clamp-1">{project.description}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </ScrollArea>
+    </CardContent>
+  </Card>
+);
+
+// Default sidebar content (for artists, events, etc.)
+const DefaultSidebarContent = ({ activeTab }: { activeTab: string }) => {
   const [activeCircleTab, setActiveCircleTab] = useState("circles");
 
-  // Sample user circles
   const userCircles = [
     { name: "Collaborators", users: ["Alex Kim", "Taylor Swift", "John Doe"], color: "bg-blue-500" },
     { name: "Favorites", users: ["Elena Rivera", "Studio 54", "James Bond"], color: "bg-yellow-500" },
@@ -133,7 +252,7 @@ const DiscoverSidebar: React.FC<DiscoverSidebarProps> = ({
   ];
 
   return (
-    <div className="space-y-4">
+    <>
       <AnimatedSection animation="slide-in-left" delay={100}>
         <Card>
           <CardHeader className="pb-3">
@@ -251,6 +370,38 @@ const DiscoverSidebar: React.FC<DiscoverSidebarProps> = ({
           </CardContent>
         </Card>
       </AnimatedSection>
+    </>
+  );
+};
+
+const DiscoverSidebar: React.FC<DiscoverSidebarProps> = ({ 
+  activeTabData = [],
+  activeTab = 'events'
+}) => {
+  // Render project-specific sidebar
+  if (activeTab === 'projects') {
+    return (
+      <div className="space-y-4">
+        <AnimatedSection animation="slide-in-left" delay={100}>
+          <ProjectQuickActions />
+        </AnimatedSection>
+        <AnimatedSection animation="slide-in-left" delay={200}>
+          <ProjectCategories />
+        </AnimatedSection>
+        <AnimatedSection animation="slide-in-left" delay={300}>
+          <ProjectTechStack />
+        </AnimatedSection>
+        <AnimatedSection animation="slide-in-left" delay={400}>
+          <FeaturedProjects projects={activeTabData} />
+        </AnimatedSection>
+      </div>
+    );
+  }
+
+  // Render default sidebar for other tabs
+  return (
+    <div className="space-y-4">
+      <DefaultSidebarContent activeTab={activeTab} />
     </div>
   );
 };
