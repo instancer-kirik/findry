@@ -216,7 +216,7 @@ const Discover = () => {
     "communities",
     "brands",
   ];
-  const tabSubcategories = {
+  const tabSubcategories: Record<string, string[]> = {
     artists: ["music", "visual", "performance", "digital"],
     brands: ["record-label", "fashion", "tech", "food-beverage"],
     events: ["concert", "exhibition", "workshop", "networking"],
@@ -229,6 +229,7 @@ const Discover = () => {
       "neighborhood",
       "interest-based",
     ],
+    projects: ["active", "beta", "planning", "completed", "idea", "catalog"],
   };
 
   const getTabLabel = (tab: string) => {
@@ -277,6 +278,15 @@ const Discover = () => {
         { value: "theater", label: "Theater" },
         { value: "outdoor", label: "Outdoor" },
         { value: "gallery", label: "Gallery" },
+      ]);
+    } else if (activeTab === "projects") {
+      setAvailableSubfilters([
+        { value: "development", label: "Development Tools" },
+        { value: "creative", label: "Creative Tools" },
+        { value: "system", label: "System Tools" },
+        { value: "gaming", label: "Gaming & Entertainment" },
+        { value: "productivity", label: "Productivity" },
+        { value: "featured", label: "Featured" },
       ]);
     } else {
       // Default subfilters for other tabs

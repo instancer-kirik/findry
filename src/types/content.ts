@@ -40,6 +40,10 @@ export interface ContentItemProps {
   selectionMode?: boolean;
   // Add status for ProjectDetail reference items
   status?: string;
+  // Project-specific properties
+  emoji?: string;
+  source_url?: string;
+  featured?: boolean;
 }
 
 // Tour planning types
