@@ -175,58 +175,33 @@ export const useDiscoverData = (
             data = [...brands];
             break;
           case 'projects':
-            // Fetch unified projects from all three tables
-            const [projectsRes, devProjectsRes, productIdeasRes] = await Promise.all([
-              supabase.from('projects').select('*'),
-              supabase.from('development_projects').select('*'),
-              supabase.from('product_ideas').select('*'),
-            ]);
+            // Fetch from unified_projects view
+            const { data: unifiedProjectsData, error: unifiedError } = await supabase
+              .from('unified_projects')
+              .select('*')
+              .order('featured', { ascending: false })
+              .order('updated_at', { ascending: false });
             
-            const unifiedProjects: ContentItemProps[] = [];
-            
-            // Map projects table
-            if (projectsRes.data) {
-              projectsRes.data.forEach(p => unifiedProjects.push({
+            if (unifiedError) {
+              console.error('Error fetching unified projects:', unifiedError);
+              data = [...projects]; // Fallback to demo data
+            } else if (unifiedProjectsData && unifiedProjectsData.length > 0) {
+              data = unifiedProjectsData.map(p => ({
                 id: p.id,
                 name: p.name,
                 type: 'project',
-                subtype: p.status || 'active',
+                subtype: p.project_type || p.status || 'active',
                 description: p.description || '',
-                location: '',
-                tags: p.tags || [],
-                image_url: p.image_url || '',
-              }));
-            }
-            
-            // Map development_projects table
-            if (devProjectsRes.data) {
-              devProjectsRes.data.forEach(p => unifiedProjects.push({
-                id: p.id,
-                name: p.name,
-                type: 'project',
-                subtype: p.status || 'active',
-                description: p.description || '',
-                location: '',
-                tags: [],
+                location: p.domain || '',
+                tags: p.tech_stack || p.features || [],
                 image_url: '',
+                source_url: p.source_url,
+                emoji: p.emoji,
+                featured: p.featured,
               }));
+            } else {
+              data = [...projects]; // Fallback to demo data if DB is empty
             }
-            
-            // Map product_ideas table
-            if (productIdeasRes.data) {
-              productIdeasRes.data.forEach(p => unifiedProjects.push({
-                id: p.id,
-                name: p.name,
-                type: 'project',
-                subtype: 'idea',
-                description: p.description || '',
-                location: '',
-                tags: p.tags || [],
-                image_url: '',
-              }));
-            }
-            
-            data = unifiedProjects.length > 0 ? unifiedProjects : [...projects];
             break;
           case 'albums':
             data = [...albums];

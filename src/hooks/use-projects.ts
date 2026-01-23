@@ -50,7 +50,42 @@ export interface Project {
   updated_at?: string;
 }
 
-// Get all projects
+// Unified project record from the view
+interface UnifiedProjectRecord {
+  id: string;
+  name: string;
+  description: string | null;
+  domain: string | null;
+  status: string | null;
+  tech_stack: string[] | null;
+  features: string[] | null;
+  source_url: string | null;
+  emoji: string | null;
+  featured: boolean | null;
+  featured_order: number | null;
+  project_type: string | null;
+  source_table: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  dev_project_id: string | null;
+  dev_version: string | null;
+  dev_progress: number | null;
+  dev_repo_url: string | null;
+  idea_id: string | null;
+  idea_category_id: string | null;
+  target_market: string | null;
+  problem_statement: string | null;
+  solution_approach: string | null;
+  feasibility_score: number | null;
+  market_potential_score: number | null;
+  priority_score: number | null;
+  category_name: string | null;
+  category_icon: string | null;
+  category_color: string | null;
+  path: string | null;
+}
+
+// Get all projects from unified_projects view
 export const useGetProjects = () => {
   const { user } = useUser();
   
@@ -58,37 +93,35 @@ export const useGetProjects = () => {
     queryKey: ['projects', user?.id],
     queryFn: async (): Promise<Project[]> => {
       try {
+        // Fetch from unified_projects view - includes all project types
+        const { data: unifiedData, error: unifiedError } = await supabase
+          .from('unified_projects')
+          .select('*')
+          .order('featured', { ascending: false })
+          .order('updated_at', { ascending: false });
+
+        if (unifiedError) {
+          console.error('Error fetching unified projects:', unifiedError);
+        }
+
+        // Also fetch from projects table for user-specific projects with full features
         let projectsData: ProjectRecord[] = [];
         
         if (user) {
-          // Get projects through multiple methods:
-          // 1. Via content_ownership table
-          // 2. Via owner_id on projects table
-          // 3. Public projects (is_public = true)
-          
-          const [ownershipResult, directOwnerResult, publicResult] = await Promise.all([
-            // Projects via content_ownership
+          const [ownershipResult, directOwnerResult] = await Promise.all([
             supabase
               .from('content_ownership')
               .select('content_id')
               .eq('content_type', 'project')
               .eq('owner_id', user.id),
-            // Projects with owner_id directly on the table
             supabase
               .from('projects')
               .select('*')
-              .eq('owner_id', user.id),
-            // Public projects
-            supabase
-              .from('projects')
-              .select('*')
-              .eq('is_public', true)
+              .or(`owner_id.eq.${user.id},created_by.eq.${user.id}`)
           ]);
 
-          // Collect project IDs from content_ownership
           const ownershipIds = (ownershipResult.data || []).map(item => item.content_id);
           
-          // Fetch projects from content_ownership if any
           let ownershipProjects: ProjectRecord[] = [];
           if (ownershipIds.length > 0) {
             const { data } = await supabase
@@ -98,81 +131,88 @@ export const useGetProjects = () => {
             ownershipProjects = data || [];
           }
 
-          // Combine all projects and deduplicate by id
           const allProjects = [
             ...ownershipProjects,
-            ...(directOwnerResult.data || []),
-            ...(publicResult.data || [])
+            ...(directOwnerResult.data || [])
           ];
           
           const projectMap = new Map<string, ProjectRecord>();
           allProjects.forEach(p => projectMap.set(p.id, p));
           projectsData = Array.from(projectMap.values());
-        } else {
-          // If not logged in, just load public projects
-          const { data, error } = await supabase
-            .from('projects')
-            .select('*')
-            .eq('is_public', true);
-            
-          if (error) throw error;
-          projectsData = data || [];
         }
+
+        // Process unified projects
+        const unifiedProjects: Project[] = (unifiedData || []).map((p: UnifiedProjectRecord) => ({
+          id: p.id,
+          name: p.name,
+          description: p.description || '',
+          status: (p.status as any) || 'planning',
+          version: p.dev_version || '0.1.0',
+          progress: p.dev_progress || 0,
+          tags: p.tech_stack || [],
+          components: [],
+          tasks: [],
+          repoUrl: p.source_url || p.dev_repo_url,
+          source: p.source_table || 'unified',
+          updated_at: p.updated_at || undefined
+        }));
+
+        // Process user's projects table data
+        const userProjects: Project[] = projectsData.map((p: ProjectRecord) => ({
+          id: p.id,
+          name: p.name,
+          description: p.description || '',
+          status: (p.status as any) || 'planning',
+          version: p.version || '0.1.0',
+          progress: p.progress || 0,
+          tags: p.tags || [],
+          components: [],
+          tasks: [],
+          repoUrl: p.repo_url,
+          source: 'projects',
+          updated_at: p.updated_at
+        }));
+
+        // Combine and deduplicate by id (user projects take priority)
+        const projectMap = new Map<string, Project>();
+        unifiedProjects.forEach(p => projectMap.set(p.id, p));
+        userProjects.forEach(p => projectMap.set(p.id, p)); // Override with user projects
+        const projects = Array.from(projectMap.values());
         
-        // Process the data to match our Project interface
-        const projects: Project[] = (projectsData || []).map((p: ProjectRecord) => {
-          const project: Project = {
-            id: p.id,
-            name: p.name,
-            description: p.description || '',
-            status: (p.status as any) || 'planning',
-            version: p.version || '0.1.0',
-            progress: p.progress || 0,
-            tags: p.tags || [],
-            components: [],
-            tasks: [],
-            repoUrl: p.repo_url,
-            source: 'projects',
-            updated_at: p.updated_at
-          };
-          
-          return project;
-        });
-        
-        // For each project, get its components and tasks
+        // For user projects from 'projects' table, get components and tasks
         for (const project of projects) {
-          // Get components
-          const { data: componentsData, error: componentsError } = await supabase
-            .from('project_components')
-            .select('*')
-            .eq('project_id', project.id);
+          if (project.source === 'projects') {
+            const { data: componentsData } = await supabase
+              .from('project_components')
+              .select('*')
+              .eq('project_id', project.id);
+              
+            if (componentsData) {
+              project.components = componentsData.map((c: ProjectComponentRecord) => ({
+                id: c.id,
+                name: c.name,
+                description: c.description || '',
+                status: (c.status as 'planned' | 'in-development' | 'ready' | 'needs-revision') || 'planned',
+                type: (c.type as 'ui' | 'feature' | 'integration' | 'page') || 'feature'
+              }));
+            }
             
-          if (!componentsError && componentsData) {
-            project.components = componentsData.map((c: ProjectComponentRecord) => ({
-              id: c.id,
-              name: c.name,
-              description: c.description || '',
-              status: (c.status as 'planned' | 'in-development' | 'ready' | 'needs-revision') || 'planned',
-              type: (c.type as 'ui' | 'feature' | 'integration' | 'page') || 'feature'
-            }));
-          }
-          
-          // Get tasks
-          const { data: tasksData, error: tasksError } = await supabase
-            .from('project_tasks')
-            .select('*')
-            .eq('project_id', project.id);
-            
-          if (!tasksError && tasksData) {
-            project.tasks = tasksData.map((t: ProjectTaskRecord) => ({
-              id: t.id,
-              title: t.title,
-              description: t.description || '',
-              status: (t.status as 'pending' | 'in-progress' | 'completed' | 'blocked') || 'pending',
-              priority: (t.priority as 'low' | 'medium' | 'high') || 'medium',
-              assignedTo: t.assigned_to,
-              dueDate: t.due_date
-            }));
+            const { data: tasksData } = await supabase
+              .from('project_tasks')
+              .select('*')
+              .eq('project_id', project.id);
+              
+            if (tasksData) {
+              project.tasks = tasksData.map((t: ProjectTaskRecord) => ({
+                id: t.id,
+                title: t.title,
+                description: t.description || '',
+                status: (t.status as 'pending' | 'in-progress' | 'completed' | 'blocked') || 'pending',
+                priority: (t.priority as 'low' | 'medium' | 'high') || 'medium',
+                assignedTo: t.assigned_to,
+                dueDate: t.due_date
+              }));
+            }
           }
         }
         
