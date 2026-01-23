@@ -8184,10 +8184,12 @@ export type Database = {
           idea_id: string | null
           market_potential_score: number | null
           name: string | null
+          path: string | null
           priority_score: number | null
           problem_statement: string | null
           project_type: string | null
           solution_approach: string | null
+          source_table: string | null
           source_url: string | null
           status: string | null
           target_market: string | null
