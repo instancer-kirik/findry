@@ -4974,38 +4974,153 @@ export type Database = {
           },
         ]
       }
+      product_options: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          product_id: string
+          sort_order: number | null
+          values: string[]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          product_id: string
+          sort_order?: number | null
+          values: string[]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          product_id?: string
+          sort_order?: number | null
+          values?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_options_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_variants: {
+        Row: {
+          available_quantity: number | null
+          created_at: string
+          description: string | null
+          id: string
+          includes: string[] | null
+          is_active: boolean | null
+          limited_quantity: number | null
+          name: string
+          options: Json | null
+          price: number
+          product_id: string
+          sku: string | null
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          available_quantity?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          includes?: string[] | null
+          is_active?: boolean | null
+          limited_quantity?: number | null
+          name: string
+          options?: Json | null
+          price: number
+          product_id: string
+          sku?: string | null
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          available_quantity?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          includes?: string[] | null
+          is_active?: boolean | null
+          limited_quantity?: number | null
+          name?: string
+          options?: Json | null
+          price?: number
+          product_id?: string
+          sku?: string | null
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           category: string | null
           created_at: string
           description: string | null
+          estimated_release: string | null
+          featured: boolean | null
+          features: string[] | null
           id: string
           image_url: string | null
+          long_description: string | null
           name: string
+          payment_links: Json | null
           price: number
-          shop_id: string
+          shop_id: string | null
+          sku: string | null
+          status: string | null
           updated_at: string
         }
         Insert: {
           category?: string | null
           created_at?: string
           description?: string | null
+          estimated_release?: string | null
+          featured?: boolean | null
+          features?: string[] | null
           id?: string
           image_url?: string | null
+          long_description?: string | null
           name: string
+          payment_links?: Json | null
           price?: number
-          shop_id: string
+          shop_id?: string | null
+          sku?: string | null
+          status?: string | null
           updated_at?: string
         }
         Update: {
           category?: string | null
           created_at?: string
           description?: string | null
+          estimated_release?: string | null
+          featured?: boolean | null
+          features?: string[] | null
           id?: string
           image_url?: string | null
+          long_description?: string | null
           name?: string
+          payment_links?: Json | null
           price?: number
-          shop_id?: string
+          shop_id?: string | null
+          sku?: string | null
+          status?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -5157,6 +5272,42 @@ export type Database = {
           },
         ]
       }
+      project_competitors: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          notes: string | null
+          project_id: string
+          strengths: string | null
+          updated_at: string | null
+          url: string | null
+          weaknesses: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          project_id: string
+          strengths?: string | null
+          updated_at?: string | null
+          url?: string | null
+          weaknesses?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          project_id?: string
+          strengths?: string | null
+          updated_at?: string | null
+          url?: string | null
+          weaknesses?: string | null
+        }
+        Relationships: []
+      }
       project_components: {
         Row: {
           assigned_to: string | null
@@ -5203,6 +5354,197 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_decision_criteria: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          project_id: string
+          updated_at: string | null
+          weight: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          project_id: string
+          updated_at?: string | null
+          weight?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          project_id?: string
+          updated_at?: string | null
+          weight?: number | null
+        }
+        Relationships: []
+      }
+      project_decision_options: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          project_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          project_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          project_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      project_decision_scores: {
+        Row: {
+          created_at: string | null
+          criterion_id: string
+          id: string
+          option_id: string
+          score: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          criterion_id: string
+          id?: string
+          option_id: string
+          score?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          criterion_id?: string
+          id?: string
+          option_id?: string
+          score?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_decision_scores_criterion_id_fkey"
+            columns: ["criterion_id"]
+            isOneToOne: false
+            referencedRelation: "project_decision_criteria"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_decision_scores_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "project_decision_options"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_design_axes: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          project_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          project_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          project_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      project_design_configs: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          notes: string | null
+          project_id: string
+          selections: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          project_id: string
+          selections?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          project_id?: string
+          selections?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      project_design_options: {
+        Row: {
+          axis_id: string
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          tradeoffs: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          axis_id: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          tradeoffs?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          axis_id?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          tradeoffs?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_design_options_axis_id_fkey"
+            columns: ["axis_id"]
+            isOneToOne: false
+            referencedRelation: "project_design_axes"
             referencedColumns: ["id"]
           },
         ]
@@ -8168,6 +8510,7 @@ export type Database = {
           category_icon: string | null
           category_name: string | null
           created_at: string | null
+          created_by: string | null
           description: string | null
           dev_progress: number | null
           dev_project_id: string | null
@@ -8182,8 +8525,12 @@ export type Database = {
           id: string | null
           idea_category_id: string | null
           idea_id: string | null
+          image_url: string | null
+          is_public: boolean | null
           market_potential_score: number | null
+          metadata: Json | null
           name: string | null
+          owner_id: string | null
           path: string | null
           priority_score: number | null
           problem_statement: string | null
