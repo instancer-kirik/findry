@@ -170,6 +170,7 @@ export const navigation: NavCategory[] = [
         links: [
           { href: "/glossary", title: "Glossary", description: "Terms & definitions", icon: BookOpen },
           { href: "/resources", title: "Guides", description: "Help & references", icon: FileText },
+          { href: "/feedback", title: "Send Feedback", description: "Share your thoughts", icon: MessageSquare },
           { href: "/contact", title: "Contact", description: "Get in touch", icon: Mail },
         ],
       },
