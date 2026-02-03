@@ -1071,6 +1071,48 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          id: string
+          message: string
+          metadata: Json | null
+          priority: string | null
+          project_id: string | null
+          status: string | null
+          subject: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          message: string
+          metadata?: Json | null
+          priority?: string | null
+          project_id?: string | null
+          status?: string | null
+          subject: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          message?: string
+          metadata?: Json | null
+          priority?: string | null
+          project_id?: string | null
+          status?: string | null
+          subject?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       game_jam_resources: {
         Row: {
           created_at: string

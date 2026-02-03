@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProject } from "@/hooks/use-project";
 import { Project } from "@/types/project";
 import { useAuth } from "@/hooks/use-auth";
@@ -26,6 +27,10 @@ import {
   Eye,
   PlusCircle,
   Upload,
+  FolderKanban,
+  Globe,
+  User,
+  Sparkles,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -54,17 +59,23 @@ import {
 
 const Projects: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { useGetProjects } = useProject();
   const { data: projects = [], isLoading, error, refetch } = useGetProjects();
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  const [projectOwnership, setProjectOwnership] = useState<
-    Record<string, boolean>
-  >({});
+  const [projectOwnership, setProjectOwnership] = useState<Record<string, boolean>>({});
   const [projectTasks, setProjectTasks] = useState<Record<string, any[]>>({});
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
+  
+  // Tab state from URL or default
+  const activeTab = searchParams.get('tab') || (user ? 'my-projects' : 'showcase');
+
+  const setActiveTab = (tab: string) => {
+    setSearchParams({ tab });
+  };
 
   // Check ownership for all projects
   useEffect(() => {
@@ -125,7 +136,21 @@ const Projects: React.FC = () => {
     fetchAllTasks();
   }, [projects]);
 
-  const filteredProjects = projects.filter(
+  // Filter projects based on tab
+  const myProjects = projects.filter((p) => projectOwnership[p.id]);
+  const showcaseProjects = projects.filter((p) => p.is_public || p.featured);
+
+  const filteredMyProjects = myProjects.filter(
+    (project) =>
+      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (project.tags &&
+        project.tags.some((tag) =>
+          tag.toLowerCase().includes(searchQuery.toLowerCase()),
+        )),
+  );
+
+  const filteredShowcaseProjects = showcaseProjects.filter(
     (project) =>
       project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -151,7 +176,6 @@ const Projects: React.FC = () => {
     if (!projectToDelete) return;
 
     try {
-      // Delete related records first
       await supabase
         .from("project_tasks")
         .delete()
@@ -165,7 +189,6 @@ const Projects: React.FC = () => {
         .delete()
         .eq("content_id", projectToDelete);
 
-      // Delete the project
       const { error } = await supabase
         .from("projects")
         .delete()
@@ -187,6 +210,131 @@ const Projects: React.FC = () => {
   const openDeleteDialog = (projectId: string) => {
     setProjectToDelete(projectId);
     setDeleteDialogOpen(true);
+  };
+
+  const renderProjectCard = (project: Project, showOwnerActions: boolean) => {
+    const tasks = projectTasks[project.id] || [];
+    const isOwner = projectOwnership[project.id] || false;
+    const completedTasks = tasks.filter((t) => t.status === "completed").length;
+
+    return (
+      <Card key={project.id} className="flex flex-col h-full">
+        <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+          <div className="flex-1">
+            <h2 className="text-xl font-semibold mb-2 line-clamp-2">
+              {project.name}
+            </h2>
+          </div>
+          {showOwnerActions && isOwner && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => handleEditProject(project.id)}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Project
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => openDeleteDialog(project.id)}
+                  className="text-destructive"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Project
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </CardHeader>
+        <CardContent className="flex-grow">
+          <div className="flex flex-wrap gap-2 mb-3">
+            {project.featured && (
+              <Badge variant="default" className="bg-yellow-500/20 text-yellow-700 dark:text-yellow-300">
+                <Sparkles className="h-3 w-3 mr-1" />
+                Featured
+              </Badge>
+            )}
+            {project.tags &&
+              project.tags.slice(0, 3).map((tag) => (
+                <span
+                  key={tag}
+                  className="inline-block bg-muted px-2 py-0.5 rounded-full text-xs"
+                >
+                  {tag}
+                </span>
+              ))}
+          </div>
+          <p className="text-muted-foreground mb-4 line-clamp-3">
+            {project.description || "No description provided"}
+          </p>
+
+          {/* Tasks Preview */}
+          {tasks.length > 0 && (
+            <div className="mb-4 space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">
+                Recent Tasks ({completedTasks}/{tasks.length} completed)
+              </p>
+              <div className="space-y-1">
+                {tasks.slice(0, 3).map((task) => (
+                  <div key={task.id} className="flex items-center text-sm">
+                    {task.status === "completed" ? (
+                      <CheckCircle2 className="h-3 w-3 mr-2 text-green-500" />
+                    ) : (
+                      <Circle className="h-3 w-3 mr-2 text-muted-foreground" />
+                    )}
+                    <span className="line-clamp-1">{task.title}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-muted-foreground">Status</p>
+              <p className="font-medium capitalize">
+                {project.status.replace("_", " ")}
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Progress</p>
+              <p className="font-medium">{project.progress}%</p>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter className="pt-0">
+          {project.has_custom_landing || project.landing_page ? (
+            <div className="grid grid-cols-2 gap-2 w-full">
+              <Button
+                variant="outline"
+                onClick={() => handleViewProject(project.id)}
+              >
+                View Project
+              </Button>
+              <Button
+                variant="default"
+                onClick={() =>
+                  window.open(`/projects/${project.id}/landing`, "_blank")
+                }
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Landing
+              </Button>
+            </div>
+          ) : (
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => handleViewProject(project.id)}
+            >
+              View Project
+            </Button>
+          )}
+        </CardFooter>
+      </Card>
+    );
   };
 
   if (isLoading) {
@@ -232,13 +380,14 @@ const Projects: React.FC = () => {
                 </DialogContent>
               </Dialog>
               <Button onClick={handleCreateProject}>
+                <PlusCircle className="h-4 w-4 mr-2" />
                 Create Project
               </Button>
             </div>
           )}
         </div>
 
-        <div className="mb-8">
+        <div className="mb-6">
           <Input
             type="text"
             placeholder="Search projects by name, description, or tags..."
@@ -248,272 +397,167 @@ const Projects: React.FC = () => {
           />
         </div>
 
-        {error ? (
-          <div className="text-center py-8">
-            <p className="text-red-500">
-              Error loading projects: {error.toString()}
-            </p>
-          </div>
-        ) : filteredProjects.length === 0 ? (
-          <div className="text-center py-16 bg-muted/20 rounded-lg">
-            <h2 className="text-xl font-semibold mb-2">No projects found</h2>
-            <p className="text-muted-foreground mb-6">
-              {searchQuery
-                ? `No projects matching "${searchQuery}"`
-                : "There are no projects available yet"}
-            </p>
-            {user && (
-              <Button onClick={handleCreateProject}>
-                Create Your First Project
-              </Button>
-            )}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Featured Vehicle Build Project */}
-            <Card className="flex flex-col h-full border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
-              <CardContent className="pt-6 flex-grow">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg">
-                    <Car className="h-6 w-6" />
-                  </div>
-                  <Badge
-                    variant="secondary"
-                    className="bg-blue-100 text-blue-800 border-blue-200"
-                  >
-                    Featured
-                  </Badge>
-                </div>
-                <h2 className="text-xl font-semibold mb-2">
-                  Van Life Build Project
-                </h2>
-                <div className="flex flex-wrap gap-2 mb-3">
-                  <span className="inline-block bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs">
-                    Hardware
-                  </span>
-                  <span className="inline-block bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs">
-                    Electrical Systems
-                  </span>
-                  <span className="inline-block bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-xs">
-                    Solar Power
-                  </span>
-                </div>
-                <p className="text-muted-foreground mb-4 line-clamp-3">
-                  Complete conversion of a Ford Transit van into a fully
-                  self-sufficient mobile home and office. Features 800W solar
-                  system, lithium batteries, full kitchen, and remote work
-                  setup.
-                </p>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-muted-foreground">Status</p>
-                    <p className="font-medium flex items-center">
-                      <Wrench className="h-3 w-3 mr-1" />
-                      In Progress
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Progress</p>
-                    <p className="font-medium">25%</p>
-                  </div>
-                </div>
-                <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg">
-                  <p className="text-xs text-muted-foreground">
-                    ✨ This project has a custom landing page you can share!
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="my-projects" className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              My Projects
+              {user && <Badge variant="secondary" className="ml-1">{myProjects.length}</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="showcase" className="flex items-center gap-2">
+              <Globe className="h-4 w-4" />
+              Showcase
+              <Badge variant="secondary" className="ml-1">{showcaseProjects.length}</Badge>
+            </TabsTrigger>
+          </TabsList>
+
+          {/* My Projects Tab */}
+          <TabsContent value="my-projects">
+            {!user ? (
+              <Card className="text-center py-12">
+                <CardContent>
+                  <FolderKanban className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h2 className="text-xl font-semibold mb-2">Sign in to view your projects</h2>
+                  <p className="text-muted-foreground mb-6">
+                    Create and manage your own projects with tasks, components, and landing pages.
                   </p>
-                </div>
-                <div className="flex items-center text-xs text-muted-foreground mt-3">
-                  <Calendar className="h-3 w-3 mr-1" />
-                  Started Jan 2024
-                </div>
-              </CardContent>
-              <CardFooter className="pt-0">
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    variant="default"
-                    className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-                    onClick={() => navigate("/vehicle-build")}
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    View Details
+                  <Button onClick={() => navigate('/login')}>
+                    Sign In
                   </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() =>
-                      window.open("/projects/vehicle-build/landing", "_blank")
-                    }
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    Landing Page
+                </CardContent>
+              </Card>
+            ) : filteredMyProjects.length === 0 ? (
+              <Card className="text-center py-12">
+                <CardContent>
+                  <FolderKanban className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h2 className="text-xl font-semibold mb-2">
+                    {searchQuery ? `No projects matching "${searchQuery}"` : "No projects yet"}
+                  </h2>
+                  <p className="text-muted-foreground mb-6">
+                    Create your first project to start tracking components, tasks, and progress.
+                  </p>
+                  <Button onClick={handleCreateProject}>
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Create Your First Project
                   </Button>
-                </div>
-              </CardFooter>
-            </Card>
-
-            {filteredProjects.map((project: Project) => {
-              const tasks = projectTasks[project.id] || [];
-              const isOwner = projectOwnership[project.id] || false;
-              const completedTasks = tasks.filter(
-                (t) => t.status === "completed",
-              ).length;
-
-              return (
-                <Card key={project.id} className="flex flex-col h-full">
-                  <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-                    <div className="flex-1">
-                      <h2 className="text-xl font-semibold mb-2 line-clamp-2">
-                        {project.name}
-                      </h2>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Featured Vehicle Build Project */}
+                <Card className="flex flex-col h-full border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
+                  <CardContent className="pt-6 flex-grow">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg">
+                        <Car className="h-6 w-6" />
+                      </div>
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
+                        Featured
+                      </Badge>
                     </div>
-                    {isOwner && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                          >
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => handleEditProject(project.id)}
-                          >
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit Project
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => openDeleteDialog(project.id)}
-                            className="text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete Project
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
-                  </CardHeader>
-                  <CardContent className="flex-grow">
+                    <h2 className="text-xl font-semibold mb-2">Van Life Build Project</h2>
                     <div className="flex flex-wrap gap-2 mb-3">
-                      {project.tags &&
-                        project.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="inline-block bg-muted px-2 py-0.5 rounded-full text-xs"
-                          >
-                            {tag}
-                          </span>
-                        ))}
+                      <span className="inline-block bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs">
+                        Hardware
+                      </span>
+                      <span className="inline-block bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs">
+                        Electrical Systems
+                      </span>
                     </div>
                     <p className="text-muted-foreground mb-4 line-clamp-3">
-                      {project.description || "No description provided"}
+                      Complete conversion of a Ford Transit van into a fully self-sufficient mobile home and office.
                     </p>
-
-                    {/* Tasks Preview */}
-                    {tasks.length > 0 && (
-                      <div className="mb-4 space-y-2">
-                        <p className="text-sm font-medium text-muted-foreground">
-                          Recent Tasks ({completedTasks}/{tasks.length}{" "}
-                          completed)
-                        </p>
-                        <div className="space-y-1">
-                          {tasks.slice(0, 3).map((task) => (
-                            <div
-                              key={task.id}
-                              className="flex items-center text-sm"
-                            >
-                              {task.status === "completed" ? (
-                                <CheckCircle2 className="h-3 w-3 mr-2 text-green-500" />
-                              ) : (
-                                <Circle className="h-3 w-3 mr-2 text-muted-foreground" />
-                              )}
-                              <span className="line-clamp-1">{task.title}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <p className="text-muted-foreground">Status</p>
-                        <p className="font-medium capitalize">
-                          {project.status.replace("_", " ")}
+                        <p className="font-medium flex items-center">
+                          <Wrench className="h-3 w-3 mr-1" />
+                          In Progress
                         </p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Progress</p>
-                        <p className="font-medium">{project.progress}%</p>
+                        <p className="font-medium">25%</p>
                       </div>
+                    </div>
+                    <div className="flex items-center text-xs text-muted-foreground mt-3">
+                      <Calendar className="h-3 w-3 mr-1" />
+                      Started Jan 2024
                     </div>
                   </CardContent>
                   <CardFooter className="pt-0">
-                    {/* Show landing page button if available */}
-                    {project.has_custom_landing || project.landing_page ? (
-                      <div className="grid grid-cols-2 gap-2 w-full">
-                        <Button
-                          variant="outline"
-                          onClick={() => handleViewProject(project.id)}
-                        >
-                          View Project
-                        </Button>
-                        <Button
-                          variant="default"
-                          onClick={() =>
-                            window.open(
-                              `/projects/${project.id}/landing`,
-                              "_blank",
-                            )
-                          }
-                        >
-                          <ExternalLink className="h-4 w-4 mr-2" />
-                          Landing
-                        </Button>
-                      </div>
-                    ) : (
+                    <div className="grid grid-cols-2 gap-2 w-full">
+                      <Button
+                        variant="default"
+                        className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                        onClick={() => navigate("/vehicle-build")}
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        View Details
+                      </Button>
                       <Button
                         variant="outline"
-                        className="w-full"
-                        onClick={() => handleViewProject(project.id)}
+                        onClick={() => window.open("/projects/vehicle-build/landing", "_blank")}
                       >
-                        View Project
+                        <Eye className="h-4 w-4 mr-2" />
+                        Landing
                       </Button>
-                    )}
+                    </div>
                   </CardFooter>
                 </Card>
-              );
-            })}
-          </div>
-        )}
+
+                {filteredMyProjects.map((project) => renderProjectCard(project, true))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Showcase Tab */}
+          <TabsContent value="showcase">
+            {error ? (
+              <div className="text-center py-8">
+                <p className="text-destructive">
+                  Error loading projects: {error.toString()}
+                </p>
+              </div>
+            ) : filteredShowcaseProjects.length === 0 ? (
+              <Card className="text-center py-12">
+                <CardContent>
+                  <Globe className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h2 className="text-xl font-semibold mb-2">
+                    {searchQuery ? `No projects matching "${searchQuery}"` : "No public projects yet"}
+                  </h2>
+                  <p className="text-muted-foreground">
+                    Check back soon for featured community projects!
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredShowcaseProjects.map((project) => renderProjectCard(project, false))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
 
         {/* Landing Page Info Section */}
-        {user && (
-          <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 rounded-lg p-6 mb-8">
+        {user && activeTab === 'my-projects' && (
+          <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 rounded-lg p-6 mt-8">
             <div className="max-w-4xl mx-auto text-center">
               <h3 className="text-xl font-semibold mb-3">
                 🚀 Make Your Projects Stand Out with Landing Pages
               </h3>
               <p className="text-muted-foreground mb-4">
                 Create beautiful, shareable landing pages for your projects.
-                Perfect for showcasing your work, building hype, and attracting
-                collaborators - just like ProductHunt!
+                Perfect for showcasing your work, building hype, and attracting collaborators!
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button
-                  variant="default"
-                  onClick={() => navigate("/create-project")}
-                  className="group"
-                >
+                <Button variant="default" onClick={() => navigate("/create-project")} className="group">
                   <PlusCircle className="h-4 w-4 mr-2" />
                   Create Project with Landing Page
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => navigate("/discover/projects")}
-                >
+                <Button variant="outline" onClick={() => setActiveTab('showcase')}>
                   <Eye className="h-4 w-4 mr-2" />
-                  See Example Landing Pages
+                  Browse Showcase
                 </Button>
               </div>
             </div>
@@ -527,8 +571,7 @@ const Projects: React.FC = () => {
               <AlertDialogTitle>Delete Project</AlertDialogTitle>
               <AlertDialogDescription>
                 Are you sure you want to delete this project? This action cannot
-                be undone. All project components and tasks will also be
-                deleted.
+                be undone. All project components and tasks will also be deleted.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
