@@ -28,6 +28,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import {
   Plus,
   Pencil,
@@ -36,9 +37,12 @@ import {
   ExternalLink,
   Package,
   CheckCircle2,
+  Globe,
+  Lock,
 } from "lucide-react";
 import {
   useGetShoppingList,
+  useGetCurrentUserId,
   useCreateShoppingListItem,
   useUpdateShoppingListItem,
   useDeleteShoppingListItem,
@@ -71,10 +75,15 @@ const priorities = ["low", "medium", "high"] as const;
 
 export default function ShoppingList() {
   const { data: items = [], isLoading } = useGetShoppingList();
+  const { data: currentUserId } = useGetCurrentUserId();
   const { data: projects = [] } = useGetProjects();
   const createItem = useCreateShoppingListItem();
   const updateItem = useUpdateShoppingListItem();
   const deleteItem = useDeleteShoppingListItem();
+
+  const isOwner = (item: ShoppingListItem) => {
+    return item.owner_id === currentUserId || item.owner_id === null;
+  };
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ShoppingListItem | null>(null);
@@ -93,6 +102,7 @@ export default function ShoppingList() {
     url: "",
     notes: "",
     project_link: undefined,
+    is_public: false,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -122,6 +132,16 @@ export default function ShoppingList() {
       url: "",
       notes: "",
       project_link: undefined,
+      is_public: false,
+    });
+  };
+
+  const handleTogglePublic = async (item: ShoppingListItem, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isOwner(item)) return;
+    await updateItem.mutateAsync({
+      id: item.id,
+      is_public: !item.is_public,
     });
   };
 
@@ -420,6 +440,31 @@ export default function ShoppingList() {
                       rows={3}
                     />
                   </div>
+
+                  <div className="col-span-2 flex items-center justify-between border rounded-lg p-3 bg-muted/50">
+                    <div className="flex items-center gap-2">
+                      {formData.is_public ? (
+                        <Globe className="h-4 w-4 text-primary" />
+                      ) : (
+                        <Lock className="h-4 w-4 text-muted-foreground" />
+                      )}
+                      <div>
+                        <Label htmlFor="is_public" className="cursor-pointer">
+                          Make Public
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          Allow others to see this item
+                        </p>
+                      </div>
+                    </div>
+                    <Switch
+                      id="is_public"
+                      checked={formData.is_public || false}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, is_public: checked })
+                      }
+                    />
+                  </div>
                 </div>
 
                 <DialogFooter>
@@ -494,18 +539,35 @@ export default function ShoppingList() {
             {filteredItems.map((item) => (
               <Card
                 key={item.id}
-                className={`relative overflow-hidden transition-all duration-200 cursor-pointer ${
+                className={`relative overflow-hidden transition-all duration-200 ${
+                  isOwner(item) ? "cursor-pointer" : ""
+                } ${
                   item.purchased
-                    ? "bg-green-50 border-green-200 hover:shadow-lg"
-                    : "hover:shadow-lg hover:bg-gray-50"
-                }`}
-                onClick={() => handleTogglePurchased(item)}
+                    ? "bg-green-50 border-green-200 hover:shadow-lg dark:bg-green-950/20 dark:border-green-900"
+                    : "hover:shadow-lg hover:bg-muted/50"
+                } ${!isOwner(item) ? "border-primary/30" : ""}`}
+                onClick={() => isOwner(item) && handleTogglePurchased(item)}
               >
-                <CardHeader>
+                {/* Public indicator badge */}
+                {item.is_public && (
+                  <div className="absolute top-2 right-2 z-10">
+                    <Badge variant="secondary" className="text-xs gap-1">
+                      <Globe className="h-3 w-3" />
+                      Public
+                    </Badge>
+                  </div>
+                )}
+                
+                <CardHeader className={item.is_public ? "pt-8" : ""}>
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
-                      <CardTitle className="text-lg">
+                      <CardTitle className="text-lg flex items-center gap-2">
                         {item.item_name}
+                        {!isOwner(item) && (
+                          <Badge variant="outline" className="text-xs font-normal">
+                            Shared
+                          </Badge>
+                        )}
                       </CardTitle>
                       {item.description && (
                         <CardDescription className="mt-1">
@@ -513,30 +575,45 @@ export default function ShoppingList() {
                         </CardDescription>
                       )}
                     </div>
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 z-10"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEdit(item);
-                        }}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 z-10"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(item.id);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    {isOwner(item) && (
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 z-10"
+                          onClick={(e) => handleTogglePublic(item, e)}
+                          title={item.is_public ? "Make private" : "Make public"}
+                        >
+                          {item.is_public ? (
+                            <Globe className="h-4 w-4 text-primary" />
+                          ) : (
+                            <Lock className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 z-10"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(item);
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 z-10"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(item.id);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">

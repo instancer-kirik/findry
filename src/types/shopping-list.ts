@@ -30,6 +30,7 @@ export interface ShoppingListItem {
   project_link?: string; // UUID linking to projects table
   resource_id?: string;
   owner_id?: string;
+  is_public?: boolean;
   created_at?: string;
   updated_at?: string;
 }

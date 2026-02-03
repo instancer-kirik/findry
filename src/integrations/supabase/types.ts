@@ -6589,6 +6589,7 @@ export type Database = {
           estimated_cost: number | null
           id: string
           image_url: string | null
+          is_public: boolean | null
           item_name: string
           notes: string | null
           owner_id: string | null
@@ -6611,6 +6612,7 @@ export type Database = {
           estimated_cost?: number | null
           id?: string
           image_url?: string | null
+          is_public?: boolean | null
           item_name: string
           notes?: string | null
           owner_id?: string | null
@@ -6633,6 +6635,7 @@ export type Database = {
           estimated_cost?: number | null
           id?: string
           image_url?: string | null
+          is_public?: boolean | null
           item_name?: string
           notes?: string | null
           owner_id?: string | null

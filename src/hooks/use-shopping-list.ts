@@ -3,22 +3,30 @@ import { supabase } from "@/integrations/supabase/client";
 import { ShoppingListItem } from "@/types/shopping-list";
 import { toast } from "@/hooks/use-toast";
 
-export const useGetShoppingList = () => {
+export const useGetShoppingList = (includePublic: boolean = true) => {
   return useQuery({
-    queryKey: ["shopping-list"],
+    queryKey: ["shopping-list", includePublic],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
-
-      // Get items owned by user OR items with no owner (legacy data)
+      
+      // RLS handles visibility: own items, null owner_id (legacy), and is_public items
       const { data, error } = await supabase
         .from("shopping_list")
         .select("*")
-        .or(`owner_id.eq.${user.id},owner_id.is.null`)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
       return (data || []) as ShoppingListItem[];
+    },
+  });
+};
+
+export const useGetCurrentUserId = () => {
+  return useQuery({
+    queryKey: ["current-user-id"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      return user?.id || null;
     },
   });
 };
