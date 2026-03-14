@@ -155,6 +155,13 @@ export type Database = {
             foreignKeyName: "communities_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
+            referencedRelation: "profiles_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communities_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
@@ -195,6 +202,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_safe"
             referencedColumns: ["id"]
           },
           {
@@ -244,6 +258,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_safe"
             referencedColumns: ["id"]
           },
           {
@@ -996,6 +1017,13 @@ export type Database = {
             foreignKeyName: "event_community_relationships_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
+            referencedRelation: "profiles_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_community_relationships_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
@@ -1112,6 +1140,55 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      fumble_photos: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          is_primary: boolean
+          photo_url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_primary?: boolean
+          photo_url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_primary?: boolean
+          photo_url?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fumble_photos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fumble_photos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fumble_photos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       game_jam_resources: {
         Row: {
@@ -4160,6 +4237,94 @@ export type Database = {
           },
         ]
       }
+      matches: {
+        Row: {
+          contact_shared_by_user1: boolean | null
+          contact_shared_by_user2: boolean | null
+          created_at: string
+          id: string
+          last_interaction_at: string | null
+          notes: string | null
+          scheduled_date: string | null
+          status: string
+          tags: string[] | null
+          updated_at: string | null
+          user1_id: string
+          user2_id: string
+        }
+        Insert: {
+          contact_shared_by_user1?: boolean | null
+          contact_shared_by_user2?: boolean | null
+          created_at?: string
+          id?: string
+          last_interaction_at?: string | null
+          notes?: string | null
+          scheduled_date?: string | null
+          status?: string
+          tags?: string[] | null
+          updated_at?: string | null
+          user1_id: string
+          user2_id: string
+        }
+        Update: {
+          contact_shared_by_user1?: boolean | null
+          contact_shared_by_user2?: boolean | null
+          created_at?: string
+          id?: string
+          last_interaction_at?: string | null
+          notes?: string | null
+          scheduled_date?: string | null
+          status?: string
+          tags?: string[] | null
+          updated_at?: string | null
+          user1_id?: string
+          user2_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matches_user1_id_fkey"
+            columns: ["user1_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_user1_id_fkey"
+            columns: ["user1_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_user1_id_fkey"
+            columns: ["user1_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_user2_id_fkey"
+            columns: ["user2_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_user2_id_fkey"
+            columns: ["user2_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_user2_id_fkey"
+            columns: ["user2_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meeting_schedules: {
         Row: {
           created_at: string | null
@@ -5175,39 +5340,106 @@ export type Database = {
           },
         ]
       }
+      profile_share_keys: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          grants: string
+          id: string
+          key: string
+          label: string | null
+          profile_id: string
+          use_count: number
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          grants?: string
+          id?: string
+          key: string
+          label?: string | null
+          profile_id: string
+          use_count?: number
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          grants?: string
+          id?: string
+          key?: string
+          label?: string | null
+          profile_id?: string
+          use_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_share_keys_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_share_keys_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_share_keys_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
+          age: number | null
           avatar_url: string | null
           bio: string | null
+          contact_methods: Json | null
           created_at: string
           full_name: string | null
           id: string
           is_public: boolean | null
+          onboarding_complete: boolean | null
           profile_types: string[] | null
+          resonance_data: Json | null
           role_attributes: Json | null
           updated_at: string
           username: string | null
         }
         Insert: {
+          age?: number | null
           avatar_url?: string | null
           bio?: string | null
+          contact_methods?: Json | null
           created_at?: string
           full_name?: string | null
           id: string
           is_public?: boolean | null
+          onboarding_complete?: boolean | null
           profile_types?: string[] | null
+          resonance_data?: Json | null
           role_attributes?: Json | null
           updated_at?: string
           username?: string | null
         }
         Update: {
+          age?: number | null
           avatar_url?: string | null
           bio?: string | null
+          contact_methods?: Json | null
           created_at?: string
           full_name?: string | null
           id?: string
           is_public?: boolean | null
+          onboarding_complete?: boolean | null
           profile_types?: string[] | null
+          resonance_data?: Json | null
           role_attributes?: Json | null
           updated_at?: string
           username?: string | null
@@ -5803,6 +6035,13 @@ export type Database = {
             foreignKeyName: "projects_created_by_profiles_fkey"
             columns: ["created_by"]
             isOneToOne: false
+            referencedRelation: "profiles_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_created_by_profiles_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
@@ -6378,6 +6617,136 @@ export type Database = {
         }
         Relationships: []
       }
+      resonance_access_requests: {
+        Row: {
+          created_at: string
+          id: string
+          requester_id: string
+          section_id: string
+          status: string
+          target_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          requester_id: string
+          section_id: string
+          status?: string
+          target_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          requester_id?: string
+          section_id?: string
+          status?: string
+          target_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resonance_access_requests_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resonance_access_requests_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resonance_access_requests_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resonance_access_requests_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resonance_access_requests_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resonance_access_requests_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resonance_field_grants: {
+        Row: {
+          created_at: string
+          field_key: string
+          id: string
+          owner_id: string
+          status: string
+          updated_at: string
+          viewer_id: string
+        }
+        Insert: {
+          created_at?: string
+          field_key: string
+          id?: string
+          owner_id: string
+          status?: string
+          updated_at?: string
+          viewer_id: string
+        }
+        Update: {
+          created_at?: string
+          field_key?: string
+          id?: string
+          owner_id?: string
+          status?: string
+          updated_at?: string
+          viewer_id?: string
+        }
+        Relationships: []
+      }
+      resonance_field_visibility: {
+        Row: {
+          created_at: string
+          field_key: string
+          id: string
+          updated_at: string
+          user_id: string
+          visibility: Database["public"]["Enums"]["field_visibility"]
+        }
+        Insert: {
+          created_at?: string
+          field_key: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          visibility?: Database["public"]["Enums"]["field_visibility"]
+        }
+        Update: {
+          created_at?: string
+          field_key?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          visibility?: Database["public"]["Enums"]["field_visibility"]
+        }
+        Relationships: []
+      }
       resource_consumption_logs: {
         Row: {
           consumption_amount: number | null
@@ -6908,6 +7277,7 @@ export type Database = {
           location: string | null
           name: string
           status: string | null
+          tags: string[] | null
           updated_at: string
           user_id: string | null
         }
@@ -6924,6 +7294,7 @@ export type Database = {
           location?: string | null
           name: string
           status?: string | null
+          tags?: string[] | null
           updated_at?: string
           user_id?: string | null
         }
@@ -6940,6 +7311,7 @@ export type Database = {
           location?: string | null
           name?: string
           status?: string | null
+          tags?: string[] | null
           updated_at?: string
           user_id?: string | null
         }
@@ -6961,6 +7333,80 @@ export type Database = {
           {
             foreignKeyName: "snacks_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "snacks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      swipes: {
+        Row: {
+          created_at: string
+          direction: string
+          id: string
+          swiped_id: string
+          swiper_id: string
+        }
+        Insert: {
+          created_at?: string
+          direction: string
+          id?: string
+          swiped_id: string
+          swiper_id: string
+        }
+        Update: {
+          created_at?: string
+          direction?: string
+          id?: string
+          swiped_id?: string
+          swiper_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "swipes_swiped_id_fkey"
+            columns: ["swiped_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "swipes_swiped_id_fkey"
+            columns: ["swiped_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "swipes_swiped_id_fkey"
+            columns: ["swiped_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "swipes_swiper_id_fkey"
+            columns: ["swiper_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "swipes_swiper_id_fkey"
+            columns: ["swiper_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "swipes_swiper_id_fkey"
+            columns: ["swiper_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]
@@ -7384,6 +7830,13 @@ export type Database = {
             foreignKeyName: "user_artist_relationships_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "profiles_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_artist_relationships_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
@@ -7451,6 +7904,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_brand_relationships_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_safe"
             referencedColumns: ["id"]
           },
           {
@@ -7724,7 +8184,7 @@ export type Database = {
           budget: number | null
           created_at: string | null
           description: string | null
-          duration_estimate: unknown
+          duration_estimate: string | null
           id: string
           metadata: Json | null
           name: string
@@ -7737,7 +8197,7 @@ export type Database = {
           budget?: number | null
           created_at?: string | null
           description?: string | null
-          duration_estimate?: unknown
+          duration_estimate?: string | null
           id?: string
           metadata?: Json | null
           name: string
@@ -7750,7 +8210,7 @@ export type Database = {
           budget?: number | null
           created_at?: string | null
           description?: string | null
-          duration_estimate?: unknown
+          duration_estimate?: string | null
           id?: string
           metadata?: Json | null
           name?: string
@@ -7765,7 +8225,7 @@ export type Database = {
         Row: {
           created_at: string | null
           description: string | null
-          duration_estimate: unknown
+          duration_estimate: string | null
           id: string
           interior_exterior: string | null
           location: string | null
@@ -7782,7 +8242,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           description?: string | null
-          duration_estimate?: unknown
+          duration_estimate?: string | null
           id?: string
           interior_exterior?: string | null
           location?: string | null
@@ -7799,7 +8259,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           description?: string | null
-          duration_estimate?: unknown
+          duration_estimate?: string | null
           id?: string
           interior_exterior?: string | null
           location?: string | null
@@ -7827,7 +8287,7 @@ export type Database = {
         Row: {
           content: string
           created_at: string | null
-          estimated_duration: unknown
+          estimated_duration: string | null
           format: string | null
           id: string
           notes: string | null
@@ -7840,7 +8300,7 @@ export type Database = {
         Insert: {
           content: string
           created_at?: string | null
-          estimated_duration?: unknown
+          estimated_duration?: string | null
           format?: string | null
           id?: string
           notes?: string | null
@@ -7853,7 +8313,7 @@ export type Database = {
         Update: {
           content?: string
           created_at?: string | null
-          estimated_duration?: unknown
+          estimated_duration?: string | null
           format?: string | null
           id?: string
           notes?: string | null
@@ -7878,7 +8338,7 @@ export type Database = {
           camera_movement: string | null
           created_at: string | null
           description: string | null
-          duration_estimate: unknown
+          duration_estimate: string | null
           equipment_needed: string[] | null
           id: string
           metadata: Json | null
@@ -7894,7 +8354,7 @@ export type Database = {
           camera_movement?: string | null
           created_at?: string | null
           description?: string | null
-          duration_estimate?: unknown
+          duration_estimate?: string | null
           equipment_needed?: string[] | null
           id?: string
           metadata?: Json | null
@@ -7910,7 +8370,7 @@ export type Database = {
           camera_movement?: string | null
           created_at?: string | null
           description?: string | null
-          duration_estimate?: unknown
+          duration_estimate?: string | null
           equipment_needed?: string[] | null
           id?: string
           metadata?: Json | null
@@ -8491,6 +8951,51 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles_safe: {
+        Row: {
+          age: number | null
+          avatar_url: string | null
+          bio: string | null
+          contact_methods: Json | null
+          full_name: string | null
+          id: string | null
+          onboarding_complete: boolean | null
+          profile_types: string[] | null
+          resonance_data: Json | null
+          role_attributes: Json | null
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          age?: number | null
+          avatar_url?: string | null
+          bio?: string | null
+          contact_methods?: Json | null
+          full_name?: string | null
+          id?: string | null
+          onboarding_complete?: boolean | null
+          profile_types?: string[] | null
+          resonance_data?: never
+          role_attributes?: Json | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          age?: number | null
+          avatar_url?: string | null
+          bio?: string | null
+          contact_methods?: Json | null
+          full_name?: string | null
+          id?: string | null
+          onboarding_complete?: boolean | null
+          profile_types?: string[] | null
+          resonance_data?: never
+          role_attributes?: Json | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
       project_components_with_metrics: {
         Row: {
           assigned_to: string | null
@@ -8838,6 +9343,12 @@ export type Database = {
           work_id: string
         }[]
       }
+      get_resonance:
+        | { Args: { target_id: string }; Returns: Json }
+        | {
+            Args: { share_key?: string; target_id: string; viewer_id?: string }
+            Returns: Json
+          }
       get_table_definition: {
         Args: { table_name: string }
         Returns: {
@@ -9195,6 +9706,7 @@ export type Database = {
         | "venue"
         | "brand"
         | "shop"
+      field_visibility: "public" | "matches" | "express"
       game_jam_status: "upcoming" | "active" | "completed"
       privacy_level: "public" | "friends_only" | "private" | "invite_only"
       project_aspect_type:
@@ -9359,6 +9871,7 @@ export const Constants = {
         "brand",
         "shop",
       ],
+      field_visibility: ["public", "matches", "express"],
       game_jam_status: ["upcoming", "active", "completed"],
       privacy_level: ["public", "friends_only", "private", "invite_only"],
       project_aspect_type: [
