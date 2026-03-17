@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/use-auth';
 import CommunityForum from '@/components/communities/CommunityForum';
 import CommunityCalendar from '@/components/communities/CommunityCalendar';
 import CommunityEvents from '@/components/communities/CommunityEvents';
+import CampfireCircles from '@/components/communities/CampfireCircles';
 import CreateEventModal from '@/components/communities/CreateEventModal';
 import { toast } from '@/components/ui/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
