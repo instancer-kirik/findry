@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Calendar, Users, Trophy, Video, MapPin, Clock, MessageSquare, Settings, Bell, Phone } from 'lucide-react';
+import { Calendar, Users, Trophy, Video, MapPin, Clock, MessageSquare, Settings, Bell, Phone, Flame } from 'lucide-react';
 import { useCommunities } from '@/hooks/use-communities';
 import { useAuth } from '@/hooks/use-auth';
 import CommunityForum from '@/components/communities/CommunityForum';
