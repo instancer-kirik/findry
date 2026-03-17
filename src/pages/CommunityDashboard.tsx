@@ -318,6 +318,10 @@ const CommunityDashboard = () => {
             </div>
           </TabsContent>
 
+          <TabsContent value="campfire">
+            <CampfireCircles communityId={communityId || ''} />
+          </TabsContent>
+
           <TabsContent value="events">
             <CommunityEvents communityId={communityId || ''} />
           </TabsContent>
