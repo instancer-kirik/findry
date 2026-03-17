@@ -218,6 +218,10 @@ const CommunityDashboard = () => {
         <Tabs defaultValue="overview" className="w-full" onValueChange={setSelectedTab}>
           <TabsList className="mb-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="campfire" className="gap-1.5">
+              <Flame className="h-3.5 w-3.5" />
+              Campfire
+            </TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="calendar">Calendar</TabsTrigger>
             <TabsTrigger value="forum">Forum</TabsTrigger>
