@@ -6,12 +6,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Calendar, Users, Trophy, Video, MapPin, Clock, MessageSquare, Settings, Bell, Phone } from 'lucide-react';
+import { Calendar, Users, Trophy, Video, MapPin, Clock, MessageSquare, Settings, Bell, Phone, Flame } from 'lucide-react';
 import { useCommunities } from '@/hooks/use-communities';
 import { useAuth } from '@/hooks/use-auth';
 import CommunityForum from '@/components/communities/CommunityForum';
 import CommunityCalendar from '@/components/communities/CommunityCalendar';
 import CommunityEvents from '@/components/communities/CommunityEvents';
+import CampfireCircles from '@/components/communities/CampfireCircles';
 import CreateEventModal from '@/components/communities/CreateEventModal';
 import { toast } from '@/components/ui/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -217,6 +218,10 @@ const CommunityDashboard = () => {
         <Tabs defaultValue="overview" className="w-full" onValueChange={setSelectedTab}>
           <TabsList className="mb-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="campfire" className="gap-1.5">
+              <Flame className="h-3.5 w-3.5" />
+              Campfire
+            </TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="calendar">Calendar</TabsTrigger>
             <TabsTrigger value="forum">Forum</TabsTrigger>
@@ -311,6 +316,10 @@ const CommunityDashboard = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="campfire">
+            <CampfireCircles communityId={communityId || ''} />
           </TabsContent>
 
           <TabsContent value="events">
