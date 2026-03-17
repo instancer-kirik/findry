@@ -1,4 +1,4 @@
-# Welcome to your Lovable project
+# This project is being renamed please wait. alternative names are listed on url main icon mouseover
 
 ## Project info
 
