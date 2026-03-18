@@ -39,7 +39,7 @@ const Roadmap: React.FC = () => {
               <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Development Roadmap</h1>
             </div>
             <p className="text-xl text-muted-foreground max-w-3xl">
-              Track the progress of Findry's development. Transparent, iterative, and community-driven.
+              Track the progress of Muster's development. Transparent, iterative, and community-driven.
             </p>
           </section>
 
