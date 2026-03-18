@@ -156,7 +156,7 @@ const PublicLanding: React.FC = () => {
     <div>
       {/* SEO Meta Tags */}
       <head>
-        <title>{project.landing_page.hero_title || project.name} - Findry</title>
+        <title>{project.landing_page.hero_title || project.name} - Muster</title>
         <meta
           name="description"
           content={project.landing_page.hero_subtitle || project.description}

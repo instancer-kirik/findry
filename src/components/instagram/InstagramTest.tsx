@@ -40,7 +40,7 @@ export const InstagramTest: React.FC<InstagramTestProps> = ({ className }) => {
 
       // Clear form
       setImageUrl('');
-      setCaption('Testing Instagram integration with Findry! 🎉 #FindryApp #EventPlatform');
+      setCaption('Testing Instagram integration with Muster! 🎉 #MusterApp #EventPlatform');
 
     } catch (error) {
       console.error('Publishing error:', error);

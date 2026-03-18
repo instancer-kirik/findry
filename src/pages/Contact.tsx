@@ -284,7 +284,7 @@ const Contact: React.FC = () => {
                     <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
                     <div>
                       <h3 className="font-medium">Email</h3>
-                      <p className="text-sm text-muted-foreground">support@findry.lovable.app</p>
+                      <p className="text-sm text-muted-foreground">support@muster.lovable.app</p>
                     </div>
                   </div>
                   

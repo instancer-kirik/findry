@@ -459,7 +459,7 @@ const Landing: React.FC = () => {
         <div className="max-w-2xl mx-auto text-center space-y-6">
           <h2 className="text-2xl font-bold">Support the Project</h2>
           <p className="text-muted-foreground">
-            Help us continue building and improving Findry by supporting the
+            Help us continue building and improving Muster by supporting the
             project.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

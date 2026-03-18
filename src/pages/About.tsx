@@ -107,7 +107,7 @@ const About: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    With a background in both art and technology, he founded Findry to bridge the gap 
+                    With a background in both art and technology, he founded Muster to bridge the gap
                     between creative minds and the resources they need to thrive.
                   </p>
                   <div className="flex mt-4 gap-2">

@@ -383,7 +383,7 @@ const Navbar = () => {
                     className="font-bold text-xl"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    Findry
+                    Muster
                   </Link>
                   <div className="flex items-center gap-2">
                     <Button variant="ghost" size="icon" onClick={toggleTheme}>

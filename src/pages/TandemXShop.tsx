@@ -175,7 +175,7 @@ const TandemXShop: React.FC = () => {
                 <div className="space-y-2">
                   <h3 className="font-semibold">Benefits for Shop Owners:</h3>
                   <ul className="list-disc pl-5 space-y-1">
-                    <li>Showcase your existing shop to the Findry community</li>
+                    <li>Showcase your existing shop to the Muster community</li>
                     <li>Single dashboard to manage your online presence</li>
                     <li>Reach new customers and collaborate with other artists</li>
                     <li>Keep your existing shop infrastructure and workflows</li>
