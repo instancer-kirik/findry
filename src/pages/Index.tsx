@@ -145,7 +145,7 @@ const Landing: React.FC = () => {
 
       {/* Quick Links Section */}
       <div className="container mx-auto px-4 py-12">
-        <h2 className="text-2xl font-bold mb-6 text-center">Explore Findry</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">Explore Muster</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           <Button
             variant="outline"
