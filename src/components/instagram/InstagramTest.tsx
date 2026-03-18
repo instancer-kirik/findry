@@ -16,7 +16,7 @@ export const InstagramTest: React.FC<InstagramTestProps> = ({ className }) => {
   const { instagramToken, instagramUser, publishToInstagram, isConnected } = useInstagramAuth();
   const [isPublishing, setIsPublishing] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
-  const [caption, setCaption] = useState('Testing Instagram integration with Findry! 🎉 #FindryApp #EventPlatform');
+  const [caption, setCaption] = useState('Testing Instagram integration with Muster! 🎉 #MusterApp #EventPlatform');
 
   const handleTestPublish = async () => {
     if (!isConnected) {
