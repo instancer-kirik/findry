@@ -39,7 +39,7 @@ const Roadmap: React.FC = () => {
               <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Development Roadmap</h1>
             </div>
             <p className="text-xl text-muted-foreground max-w-3xl">
-              Track the progress of Findry's development. Transparent, iterative, and community-driven.
+              Track the progress of Muster's development. Transparent, iterative, and community-driven.
             </p>
           </section>
 
@@ -508,7 +508,7 @@ const Roadmap: React.FC = () => {
             </CardHeader>
             <CardContent className="prose prose-sm dark:prose-invert max-w-none">
               <p className="text-muted-foreground">
-                Findry bridges the gap between indie venues, artists, and creative communities. We're building 
+                Muster bridges the gap between indie venues, artists, and creative communities. We're building 
                 infrastructure for non-traditional spaces—maker studios, galleries, unconventional venues—that 
                 serve the creative economy. Our goal is to combine the reliability of enterprise venue management 
                 with the social virality and organic discovery that modern creators need.

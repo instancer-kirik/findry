@@ -168,14 +168,14 @@ const TandemXShop: React.FC = () => {
               <h2 className="text-xl font-bold mb-2">About This Integration</h2>
               <Separator className="my-4" />
               <p className="mb-4">
-                This page demonstrates how Findry can integrate with external shops like TandemX.
-                Artists and creators can connect their existing shops to their Findry profile.
+                This page demonstrates how Muster can integrate with external shops like TandemX.
+                Artists and creators can connect their existing shops to their Muster profile.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                 <div className="space-y-2">
                   <h3 className="font-semibold">Benefits for Shop Owners:</h3>
                   <ul className="list-disc pl-5 space-y-1">
-                    <li>Showcase your existing shop to the Findry community</li>
+                    <li>Showcase your existing shop to the Muster community</li>
                     <li>Single dashboard to manage your online presence</li>
                     <li>Reach new customers and collaborate with other artists</li>
                     <li>Keep your existing shop infrastructure and workflows</li>

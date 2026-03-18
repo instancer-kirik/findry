@@ -1,6 +1,6 @@
 # Rename Candidates
 
-Brainstormed names for the project (currently "Findry"):
+Brainstormed names for the project (now **Muster**, previously "Findry"):
 
 ## Community / Gathering ⭐
 - **Muster** — to gather, rally; has grit (top contender)
