@@ -122,7 +122,7 @@ const PublicLanding: React.FC = () => {
               variant="outline"
               onClick={() => window.location.href = "/"}
             >
-              Go to Findry
+              Go to Muster
             </Button>
           </CardContent>
         </Card>
