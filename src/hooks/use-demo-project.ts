@@ -81,7 +81,7 @@ export const useDemoProject = (projectId: string) => {
         
         const demoProject: Project = {
           id: projectId,
-          name: 'Findry Platform Core',
+          name: 'Muster Platform Core',
           description: 'The main platform for creative ecosystem connections',
           status: 'development',
           version: '0.5.0',
