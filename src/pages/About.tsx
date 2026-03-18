@@ -23,7 +23,7 @@ const About: React.FC = () => {
           <Card className="mb-12">
             <CardHeader>
               <CardTitle className="text-2xl">Our Mission</CardTitle>
-              <CardDescription>Why we built Findry</CardDescription>
+              <CardDescription>Why we built Muster</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <p>
