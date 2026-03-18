@@ -31,8 +31,8 @@ const Hero: React.FC = () => {
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background to-background/80"></div>
       
       {/* Abstract shapes/blurs */}
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-teal-100/30 dark:bg-teal-900/10 rounded-full filter blur-3xl animate-pulse"></div>
-      <div className="absolute top-1/2 -left-40 w-80 h-80 bg-green-100/20 dark:bg-green-900/10 rounded-full filter blur-3xl"></div>
+      <div className="absolute -top-40 -right-40 w-96 h-96 bg-orange-200/30 dark:bg-orange-900/10 rounded-full filter blur-3xl animate-pulse"></div>
+      <div className="absolute top-1/2 -left-40 w-80 h-80 bg-amber-100/20 dark:bg-amber-900/10 rounded-full filter blur-3xl"></div>
       
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center">
