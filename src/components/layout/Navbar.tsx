@@ -172,7 +172,11 @@ const Navbar = () => {
     <nav className="border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80 sticky top-0 z-50">
       <div className="container flex h-14 items-center justify-between">
         <div className="flex items-center gap-6">
-          <Link to="/" className="font-bold text-xl tracking-tight">
+          <Link
+            to="/"
+            className="font-bold text-xl tracking-tight"
+            title="Findry · Artex · Articutor · Articut · Articute · Yarder · Yardec"
+          >
             Findry
           </Link>
 
