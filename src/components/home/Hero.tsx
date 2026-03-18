@@ -31,8 +31,8 @@ const Hero: React.FC = () => {
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background to-background/80"></div>
       
       {/* Abstract shapes/blurs */}
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-teal-100/30 dark:bg-teal-900/10 rounded-full filter blur-3xl animate-pulse"></div>
-      <div className="absolute top-1/2 -left-40 w-80 h-80 bg-green-100/20 dark:bg-green-900/10 rounded-full filter blur-3xl"></div>
+      <div className="absolute -top-40 -right-40 w-96 h-96 bg-orange-200/30 dark:bg-orange-900/10 rounded-full filter blur-3xl animate-pulse"></div>
+      <div className="absolute top-1/2 -left-40 w-80 h-80 bg-amber-100/20 dark:bg-amber-900/10 rounded-full filter blur-3xl"></div>
       
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center">
@@ -45,7 +45,7 @@ const Hero: React.FC = () => {
           </AnimatedSection>
           
           <AnimatedSection animation="fade-in-up" delay={200}>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight leading-normal pb-2 bg-gradient-to-r from-purple-400 via-teal-400 to-green-500 text-transparent bg-clip-text">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight leading-normal pb-2 bg-gradient-to-r from-orange-400 via-amber-500 to-yellow-500 text-transparent bg-clip-text">
               {isAuthenticated ? "Welcome Wonder Seeker and/or Mighty Artist\n" : "Bonj! Wonder Seeker and/or Mighty Artist\n"}
             </h1>
           </AnimatedSection>
