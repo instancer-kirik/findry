@@ -380,7 +380,6 @@ const Navbar = () => {
                   <Link 
                     to="/" 
                     className="font-bold text-xl"
-                    title="Findry · Artex · Articutor · Articut · Articute · Yarder · Yardec"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Findry
