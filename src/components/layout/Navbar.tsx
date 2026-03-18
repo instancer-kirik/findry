@@ -174,13 +174,27 @@ const Navbar = () => {
     <nav className="border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80 sticky top-0 z-50">
       <div className="container flex h-14 items-center justify-between">
         <div className="flex items-center gap-6">
-          <Link
-            to="/"
-            className="font-bold text-xl tracking-tight"
-            title="Findry · Artex · Articutor · Articut · Articute · Yarder · Yardec"
-          >
-            Findry
-          </Link>
+          <HoverCard openDelay={200} closeDelay={300}>
+            <HoverCardTrigger asChild>
+              <Link to="/" className="font-bold text-xl tracking-tight cursor-pointer">
+                Findry
+              </Link>
+            </HoverCardTrigger>
+            <HoverCardContent className="w-72 p-3" align="start">
+              <p className="text-xs text-muted-foreground mb-2 font-medium">Rename candidates</p>
+              <div className="flex flex-wrap gap-1.5">
+                {["Findry","ARTEX","Articutor","Articut","Articute","Yarder","Yarded","Yardy","Yardec",
+                  "Bosk Mires","Bosk Merchant Co.","Bock & Company",
+                  "FORN Transport","FORN Logistics","FORN Supply","FORN Systems","FORN Motorworks",
+                  "Bankvoczick","Troyal","Bachrake","GUGGER"
+                ].map((name) => (
+                  <Badge key={name} variant={name === "Findry" ? "default" : "secondary"} className="text-xs cursor-default">
+                    {name}
+                  </Badge>
+                ))}
+              </div>
+            </HoverCardContent>
+          </HoverCard>
 
           {/* Desktop Navigation with Professional Megamenu */}
           <NavigationMenu className="hidden lg:flex">
