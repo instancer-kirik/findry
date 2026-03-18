@@ -2,6 +2,16 @@
 
 Brainstormed names for the project (currently "Findry"):
 
+## Community / Gathering ⭐
+- **Muster** — to gather, rally; has grit (top contender)
+- **Kith** — friends & kin, intimate community
+- **Rove** — wandering gatherings, discovery
+- **Throng** — crowd energy
+- **Stoa** — ancient Greek gathering walkway
+- **Grange** — community hall, maker roots
+- **Forge** — making + coming together
+- **Beacon** — signal, discovery
+
 ## Art-rooted
 - **ARTICUTOR**
 - **ARTICUT**
@@ -13,7 +23,6 @@ Brainstormed names for the project (currently "Findry"):
 - **Yarded**
 - **Yardy**
 - **Yardec**
-- Others TBD
 
 ---
-*Captured 2026-03-18*
+*Updated 2026-03-18*

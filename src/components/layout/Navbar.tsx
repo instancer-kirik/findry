@@ -183,7 +183,8 @@ const Navbar = () => {
             <HoverCardContent className="w-72 p-3" align="start">
               <p className="text-xs text-muted-foreground mb-2 font-medium">Rename candidates</p>
               <div className="flex flex-wrap gap-1.5">
-                {["Findry","ARTEX","Articutor","Articut","Articute","Yarder","Yarded","Yardy","Yardec",
+                {["Findry","Muster","ARTEX","Kith","Rove","Throng","Stoa","Grange","Forge","Beacon",
+                  "Articutor","Articut","Articute","Yarder","Yarded","Yardy","Yardec",
                   "Bosk Mires","Bosk Merchant Co.","Bock & Company",
                   "FORN Transport","FORN Logistics","FORN Supply","FORN Systems","FORN Motorworks",
                   "Bankvoczick","Troyal","Bachrake","GUGGER"
