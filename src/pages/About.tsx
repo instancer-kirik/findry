@@ -13,7 +13,7 @@ const About: React.FC = () => {
         <div className="max-w-5xl mx-auto">
           {/* Hero Section */}
           <section className="mb-12 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">About Findry</h1>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">About Muster</h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                 from Ultimate Starter Kit - <a href="https://instance.select" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">instance.select</a>
             </p>
