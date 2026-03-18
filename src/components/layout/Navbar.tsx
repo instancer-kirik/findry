@@ -363,7 +363,8 @@ const Navbar = () => {
                 <div className="flex items-center justify-between p-4 border-b">
                   <Link 
                     to="/" 
-                    className="font-bold text-xl" 
+                    className="font-bold text-xl"
+                    title="Findry · Artex · Articutor · Articut · Articute · Yarder · Yardec"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Findry
