@@ -237,13 +237,17 @@ export const sampleVehicleBuild = {
         { id: 'rear-storage-box', name: 'Build rear storage cargo box', completed: false, estimatedHours: 12 },
         { id: 'bike-rack', name: 'Install swing-away bike rack', completed: false, estimatedHours: 2 },
         { id: 'awning', name: 'Install retractable awning', completed: false, estimatedHours: 6 },
-        { id: 'exterior-shower', name: 'Install exterior shower connection', completed: false, estimatedHours: 4 }
+        { id: 'exterior-shower', name: 'Install exterior shower connection', completed: false, estimatedHours: 4 },
+        { id: 'aero-visor', name: 'Install aerodynamic visor – Chevy Silverado', completed: false, estimatedHours: 2 },
+        { id: 'roof-rack', name: 'Install roof rack – Chevy Silverado', completed: false, estimatedHours: 4 }
       ],
       partsList: [
         { id: 'hitch', name: '2" Receiver Hitch', brand: 'Curt', model: '13417', cost: 200, quantity: 1, vendor: 'Amazon' },
         { id: 'cargo-box', name: 'Rear Cargo Box Materials', brand: 'Various', cost: 300, quantity: 1, vendor: 'Home Depot' },
         { id: 'bike-rack', name: 'Swing-Away Bike Rack', brand: 'Yakima', model: 'SwingDaddy', cost: 400, quantity: 1, vendor: 'REI' },
-        { id: 'awning', name: 'Retractable Awning', brand: 'Dometic', model: '8500', cost: 600, quantity: 1, vendor: 'Camping World' }
+        { id: 'awning', name: 'Retractable Awning', brand: 'Dometic', model: '8500', cost: 600, quantity: 1, vendor: 'Camping World' },
+        { id: 'aero-visor', name: 'Aerodynamic Bug Deflector/Visor', brand: 'AVS', model: 'Aeroskin II', cost: 85, quantity: 1, vendor: 'Amazon', warrantyInfo: 'Lifetime' },
+        { id: 'roof-rack', name: 'Heavy-Duty Roof Rack System', brand: 'Thule', model: 'TracRac SR', cost: 650, quantity: 1, vendor: 'AutoZone', warrantyInfo: 'Lifetime' }
       ]
     },
     {
