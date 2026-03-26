@@ -1296,6 +1296,9 @@ const VehicleBuildShowcase: React.FC = () => {
             </CardContent>
           </Card>
         </div>
+
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );
