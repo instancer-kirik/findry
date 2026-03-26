@@ -4985,6 +4985,114 @@ export type Database = {
           },
         ]
       }
+      pockets_yt_bookmarks: {
+        Row: {
+          album: string | null
+          artist: string | null
+          broadcast_safety: string | null
+          cdn_url: string | null
+          clip_end_seconds: number | null
+          clip_purpose: string | null
+          clip_start_seconds: number | null
+          created_at: string
+          duration: number | null
+          elixir_file_path: string | null
+          elixir_server_synced: boolean | null
+          energy: number | null
+          external_id: string | null
+          family_factor: number | null
+          file_size: number | null
+          genre: string[] | null
+          id: string
+          instrument_tags: string[] | null
+          is_clip: boolean | null
+          local_filename: string | null
+          mood: string[] | null
+          notes: string | null
+          recording_type: string | null
+          season_tags: string[] | null
+          source_platform: string | null
+          source_url: string | null
+          status: string
+          tags: string[] | null
+          thumbnail_url: string | null
+          time_of_day: string[] | null
+          title: string
+          updated_at: string
+          weird_tolerance: number | null
+        }
+        Insert: {
+          album?: string | null
+          artist?: string | null
+          broadcast_safety?: string | null
+          cdn_url?: string | null
+          clip_end_seconds?: number | null
+          clip_purpose?: string | null
+          clip_start_seconds?: number | null
+          created_at?: string
+          duration?: number | null
+          elixir_file_path?: string | null
+          elixir_server_synced?: boolean | null
+          energy?: number | null
+          external_id?: string | null
+          family_factor?: number | null
+          file_size?: number | null
+          genre?: string[] | null
+          id?: string
+          instrument_tags?: string[] | null
+          is_clip?: boolean | null
+          local_filename?: string | null
+          mood?: string[] | null
+          notes?: string | null
+          recording_type?: string | null
+          season_tags?: string[] | null
+          source_platform?: string | null
+          source_url?: string | null
+          status?: string
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          time_of_day?: string[] | null
+          title: string
+          updated_at?: string
+          weird_tolerance?: number | null
+        }
+        Update: {
+          album?: string | null
+          artist?: string | null
+          broadcast_safety?: string | null
+          cdn_url?: string | null
+          clip_end_seconds?: number | null
+          clip_purpose?: string | null
+          clip_start_seconds?: number | null
+          created_at?: string
+          duration?: number | null
+          elixir_file_path?: string | null
+          elixir_server_synced?: boolean | null
+          energy?: number | null
+          external_id?: string | null
+          family_factor?: number | null
+          file_size?: number | null
+          genre?: string[] | null
+          id?: string
+          instrument_tags?: string[] | null
+          is_clip?: boolean | null
+          local_filename?: string | null
+          mood?: string[] | null
+          notes?: string | null
+          recording_type?: string | null
+          season_tags?: string[] | null
+          source_platform?: string | null
+          source_url?: string | null
+          status?: string
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          time_of_day?: string[] | null
+          title?: string
+          updated_at?: string
+          weird_tolerance?: number | null
+        }
+        Relationships: []
+      }
       posts: {
         Row: {
           author: string
