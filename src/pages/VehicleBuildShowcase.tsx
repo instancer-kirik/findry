@@ -7,6 +7,9 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
+import LayoutConfigurator from "@/components/vehicle-build/LayoutConfigurator";
+import SystemsConfigurator from "@/components/vehicle-build/SystemsConfigurator";
+import SchematicsCanvas from "@/components/vehicle-build/SchematicsCanvas";
 import {
   ArrowLeft,
   Github,
@@ -972,6 +975,28 @@ const VehicleBuildShowcase: React.FC = () => {
             </div>
           </CardContent>
         </Card>
+        {/* Configurator Tabs */}
+        <Tabs defaultValue="build-log" className="w-full">
+          <TabsList className="w-full justify-start">
+            <TabsTrigger value="layout">Layout</TabsTrigger>
+            <TabsTrigger value="systems">Systems</TabsTrigger>
+            <TabsTrigger value="schematics">Schematics</TabsTrigger>
+            <TabsTrigger value="build-log">Build Log</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="layout" className="mt-6">
+            <LayoutConfigurator />
+          </TabsContent>
+
+          <TabsContent value="systems" className="mt-6">
+            <SystemsConfigurator />
+          </TabsContent>
+
+          <TabsContent value="schematics" className="mt-6">
+            <SchematicsCanvas />
+          </TabsContent>
+
+          <TabsContent value="build-log" className="mt-6 space-y-8">
 
         {/* Phases Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1271,6 +1296,9 @@ const VehicleBuildShowcase: React.FC = () => {
             </CardContent>
           </Card>
         </div>
+
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );
