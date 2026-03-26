@@ -7,6 +7,9 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
+import LayoutConfigurator from "@/components/vehicle-build/LayoutConfigurator";
+import SystemsConfigurator from "@/components/vehicle-build/SystemsConfigurator";
+import SchematicsCanvas from "@/components/vehicle-build/SchematicsCanvas";
 import {
   ArrowLeft,
   Github,
