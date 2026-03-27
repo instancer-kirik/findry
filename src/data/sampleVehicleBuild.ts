@@ -264,22 +264,36 @@ export const sampleVehicleBuild = {
         { id: 'rear-storage-box', name: 'Build rear storage cargo box', completed: false, estimatedHours: 12 },
         { id: 'bike-rack', name: 'Install swing-away bike rack', completed: false, estimatedHours: 2 },
         { id: 'awning', name: 'Install retractable awning', completed: false, estimatedHours: 6 },
-        { id: 'exterior-shower', name: 'Install exterior shower connection', completed: false, estimatedHours: 4 },
-        { id: 'aero-visor', name: 'Design & fabricate custom aerodynamic visor – Chevy Silverado', completed: false, estimatedHours: 14 },
+        { id: 'exterior-shower', name: 'Install exterior shower connection', completed: false, estimatedHours: 4 }
+      ],
+      partsList: [
+        { id: 'hitch', name: '2" Receiver Hitch', brand: 'Curt', model: '13417', cost: 200, quantity: 1, vendor: 'Amazon' },
+        { id: 'cargo-box', name: 'Rear Cargo Box Materials', brand: 'Various', cost: 300, quantity: 1, vendor: 'Home Depot' },
+        { id: 'bike-rack', name: 'Swing-Away Bike Rack', brand: 'Yakima', model: 'SwingDaddy', cost: 400, quantity: 1, vendor: 'REI' },
+        { id: 'awning', name: 'Retractable Awning', brand: 'Dometic', model: '8500', cost: 600, quantity: 1, vendor: 'Camping World' }
+      ]
+    },
+    {
+      id: 'silverado-fabrication',
+      name: 'Silverado Custom Fabrication',
+      description: 'Custom aerodynamic visor and roof rack for Chevy Silverado',
+      icon: Wrench,
+      status: 'not_started' as const,
+      priority: 'medium' as const,
+      estimatedCost: 285,
+      estimatedDuration: '2 weeks',
+      tasks: [
+        { id: 'aero-visor', name: 'Design & fabricate custom aerodynamic visor', completed: false, estimatedHours: 14 },
         { id: 'aero-visor-template', name: 'Template visor shape from windshield rake angle', completed: false, estimatedHours: 3 },
         { id: 'aero-visor-form', name: 'Form visor from sheet metal or ABS plastic', completed: false, estimatedHours: 6 },
         { id: 'aero-visor-mount', name: 'Fabricate mounting brackets & test-fit visor', completed: false, estimatedHours: 4 },
-        { id: 'roof-rack', name: 'Design & fabricate custom roof rack – Chevy Silverado', completed: false, estimatedHours: 24 },
+        { id: 'roof-rack', name: 'Design & fabricate custom roof rack', completed: false, estimatedHours: 24 },
         { id: 'roof-rack-measure', name: 'Measure cab & bed dimensions for rack layout', completed: false, estimatedHours: 3 },
         { id: 'roof-rack-weld', name: 'Cut, notch & weld rack frame from steel tubing', completed: false, estimatedHours: 12 },
         { id: 'roof-rack-finish', name: 'Grind, prime & powdercoat/bedliner rack', completed: false, estimatedHours: 5 },
         { id: 'roof-rack-mount', name: 'Drill & bolt rack mounts to bed rails / cab', completed: false, estimatedHours: 4 }
       ],
       partsList: [
-        { id: 'hitch', name: '2" Receiver Hitch', brand: 'Curt', model: '13417', cost: 200, quantity: 1, vendor: 'Amazon' },
-        { id: 'cargo-box', name: 'Rear Cargo Box Materials', brand: 'Various', cost: 300, quantity: 1, vendor: 'Home Depot' },
-        { id: 'bike-rack', name: 'Swing-Away Bike Rack', brand: 'Yakima', model: 'SwingDaddy', cost: 400, quantity: 1, vendor: 'REI' },
-        { id: 'awning', name: 'Retractable Awning', brand: 'Dometic', model: '8500', cost: 600, quantity: 1, vendor: 'Camping World' },
         { id: 'visor-material', name: 'ABS Plastic Sheet / 16ga Sheet Metal', brand: 'Various', cost: 45, quantity: 1, vendor: 'Metal Supermarkets' },
         { id: 'visor-hardware', name: 'Stainless mounting hardware & rivets', brand: 'Various', cost: 20, quantity: 1, vendor: 'Home Depot' },
         { id: 'rack-tubing', name: '1.5" x .120 DOM Steel Tubing (20ft)', brand: 'Various', cost: 120, quantity: 1, vendor: 'Metal Supermarkets' },
