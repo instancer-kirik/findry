@@ -26,6 +26,33 @@ export const sampleVehicleBuild = {
   },
   phases: [
     {
+      id: 'mechanical-repair',
+      name: 'Mechanical Repair',
+      description: 'Critical drivetrain and chassis repairs before build-out',
+      icon: Car,
+      status: 'in_progress' as const,
+      priority: 'critical' as const,
+      estimatedCost: 2500,
+      actualCost: undefined,
+      estimatedDuration: '3 weeks',
+      startDate: new Date('2024-01-20'),
+      tasks: [
+        { id: 'frame-repair', name: 'Frame repair and reinforcement', completed: false, estimatedHours: 20 },
+        { id: 'fuel-lines', name: 'Replace fuel lines', completed: false, estimatedHours: 8 },
+        { id: 'brake-lines', name: 'Replace brake lines', completed: false, estimatedHours: 10 },
+        { id: 'driveshaft-replace', name: 'Replace cracked driveshaft', completed: false, estimatedHours: 6 },
+        { id: 'safety-inspection', name: 'Post-repair safety inspection', completed: false, estimatedHours: 2 }
+      ],
+      partsList: [
+        { id: 'frame-steel', name: 'Frame Repair Steel Plate & Tubing', brand: 'Various', cost: 300, quantity: 1, vendor: 'Metal Supermarkets' },
+        { id: 'fuel-line-kit', name: 'Fuel Line Kit (P30 Chassis)', brand: 'Dorman', cost: 180, quantity: 1, vendor: 'RockAuto' },
+        { id: 'brake-line-kit', name: 'Brake Line Kit (P30 Chassis)', brand: 'Dorman', cost: 150, quantity: 1, vendor: 'RockAuto' },
+        { id: 'driveshaft', name: 'Replacement Driveshaft', brand: 'Cardone', cost: 350, quantity: 1, vendor: 'RockAuto', warrantyInfo: '2 years' },
+        { id: 'welding-supplies', name: 'Welding Rod & Gas', brand: 'Lincoln', cost: 80, quantity: 1, vendor: 'Airgas' }
+      ],
+      notes: 'Truck was $1500 — needs significant mechanical work before any build-out. Frame is the top priority.'
+    },
+    {
       id: 'planning-research',
       name: 'Planning & Research',
       description: 'Initial planning, measurements, and research phase',
