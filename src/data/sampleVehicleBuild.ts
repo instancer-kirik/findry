@@ -16,13 +16,13 @@ import {
 
 export const sampleVehicleBuild = {
   vehicleInfo: {
-    make: 'Ford',
-    model: 'Transit 250',
-    year: 2019,
+    make: 'Grumman Olson',
+    model: 'P30 Step Van',
+    year: 1996,
     type: 'van' as const,
-    mileage: 85000,
+    mileage: undefined,
     purchaseDate: new Date('2024-01-15'),
-    purchasePrice: 28500
+    purchasePrice: 1500
   },
   phases: [
     {
