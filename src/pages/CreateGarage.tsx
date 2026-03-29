@@ -407,8 +407,8 @@ export default function CreateGarage() {
                   <Button type="button" variant="outline" onClick={() => navigate('/garages')}>
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={createMutation.isPending}>
-                    {createMutation.isPending ? 'Creating...' : 'Create Garage'}
+                  <Button type="submit" disabled={createMutation.isPending || !user}>
+                    {!user ? 'Login Required' : createMutation.isPending ? 'Creating...' : 'Create Garage'}
                   </Button>
                 </div>
               </form>
