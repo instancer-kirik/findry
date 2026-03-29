@@ -119,6 +119,15 @@ export default function CreateGarage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {!user && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Login Required</AlertTitle>
+                <AlertDescription>
+                  You must be <Link to="/login" className="underline font-medium">logged in</Link> to create a garage. You can browse the form, but submission is disabled.
+                </AlertDescription>
+              </Alert>
+            )}
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 {/* Basic Info */}
