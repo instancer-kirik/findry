@@ -5554,6 +5554,38 @@ export type Database = {
         }
         Relationships: []
       }
+      project_aspect_tags: {
+        Row: {
+          created_at: string
+          id: string
+          project_id: string
+          tag_category: string
+          tag_value: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          project_id: string
+          tag_category: string
+          tag_value: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          project_id?: string
+          tag_category?: string
+          tag_value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_aspect_tags_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects_catalog"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_aspects: {
         Row: {
           aspect_type: Database["public"]["Enums"]["project_aspect_type"]

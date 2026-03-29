@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Warehouse, ArrowLeft } from 'lucide-react';
+import { Warehouse, ArrowLeft, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useGarages } from '@/hooks/use-garages';
+import { useAuth } from '@/hooks/use-auth';
 import { PrivacyLevel } from '@/types/garage';
 import Layout from '@/components/layout/Layout';
 import { Link } from 'react-router-dom';
@@ -44,6 +46,7 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function CreateGarage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { useCreateGarage } = useGarages();
   const createMutation = useCreateGarage();
 
@@ -116,6 +119,15 @@ export default function CreateGarage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {!user && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Login Required</AlertTitle>
+                <AlertDescription>
+                  You must be <Link to="/login" className="underline font-medium">logged in</Link> to create a garage. You can browse the form, but submission is disabled.
+                </AlertDescription>
+              </Alert>
+            )}
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 {/* Basic Info */}
@@ -395,8 +407,8 @@ export default function CreateGarage() {
                   <Button type="button" variant="outline" onClick={() => navigate('/garages')}>
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={createMutation.isPending}>
-                    {createMutation.isPending ? 'Creating...' : 'Create Garage'}
+                  <Button type="submit" disabled={createMutation.isPending || !user}>
+                    {!user ? 'Login Required' : createMutation.isPending ? 'Creating...' : 'Create Garage'}
                   </Button>
                 </div>
               </form>
