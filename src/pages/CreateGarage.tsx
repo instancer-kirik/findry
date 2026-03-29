@@ -46,6 +46,7 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function CreateGarage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { useCreateGarage } = useGarages();
   const createMutation = useCreateGarage();
 
