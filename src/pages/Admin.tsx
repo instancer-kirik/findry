@@ -15,7 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { 
   RefreshCw, Users, Mail, MessageSquare, Calendar, 
   FolderKanban, Bug, Lightbulb, Terminal, Database,
-  TrendingUp, Star, Eye, ArrowUpRight
+  TrendingUp, Star, Eye, ArrowUpRight, Target, ExternalLink, Copy
 } from 'lucide-react';
 import { format, subDays, startOfDay } from 'date-fns';
 import { toast } from 'sonner';
@@ -65,6 +65,157 @@ interface UnifiedProject {
   source_table: string | null;
   created_at: string;
 }
+
+interface BetaTarget {
+  name: string;
+  type: 'artist' | 'makerspace' | 'org' | 'mobile';
+  description: string;
+  location: string;
+  url?: string;
+  status: 'not_contacted' | 'contacted' | 'interested' | 'onboarded' | 'declined';
+  notes?: string;
+}
+
+const initialBetaTargets: BetaTarget[] = [
+  // Artists & Fabricators
+  { name: "Ember de Boer", type: "artist", description: "Large-scale sculptor, festival installations", location: "Pacific NW", url: "https://instagram.com", status: "not_contacted" },
+  { name: "Ian Gallo", type: "artist", description: "Interactive festival art, LED + metal", location: "Bay Area, CA", status: "not_contacted" },
+  { name: "Bruna D'Alessandro", type: "artist", description: "Metalwork & sculptural furniture", location: "Brooklyn, NY", status: "not_contacted" },
+  { name: "Swoon (Caledonia Curry)", type: "artist", description: "Street art, community-built structures", location: "NYC / Global", status: "not_contacted" },
+  { name: "Michael Garlington", type: "artist", description: "Large-format photography temples, Burning Man", location: "Oakland, CA", status: "not_contacted" },
+  { name: "HYBYCOZO (Yelena Filipchuk)", type: "artist", description: "Geometric light sculptures", location: "Oakland, CA", status: "not_contacted" },
+  // Makerspaces & Workshops
+  { name: "The Collab", type: "makerspace", description: "Shared creative workspace, tools & lifts", location: "Los Angeles, CA", url: "https://thecollab.la", status: "not_contacted" },
+  { name: "Filma Collective", type: "makerspace", description: "Film & fabrication community space", location: "Berkeley, CA", status: "not_contacted" },
+  { name: "Make At Rosie", type: "makerspace", description: "Open workshop, metalwork & woodshop", location: "Portland, OR", status: "not_contacted" },
+  { name: "Vancowork / NomadBase", type: "makerspace", description: "Van build co-working garage", location: "Porto, Portugal", status: "not_contacted" },
+  { name: "ADX Portland", type: "makerspace", description: "Shared makerspace, classes & residencies", location: "Portland, OR", status: "not_contacted" },
+  { name: "Artisan's Asylum", type: "makerspace", description: "Large community makerspace", location: "Somerville, MA", status: "not_contacted" },
+  // Community Orgs
+  { name: "Big Heavy World", type: "org", description: "Touring support, gear library for musicians", location: "Burlington, VT", url: "https://bigheavyworld.com", status: "not_contacted" },
+  { name: "IndieSpace Together", type: "org", description: "Network of DIY venues & art spaces", location: "Nationwide", status: "not_contacted" },
+  { name: "Artist Commons", type: "org", description: "Shared studio & resource collective", location: "Denver, CO", status: "not_contacted" },
+  { name: "NIVA (Nat'l Indep. Venue Assoc.)", type: "org", description: "Independent venue advocacy network", location: "Nationwide", status: "not_contacted" },
+  // Mobile / Festival Creatives
+  { name: "AfrikaBurn Art Collective", type: "mobile", description: "Regional burn art builders, shared resources", location: "South Africa", status: "not_contacted" },
+  { name: "Open Road Upfitters", type: "mobile", description: "Van/truck builds for mobile creatives", location: "Austin, TX", status: "not_contacted" },
+  { name: "Camplight Collective", type: "mobile", description: "Touring musicians resource-sharing group", location: "Nashville, TN", status: "not_contacted" },
+  { name: "Tinker Trucks", type: "mobile", description: "Mobile workshop & build community", location: "San Diego, CA", status: "not_contacted" },
+];
+
+const typeColors: Record<string, string> = {
+  artist: 'bg-primary/20 text-primary',
+  makerspace: 'bg-accent/20 text-accent-foreground',
+  org: 'bg-secondary text-secondary-foreground',
+  mobile: 'bg-muted text-muted-foreground',
+};
+
+const statusColors: Record<string, string> = {
+  not_contacted: 'bg-muted text-muted-foreground',
+  contacted: 'bg-primary/20 text-primary',
+  interested: 'bg-accent/30 text-accent-foreground',
+  onboarded: 'bg-primary text-primary-foreground',
+  declined: 'bg-destructive/20 text-destructive',
+};
+
+const BetaOutreachTab: React.FC = () => {
+  const [targets, setTargets] = useState<BetaTarget[]>(() => {
+    const saved = localStorage.getItem('muster-beta-targets');
+    return saved ? JSON.parse(saved) : initialBetaTargets;
+  });
+
+  const updateStatus = (index: number, status: BetaTarget['status']) => {
+    const updated = [...targets];
+    updated[index] = { ...updated[index], status };
+    setTargets(updated);
+    localStorage.setItem('muster-beta-targets', JSON.stringify(updated));
+    toast.success(`Updated ${updated[index].name}`);
+  };
+
+  const copyEmail = (name: string) => {
+    navigator.clipboard.writeText(name);
+    toast.success('Copied to clipboard');
+  };
+
+  const stats = {
+    total: targets.length,
+    contacted: targets.filter(t => t.status !== 'not_contacted').length,
+    interested: targets.filter(t => t.status === 'interested').length,
+    onboarded: targets.filter(t => t.status === 'onboarded').length,
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card><CardContent className="pt-4 text-center"><div className="text-2xl font-bold">{stats.total}</div><p className="text-xs text-muted-foreground">Total Targets</p></CardContent></Card>
+        <Card><CardContent className="pt-4 text-center"><div className="text-2xl font-bold">{stats.contacted}</div><p className="text-xs text-muted-foreground">Contacted</p></CardContent></Card>
+        <Card><CardContent className="pt-4 text-center"><div className="text-2xl font-bold">{stats.interested}</div><p className="text-xs text-muted-foreground">Interested</p></CardContent></Card>
+        <Card><CardContent className="pt-4 text-center"><div className="text-2xl font-bold">{stats.onboarded}</div><p className="text-xs text-muted-foreground">Onboarded</p></CardContent></Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><Target className="h-5 w-5" /> Beta Tester Targets</CardTitle>
+          <CardDescription>Zero-to-one artists, makerspaces, and orgs for outreach. Status is saved locally.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead className="hidden md:table-cell">Description</TableHead>
+                <TableHead className="hidden sm:table-cell">Location</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="w-10"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {targets.map((target, i) => (
+                <TableRow key={i}>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-1">
+                      {target.name}
+                      {target.url && (
+                        <a href={target.url} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                        </a>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className={typeColors[target.type]}>{target.type}</Badge>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell text-muted-foreground text-sm max-w-xs truncate">{target.description}</TableCell>
+                  <TableCell className="hidden sm:table-cell text-sm">{target.location}</TableCell>
+                  <TableCell>
+                    <Select value={target.status} onValueChange={(v) => updateStatus(i, v as BetaTarget['status'])}>
+                      <SelectTrigger className="w-32">
+                        <Badge variant="outline" className={statusColors[target.status]}>{target.status.replace('_', ' ')}</Badge>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="not_contacted">Not Contacted</SelectItem>
+                        <SelectItem value="contacted">Contacted</SelectItem>
+                        <SelectItem value="interested">Interested</SelectItem>
+                        <SelectItem value="onboarded">Onboarded</SelectItem>
+                        <SelectItem value="declined">Declined</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="ghost" size="icon" onClick={() => copyEmail(target.name)}>
+                      <Copy className="h-3 w-3" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
 
 const Admin: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -296,6 +447,10 @@ const Admin: React.FC = () => {
             <TabsTrigger value="users">
               <Users className="h-4 w-4 mr-2" />
               Users
+            </TabsTrigger>
+            <TabsTrigger value="outreach">
+              <Target className="h-4 w-4 mr-2" />
+              Beta Outreach
             </TabsTrigger>
             <TabsTrigger value="devtools">
               <Terminal className="h-4 w-4 mr-2" />
@@ -720,6 +875,11 @@ const Admin: React.FC = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* Beta Outreach Tab */}
+          <TabsContent value="outreach">
+            <BetaOutreachTab />
           </TabsContent>
         </Tabs>
       </div>
