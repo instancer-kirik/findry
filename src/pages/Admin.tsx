@@ -725,6 +725,11 @@ const Admin: React.FC = () => {
               </Card>
             </div>
           </TabsContent>
+
+          {/* Beta Outreach Tab */}
+          <TabsContent value="outreach">
+            <BetaOutreachTab />
+          </TabsContent>
         </Tabs>
       </div>
     </Layout>
