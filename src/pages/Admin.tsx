@@ -15,7 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { 
   RefreshCw, Users, Mail, MessageSquare, Calendar, 
   FolderKanban, Bug, Lightbulb, Terminal, Database,
-  TrendingUp, Star, Eye, ArrowUpRight
+  TrendingUp, Star, Eye, ArrowUpRight, Target, ExternalLink, Copy
 } from 'lucide-react';
 import { format, subDays, startOfDay } from 'date-fns';
 import { toast } from 'sonner';
