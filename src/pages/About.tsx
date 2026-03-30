@@ -257,9 +257,9 @@ const About: React.FC = () => {
             <h2 className="text-2xl font-bold mb-6">Frequently Asked Questions</h2>
             <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-semibold mb-2">What is Findry?</h3>
+                <h3 className="text-lg font-semibold mb-2">What is Muster?</h3>
                 <p className="text-muted-foreground">
-                  Findry is the present tense of foundry.
+                  Muster means to gather, rally, and assemble — exactly what we do for creative communities.
                 </p>
               </div>
               <Separator className="my-4" />
