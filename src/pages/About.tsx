@@ -191,7 +191,7 @@ const About: React.FC = () => {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                Findry is in active development. Check out our roadmap to see completed features, 
+                Muster is in active development. Check out our roadmap to see completed features, 
                 current priorities, and future plans. We're transparent about what's working and what needs improvement.
               </p>
               <Link to="/roadmap">
