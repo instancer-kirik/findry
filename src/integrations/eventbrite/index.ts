@@ -370,7 +370,7 @@ export const mockEventbriteEvents: EventbriteEvent[] = [
     source: 'create_event',
     is_free: true,
     version: '3.0.0',
-    summary: 'Findry Creators Showcase',
+    summary: 'Muster Creators Showcase',
     logo_id: 'logo-123456',
     organizer_id: 'org-123456',
     venue_id: 'venue-123456',
