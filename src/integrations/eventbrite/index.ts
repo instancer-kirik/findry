@@ -325,14 +325,14 @@ export const mockEventbriteEvents: EventbriteEvent[] = [
   {
     id: 'eb-123456789',
     name: {
-      text: 'Findry Creators Showcase',
-      html: '<p>Findry Creators Showcase</p>'
+      text: 'Muster Creators Showcase',
+      html: '<p>Muster Creators Showcase</p>'
     },
     description: {
-      text: 'Join us for an evening showcasing the best creative work from the Findry community. Meet artists, designers, and creators while enjoying live performances and exhibitions.',
-      html: '<p>Join us for an evening showcasing the best creative work from the Findry community. Meet artists, designers, and creators while enjoying live performances and exhibitions.</p>'
+      text: 'Join us for an evening showcasing the best creative work from the Muster community. Meet artists, designers, and creators while enjoying live performances and exhibitions.',
+      html: '<p>Join us for an evening showcasing the best creative work from the Muster community. Meet artists, designers, and creators while enjoying live performances and exhibitions.</p>'
     },
-    url: 'https://www.eventbrite.com/e/findry-creators-showcase-tickets-123456789',
+    url: 'https://www.eventbrite.com/e/muster-creators-showcase-tickets-123456789',
     start: {
       timezone: 'America/Los_Angeles',
       local: '2023-09-15T18:00:00',
