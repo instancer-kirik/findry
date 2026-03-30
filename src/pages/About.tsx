@@ -136,7 +136,7 @@ const About: React.FC = () => {
                 <CardContent>
                   <p className="text-muted-foreground">
                     He brings a wealth of experience in UX design and community building, 
-                    ensuring that Findry remains intuitive and responsive.
+                    ensuring that Muster remains intuitive and responsive.
                   </p>
                   <div className="flex mt-4 gap-2">
                     <Button variant="outline" size="icon">
