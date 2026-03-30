@@ -311,9 +311,9 @@ const ProjectDetail: React.FC = () => {
 
       // Update document title and meta tags for SEO
       const title = project.name || "Project";
-      const description = project.description || "An amazing project on Findry";
+      const description = project.description || "An amazing project on Muster";
 
-      document.title = `${title} - Findry`;
+      document.title = `${title} - Muster`;
 
       // Update meta description
       let metaDescription = document.querySelector('meta[name="description"]');
