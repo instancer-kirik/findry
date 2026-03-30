@@ -237,7 +237,7 @@ const About: React.FC = () => {
                 </CardHeader>
                 <CardContent className="flex-1">
                   <p className="text-muted-foreground mb-6">
-                    Have questions, feedback, or ideas for improving Findry? We'd love to hear from you.
+                    Have questions, feedback, or ideas for improving Muster? We'd love to hear from you.
                     Reach out to our team and let's build a better platform together.
                   </p>
                 </CardContent>
