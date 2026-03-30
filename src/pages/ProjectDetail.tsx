@@ -386,7 +386,7 @@ const ProjectDetail: React.FC = () => {
   // Cleanup meta tags on unmount
   useEffect(() => {
     return () => {
-      document.title = "Findry";
+      document.title = "Muster";
     };
   }, []);
 

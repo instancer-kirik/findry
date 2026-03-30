@@ -280,7 +280,7 @@ const About: React.FC = () => {
               </div>
               <Separator className="my-4" />
               <div>
-                <h3 className="text-lg font-semibold mb-2">How can I contribute to Findry's development?</h3>
+                <h3 className="text-lg font-semibold mb-2">How can I contribute to Muster's development?</h3>
                 <p className="text-muted-foreground">
                   We welcome feedback, feature suggestions, and community contributions. 
                   Contact us through our <Link to="/contact" className="text-primary hover:underline">contact page</Link> to 

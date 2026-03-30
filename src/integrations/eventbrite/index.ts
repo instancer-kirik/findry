@@ -399,7 +399,7 @@ export const mockEventbriteEvents: EventbriteEvent[] = [
       },
       resource_uri: 'https://www.eventbriteapi.com/v3/venues/venue-123456/',
       id: 'venue-123456',
-      name: 'Findry Creative Space',
+      name: 'Muster Creative Space',
       latitude: '37.7749',
       longitude: '-122.4194'
     },
