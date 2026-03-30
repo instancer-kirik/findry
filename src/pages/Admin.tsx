@@ -297,6 +297,10 @@ const Admin: React.FC = () => {
               <Users className="h-4 w-4 mr-2" />
               Users
             </TabsTrigger>
+            <TabsTrigger value="outreach">
+              <Target className="h-4 w-4 mr-2" />
+              Beta Outreach
+            </TabsTrigger>
             <TabsTrigger value="devtools">
               <Terminal className="h-4 w-4 mr-2" />
               Dev Tools
