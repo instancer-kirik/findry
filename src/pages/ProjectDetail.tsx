@@ -143,7 +143,7 @@ const ProjectDetail: React.FC = () => {
     const description =
       project?.landing_page?.hero_subtitle ||
       project?.description ||
-      "Check out this project on Findry!";
+      "Check out this project on Muster!";
 
     if (platform) {
       let url = "";
