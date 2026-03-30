@@ -271,9 +271,9 @@ const About: React.FC = () => {
               </div>
               <Separator className="my-4" />
               <div>
-                <h3 className="text-lg font-semibold mb-2">Is Findry available in my area?</h3>
+                <h3 className="text-lg font-semibold mb-2">Is Muster available in my area?</h3>
                 <p className="text-muted-foreground">
-                  Findry is currently focused on building strong communities in select regions, with plans to expand. 
+                  Muster is currently focused on building strong communities in select regions, with plans to expand. 
                   Even if you're outside our primary regions, you can still join and connect with resources and communities 
                   that might be relevant to your work.
                 </p>
