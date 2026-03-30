@@ -94,7 +94,7 @@ const FeatureSection: React.FC = () => {
                   </div>
                   <div className="flex-1 ml-4">
                     <div className="bg-background/60 rounded-md px-3 py-1 text-xs text-muted-foreground max-w-xs">
-                      findry.app{activeFeature.route}
+                      muster.app{activeFeature.route}
                     </div>
                   </div>
                 </div>
