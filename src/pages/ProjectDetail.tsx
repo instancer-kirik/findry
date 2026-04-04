@@ -900,6 +900,11 @@ const ProjectDetail: React.FC = () => {
     );
   }
 
+  // Check if this is a film production project
+  if (project.type === "film") {
+    return <FilmProductionPlanner project={project} />;
+  }
+
   // Check if this is a product landing page project
   if (
     project.type === "product_launch" ||
