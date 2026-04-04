@@ -71,6 +71,7 @@ import ComponentDialog from "@/components/projects/detail/ComponentDialog";
 import TaskDialog from "@/components/projects/detail/TaskDialog";
 import VehicleBuildProject from "@/components/projects/VehicleBuildProject";
 import ProductLandingPage from "@/components/projects/ProductLandingPage";
+import FilmProductionPlanner from "@/components/projects/FilmProductionPlanner";
 import CustomLandingPage from "@/components/projects/landing/CustomLandingPage";
 import LandingPageEditor from "@/components/projects/landing/LandingPageEditor";
 
