@@ -20,6 +20,7 @@ interface ProjectFormData {
   ownerId?: string;
   tags: string[];
   isPublic: boolean;
+  projectType: string;
 }
 
 const CreateProject = () => {
