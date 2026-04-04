@@ -282,8 +282,8 @@ const FilmProductionPlanner: React.FC<Props> = ({ project }) => {
   };
 
   const phaseStatusIcon = (status: string) => {
-    if (status === 'completed') return <CheckCircle2 className="w-4 h-4 text-green-500" />;
-    if (status === 'in_progress') return <PlayCircle className="w-4 h-4 text-amber-500" />;
+    if (status === 'completed') return <CheckCircle2 className="w-4 h-4 text-primary" />;
+    if (status === 'in_progress') return <PlayCircle className="w-4 h-4 text-accent-foreground" />;
     return <Circle className="w-4 h-4 text-muted-foreground" />;
   };
 
