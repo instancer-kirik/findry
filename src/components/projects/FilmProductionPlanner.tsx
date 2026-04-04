@@ -409,7 +409,7 @@ const FilmProductionPlanner: React.FC<Props> = ({ project }) => {
                         className="flex items-center gap-2 w-full text-left text-sm py-1 px-2 rounded hover:bg-muted/50 transition-colors"
                       >
                         {task.done
-                          ? <CheckCircle2 className="w-3.5 h-3.5 text-green-500 shrink-0" />
+                          ? <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
                           : <Circle className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                         }
                         <span className={task.done ? 'line-through text-muted-foreground' : ''}>{task.name}</span>

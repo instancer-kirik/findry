@@ -35,7 +35,8 @@ const CreateProject = () => {
     description: '',
     ownershipType: 'personal',
     tags: [],
-    isPublic: false
+    isPublic: false,
+    projectType: 'general',
   });
 
   // Show auth gate if not logged in after loading
