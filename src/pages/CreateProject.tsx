@@ -74,7 +74,8 @@ const CreateProject = () => {
         owner_type: formData.ownershipType,
         owner_id: formData.ownerId || user.id,
         created_by: user.id,
-        is_public: formData.isPublic
+        is_public: formData.isPublic,
+        type: formData.projectType,
       });
 
       navigate('/projects');
