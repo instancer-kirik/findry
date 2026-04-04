@@ -20,6 +20,7 @@ interface ProjectFormData {
   ownerId?: string;
   tags: string[];
   isPublic: boolean;
+  projectType: string;
 }
 
 const CreateProject = () => {
@@ -34,7 +35,8 @@ const CreateProject = () => {
     description: '',
     ownershipType: 'personal',
     tags: [],
-    isPublic: false
+    isPublic: false,
+    projectType: 'general',
   });
 
   // Show auth gate if not logged in after loading
@@ -72,7 +74,8 @@ const CreateProject = () => {
         owner_type: formData.ownershipType,
         owner_id: formData.ownerId || user.id,
         created_by: user.id,
-        is_public: formData.isPublic
+        is_public: formData.isPublic,
+        type: formData.projectType,
       });
 
       navigate('/projects');
@@ -109,6 +112,24 @@ const CreateProject = () => {
                 placeholder="Describe your project"
                 required
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="projectType">Project Type</Label>
+              <Select 
+                value={formData.projectType}
+                onValueChange={(value) => setFormData({ ...formData, projectType: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select project type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="general">General Project</SelectItem>
+                  <SelectItem value="film">Film / Movie</SelectItem>
+                  <SelectItem value="vehicle_build">Vehicle Build</SelectItem>
+                  <SelectItem value="product_launch">Product Launch</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
