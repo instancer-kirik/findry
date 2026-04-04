@@ -115,6 +115,24 @@ const CreateProject = () => {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="projectType">Project Type</Label>
+              <Select 
+                value={formData.projectType}
+                onValueChange={(value) => setFormData({ ...formData, projectType: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select project type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="general">General Project</SelectItem>
+                  <SelectItem value="film">Film / Movie</SelectItem>
+                  <SelectItem value="vehicle_build">Vehicle Build</SelectItem>
+                  <SelectItem value="product_launch">Product Launch</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="ownershipType">Project Ownership</Label>
               <Select 
                 value={formData.ownershipType}
