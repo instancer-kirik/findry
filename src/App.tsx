@@ -75,6 +75,8 @@ import Garages from "./pages/Garages";
 import CreateGarage from "./pages/CreateGarage";
 import Admin from "./pages/Admin";
 import Feedback from "./pages/Feedback";
+import ShareViews from "./pages/ShareViews";
+import ShareViewPublic from "./pages/ShareViewPublic";
 const queryClient = new QueryClient();
 
 const App: React.FC = () => {
@@ -202,6 +204,8 @@ const App: React.FC = () => {
         <Route path="/instagram-demo" element={<InstagramDemo />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/feedback" element={<Feedback />} />
+        <Route path="/share-views" element={<ShareViews />} />
+        <Route path="/share/:shareKey" element={<ShareViewPublic />} />
         <Route path="*" element={<Navigate to="/not-found" replace />} />
       </Routes>
     </QueryClientProvider>
