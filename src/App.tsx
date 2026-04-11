@@ -75,6 +75,8 @@ import Garages from "./pages/Garages";
 import CreateGarage from "./pages/CreateGarage";
 import Admin from "./pages/Admin";
 import Feedback from "./pages/Feedback";
+import ShareViews from "./pages/ShareViews";
+import ShareViewPublic from "./pages/ShareViewPublic";
 const queryClient = new QueryClient();
 
 const App: React.FC = () => {
