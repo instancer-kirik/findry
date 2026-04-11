@@ -7089,6 +7089,57 @@ export type Database = {
         }
         Relationships: []
       }
+      share_views: {
+        Row: {
+          created_at: string
+          description: string | null
+          excluded_project_ids: string[] | null
+          id: string
+          is_active: boolean | null
+          labels: string[] | null
+          name: string
+          owner_id: string
+          pinned_project_ids: string[] | null
+          share_key: string
+          tags: string[] | null
+          theme: string | null
+          updated_at: string
+          view_count: number | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          excluded_project_ids?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          labels?: string[] | null
+          name: string
+          owner_id: string
+          pinned_project_ids?: string[] | null
+          share_key?: string
+          tags?: string[] | null
+          theme?: string | null
+          updated_at?: string
+          view_count?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          excluded_project_ids?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          labels?: string[] | null
+          name?: string
+          owner_id?: string
+          pinned_project_ids?: string[] | null
+          share_key?: string
+          tags?: string[] | null
+          theme?: string | null
+          updated_at?: string
+          view_count?: number | null
+        }
+        Relationships: []
+      }
       shopping_list: {
         Row: {
           actual_cost: number | null
