@@ -204,6 +204,8 @@ const App: React.FC = () => {
         <Route path="/instagram-demo" element={<InstagramDemo />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/feedback" element={<Feedback />} />
+        <Route path="/share-views" element={<ShareViews />} />
+        <Route path="/share/:shareKey" element={<ShareViewPublic />} />
         <Route path="*" element={<Navigate to="/not-found" replace />} />
       </Routes>
     </QueryClientProvider>
