@@ -98,6 +98,7 @@ interface CatalogProject {
   project_type: string | null;
   source_table: string | null;
   created_at: string;
+  dev_project_id: string | null;
   dev_progress: number | null;
   dev_repo_url: string | null;
   category_name: string | null;
