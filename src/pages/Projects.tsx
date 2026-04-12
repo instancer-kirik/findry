@@ -834,21 +834,22 @@ const Projects: React.FC = () => {
                 </div>
                 <div className="flex flex-wrap gap-2 mt-3">
                   {shareViews.slice(0, 5).map((view) => (
-                  <Badge
-                    key={view.id}
-                    variant={selectedShareView?.id === view.id ? "default" : "outline"}
-                    className="text-xs cursor-pointer hover:bg-accent transition-colors"
-                    onClick={() => setSelectedShareViewId(view.id)}
-                  >
-                    <Share2 className="h-3 w-3 mr-1" />
-                    {view.name}
-                  </Badge>
-                ))}
-                {shareViews.length > 5 && (
-                  <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={() => navigate("/share-views")}>
-                    View all ({shareViews.length})
-                  </Button>
-                )}
+                    <Badge
+                      key={view.id}
+                      variant={selectedShareView?.id === view.id ? "default" : "outline"}
+                      className="text-xs cursor-pointer hover:bg-accent transition-colors"
+                      onClick={() => setSelectedShareViewId(view.id)}
+                    >
+                      <Share2 className="h-3 w-3 mr-1" />
+                      {view.name}
+                    </Badge>
+                  ))}
+                  {shareViews.length > 5 && (
+                    <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={() => navigate("/share-views")}>
+                      View all ({shareViews.length})
+                    </Button>
+                  )}
+                </div>
               </div>
             )}
 

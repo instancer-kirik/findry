@@ -132,17 +132,6 @@ const ShareViews: React.FC = () => {
     setPinnedIds(prev => prev.filter(id => id !== projectId));
   };
 
-  if (!user) {
-    return (
-      <Layout>
-        <div className="container mx-auto py-12 text-center">
-          <h1 className="text-2xl font-bold mb-4">Share Views</h1>
-          <p className="text-muted-foreground">Log in to create curated share links.</p>
-        </div>
-      </Layout>
-    );
-  }
-
   const views = myViews.data || [];
 
   useEffect(() => {
@@ -164,6 +153,17 @@ const ShareViews: React.FC = () => {
     nextParams.delete('edit');
     setSearchParams(nextParams, { replace: true });
   }, [searchParams, setSearchParams, views]);
+
+  if (!user) {
+    return (
+      <Layout>
+        <div className="container mx-auto py-12 text-center">
+          <h1 className="text-2xl font-bold mb-4">Share Views</h1>
+          <p className="text-muted-foreground">Log in to create curated share links.</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
