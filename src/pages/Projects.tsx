@@ -131,6 +131,7 @@ const Projects: React.FC = () => {
   const [newShareName, setNewShareName] = useState("");
   const [newShareDesc, setNewShareDesc] = useState("");
   const [newShareTags, setNewShareTags] = useState<string[]>([]);
+  const [selectedShareViewId, setSelectedShareViewId] = useState("");
 
   // Tab state from URL or default
   const activeTab = searchParams.get("tab") || (user ? "my-projects" : "catalog");
@@ -270,6 +271,25 @@ const Projects: React.FC = () => {
     return filtered;
   })();
 
+  const shareViews = myViews.data || [];
+  const selectedShareView =
+    shareViews.find((view) => view.id === selectedShareViewId) ||
+    shareViews[0] ||
+    null;
+
+  useEffect(() => {
+    if (shareViews.length === 0) {
+      if (selectedShareViewId) {
+        setSelectedShareViewId("");
+      }
+      return;
+    }
+
+    if (!shareViews.some((view) => view.id === selectedShareViewId)) {
+      setSelectedShareViewId(shareViews[0].id);
+    }
+  }, [selectedShareViewId, shareViews]);
+
   // Share view helpers
   const handleCreateShareView = async () => {
     if (!newShareName.trim()) {
@@ -296,8 +316,8 @@ const Projects: React.FC = () => {
       setNewShareName("");
       setNewShareDesc("");
       setNewShareTags([]);
-      // Navigate to share views management page
-      navigate("/share-views");
+      setSelectedShareViewId(result.id);
+      navigate(`/share-views?edit=${result.id}`);
     } catch (err: any) {
       console.error("Share view creation error:", err);
       toast.error(`Failed to create share view: ${err.message || "Unknown error"}`);
@@ -308,6 +328,14 @@ const Projects: React.FC = () => {
     setNewShareTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
+  };
+
+  const openShareViewEditor = (viewId: string) => {
+    navigate(`/share-views?edit=${viewId}`);
+  };
+
+  const openShareViewPreview = (shareKey: string) => {
+    window.open(`/share/${shareKey}`, "_blank");
   };
 
   const handleCreateProject = () => navigate("/create-project");
@@ -418,29 +446,43 @@ const Projects: React.FC = () => {
   };
 
   const getCatalogProjectLink = (project: CatalogProject) => {
+    const normalizedSourceUrl = project.source_url?.trim() || "";
+    const hasExternalSourceUrl = /^https?:\/\//i.test(normalizedSourceUrl);
+
     if (project.path?.startsWith("/")) {
-      return project.path;
+      return { href: project.path, external: false };
     }
 
     switch (project.source_table) {
       case "projects":
       case "video_projects":
       case "loreum_creative_works":
-        return `/projects/${project.id}`;
+        return { href: `/projects/${project.id}`, external: false };
       case "development_projects":
-        return project.dev_project_id
-          ? `/projects/${project.dev_project_id}`
-          : "/projects?tab=catalog";
+        return {
+          href: project.dev_project_id
+            ? `/projects/${project.dev_project_id}`
+            : `/projects/${project.id}`,
+          external: false,
+        };
       case "vehicle_configurations":
-        return "/vehicle-build";
+        return { href: "/vehicle-build", external: false };
       default:
-        return "/projects?tab=catalog";
+        if (hasExternalSourceUrl) {
+          return { href: normalizedSourceUrl, external: true };
+        }
+
+        return {
+          href: `/projects/${project.dev_project_id || project.id}`,
+          external: false,
+        };
     }
   };
 
-  const renderCatalogCard = (project: CatalogProject) => (
-    <Card key={project.id} className="group h-full hover:shadow-lg transition-all duration-200">
-      <Link to={getCatalogProjectLink(project)} className="block">
+  const renderCatalogCard = (project: CatalogProject) => {
+    const catalogLink = getCatalogProjectLink(project);
+    const cardContent = (
+      <>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-center gap-2">
@@ -467,7 +509,10 @@ const Projects: React.FC = () => {
               <Badge variant="secondary" className="text-xs">{project.domain}</Badge>
             )}
             {project.source_table && (
-              <span className="text-xs text-muted-foreground capitalize">{project.source_table.replace("_", " ")}</span>
+              <span className="text-xs text-muted-foreground capitalize flex items-center gap-1">
+                {project.source_table.replace("_", " ")}
+                {catalogLink.external && <ExternalLink className="h-3 w-3" />}
+              </span>
             )}
           </div>
 
@@ -512,9 +557,28 @@ const Projects: React.FC = () => {
             <span className="text-xs text-muted-foreground">{project.category_name}</span>
           )}
         </CardContent>
-      </Link>
-    </Card>
-  );
+      </>
+    );
+
+    return (
+      <Card key={project.id} className="group h-full hover:shadow-lg transition-all duration-200">
+        {catalogLink.external ? (
+          <a
+            href={catalogLink.href}
+            target="_blank"
+            rel="noreferrer"
+            className="block h-full"
+          >
+            {cardContent}
+          </a>
+        ) : (
+          <Link to={catalogLink.href} className="block h-full">
+            {cardContent}
+          </Link>
+        )}
+      </Card>
+    );
+  };
 
   if (isLoading) {
     return (
@@ -732,25 +796,60 @@ const Projects: React.FC = () => {
             )}
 
             {/* Existing share views quick access */}
-            {user && myViews.data && myViews.data.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-4">
-                <span className="text-xs text-muted-foreground self-center mr-1">Your share views:</span>
-                {myViews.data.slice(0, 5).map((view) => (
-                  <Badge
-                    key={view.id}
-                    variant="outline"
-                    className="text-xs cursor-pointer hover:bg-accent transition-colors"
-                    onClick={() => window.open(`/share/${view.share_key}`, "_blank")}
-                  >
-                    <Share2 className="h-3 w-3 mr-1" />
-                    {view.name}
-                  </Badge>
-                ))}
-                {myViews.data.length > 5 && (
-                  <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={() => navigate("/share-views")}>
-                    View all ({myViews.data.length})
-                  </Button>
-                )}
+            {user && shareViews.length > 0 && (
+              <div className="mb-4 rounded-lg border border-border bg-card/50 p-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-medium">Share page group</p>
+                    <p className="text-xs text-muted-foreground">Select an existing group to edit or preview it.</p>
+                  </div>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <Select value={selectedShareView?.id} onValueChange={setSelectedShareViewId}>
+                      <SelectTrigger className="w-full sm:w-[220px] h-9">
+                        <SelectValue placeholder="Select share view" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {shareViews.map((view) => (
+                          <SelectItem key={view.id} value={view.id}>{view.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={!selectedShareView}
+                      onClick={() => selectedShareView && openShareViewEditor(selectedShareView.id)}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />Edit Selected
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      disabled={!selectedShareView}
+                      onClick={() => selectedShareView && openShareViewPreview(selectedShareView.share_key)}
+                    >
+                      <Eye className="h-4 w-4 mr-2" />Preview
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {shareViews.slice(0, 5).map((view) => (
+                    <Badge
+                      key={view.id}
+                      variant={selectedShareView?.id === view.id ? "default" : "outline"}
+                      className="text-xs cursor-pointer hover:bg-accent transition-colors"
+                      onClick={() => setSelectedShareViewId(view.id)}
+                    >
+                      <Share2 className="h-3 w-3 mr-1" />
+                      {view.name}
+                    </Badge>
+                  ))}
+                  {shareViews.length > 5 && (
+                    <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={() => navigate("/share-views")}>
+                      View all ({shareViews.length})
+                    </Button>
+                  )}
+                </div>
               </div>
             )}
 
