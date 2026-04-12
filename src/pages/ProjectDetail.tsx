@@ -399,7 +399,7 @@ const ProjectDetail: React.FC = () => {
       try {
         const { data, error: unifiedError } = await supabase
           .from("unified_projects" as any)
-          .select("path, source_table, dev_project_id")
+          .select("path, source_table, dev_project_id, source_url")
           .eq("id", projectId)
           .maybeSingle();
 
@@ -407,6 +407,7 @@ const ProjectDetail: React.FC = () => {
           path: string | null;
           source_table: string | null;
           dev_project_id: string | null;
+          source_url: string | null;
         } | null;
 
         if (unifiedError) {
@@ -414,6 +415,15 @@ const ProjectDetail: React.FC = () => {
         }
 
         if (cancelled || !unifiedProject) {
+          return;
+        }
+
+        const externalSourceUrl = unifiedProject.source_url?.match(/^https?:\/\//i)
+          ? unifiedProject.source_url
+          : null;
+
+        if (unifiedProject.source_table === "catalog" && externalSourceUrl) {
+          window.location.replace(externalSourceUrl);
           return;
         }
 

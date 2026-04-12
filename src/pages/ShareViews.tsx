@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useShareViews, ShareView } from '@/hooks/use-share-views';
 import { useAuth } from '@/hooks/use-auth';
+import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Copy, Trash2, Eye, Tag, Pin, X, Link2, Edit2 } from 'lucide-react';
@@ -18,6 +19,7 @@ const ShareViews: React.FC = () => {
   const { user } = useAuth();
   const { myViews, createView, updateView, deleteView } = useShareViews();
   const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingView, setEditingView] = useState<ShareView | null>(null);
   const [form, setForm] = useState({
@@ -67,6 +69,14 @@ const ShareViews: React.FC = () => {
     setPinnedIds(view.pinned_project_ids || []);
     setExcludedIds(view.excluded_project_ids || []);
     setDialogOpen(true);
+  };
+
+  const handleDialogOpenChange = (open: boolean) => {
+    setDialogOpen(open);
+
+    if (!open) {
+      resetForm();
+    }
   };
 
   const handleSubmit = async () => {
@@ -134,6 +144,26 @@ const ShareViews: React.FC = () => {
   }
 
   const views = myViews.data || [];
+
+  useEffect(() => {
+    const editId = searchParams.get('edit');
+
+    if (!editId || views.length === 0) {
+      return;
+    }
+
+    const matchingView = views.find((view) => view.id === editId);
+
+    if (!matchingView) {
+      return;
+    }
+
+    openEdit(matchingView);
+
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete('edit');
+    setSearchParams(nextParams, { replace: true });
+  }, [searchParams, setSearchParams, views]);
 
   return (
     <Layout>
@@ -224,10 +254,13 @@ const ShareViews: React.FC = () => {
         )}
 
         {/* Create/Edit Dialog */}
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
           <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingView ? 'Edit Share View' : 'Create Share View'}</DialogTitle>
+              <DialogDescription>
+                Configure which tags auto-fill this share page and which projects stay pinned or excluded.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
