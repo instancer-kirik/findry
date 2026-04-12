@@ -449,10 +449,7 @@ const Projects: React.FC = () => {
     const normalizedSourceUrl = project.source_url?.trim() || "";
     const hasExternalSourceUrl = /^https?:\/\//i.test(normalizedSourceUrl);
 
-    if (project.path?.startsWith("/")) {
-      return { href: project.path, external: false };
-    }
-
+    // Prioritize known source_table routing over the path field
     switch (project.source_table) {
       case "projects":
       case "video_projects":
@@ -460,18 +457,24 @@ const Projects: React.FC = () => {
         return { href: `/projects/${project.id}`, external: false };
       case "development_projects":
         return {
-          href: project.dev_project_id
-            ? `/projects/${project.dev_project_id}`
-            : `/projects/${project.id}`,
+          href: `/projects/${project.dev_project_id || project.id}`,
           external: false,
         };
       case "vehicle_configurations":
         return { href: "/vehicle-build", external: false };
-      default:
+      case "catalog":
         if (hasExternalSourceUrl) {
           return { href: normalizedSourceUrl, external: true };
         }
-
+        return { href: `/projects/${project.id}`, external: false };
+      default:
+        // For unknown source tables, try path, then external URL, then fallback
+        if (project.path?.startsWith("/")) {
+          return { href: project.path, external: false };
+        }
+        if (hasExternalSourceUrl) {
+          return { href: normalizedSourceUrl, external: true };
+        }
         return {
           href: `/projects/${project.dev_project_id || project.id}`,
           external: false,
