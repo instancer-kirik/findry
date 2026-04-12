@@ -403,7 +403,7 @@ const ProjectDetail: React.FC = () => {
           .eq("id", projectId)
           .maybeSingle();
 
-        const unifiedProject = data as {
+        const unifiedProject = data as unknown as {
           path: string | null;
           source_table: string | null;
           dev_project_id: string | null;
