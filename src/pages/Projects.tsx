@@ -23,6 +23,7 @@ import {
 import { useProject } from "@/hooks/use-project";
 import { Project } from "@/types/project";
 import { useAuth } from "@/hooks/use-auth";
+import { useShareViews } from "@/hooks/use-share-views";
 import {
   Car,
   Wrench,
@@ -48,6 +49,8 @@ import {
   Filter,
   ArrowUpDown,
   X,
+  Share2,
+  Link2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -55,7 +58,12 @@ import { ToonImporter } from "@/components/projects/ToonImporter";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
   DialogTrigger,
+  DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -73,21 +81,26 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
-interface PublicProject {
+interface CatalogProject {
   id: string;
   name: string;
   description: string;
-  tags: string[];
-  image_url: string | null;
-  view_count: number;
-  like_count: number;
-  featured: boolean;
-  created_at: string;
+  domain: string | null;
   status: string;
-  progress: number;
-  owner_username?: string;
-  has_custom_landing: boolean;
+  tech_stack: string[] | null;
+  features: string[] | null;
+  source_url: string | null;
+  emoji: string | null;
+  featured: boolean;
+  project_type: string | null;
+  source_table: string | null;
+  created_at: string;
+  dev_progress: number | null;
+  dev_repo_url: string | null;
+  category_name: string | null;
 }
 
 const Projects: React.FC = () => {
@@ -96,6 +109,7 @@ const Projects: React.FC = () => {
   const { useGetProjects } = useProject();
   const { data: projects = [], isLoading, error, refetch } = useGetProjects();
   const { user } = useAuth();
+  const { myViews, createView } = useShareViews();
   const [searchQuery, setSearchQuery] = useState("");
   const [projectOwnership, setProjectOwnership] = useState<Record<string, boolean>>({});
   const [projectTasks, setProjectTasks] = useState<Record<string, any[]>>({});
@@ -104,12 +118,17 @@ const Projects: React.FC = () => {
   const [importDialogOpen, setImportDialogOpen] = useState(false);
 
   // Catalog state
-  const [catalogProjects, setCatalogProjects] = useState<PublicProject[]>([]);
+  const [catalogProjects, setCatalogProjects] = useState<CatalogProject[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [sortBy, setSortBy] = useState("featured");
-  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterDomain, setFilterDomain] = useState("all");
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [likedProjects, setLikedProjects] = useState<Set<string>>(new Set());
+
+  // Share view creation state
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [newShareName, setNewShareName] = useState("");
+  const [newShareDesc, setNewShareDesc] = useState("");
+  const [newShareTags, setNewShareTags] = useState<string[]>([]);
 
   // Tab state from URL or default
   const activeTab = searchParams.get("tab") || (user ? "my-projects" : "catalog");
@@ -168,43 +187,21 @@ const Projects: React.FC = () => {
     fetchAllTasks();
   }, [projects]);
 
-  // Fetch catalog projects
+  // Fetch catalog from unified_projects view
   useEffect(() => {
     fetchCatalogProjects();
   }, []);
 
   const fetchCatalogProjects = async () => {
     try {
-      const { data: projectsData, error: projectsError } = await supabase
-        .from("projects")
-        .select(`id, name, description, tags, image_url, view_count, like_count, featured, created_at, status, progress, has_custom_landing, owner_id, created_by`)
-        .eq("is_public", true)
+      const { data, error } = await supabase
+        .from("unified_projects" as any)
+        .select("*")
         .order("featured", { ascending: false })
         .order("created_at", { ascending: false });
 
-      if (projectsError) throw projectsError;
-
-      const userIds = new Set<string>();
-      (projectsData || []).forEach((p: any) => {
-        if (p.owner_id) userIds.add(p.owner_id);
-        if (p.created_by) userIds.add(p.created_by);
-      });
-
-      const { data: profilesData } = await supabase
-        .from("profiles")
-        .select("id, username")
-        .in("id", Array.from(userIds));
-
-      const usernameMap = new Map(
-        (profilesData || []).map((p: any) => [p.id, p.username])
-      );
-
-      const processed = (projectsData || []).map((project: any) => ({
-        ...project,
-        owner_username: usernameMap.get(project.owner_id || project.created_by),
-      }));
-
-      setCatalogProjects(processed);
+      if (error) throw error;
+      setCatalogProjects((data || []) as unknown as CatalogProject[]);
     } catch (error: any) {
       console.error("Error fetching catalog:", error);
     } finally {
@@ -222,29 +219,35 @@ const Projects: React.FC = () => {
       (project.tags?.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))),
   );
 
-  // Catalog filtering + sorting
+  // Catalog: collect all tech_stack tags and domains
   const allCatalogTags = Array.from(
-    new Set(catalogProjects.flatMap((p) => p.tags || []))
+    new Set(catalogProjects.flatMap((p) => p.tech_stack || []))
   ).sort();
+
+  const allDomains = Array.from(
+    new Set(catalogProjects.map((p) => p.domain).filter(Boolean))
+  ).sort() as string[];
 
   const filteredCatalog = (() => {
     let filtered = [...catalogProjects];
 
     if (searchQuery) {
+      const q = searchQuery.toLowerCase();
       filtered = filtered.filter(
         (p) =>
-          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.tags?.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase())),
+          p.name.toLowerCase().includes(q) ||
+          p.description?.toLowerCase().includes(q) ||
+          p.tech_stack?.some((t) => t.toLowerCase().includes(q)) ||
+          p.domain?.toLowerCase().includes(q),
       );
     }
 
-    if (filterStatus !== "all") {
-      filtered = filtered.filter((p) => p.status === filterStatus);
+    if (filterDomain !== "all") {
+      filtered = filtered.filter((p) => p.domain === filterDomain);
     }
 
     if (selectedTag) {
-      filtered = filtered.filter((p) => p.tags?.includes(selectedTag));
+      filtered = filtered.filter((p) => p.tech_stack?.includes(selectedTag));
     }
 
     filtered.sort((a, b) => {
@@ -252,15 +255,11 @@ const Projects: React.FC = () => {
         case "featured":
           if (a.featured && !b.featured) return -1;
           if (!a.featured && b.featured) return 1;
-          return (b.view_count || 0) - (a.view_count || 0);
-        case "trending":
-          return (b.view_count || 0) - (a.view_count || 0);
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         case "newest":
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        case "popular":
-          return (b.like_count || 0) - (a.like_count || 0);
         case "progress":
-          return (b.progress || 0) - (a.progress || 0);
+          return (b.dev_progress || 0) - (a.dev_progress || 0);
         default:
           return 0;
       }
@@ -269,44 +268,34 @@ const Projects: React.FC = () => {
     return filtered;
   })();
 
-  const handleLikeProject = async (projectId: string, currentLikes: number) => {
-    if (!user) {
-      toast.error("Please log in to like projects");
-      return;
-    }
+  // Share view helpers
+  const handleCreateShareView = async () => {
+    if (!newShareName.trim()) return;
     try {
-      const isLiked = likedProjects.has(projectId);
-      const newLikeCount = isLiked ? currentLikes - 1 : currentLikes + 1;
-      const { error } = await supabase
-        .from("projects")
-        .update({ like_count: newLikeCount })
-        .eq("id", projectId);
-      if (error) throw error;
-
-      const newLiked = new Set(likedProjects);
-      if (isLiked) newLiked.delete(projectId);
-      else newLiked.add(projectId);
-      setLikedProjects(newLiked);
-
-      setCatalogProjects((prev) =>
-        prev.map((p) => (p.id === projectId ? { ...p, like_count: newLikeCount } : p))
-      );
-    } catch (error: any) {
-      toast.error("Failed to like project");
+      await createView.mutateAsync({
+        name: newShareName.trim(),
+        description: newShareDesc.trim() || null,
+        tags: newShareTags,
+        labels: [],
+        pinned_project_ids: [],
+        excluded_project_ids: [],
+        theme: "default",
+        is_active: true,
+      });
+      toast.success("Share view created! Manage it from Share Views page.");
+      setShareDialogOpen(false);
+      setNewShareName("");
+      setNewShareDesc("");
+      setNewShareTags([]);
+    } catch (err: any) {
+      toast.error("Failed to create share view");
     }
   };
 
-  const incrementViewCount = async (projectId: string) => {
-    try {
-      const project = catalogProjects.find((p) => p.id === projectId);
-      if (!project) return;
-      await supabase
-        .from("projects")
-        .update({ view_count: (project.view_count || 0) + 1 })
-        .eq("id", projectId);
-    } catch (error) {
-      console.error("Error incrementing view count:", error);
-    }
+  const toggleShareTag = (tag: string) => {
+    setNewShareTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
   };
 
   const handleCreateProject = () => navigate("/create-project");
@@ -351,12 +340,10 @@ const Projects: React.FC = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => handleEditProject(project.id)}>
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Project
+                  <Edit className="h-4 w-4 mr-2" />Edit Project
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => { setProjectToDelete(project.id); setDeleteDialogOpen(true); }} className="text-destructive">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Project
+                  <Trash2 className="h-4 w-4 mr-2" />Delete Project
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -376,7 +363,7 @@ const Projects: React.FC = () => {
           <p className="text-muted-foreground mb-4 line-clamp-3">{project.description || "No description provided"}</p>
           {tasks.length > 0 && (
             <div className="mb-4 space-y-2">
-              <p className="text-sm font-medium text-muted-foreground">Recent Tasks ({completedTasks}/{tasks.length} completed)</p>
+              <p className="text-sm font-medium text-muted-foreground">Recent Tasks ({completedTasks}/{tasks.length})</p>
               <div className="space-y-1">
                 {tasks.slice(0, 3).map((task) => (
                   <div key={task.id} className="flex items-center text-sm">
@@ -418,63 +405,56 @@ const Projects: React.FC = () => {
     );
   };
 
-  const renderCatalogCard = (project: PublicProject) => (
+  const renderCatalogCard = (project: CatalogProject) => (
     <Card key={project.id} className="group h-full hover:shadow-lg transition-all duration-200">
-      <div className="relative">
-        {project.image_url && (
-          <div className="h-40 overflow-hidden rounded-t-lg">
-            <img src={project.image_url} alt={project.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-          </div>
-        )}
-        <div className="absolute top-3 left-3 flex gap-2">
-          {project.featured && (
-            <Badge variant="default" className="bg-yellow-500/90 backdrop-blur-sm">
-              <Star className="h-3 w-3 mr-1" />Featured
-            </Badge>
-          )}
-        </div>
-        <div className="absolute top-3 right-3 flex gap-2">
-          {project.has_custom_landing && (
-            <Button variant="ghost" size="sm" asChild className="bg-background/80 backdrop-blur-sm hover:bg-background">
-              <Link to={`/projects/${project.id}/landing`} onClick={(e) => { e.stopPropagation(); incrementViewCount(project.id); }}>
-                <ExternalLink className="h-3 w-3" />
-              </Link>
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleLikeProject(project.id, project.like_count || 0); }}
-            className={`bg-background/80 backdrop-blur-sm hover:bg-background ${likedProjects.has(project.id) ? "text-red-500" : ""}`}
-          >
-            <Heart className={`h-3 w-3 ${likedProjects.has(project.id) ? "fill-current" : ""}`} />
-          </Button>
-        </div>
-      </div>
-
-      <Link to={`/projects/${project.id}`} onClick={() => incrementViewCount(project.id)} className="block">
+      <Link to={`/projects/${project.id}`} className="block">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-2">
-            <CardTitle className="text-lg line-clamp-1 group-hover:text-primary transition-colors">{project.name}</CardTitle>
-            <Badge variant="outline" className="text-xs capitalize shrink-0">{project.status.replace("_", " ")}</Badge>
+            <div className="flex items-center gap-2">
+              {project.emoji && <span className="text-lg">{project.emoji}</span>}
+              <CardTitle className="text-lg line-clamp-1 group-hover:text-primary transition-colors">{project.name}</CardTitle>
+            </div>
+            <div className="flex gap-1.5 shrink-0">
+              {project.featured && (
+                <Badge variant="default" className="text-xs bg-yellow-500/90">
+                  <Star className="h-3 w-3 mr-0.5" />
+                </Badge>
+              )}
+              <Badge variant="outline" className="text-xs capitalize">{project.status?.replace("_", " ") || "active"}</Badge>
+            </div>
           </div>
           {project.description && (
             <CardDescription className="line-clamp-2">{project.description}</CardDescription>
           )}
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="mb-3">
-            <div className="flex justify-between text-xs text-muted-foreground mb-1">
-              <span>Progress</span>
-              <span>{project.progress || 0}%</span>
-            </div>
-            <div className="w-full bg-muted rounded-full h-2">
-              <div className="bg-primary h-2 rounded-full transition-all duration-300" style={{ width: `${project.progress || 0}%` }} />
-            </div>
+          {/* Domain + Source */}
+          <div className="flex items-center gap-2 mb-3">
+            {project.domain && (
+              <Badge variant="secondary" className="text-xs">{project.domain}</Badge>
+            )}
+            {project.source_table && (
+              <span className="text-xs text-muted-foreground capitalize">{project.source_table.replace("_", " ")}</span>
+            )}
           </div>
-          {project.tags && project.tags.length > 0 && (
+
+          {/* Progress bar (if dev project) */}
+          {project.dev_progress != null && project.dev_progress > 0 && (
+            <div className="mb-3">
+              <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                <span>Progress</span>
+                <span>{project.dev_progress}%</span>
+              </div>
+              <div className="w-full bg-muted rounded-full h-2">
+                <div className="bg-primary h-2 rounded-full transition-all duration-300" style={{ width: `${project.dev_progress}%` }} />
+              </div>
+            </div>
+          )}
+
+          {/* Tech stack tags */}
+          {project.tech_stack && project.tech_stack.length > 0 && (
             <div className="flex flex-wrap gap-1 mb-3">
-              {project.tags.slice(0, 3).map((tag) => (
+              {project.tech_stack.slice(0, 4).map((tag) => (
                 <Badge
                   key={tag}
                   variant="secondary"
@@ -488,18 +468,16 @@ const Projects: React.FC = () => {
                   {tag}
                 </Badge>
               ))}
-              {project.tags.length > 3 && (
-                <Badge variant="secondary" className="text-xs">+{project.tags.length - 3}</Badge>
+              {project.tech_stack.length > 4 && (
+                <Badge variant="secondary" className="text-xs">+{project.tech_stack.length - 4}</Badge>
               )}
             </div>
           )}
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{project.view_count || 0}</span>
-              <span className="flex items-center gap-1"><Heart className="h-3 w-3" />{project.like_count || 0}</span>
-            </div>
-            {project.owner_username && <span className="text-xs">by @{project.owner_username}</span>}
-          </div>
+
+          {/* Category */}
+          {project.category_name && (
+            <span className="text-xs text-muted-foreground">{project.category_name}</span>
+          )}
         </CardContent>
       </Link>
     </Card>
@@ -529,23 +507,28 @@ const Projects: React.FC = () => {
         {/* Header */}
         <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
           <h1 className="text-3xl font-bold">Projects</h1>
-          {user && (
-            <div className="flex gap-2">
-              <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Upload className="h-4 w-4 mr-2" />Import .toon
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <ToonImporter onComplete={() => { setImportDialogOpen(false); refetch(); }} />
-                </DialogContent>
-              </Dialog>
-              <Button onClick={handleCreateProject} size="sm">
-                <PlusCircle className="h-4 w-4 mr-2" />Create Project
-              </Button>
-            </div>
-          )}
+          <div className="flex gap-2">
+            {user && (
+              <>
+                <Button variant="outline" size="sm" onClick={() => navigate("/share-views")}>
+                  <Share2 className="h-4 w-4 mr-2" />Share Views
+                </Button>
+                <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Upload className="h-4 w-4 mr-2" />Import .toon
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <ToonImporter onComplete={() => { setImportDialogOpen(false); refetch(); }} />
+                  </DialogContent>
+                </Dialog>
+                <Button onClick={handleCreateProject} size="sm">
+                  <PlusCircle className="h-4 w-4 mr-2" />Create Project
+                </Button>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Search */}
@@ -553,7 +536,7 @@ const Projects: React.FC = () => {
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search projects by name, description, or tags..."
+            placeholder="Search projects by name, description, or tech..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
@@ -644,10 +627,10 @@ const Projects: React.FC = () => {
             )}
           </TabsContent>
 
-          {/* Catalog Tab - Full browsing with filters, tags, sorting */}
+          {/* Catalog Tab - Unified Projects with filters, tags, sorting */}
           <TabsContent value="catalog">
             {/* Filters bar */}
-            <div className="flex flex-wrap gap-3 mb-6 items-center">
+            <div className="flex flex-wrap gap-3 mb-4 items-center">
               <div className="flex items-center gap-2">
                 <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
                 <Select value={sortBy} onValueChange={setSortBy}>
@@ -656,41 +639,50 @@ const Projects: React.FC = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="featured"><span className="flex items-center gap-2"><Star className="h-3 w-3" />Featured</span></SelectItem>
-                    <SelectItem value="trending"><span className="flex items-center gap-2"><TrendingUp className="h-3 w-3" />Trending</span></SelectItem>
                     <SelectItem value="newest"><span className="flex items-center gap-2"><Clock className="h-3 w-3" />Newest</span></SelectItem>
-                    <SelectItem value="popular"><span className="flex items-center gap-2"><Heart className="h-3 w-3" />Most Liked</span></SelectItem>
                     <SelectItem value="progress">Progress</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 text-muted-foreground" />
-                <Select value={filterStatus} onValueChange={setFilterStatus}>
-                  <SelectTrigger className="w-[140px] h-9">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="planning">Planning</SelectItem>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="on_hold">On Hold</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {allDomains.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-muted-foreground" />
+                  <Select value={filterDomain} onValueChange={setFilterDomain}>
+                    <SelectTrigger className="w-[160px] h-9">
+                      <SelectValue placeholder="Domain" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Domains</SelectItem>
+                      {allDomains.map((d) => (
+                        <SelectItem key={d} value={d}>{d}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               {selectedTag && (
                 <Badge variant="default" className="flex items-center gap-1 cursor-pointer" onClick={() => setSelectedTag(null)}>
                   {selectedTag} <X className="h-3 w-3" />
                 </Badge>
               )}
+
+              {/* Create Share View button */}
+              {user && (
+                <div className="ml-auto">
+                  <Button variant="outline" size="sm" onClick={() => setShareDialogOpen(true)}>
+                    <Link2 className="h-4 w-4 mr-1" />
+                    Create Share View
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* Tag cloud */}
             {allCatalogTags.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mb-6">
-                {allCatalogTags.slice(0, 20).map((tag) => (
+                {allCatalogTags.slice(0, 24).map((tag) => (
                   <Badge
                     key={tag}
                     variant={selectedTag === tag ? "default" : "outline"}
@@ -700,8 +692,31 @@ const Projects: React.FC = () => {
                     {tag}
                   </Badge>
                 ))}
-                {allCatalogTags.length > 20 && (
-                  <Badge variant="outline" className="text-xs text-muted-foreground">+{allCatalogTags.length - 20} more</Badge>
+                {allCatalogTags.length > 24 && (
+                  <Badge variant="outline" className="text-xs text-muted-foreground">+{allCatalogTags.length - 24} more</Badge>
+                )}
+              </div>
+            )}
+
+            {/* Existing share views quick access */}
+            {user && myViews.data && myViews.data.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                <span className="text-xs text-muted-foreground self-center mr-1">Your share views:</span>
+                {myViews.data.slice(0, 5).map((view) => (
+                  <Badge
+                    key={view.id}
+                    variant="outline"
+                    className="text-xs cursor-pointer hover:bg-accent transition-colors"
+                    onClick={() => window.open(`/share/${view.share_key}`, "_blank")}
+                  >
+                    <Share2 className="h-3 w-3 mr-1" />
+                    {view.name}
+                  </Badge>
+                ))}
+                {myViews.data.length > 5 && (
+                  <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={() => navigate("/share-views")}>
+                    View all ({myViews.data.length})
+                  </Button>
                 )}
               </div>
             )}
@@ -719,9 +734,9 @@ const Projects: React.FC = () => {
             ) : filteredCatalog.length === 0 ? (
               <div className="text-center py-12">
                 <Globe className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-lg text-muted-foreground">{searchQuery || selectedTag ? "No projects found matching your filters." : "No public projects yet."}</p>
-                {(searchQuery || selectedTag || filterStatus !== "all") && (
-                  <Button variant="outline" className="mt-4" onClick={() => { setSearchQuery(""); setSelectedTag(null); setFilterStatus("all"); }}>
+                <p className="text-lg text-muted-foreground">{searchQuery || selectedTag || filterDomain !== "all" ? "No projects found matching your filters." : "No projects in the catalog yet."}</p>
+                {(searchQuery || selectedTag || filterDomain !== "all") && (
+                  <Button variant="outline" className="mt-4" onClick={() => { setSearchQuery(""); setSelectedTag(null); setFilterDomain("all"); }}>
                     Clear Filters
                   </Button>
                 )}
@@ -755,12 +770,61 @@ const Projects: React.FC = () => {
           </TabsContent>
         </Tabs>
 
+        {/* Create Share View Dialog */}
+        <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create Share View</DialogTitle>
+              <DialogDescription>
+                Create a curated page of projects to share with a specific audience. Pick tags to auto-populate, then fine-tune on the Share Views page.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              <div>
+                <Label htmlFor="share-name">View Name</Label>
+                <Input id="share-name" placeholder="e.g. Hardware & Technical" value={newShareName} onChange={(e) => setNewShareName(e.target.value)} />
+              </div>
+              <div>
+                <Label htmlFor="share-desc">Description (optional)</Label>
+                <Textarea id="share-desc" placeholder="What this collection is about..." value={newShareDesc} onChange={(e) => setNewShareDesc(e.target.value)} rows={2} />
+              </div>
+              <div>
+                <Label>Auto-populate by tags</Label>
+                <p className="text-xs text-muted-foreground mb-2">Projects matching these tags will appear in this view.</p>
+                <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
+                  {allCatalogTags.slice(0, 30).map((tag) => (
+                    <Badge
+                      key={tag}
+                      variant={newShareTags.includes(tag) ? "default" : "outline"}
+                      className="text-xs cursor-pointer transition-colors"
+                      onClick={() => toggleShareTag(tag)}
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+                {newShareTags.length > 0 && (
+                  <p className="text-xs text-muted-foreground mt-2">{newShareTags.length} tag{newShareTags.length !== 1 ? "s" : ""} selected</p>
+                )}
+              </div>
+            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </DialogClose>
+              <Button onClick={handleCreateShareView} disabled={!newShareName.trim() || createView.isPending}>
+                {createView.isPending ? "Creating..." : "Create View"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Project</AlertDialogTitle>
-              <AlertDialogDescription>Are you sure you want to delete this project? This action cannot be undone. All project components and tasks will also be deleted.</AlertDialogDescription>
+              <AlertDialogDescription>Are you sure you want to delete this project? This action cannot be undone.</AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
