@@ -88,6 +88,7 @@ interface CatalogProject {
   id: string;
   name: string;
   description: string;
+  path: string | null;
   domain: string | null;
   status: string;
   tech_stack: string[] | null;
@@ -417,13 +418,23 @@ const Projects: React.FC = () => {
   };
 
   const getCatalogProjectLink = (project: CatalogProject) => {
+    if (project.path?.startsWith("/")) {
+      return project.path;
+    }
+
     switch (project.source_table) {
-      case "projects": return `/projects/${project.id}`;
-      case "development_projects": return `/projects/${project.dev_project_id || project.id}`;
-      case "vehicle_configurations": return "/vehicle-build";
-      case "video_projects": return `/projects/${project.id}`;
-      case "loreum_creative_works": return `/projects/${project.id}`;
-      default: return `/projects/${project.id}`;
+      case "projects":
+      case "video_projects":
+      case "loreum_creative_works":
+        return `/projects/${project.id}`;
+      case "development_projects":
+        return project.dev_project_id
+          ? `/projects/${project.dev_project_id}`
+          : "/projects?tab=catalog";
+      case "vehicle_configurations":
+        return "/vehicle-build";
+      default:
+        return "/projects?tab=catalog";
     }
   };
 
