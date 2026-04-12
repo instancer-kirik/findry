@@ -397,11 +397,17 @@ const ProjectDetail: React.FC = () => {
       setIsResolvingRoute(true);
 
       try {
-        const { data: unifiedProject, error: unifiedError } = await supabase
+        const { data, error: unifiedError } = await supabase
           .from("unified_projects" as any)
           .select("path, source_table, dev_project_id")
           .eq("id", projectId)
           .maybeSingle();
+
+        const unifiedProject = data as {
+          path: string | null;
+          source_table: string | null;
+          dev_project_id: string | null;
+        } | null;
 
         if (unifiedError) {
           throw unifiedError;
@@ -425,10 +431,10 @@ const ProjectDetail: React.FC = () => {
         }
       } catch (routeError) {
         console.error("Error resolving unified project route:", routeError);
-      }
-
-      if (!cancelled) {
+      } finally {
+        if (!cancelled) {
         setIsResolvingRoute(false);
+        }
       }
     };
 
