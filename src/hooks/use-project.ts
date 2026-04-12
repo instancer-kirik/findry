@@ -28,7 +28,7 @@ export const useGetProject = (projectId?: string) => {
           .from("projects")
           .select("*")
           .eq("id", projectId)
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
         if (!data) return null;
