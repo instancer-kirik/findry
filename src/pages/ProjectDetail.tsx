@@ -82,6 +82,7 @@ const ProjectDetail: React.FC = () => {
   const { useGetProject } = useProject();
   const { data: project, isLoading, error, refetch } = useGetProject(projectId);
   const [isOwner, setIsOwner] = useState(false);
+  const [isResolvingRoute, setIsResolvingRoute] = useState(false);
   const [activeTab, setActiveTab] = useState("components");
   const chatRef = useRef<{ addReference: (item: ReferenceItem) => void }>(null);
 
@@ -383,6 +384,66 @@ const ProjectDetail: React.FC = () => {
       incrementView();
     }
   }, [project, projectId]);
+
+  useEffect(() => {
+    if (isLoading || project || !projectId) {
+      setIsResolvingRoute(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const resolveUnifiedProjectRoute = async () => {
+      setIsResolvingRoute(true);
+
+      try {
+        const { data, error: unifiedError } = await supabase
+          .from("unified_projects" as any)
+          .select("path, source_table, dev_project_id")
+          .eq("id", projectId)
+          .maybeSingle();
+
+        const unifiedProject = data as unknown as {
+          path: string | null;
+          source_table: string | null;
+          dev_project_id: string | null;
+        } | null;
+
+        if (unifiedError) {
+          throw unifiedError;
+        }
+
+        if (cancelled || !unifiedProject) {
+          return;
+        }
+
+        const fallbackPath = unifiedProject.path?.startsWith("/")
+          ? unifiedProject.path
+          : unifiedProject.source_table === "vehicle_configurations"
+            ? "/vehicle-build"
+            : unifiedProject.source_table === "development_projects" && unifiedProject.dev_project_id
+              ? `/projects/${unifiedProject.dev_project_id}`
+              : null;
+
+        if (fallbackPath && fallbackPath !== window.location.pathname) {
+          navigate(fallbackPath, { replace: true });
+          return;
+        }
+      } catch (routeError) {
+        console.error("Error resolving unified project route:", routeError);
+      } finally {
+        if (!cancelled) {
+        setIsResolvingRoute(false);
+        }
+      }
+    };
+
+    resolveUnifiedProjectRoute();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoading, navigate, project, projectId]);
 
   // Cleanup meta tags on unmount
   useEffect(() => {
@@ -859,7 +920,7 @@ const ProjectDetail: React.FC = () => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || isResolvingRoute) {
     return (
       <Layout>
         <div className="container mx-auto py-8">
