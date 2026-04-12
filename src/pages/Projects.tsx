@@ -271,9 +271,16 @@ const Projects: React.FC = () => {
 
   // Share view helpers
   const handleCreateShareView = async () => {
-    if (!newShareName.trim()) return;
+    if (!newShareName.trim()) {
+      toast.error("Please enter a name for the share view");
+      return;
+    }
+    if (!user) {
+      toast.error("Please sign in to create share views");
+      return;
+    }
     try {
-      await createView.mutateAsync({
+      const result = await createView.mutateAsync({
         name: newShareName.trim(),
         description: newShareDesc.trim() || null,
         tags: newShareTags,
@@ -283,13 +290,16 @@ const Projects: React.FC = () => {
         theme: "default",
         is_active: true,
       });
-      toast.success("Share view created! Manage it from Share Views page.");
+      toast.success("Share view created!");
       setShareDialogOpen(false);
       setNewShareName("");
       setNewShareDesc("");
       setNewShareTags([]);
+      // Navigate to share views management page
+      navigate("/share-views");
     } catch (err: any) {
-      toast.error("Failed to create share view");
+      console.error("Share view creation error:", err);
+      toast.error(`Failed to create share view: ${err.message || "Unknown error"}`);
     }
   };
 
