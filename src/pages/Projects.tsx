@@ -98,6 +98,7 @@ interface CatalogProject {
   project_type: string | null;
   source_table: string | null;
   created_at: string;
+  dev_project_id: string | null;
   dev_progress: number | null;
   dev_repo_url: string | null;
   category_name: string | null;
@@ -270,9 +271,16 @@ const Projects: React.FC = () => {
 
   // Share view helpers
   const handleCreateShareView = async () => {
-    if (!newShareName.trim()) return;
+    if (!newShareName.trim()) {
+      toast.error("Please enter a name for the share view");
+      return;
+    }
+    if (!user) {
+      toast.error("Please sign in to create share views");
+      return;
+    }
     try {
-      await createView.mutateAsync({
+      const result = await createView.mutateAsync({
         name: newShareName.trim(),
         description: newShareDesc.trim() || null,
         tags: newShareTags,
@@ -282,13 +290,16 @@ const Projects: React.FC = () => {
         theme: "default",
         is_active: true,
       });
-      toast.success("Share view created! Manage it from Share Views page.");
+      toast.success("Share view created!");
       setShareDialogOpen(false);
       setNewShareName("");
       setNewShareDesc("");
       setNewShareTags([]);
+      // Navigate to share views management page
+      navigate("/share-views");
     } catch (err: any) {
-      toast.error("Failed to create share view");
+      console.error("Share view creation error:", err);
+      toast.error(`Failed to create share view: ${err.message || "Unknown error"}`);
     }
   };
 
@@ -405,9 +416,20 @@ const Projects: React.FC = () => {
     );
   };
 
+  const getCatalogProjectLink = (project: CatalogProject) => {
+    switch (project.source_table) {
+      case "projects": return `/projects/${project.id}`;
+      case "development_projects": return `/projects/${project.dev_project_id || project.id}`;
+      case "vehicle_configurations": return "/vehicle-build";
+      case "video_projects": return `/projects/${project.id}`;
+      case "loreum_creative_works": return `/projects/${project.id}`;
+      default: return `/projects/${project.id}`;
+    }
+  };
+
   const renderCatalogCard = (project: CatalogProject) => (
     <Card key={project.id} className="group h-full hover:shadow-lg transition-all duration-200">
-      <Link to={`/projects/${project.id}`} className="block">
+      <Link to={getCatalogProjectLink(project)} className="block">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-center gap-2">
