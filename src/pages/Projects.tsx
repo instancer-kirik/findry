@@ -405,9 +405,20 @@ const Projects: React.FC = () => {
     );
   };
 
+  const getCatalogProjectLink = (project: CatalogProject) => {
+    switch (project.source_table) {
+      case "projects": return `/projects/${project.id}`;
+      case "development_projects": return `/projects/${project.dev_project_id || project.id}`;
+      case "vehicle_configurations": return "/vehicle-build";
+      case "video_projects": return `/projects/${project.id}`;
+      case "loreum_creative_works": return `/projects/${project.id}`;
+      default: return `/projects/${project.id}`;
+    }
+  };
+
   const renderCatalogCard = (project: CatalogProject) => (
     <Card key={project.id} className="group h-full hover:shadow-lg transition-all duration-200">
-      <Link to={`/projects/${project.id}`} className="block">
+      <Link to={getCatalogProjectLink(project)} className="block">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-center gap-2">
