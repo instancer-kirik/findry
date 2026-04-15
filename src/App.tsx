@@ -77,6 +77,7 @@ import Admin from "./pages/Admin";
 import Feedback from "./pages/Feedback";
 import ShareViews from "./pages/ShareViews";
 import ShareViewPublic from "./pages/ShareViewPublic";
+import Lyrics from "./pages/Lyrics";
 const queryClient = new QueryClient();
 
 const App: React.FC = () => {
@@ -206,6 +207,7 @@ const App: React.FC = () => {
         <Route path="/feedback" element={<Feedback />} />
         <Route path="/share-views" element={<ShareViews />} />
         <Route path="/share/:shareKey" element={<ShareViewPublic />} />
+        <Route path="/lyrics" element={<Lyrics />} />
         <Route path="*" element={<Navigate to="/not-found" replace />} />
       </Routes>
     </QueryClientProvider>
