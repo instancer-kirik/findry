@@ -4187,6 +4187,62 @@ export type Database = {
           },
         ]
       }
+      lyrics: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          key_signature: string | null
+          mood: string | null
+          notes: string | null
+          project_id: string | null
+          status: string
+          tags: string[] | null
+          tempo_bpm: number | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          id?: string
+          key_signature?: string | null
+          mood?: string | null
+          notes?: string | null
+          project_id?: string | null
+          status?: string
+          tags?: string[] | null
+          tempo_bpm?: number | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          key_signature?: string | null
+          mood?: string | null
+          notes?: string | null
+          project_id?: string | null
+          status?: string
+          tags?: string[] | null
+          tempo_bpm?: number | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lyrics_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       market_research: {
         Row: {
           conducted_date: string | null

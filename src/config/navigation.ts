@@ -25,6 +25,7 @@ import {
   Handshake,
   CheckSquare,
   Warehouse,
+  Music,
   type LucideIcon,
 } from "lucide-react";
 
@@ -135,6 +136,7 @@ export const navigation: NavCategory[] = [
         title: "Planning",
         links: [
           { href: "/tasks", title: "Tasks", description: "Unified task view", icon: CheckSquare },
+          { href: "/lyrics", title: "Lyrics", description: "Write & organize lyrics", icon: Music },
           { href: "/travel-locations", title: "Travel Locations", description: "Road resources & POIs", icon: MapPin },
           { href: "/tour-planner", title: "Tour Planner", description: "Plan trips & routes", icon: Route },
           { href: "/shopping-list", title: "Shopping List", description: "Track purchases", icon: ShoppingCart },
