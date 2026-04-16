@@ -93,7 +93,7 @@ const LyricsPage = () => {
     }
   };
 
-  const LyricForm = ({ onSubmit, submitLabel }: { onSubmit: () => void; submitLabel: string }) => (
+  const renderLyricForm = (onSubmit: () => void, submitLabel: string) => (
     <div className="space-y-4">
       <Input placeholder="Title" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
       <Textarea
