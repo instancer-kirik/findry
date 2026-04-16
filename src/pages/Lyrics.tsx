@@ -139,7 +139,7 @@ const LyricsPage = () => {
               </DialogTrigger>
               <DialogContent className="max-w-lg">
                 <DialogHeader><DialogTitle>Create New Lyrics</DialogTitle></DialogHeader>
-                <LyricForm onSubmit={handleCreate} submitLabel="Create" />
+                {renderLyricForm(handleCreate, 'Create')}
               </DialogContent>
             </Dialog>
           )}
@@ -214,7 +214,7 @@ const LyricsPage = () => {
         <Dialog open={!!editingId} onOpenChange={open => { if (!open) { setEditingId(null); resetForm(); } }}>
           <DialogContent className="max-w-lg">
             <DialogHeader><DialogTitle>Edit Lyrics</DialogTitle></DialogHeader>
-            <LyricForm onSubmit={handleUpdate} submitLabel="Save Changes" />
+            {renderLyricForm(handleUpdate, 'Save Changes')}
           </DialogContent>
         </Dialog>
       </div>
