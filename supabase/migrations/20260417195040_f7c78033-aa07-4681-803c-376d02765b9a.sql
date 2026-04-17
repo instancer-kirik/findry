@@ -1,0 +1,1 @@
+ALTER VIEW public.unified_projects SET (security_invoker = on);
