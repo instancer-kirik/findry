@@ -28,21 +28,19 @@ const ShareViews: React.FC = () => {
     tags: '',
   });
 
-  // Fetch user's projects from unified view (across all source tables)
+  // Fetch ALL unified projects (catalog + dev + ideas + projects, etc.)
+  // Source tables like catalog/product_ideas don't have owner columns,
+  // so we surface everything for pinning. Tags come from the projects table when present.
   const { data: myProjects } = useQuery({
-    queryKey: ['my-unified-projects-for-share', user?.id],
+    queryKey: ['unified-projects-for-share'],
     queryFn: async () => {
-      if (!user) return [];
-      // Pull from unified_projects (canonical) + tags from projects table
       const [{ data: unified }, { data: tagged }] = await Promise.all([
         supabase
           .from('unified_projects' as any)
-          .select('id, name, type, status, source_table, owner_id, created_by')
-          .or(`created_by.eq.${user.id},owner_id.eq.${user.id}`) as any,
-        supabase
-          .from('projects' as any)
-          .select('id, tags')
-          .or(`created_by.eq.${user.id},owner_id.eq.${user.id}`) as any,
+          .select('id, name, project_type, source_table, domain')
+          .order('name', { ascending: true })
+          .limit(500) as any,
+        supabase.from('projects' as any).select('id, tags') as any,
       ]);
       const tagMap = new Map<string, string[]>(
         ((tagged as any[]) || []).map((p: any) => [p.id, p.tags || []])
@@ -302,10 +300,10 @@ const ShareViews: React.FC = () => {
                 <Label className="mb-2 block">Pin or Exclude Projects</Label>
                 {!myProjects || myProjects.length === 0 ? (
                   <div className="text-sm text-muted-foreground border rounded-md p-3 bg-muted/30">
-                    No projects with tags found on your account. Add tags to your projects so this view can auto-populate, or pin them manually here once you create them.
+                    No projects loaded yet.
                   </div>
                 ) : (
-                  <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-2">
+                  <div className="space-y-2 max-h-64 overflow-y-auto border rounded-md p-2">
                     {myProjects.map((project: any) => (
                       <div
                         key={project.id}
@@ -313,13 +311,13 @@ const ShareViews: React.FC = () => {
                       >
                         <div className="flex-1 min-w-0">
                           <span className="text-sm font-medium truncate block">{project.name}</span>
-                          <div className="flex gap-1 mt-0.5 flex-wrap">
+                          <div className="flex gap-1 mt-0.5 flex-wrap items-center">
+                            <Badge variant="outline" className="text-[10px] py-0 px-1.5">
+                              {project.source_table}
+                            </Badge>
                             {(project.tags || []).slice(0, 4).map((t: string) => (
                               <span key={t} className="text-xs text-muted-foreground">#{t}</span>
                             ))}
-                            {(project.tags || []).length === 0 && (
-                              <span className="text-xs text-muted-foreground italic">no tags</span>
-                            )}
                           </div>
                         </div>
                         <div className="flex gap-1 ml-2">
