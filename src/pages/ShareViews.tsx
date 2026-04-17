@@ -302,15 +302,6 @@ const ShareViews: React.FC = () => {
                   Projects with these tags auto-populate into this view
                 </p>
               </div>
-              <div>
-                <Label>Labels (comma separated)</Label>
-                <Input
-                  placeholder="technical, construction, engineering"
-                  value={form.labels}
-                  onChange={e => setForm(f => ({ ...f, labels: e.target.value }))}
-                />
-              </div>
-
               {/* Project selection */}
               {myProjects && myProjects.length > 0 && (
                 <div>
