@@ -26,7 +26,6 @@ const ShareViews: React.FC = () => {
     name: '',
     description: '',
     tags: '',
-    labels: '',
   });
 
   // Fetch user's projects from unified view (across all source tables)
@@ -60,7 +59,7 @@ const ShareViews: React.FC = () => {
   const [excludedIds, setExcludedIds] = useState<string[]>([]);
 
   const resetForm = () => {
-    setForm({ name: '', description: '', tags: '', labels: '' });
+    setForm({ name: '', description: '', tags: '' });
     setPinnedIds([]);
     setExcludedIds([]);
     setEditingView(null);
@@ -73,11 +72,12 @@ const ShareViews: React.FC = () => {
 
   const openEdit = (view: ShareView) => {
     setEditingView(view);
+    // Merge legacy labels into tags
+    const allTags = Array.from(new Set([...(view.tags || []), ...(view.labels || [])]));
     setForm({
       name: view.name,
       description: view.description || '',
-      tags: (view.tags || []).join(', '),
-      labels: (view.labels || []).join(', '),
+      tags: allTags.join(', '),
     });
     setPinnedIds(view.pinned_project_ids || []);
     setExcludedIds(view.excluded_project_ids || []);
@@ -94,13 +94,12 @@ const ShareViews: React.FC = () => {
 
   const handleSubmit = async () => {
     const tags = form.tags.split(',').map(t => t.trim()).filter(Boolean);
-    const labels = form.labels.split(',').map(l => l.trim()).filter(Boolean);
 
     const payload = {
       name: form.name,
       description: form.description || null,
       tags,
-      labels,
+      labels: [],
       pinned_project_ids: pinnedIds,
       excluded_project_ids: excludedIds,
     };
@@ -238,14 +237,9 @@ const ShareViews: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2 mb-3">
-                    {(view.tags || []).map((tag) => (
+                    {Array.from(new Set([...(view.tags || []), ...(view.labels || [])])).map((tag) => (
                       <Badge key={tag} variant="secondary" className="gap-1">
                         <Tag className="h-3 w-3" /> {tag}
-                      </Badge>
-                    ))}
-                    {(view.labels || []).map((label) => (
-                      <Badge key={label} variant="outline">
-                        {label}
                       </Badge>
                     ))}
                   </div>
@@ -303,19 +297,14 @@ const ShareViews: React.FC = () => {
                   Projects with these tags auto-populate into this view
                 </p>
               </div>
-              <div>
-                <Label>Labels (comma separated)</Label>
-                <Input
-                  placeholder="technical, construction, engineering"
-                  value={form.labels}
-                  onChange={e => setForm(f => ({ ...f, labels: e.target.value }))}
-                />
-              </div>
-
               {/* Project selection */}
-              {myProjects && myProjects.length > 0 && (
-                <div>
-                  <Label className="mb-2 block">Pin or Exclude Projects</Label>
+              <div>
+                <Label className="mb-2 block">Pin or Exclude Projects</Label>
+                {!myProjects || myProjects.length === 0 ? (
+                  <div className="text-sm text-muted-foreground border rounded-md p-3 bg-muted/30">
+                    No projects with tags found on your account. Add tags to your projects so this view can auto-populate, or pin them manually here once you create them.
+                  </div>
+                ) : (
                   <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-2">
                     {myProjects.map((project: any) => (
                       <div
@@ -324,10 +313,13 @@ const ShareViews: React.FC = () => {
                       >
                         <div className="flex-1 min-w-0">
                           <span className="text-sm font-medium truncate block">{project.name}</span>
-                          <div className="flex gap-1 mt-0.5">
-                            {(project.tags || []).slice(0, 3).map((t: string) => (
+                          <div className="flex gap-1 mt-0.5 flex-wrap">
+                            {(project.tags || []).slice(0, 4).map((t: string) => (
                               <span key={t} className="text-xs text-muted-foreground">#{t}</span>
                             ))}
+                            {(project.tags || []).length === 0 && (
+                              <span className="text-xs text-muted-foreground italic">no tags</span>
+                            )}
                           </div>
                         </div>
                         <div className="flex gap-1 ml-2">
@@ -353,8 +345,8 @@ const ShareViews: React.FC = () => {
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
+                )}
+              </div>
 
               <Button
                 onClick={handleSubmit}
