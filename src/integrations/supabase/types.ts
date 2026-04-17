@@ -784,6 +784,7 @@ export type Database = {
           created_at: string
           id: string
           owner_id: string
+          role: string
           updated_at: string
         }
         Insert: {
@@ -792,6 +793,7 @@ export type Database = {
           created_at?: string
           id?: string
           owner_id: string
+          role?: string
           updated_at?: string
         }
         Update: {
@@ -800,6 +802,7 @@ export type Database = {
           created_at?: string
           id?: string
           owner_id?: string
+          role?: string
           updated_at?: string
         }
         Relationships: []
@@ -9354,8 +9357,6 @@ export type Database = {
       }
       unified_projects: {
         Row: {
-          category_color: string | null
-          category_icon: string | null
           category_name: string | null
           created_at: string | null
           created_by: string | null
@@ -9363,33 +9364,21 @@ export type Database = {
           dev_progress: number | null
           dev_project_id: string | null
           dev_repo_url: string | null
-          dev_version: string | null
           domain: string | null
           emoji: string | null
-          feasibility_score: number | null
           featured: boolean | null
-          featured_order: number | null
           features: string[] | null
           id: string | null
-          idea_category_id: string | null
-          idea_id: string | null
-          image_url: string | null
           is_public: boolean | null
-          market_potential_score: number | null
-          metadata: Json | null
           name: string | null
           owner_id: string | null
+          owner_ids: string[] | null
           path: string | null
-          priority_score: number | null
-          problem_statement: string | null
           project_type: string | null
-          solution_approach: string | null
           source_table: string | null
           source_url: string | null
           status: string | null
-          target_market: string | null
           tech_stack: string[] | null
-          updated_at: string | null
         }
         Relationships: []
       }
@@ -9857,6 +9846,14 @@ export type Database = {
         }
       }
       is_content_owner: {
+        Args: {
+          _content_id: string
+          _content_type: Database["public"]["Enums"]["content_type"]
+          _user_id?: string
+        }
+        Returns: boolean
+      }
+      is_my_content: {
         Args: {
           _content_id: string
           _content_type: Database["public"]["Enums"]["content_type"]
