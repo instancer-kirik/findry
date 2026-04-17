@@ -400,16 +400,11 @@ const ProjectDetail: React.FC = () => {
       try {
         const { data, error: unifiedError } = await supabase
           .from("unified_projects" as any)
-          .select("path, source_table, dev_project_id, source_url")
+          .select("*")
           .eq("id", projectId)
           .maybeSingle();
 
-        const unifiedProject = data as unknown as {
-          path: string | null;
-          source_table: string | null;
-          dev_project_id: string | null;
-          source_url: string | null;
-        } | null;
+        const unifiedProject = data as any;
 
         if (unifiedError) {
           throw unifiedError;
@@ -440,6 +435,9 @@ const ProjectDetail: React.FC = () => {
           navigate(fallbackPath, { replace: true });
           return;
         }
+
+        // No redirect possible — render the unified row as a basic detail page
+        setUnifiedFallback(unifiedProject);
       } catch (routeError) {
         console.error("Error resolving unified project route:", routeError);
       } finally {
