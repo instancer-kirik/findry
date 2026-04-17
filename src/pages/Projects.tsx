@@ -388,6 +388,33 @@ const Projects: React.FC = () => {
     }
   };
 
+  const isProjectPinned = (projectId: string) => {
+    if (!selectedShareView) return false;
+    return (selectedShareView.pinned_project_ids || []).includes(projectId);
+  };
+
+  const togglePinToShareView = async (projectId: string) => {
+    if (!user) {
+      toast.error("Sign in to pin projects");
+      return;
+    }
+    if (!selectedShareView) {
+      toast.info("Select a Share View above to pin projects to it");
+      return;
+    }
+    const current = selectedShareView.pinned_project_ids || [];
+    const isPinned = current.includes(projectId);
+    const next = isPinned
+      ? current.filter((id) => id !== projectId)
+      : [...current, projectId];
+    try {
+      await updateView.mutateAsync({ id: selectedShareView.id, pinned_project_ids: next });
+      toast.success(isPinned ? `Unpinned from "${selectedShareView.name}"` : `Pinned to "${selectedShareView.name}"`);
+    } catch (err: any) {
+      toast.error(`Failed: ${err.message || "Unknown error"}`);
+    }
+  };
+
   const renderMyProjectCard = (project: Project) => {
     const tasks = projectTasks[project.id] || [];
     const isOwner = projectOwnership[project.id] || false;
