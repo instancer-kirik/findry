@@ -298,9 +298,13 @@ const ShareViews: React.FC = () => {
                 </p>
               </div>
               {/* Project selection */}
-              {myProjects && myProjects.length > 0 && (
-                <div>
-                  <Label className="mb-2 block">Pin or Exclude Projects</Label>
+              <div>
+                <Label className="mb-2 block">Pin or Exclude Projects</Label>
+                {!myProjects || myProjects.length === 0 ? (
+                  <div className="text-sm text-muted-foreground border rounded-md p-3 bg-muted/30">
+                    No projects with tags found on your account. Add tags to your projects so this view can auto-populate, or pin them manually here once you create them.
+                  </div>
+                ) : (
                   <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-2">
                     {myProjects.map((project: any) => (
                       <div
@@ -309,10 +313,13 @@ const ShareViews: React.FC = () => {
                       >
                         <div className="flex-1 min-w-0">
                           <span className="text-sm font-medium truncate block">{project.name}</span>
-                          <div className="flex gap-1 mt-0.5">
-                            {(project.tags || []).slice(0, 3).map((t: string) => (
+                          <div className="flex gap-1 mt-0.5 flex-wrap">
+                            {(project.tags || []).slice(0, 4).map((t: string) => (
                               <span key={t} className="text-xs text-muted-foreground">#{t}</span>
                             ))}
+                            {(project.tags || []).length === 0 && (
+                              <span className="text-xs text-muted-foreground italic">no tags</span>
+                            )}
                           </div>
                         </div>
                         <div className="flex gap-1 ml-2">
@@ -338,8 +345,8 @@ const ShareViews: React.FC = () => {
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
+                )}
+              </div>
 
               <Button
                 onClick={handleSubmit}
