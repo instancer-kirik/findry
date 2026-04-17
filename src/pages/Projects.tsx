@@ -51,6 +51,8 @@ import {
   X,
   Share2,
   Link2,
+  Pin,
+  PinOff,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -114,7 +116,7 @@ const Projects: React.FC = () => {
   const { useGetProjects } = useProject();
   const { data: projects = [], isLoading, error, refetch } = useGetProjects();
   const { user } = useAuth();
-  const { myViews, createView } = useShareViews();
+  const { myViews, createView, updateView } = useShareViews();
   const [searchQuery, setSearchQuery] = useState("");
   const [projectOwnership, setProjectOwnership] = useState<Record<string, boolean>>({});
   const [projectTasks, setProjectTasks] = useState<Record<string, any[]>>({});
@@ -386,6 +388,33 @@ const Projects: React.FC = () => {
     }
   };
 
+  const isProjectPinned = (projectId: string) => {
+    if (!selectedShareView) return false;
+    return (selectedShareView.pinned_project_ids || []).includes(projectId);
+  };
+
+  const togglePinToShareView = async (projectId: string) => {
+    if (!user) {
+      toast.error("Sign in to pin projects");
+      return;
+    }
+    if (!selectedShareView) {
+      toast.info("Select a Share View above to pin projects to it");
+      return;
+    }
+    const current = selectedShareView.pinned_project_ids || [];
+    const isPinned = current.includes(projectId);
+    const next = isPinned
+      ? current.filter((id) => id !== projectId)
+      : [...current, projectId];
+    try {
+      await updateView.mutateAsync({ id: selectedShareView.id, pinned_project_ids: next });
+      toast.success(isPinned ? `Unpinned from "${selectedShareView.name}"` : `Pinned to "${selectedShareView.name}"`);
+    } catch (err: any) {
+      toast.error(`Failed: ${err.message || "Unknown error"}`);
+    }
+  };
+
   const renderMyProjectCard = (project: Project) => {
     const tasks = projectTasks[project.id] || [];
     const isOwner = projectOwnership[project.id] || false;
@@ -591,11 +620,13 @@ const Projects: React.FC = () => {
 
     const owned = isUserOwned(project);
     const canTogglePublic = owned && project.source_table === "projects";
+    const pinned = isProjectPinned(project.id);
+    const showKebab = !!user;
 
     return (
       <Card key={project.id} className="group h-full hover:shadow-lg transition-all duration-200 relative">
-        {/* Owner controls overlay */}
-        {owned && (
+        {/* Action overlay */}
+        {showKebab && (
           <div className="absolute top-2 right-2 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             {canTogglePublic && (
               <Button
@@ -625,10 +656,21 @@ const Projects: React.FC = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                <DropdownMenuItem onClick={() => handleEditProject(project.id)}>
-                  <Edit className="h-4 w-4 mr-2" /> Edit
+                <DropdownMenuItem
+                  onClick={() => togglePinToShareView(project.id)}
+                  disabled={!selectedShareView}
+                >
+                  {pinned ? <PinOff className="h-4 w-4 mr-2" /> : <Pin className="h-4 w-4 mr-2" />}
+                  {selectedShareView
+                    ? (pinned ? `Unpin from "${selectedShareView.name}"` : `Pin to "${selectedShareView.name}"`)
+                    : "Pin to Share View (select one)"}
                 </DropdownMenuItem>
-                {project.source_table === "projects" && (
+                {owned && (
+                  <DropdownMenuItem onClick={() => handleEditProject(project.id)}>
+                    <Edit className="h-4 w-4 mr-2" /> Edit
+                  </DropdownMenuItem>
+                )}
+                {owned && project.source_table === "projects" && (
                   <DropdownMenuItem
                     onClick={() => { setProjectToDelete(project.id); setDeleteDialogOpen(true); }}
                     className="text-destructive"
