@@ -26,7 +26,6 @@ const ShareViews: React.FC = () => {
     name: '',
     description: '',
     tags: '',
-    labels: '',
   });
 
   // Fetch user's projects from unified view (across all source tables)
