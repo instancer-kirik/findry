@@ -83,6 +83,7 @@ const ProjectDetail: React.FC = () => {
   const { data: project, isLoading, error, refetch } = useGetProject(projectId);
   const [isOwner, setIsOwner] = useState(false);
   const [isResolvingRoute, setIsResolvingRoute] = useState(false);
+  const [unifiedFallback, setUnifiedFallback] = useState<any | null>(null);
   const [activeTab, setActiveTab] = useState("components");
   const chatRef = useRef<{ addReference: (item: ReferenceItem) => void }>(null);
 
