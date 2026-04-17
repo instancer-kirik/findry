@@ -51,6 +51,8 @@ import {
   X,
   Share2,
   Link2,
+  Pin,
+  PinOff,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -114,7 +116,7 @@ const Projects: React.FC = () => {
   const { useGetProjects } = useProject();
   const { data: projects = [], isLoading, error, refetch } = useGetProjects();
   const { user } = useAuth();
-  const { myViews, createView } = useShareViews();
+  const { myViews, createView, updateView } = useShareViews();
   const [searchQuery, setSearchQuery] = useState("");
   const [projectOwnership, setProjectOwnership] = useState<Record<string, boolean>>({});
   const [projectTasks, setProjectTasks] = useState<Record<string, any[]>>({});
