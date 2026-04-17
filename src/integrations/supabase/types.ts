@@ -10004,6 +10004,12 @@ export type Database = {
         | "venue"
         | "brand"
         | "shop"
+        | "development_project"
+        | "product_idea"
+        | "loreum_work"
+        | "vehicle_config"
+        | "video_project"
+        | "catalog_entry"
       field_visibility: "public" | "matches" | "express"
       game_jam_status: "upcoming" | "active" | "completed"
       privacy_level: "public" | "friends_only" | "private" | "invite_only"
@@ -10168,6 +10174,12 @@ export const Constants = {
         "venue",
         "brand",
         "shop",
+        "development_project",
+        "product_idea",
+        "loreum_work",
+        "vehicle_config",
+        "video_project",
+        "catalog_entry",
       ],
       field_visibility: ["public", "matches", "express"],
       game_jam_status: ["upcoming", "active", "completed"],
