@@ -103,6 +103,9 @@ interface CatalogProject {
   dev_progress: number | null;
   dev_repo_url: string | null;
   category_name: string | null;
+  owner_id: string | null;
+  created_by: string | null;
+  is_public: boolean | null;
 }
 
 const Projects: React.FC = () => {
