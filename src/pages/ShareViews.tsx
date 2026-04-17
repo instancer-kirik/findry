@@ -28,21 +28,19 @@ const ShareViews: React.FC = () => {
     tags: '',
   });
 
-  // Fetch user's projects from unified view (across all source tables)
+  // Fetch ALL unified projects (catalog + dev + ideas + projects, etc.)
+  // Source tables like catalog/product_ideas don't have owner columns,
+  // so we surface everything for pinning. Tags come from the projects table when present.
   const { data: myProjects } = useQuery({
-    queryKey: ['my-unified-projects-for-share', user?.id],
+    queryKey: ['unified-projects-for-share'],
     queryFn: async () => {
-      if (!user) return [];
-      // Pull from unified_projects (canonical) + tags from projects table
       const [{ data: unified }, { data: tagged }] = await Promise.all([
         supabase
           .from('unified_projects' as any)
-          .select('id, name, type, status, source_table, owner_id, created_by')
-          .or(`created_by.eq.${user.id},owner_id.eq.${user.id}`) as any,
-        supabase
-          .from('projects' as any)
-          .select('id, tags')
-          .or(`created_by.eq.${user.id},owner_id.eq.${user.id}`) as any,
+          .select('id, name, project_type, source_table, domain')
+          .order('name', { ascending: true })
+          .limit(500) as any,
+        supabase.from('projects' as any).select('id, tags') as any,
       ]);
       const tagMap = new Map<string, string[]>(
         ((tagged as any[]) || []).map((p: any) => [p.id, p.tags || []])
