@@ -59,7 +59,7 @@ const ShareViews: React.FC = () => {
   const [excludedIds, setExcludedIds] = useState<string[]>([]);
 
   const resetForm = () => {
-    setForm({ name: '', description: '', tags: '', labels: '' });
+    setForm({ name: '', description: '', tags: '' });
     setPinnedIds([]);
     setExcludedIds([]);
     setEditingView(null);
@@ -72,11 +72,12 @@ const ShareViews: React.FC = () => {
 
   const openEdit = (view: ShareView) => {
     setEditingView(view);
+    // Merge legacy labels into tags
+    const allTags = Array.from(new Set([...(view.tags || []), ...(view.labels || [])]));
     setForm({
       name: view.name,
       description: view.description || '',
-      tags: (view.tags || []).join(', '),
-      labels: (view.labels || []).join(', '),
+      tags: allTags.join(', '),
     });
     setPinnedIds(view.pinned_project_ids || []);
     setExcludedIds(view.excluded_project_ids || []);
@@ -93,13 +94,12 @@ const ShareViews: React.FC = () => {
 
   const handleSubmit = async () => {
     const tags = form.tags.split(',').map(t => t.trim()).filter(Boolean);
-    const labels = form.labels.split(',').map(l => l.trim()).filter(Boolean);
 
     const payload = {
       name: form.name,
       description: form.description || null,
       tags,
-      labels,
+      labels: [],
       pinned_project_ids: pinnedIds,
       excluded_project_ids: excludedIds,
     };
