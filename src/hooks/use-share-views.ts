@@ -105,7 +105,7 @@ export const useShareViewProjects = (view: ShareView | null | undefined) => {
       if (!view) return [];
 
       const pinnedIds = view.pinned_project_ids || [];
-      const excludedIds = view.excludedIds(view.excluded_project_ids) || [];
+      const excludedIds = view.excluded_project_ids || [];
       const viewTags = view.tags || [];
 
       // Fetch from unified_projects (the canonical view) + tags from projects table
