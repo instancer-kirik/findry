@@ -103,27 +103,32 @@ export const useShareViewProjects = (view: ShareView | null | undefined) => {
     queryKey: ['share-view-projects', view?.id],
     queryFn: async () => {
       if (!view) return [];
-      
-      // Fetch projects matching tags OR pinned, excluding excluded
-      let query = supabase
-        .from('projects' as any)
-        .select('*')
-        .eq('is_public', true);
 
-      const { data: allProjects, error } = await query;
-      if (error) throw error;
-      
-      const projects = (allProjects || []) as any[];
       const pinnedIds = view.pinned_project_ids || [];
       const excludedIds = view.excluded_project_ids || [];
       const viewTags = view.tags || [];
 
-      return projects.filter((p: any) => {
+      // Fetch from unified_projects (the canonical view) + tags from projects table
+      const { data: unified, error: uErr } = await supabase
+        .from('unified_projects' as any)
+        .select('*')
+        .eq('is_public', true);
+      if (uErr) throw uErr;
+
+      // Get tags from projects table for matching
+      const { data: projectTags } = await supabase
+        .from('projects' as any)
+        .select('id, tags');
+      const tagMap = new Map<string, string[]>(
+        ((projectTags as any[]) || []).map((p: any) => [p.id, p.tags || []])
+      );
+
+      return ((unified as any[]) || []).filter((p: any) => {
         if (excludedIds.includes(p.id)) return false;
         if (pinnedIds.includes(p.id)) return true;
         if (viewTags.length === 0) return false;
-        const projectTags = p.tags || [];
-        return viewTags.some((t: string) => projectTags.includes(t));
+        const tags = tagMap.get(p.id) || [];
+        return viewTags.some((t: string) => tags.includes(t));
       });
     },
     enabled: !!view,
