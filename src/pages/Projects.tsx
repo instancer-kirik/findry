@@ -345,6 +345,29 @@ const Projects: React.FC = () => {
   const handleViewProject = (projectId: string) => navigate(`/projects/${projectId}`);
   const handleEditProject = (projectId: string) => navigate(`/projects/${projectId}`);
 
+  const isUserOwned = (project: CatalogProject) =>
+    !!user && (project.owner_id === user.id || project.created_by === user.id);
+
+  const togglePublic = async (project: CatalogProject) => {
+    if (project.source_table !== "projects") {
+      toast.info("Visibility toggle is only available for user-created projects");
+      return;
+    }
+    const next = !project.is_public;
+    const { error } = await supabase
+      .from("projects")
+      .update({ is_public: next })
+      .eq("id", project.id);
+    if (error) {
+      toast.error(`Failed: ${error.message}`);
+      return;
+    }
+    setCatalogProjects((prev) =>
+      prev.map((p) => (p.id === project.id ? { ...p, is_public: next } : p))
+    );
+    toast.success(next ? "Now public" : "Set to private");
+  };
+
   const handleDeleteProject = async () => {
     if (!projectToDelete) return;
     try {
