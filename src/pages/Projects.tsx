@@ -103,6 +103,9 @@ interface CatalogProject {
   dev_progress: number | null;
   dev_repo_url: string | null;
   category_name: string | null;
+  owner_id: string | null;
+  created_by: string | null;
+  is_public: boolean | null;
 }
 
 const Projects: React.FC = () => {
@@ -342,6 +345,29 @@ const Projects: React.FC = () => {
   const handleViewProject = (projectId: string) => navigate(`/projects/${projectId}`);
   const handleEditProject = (projectId: string) => navigate(`/projects/${projectId}`);
 
+  const isUserOwned = (project: CatalogProject) =>
+    !!user && (project.owner_id === user.id || project.created_by === user.id);
+
+  const togglePublic = async (project: CatalogProject) => {
+    if (project.source_table !== "projects") {
+      toast.info("Visibility toggle is only available for user-created projects");
+      return;
+    }
+    const next = !project.is_public;
+    const { error } = await supabase
+      .from("projects")
+      .update({ is_public: next })
+      .eq("id", project.id);
+    if (error) {
+      toast.error(`Failed: ${error.message}`);
+      return;
+    }
+    setCatalogProjects((prev) =>
+      prev.map((p) => (p.id === project.id ? { ...p, is_public: next } : p))
+    );
+    toast.success(next ? "Now public" : "Set to private");
+  };
+
   const handleDeleteProject = async () => {
     if (!projectToDelete) return;
     try {
@@ -563,8 +589,57 @@ const Projects: React.FC = () => {
       </>
     );
 
+    const owned = isUserOwned(project);
+    const canTogglePublic = owned && project.source_table === "projects";
+
     return (
-      <Card key={project.id} className="group h-full hover:shadow-lg transition-all duration-200">
+      <Card key={project.id} className="group h-full hover:shadow-lg transition-all duration-200 relative">
+        {/* Owner controls overlay */}
+        {owned && (
+          <div className="absolute top-2 right-2 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            {canTogglePublic && (
+              <Button
+                size="sm"
+                variant={project.is_public ? "default" : "outline"}
+                className="h-7 px-2 text-xs gap-1"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  togglePublic(project);
+                }}
+                title={project.is_public ? "Public — click to make private" : "Private — click to make public"}
+              >
+                {project.is_public ? <Globe className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                {project.is_public ? "Public" : "Private"}
+              </Button>
+            )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 w-7 p-0"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                >
+                  <MoreVertical className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                <DropdownMenuItem onClick={() => handleEditProject(project.id)}>
+                  <Edit className="h-4 w-4 mr-2" /> Edit
+                </DropdownMenuItem>
+                {project.source_table === "projects" && (
+                  <DropdownMenuItem
+                    onClick={() => { setProjectToDelete(project.id); setDeleteDialogOpen(true); }}
+                    className="text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" /> Delete
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
         {catalogLink.external ? (
           <a
             href={catalogLink.href}

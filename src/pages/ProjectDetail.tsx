@@ -83,6 +83,7 @@ const ProjectDetail: React.FC = () => {
   const { data: project, isLoading, error, refetch } = useGetProject(projectId);
   const [isOwner, setIsOwner] = useState(false);
   const [isResolvingRoute, setIsResolvingRoute] = useState(false);
+  const [unifiedFallback, setUnifiedFallback] = useState<any | null>(null);
   const [activeTab, setActiveTab] = useState("components");
   const chatRef = useRef<{ addReference: (item: ReferenceItem) => void }>(null);
 
@@ -399,16 +400,11 @@ const ProjectDetail: React.FC = () => {
       try {
         const { data, error: unifiedError } = await supabase
           .from("unified_projects" as any)
-          .select("path, source_table, dev_project_id, source_url")
+          .select("*")
           .eq("id", projectId)
           .maybeSingle();
 
-        const unifiedProject = data as unknown as {
-          path: string | null;
-          source_table: string | null;
-          dev_project_id: string | null;
-          source_url: string | null;
-        } | null;
+        const unifiedProject = data as any;
 
         if (unifiedError) {
           throw unifiedError;
@@ -439,6 +435,9 @@ const ProjectDetail: React.FC = () => {
           navigate(fallbackPath, { replace: true });
           return;
         }
+
+        // No redirect possible — render the unified row as a basic detail page
+        setUnifiedFallback(unifiedProject);
       } catch (routeError) {
         console.error("Error resolving unified project route:", routeError);
       } finally {
@@ -945,6 +944,54 @@ const ProjectDetail: React.FC = () => {
               </div>
               <div className="h-96 bg-muted rounded"></div>
             </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!project && unifiedFallback) {
+    const u = unifiedFallback;
+    return (
+      <Layout>
+        <div className="container mx-auto py-8 max-w-3xl">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/projects?tab=catalog")} className="mb-4">
+            ← Back to Catalog
+          </Button>
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              {u.emoji && <span className="text-4xl">{u.emoji}</span>}
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold">{u.name}</h1>
+                {u.domain && <p className="text-muted-foreground capitalize">{u.domain}</p>}
+              </div>
+              {u.source_table && (
+                <span className="text-xs px-2 py-1 rounded bg-muted capitalize">
+                  {u.source_table.replace(/_/g, " ")}
+                </span>
+              )}
+            </div>
+            {u.description && (
+              <p className="text-base text-foreground/80 whitespace-pre-wrap">{u.description}</p>
+            )}
+            {u.tech_stack && u.tech_stack.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {u.tech_stack.map((t: string) => (
+                  <span key={t} className="text-xs px-2 py-0.5 rounded bg-secondary text-secondary-foreground">{t}</span>
+                ))}
+              </div>
+            )}
+            {u.problem_statement && (
+              <section><h2 className="font-semibold mb-1">Problem</h2><p className="text-sm text-muted-foreground">{u.problem_statement}</p></section>
+            )}
+            {u.solution_approach && (
+              <section><h2 className="font-semibold mb-1">Solution</h2><p className="text-sm text-muted-foreground">{u.solution_approach}</p></section>
+            )}
+            {u.source_url && (
+              <a href={u.source_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
+                View source <ExternalLink className="h-3 w-3" />
+              </a>
+            )}
           </div>
         </div>
       </Layout>
