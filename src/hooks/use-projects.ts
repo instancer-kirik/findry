@@ -142,7 +142,7 @@ export const useGetProjects = () => {
         }
 
         // Process unified projects
-        const unifiedProjects: Project[] = (unifiedData || []).map((p: UnifiedProjectRecord) => ({
+        const unifiedProjects: Project[] = (unifiedData || []).map((p: any) => ({
           id: p.id,
           name: p.name,
           description: p.description || '',
