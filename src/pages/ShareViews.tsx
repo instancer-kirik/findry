@@ -237,14 +237,9 @@ const ShareViews: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2 mb-3">
-                    {(view.tags || []).map((tag) => (
+                    {Array.from(new Set([...(view.tags || []), ...(view.labels || [])])).map((tag) => (
                       <Badge key={tag} variant="secondary" className="gap-1">
                         <Tag className="h-3 w-3" /> {tag}
-                      </Badge>
-                    ))}
-                    {(view.labels || []).map((label) => (
-                      <Badge key={label} variant="outline">
-                        {label}
                       </Badge>
                     ))}
                   </div>
