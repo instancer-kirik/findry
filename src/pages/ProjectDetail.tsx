@@ -950,6 +950,54 @@ const ProjectDetail: React.FC = () => {
     );
   }
 
+  if (!project && unifiedFallback) {
+    const u = unifiedFallback;
+    return (
+      <Layout>
+        <div className="container mx-auto py-8 max-w-3xl">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/projects?tab=catalog")} className="mb-4">
+            ← Back to Catalog
+          </Button>
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              {u.emoji && <span className="text-4xl">{u.emoji}</span>}
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold">{u.name}</h1>
+                {u.domain && <p className="text-muted-foreground capitalize">{u.domain}</p>}
+              </div>
+              {u.source_table && (
+                <span className="text-xs px-2 py-1 rounded bg-muted capitalize">
+                  {u.source_table.replace(/_/g, " ")}
+                </span>
+              )}
+            </div>
+            {u.description && (
+              <p className="text-base text-foreground/80 whitespace-pre-wrap">{u.description}</p>
+            )}
+            {u.tech_stack && u.tech_stack.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {u.tech_stack.map((t: string) => (
+                  <span key={t} className="text-xs px-2 py-0.5 rounded bg-secondary text-secondary-foreground">{t}</span>
+                ))}
+              </div>
+            )}
+            {u.problem_statement && (
+              <section><h2 className="font-semibold mb-1">Problem</h2><p className="text-sm text-muted-foreground">{u.problem_statement}</p></section>
+            )}
+            {u.solution_approach && (
+              <section><h2 className="font-semibold mb-1">Solution</h2><p className="text-sm text-muted-foreground">{u.solution_approach}</p></section>
+            )}
+            {u.source_url && (
+              <a href={u.source_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
+                View source <ExternalLink className="h-3 w-3" />
+              </a>
+            )}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   if (error || !project) {
     return (
       <Layout>
