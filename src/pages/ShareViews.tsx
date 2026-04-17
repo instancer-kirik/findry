@@ -28,16 +28,18 @@ const ShareViews: React.FC = () => {
     tags: '',
   });
 
-  // Fetch ALL unified projects (catalog + dev + ideas + projects, etc.)
-  // Source tables like catalog/product_ideas don't have owner columns,
-  // so we surface everything for pinning. Tags come from the projects table when present.
+  // Fetch user-owned unified projects across every source table.
+  // Now that ownership columns exist on all source tables and unified_projects
+  // surfaces real owner_id, we can scope the picker to projects the user owns.
   const { data: myProjects } = useQuery({
-    queryKey: ['unified-projects-for-share'],
+    queryKey: ['my-unified-projects-for-share', user?.id],
     queryFn: async () => {
+      if (!user) return [];
       const [{ data: unified }, { data: tagged }] = await Promise.all([
         supabase
           .from('unified_projects' as any)
-          .select('id, name, project_type, source_table, domain')
+          .select('id, name, project_type, source_table, domain, is_public, owner_id, created_by')
+          .or(`owner_id.eq.${user.id},created_by.eq.${user.id}`)
           .order('name', { ascending: true })
           .limit(500) as any,
         supabase.from('projects' as any).select('id, tags') as any,
