@@ -879,9 +879,12 @@ export type Database = {
       development_projects: {
         Row: {
           created_at: string
+          created_by: string | null
           description: string | null
           id: string
+          is_public: boolean
           name: string
+          owner_id: string | null
           progress: number
           repo_url: string | null
           status: string
@@ -890,9 +893,12 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           description?: string | null
           id?: string
+          is_public?: boolean
           name: string
+          owner_id?: string | null
           progress?: number
           repo_url?: string | null
           status?: string
@@ -901,9 +907,12 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           description?: string | null
           id?: string
+          is_public?: boolean
           name?: string
+          owner_id?: string | null
           progress?: number
           repo_url?: string | null
           status?: string
@@ -2013,6 +2022,7 @@ export type Database = {
           content: string | null
           content_format: string | null
           created_at: string | null
+          created_by: string | null
           creative_type: string
           description: string | null
           external_links: Json | null
@@ -2023,6 +2033,7 @@ export type Database = {
           mood: string | null
           notes: Json | null
           outline: string | null
+          owner_id: string | null
           parent_work_id: string | null
           pov_character_id: string | null
           primary_location_id: string | null
@@ -2048,6 +2059,7 @@ export type Database = {
           content?: string | null
           content_format?: string | null
           created_at?: string | null
+          created_by?: string | null
           creative_type: string
           description?: string | null
           external_links?: Json | null
@@ -2058,6 +2070,7 @@ export type Database = {
           mood?: string | null
           notes?: Json | null
           outline?: string | null
+          owner_id?: string | null
           parent_work_id?: string | null
           pov_character_id?: string | null
           primary_location_id?: string | null
@@ -2083,6 +2096,7 @@ export type Database = {
           content?: string | null
           content_format?: string | null
           created_at?: string | null
+          created_by?: string | null
           creative_type?: string
           description?: string | null
           external_links?: Json | null
@@ -2093,6 +2107,7 @@ export type Database = {
           mood?: string | null
           notes?: Json | null
           outline?: string | null
+          owner_id?: string | null
           parent_work_id?: string | null
           pov_character_id?: string | null
           primary_location_id?: string | null
@@ -5276,14 +5291,17 @@ export type Database = {
           category_id: string | null
           competitor_analysis: string | null
           created_at: string | null
+          created_by: string | null
           description: string | null
           estimated_cost: number | null
           estimated_development_time: string | null
           feasibility_score: number | null
           id: string
           inspiration_sources: string[] | null
+          is_public: boolean
           market_potential_score: number | null
           name: string
+          owner_id: string | null
           priority_score: number | null
           problem_statement: string | null
           solution_approach: string | null
@@ -5297,14 +5315,17 @@ export type Database = {
           category_id?: string | null
           competitor_analysis?: string | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           estimated_cost?: number | null
           estimated_development_time?: string | null
           feasibility_score?: number | null
           id?: string
           inspiration_sources?: string[] | null
+          is_public?: boolean
           market_potential_score?: number | null
           name: string
+          owner_id?: string | null
           priority_score?: number | null
           problem_statement?: string | null
           solution_approach?: string | null
@@ -5318,14 +5339,17 @@ export type Database = {
           category_id?: string | null
           competitor_analysis?: string | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           estimated_cost?: number | null
           estimated_development_time?: string | null
           feasibility_score?: number | null
           id?: string
           inspiration_sources?: string[] | null
+          is_public?: boolean
           market_potential_score?: number | null
           name?: string
+          owner_id?: string | null
           priority_score?: number | null
           problem_statement?: string | null
           solution_approach?: string | null
@@ -6246,6 +6270,7 @@ export type Database = {
       projects_catalog: {
         Row: {
           created_at: string
+          created_by: string | null
           description: string
           dev_project_id: string | null
           domain: string
@@ -6254,7 +6279,9 @@ export type Database = {
           featured_order: number | null
           features: string[] | null
           id: string
+          is_public: boolean
           name: string
+          owner_id: string | null
           path: string | null
           product_idea_id: string | null
           project_type: string | null
@@ -6265,6 +6292,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           description: string
           dev_project_id?: string | null
           domain: string
@@ -6273,7 +6301,9 @@ export type Database = {
           featured_order?: number | null
           features?: string[] | null
           id?: string
+          is_public?: boolean
           name: string
+          owner_id?: string | null
           path?: string | null
           product_idea_id?: string | null
           project_type?: string | null
@@ -6284,6 +6314,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           description?: string
           dev_project_id?: string | null
           domain?: string
@@ -6292,7 +6323,9 @@ export type Database = {
           featured_order?: number | null
           features?: string[] | null
           id?: string
+          is_public?: boolean
           name?: string
+          owner_id?: string | null
           path?: string | null
           product_idea_id?: string | null
           project_type?: string | null
@@ -8336,12 +8369,15 @@ export type Database = {
       vehicle_configurations: {
         Row: {
           created_at: string | null
+          created_by: string | null
           current_layout_state: string | null
           gvwr: number | null
           id: string
           interior_height: number | null
           interior_length: number | null
           interior_width: number | null
+          is_public: boolean
+          owner_id: string | null
           project_name: string | null
           updated_at: string | null
           vehicle_make: string | null
@@ -8352,12 +8388,15 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          created_by?: string | null
           current_layout_state?: string | null
           gvwr?: number | null
           id?: string
           interior_height?: number | null
           interior_length?: number | null
           interior_width?: number | null
+          is_public?: boolean
+          owner_id?: string | null
           project_name?: string | null
           updated_at?: string | null
           vehicle_make?: string | null
@@ -8368,12 +8407,15 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          created_by?: string | null
           current_layout_state?: string | null
           gvwr?: number | null
           id?: string
           interior_height?: number | null
           interior_length?: number | null
           interior_width?: number | null
+          is_public?: boolean
+          owner_id?: string | null
           project_name?: string | null
           updated_at?: string | null
           vehicle_make?: string | null
@@ -8430,11 +8472,14 @@ export type Database = {
         Row: {
           budget: number | null
           created_at: string | null
+          created_by: string | null
           description: string | null
           duration_estimate: string | null
           id: string
+          is_public: boolean
           metadata: Json | null
           name: string
+          owner_id: string | null
           project_type: string | null
           status: string | null
           tags: string[] | null
@@ -8443,11 +8488,14 @@ export type Database = {
         Insert: {
           budget?: number | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           duration_estimate?: string | null
           id?: string
+          is_public?: boolean
           metadata?: Json | null
           name: string
+          owner_id?: string | null
           project_type?: string | null
           status?: string | null
           tags?: string[] | null
@@ -8456,11 +8504,14 @@ export type Database = {
         Update: {
           budget?: number | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           duration_estimate?: string | null
           id?: string
+          is_public?: boolean
           metadata?: Json | null
           name?: string
+          owner_id?: string | null
           project_type?: string | null
           status?: string | null
           tags?: string[] | null
