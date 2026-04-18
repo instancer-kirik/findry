@@ -614,6 +614,15 @@ const Projects: React.FC = () => {
           {project.category_name && (
             <span className="text-xs text-muted-foreground">{project.category_name}</span>
           )}
+
+          {/* Debug: owner info — visible only to instance.select@gmail.com */}
+          {user?.email === "instance.select@gmail.com" && (
+            <div className="mt-2 pt-2 border-t border-dashed border-border text-[10px] font-mono text-muted-foreground space-y-0.5">
+              <div>owner_id: {project.owner_id || <span className="italic">null</span>}</div>
+              <div>created_by: {project.created_by || <span className="italic">null</span>}</div>
+              <div>source: {project.source_table || "—"} · public: {String(project.is_public)}</div>
+            </div>
+          )}
         </CardContent>
       </>
     );
@@ -764,8 +773,7 @@ const Projects: React.FC = () => {
           <TabsList className="grid w-full max-w-lg grid-cols-3">
             <TabsTrigger value="my-projects" className="flex items-center gap-1.5">
               <User className="h-4 w-4" />
-              <span className="hidden sm:inline">My Projects</span>
-              <span className="sm:hidden">Mine</span>
+              <span>My Projects</span>
               {user && myProjects.length > 0 && <Badge variant="secondary" className="ml-1 h-5 text-xs">{myProjects.length}</Badge>}
             </TabsTrigger>
             <TabsTrigger value="catalog" className="flex items-center gap-1.5">
