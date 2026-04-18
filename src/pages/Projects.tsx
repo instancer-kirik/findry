@@ -20,8 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useProject } from "@/hooks/use-project";
-import { Project } from "@/types/project";
 import { useAuth } from "@/hooks/use-auth";
 import { useShareViews } from "@/hooks/use-share-views";
 import {
@@ -106,6 +104,7 @@ interface CatalogProject {
   dev_repo_url: string | null;
   category_name: string | null;
   owner_id: string | null;
+  owner_ids: string[] | null;
   created_by: string | null;
   is_public: boolean | null;
 }
@@ -113,12 +112,9 @@ interface CatalogProject {
 const Projects: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { useGetProjects } = useProject();
-  const { data: projects = [], isLoading, error, refetch } = useGetProjects();
   const { user } = useAuth();
   const { myViews, createView, updateView } = useShareViews();
   const [searchQuery, setSearchQuery] = useState("");
-  const [projectOwnership, setProjectOwnership] = useState<Record<string, boolean>>({});
   const [projectTasks, setProjectTasks] = useState<Record<string, any[]>>({});
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
@@ -147,61 +143,14 @@ const Projects: React.FC = () => {
     setSearchParams(params);
   };
 
-  // Check ownership for all projects
-  useEffect(() => {
-    if (!user || projects.length === 0) return;
-
-    const checkAllOwnership = async () => {
-      const ownershipMap: Record<string, boolean> = {};
-      for (const project of projects) {
-        try {
-          const { data: projectData } = await supabase
-            .from("projects")
-            .select("owner_id, created_by")
-            .eq("id", project.id)
-            .maybeSingle();
-          ownershipMap[project.id] =
-            projectData?.owner_id === user.id ||
-            projectData?.created_by === user.id;
-        } catch (err) {
-          ownershipMap[project.id] = false;
-        }
-      }
-      setProjectOwnership(ownershipMap);
-    };
-    checkAllOwnership();
-  }, [user, projects]);
-
-  // Fetch tasks for user projects
-  useEffect(() => {
-    if (projects.length === 0) return;
-    const fetchAllTasks = async () => {
-      const tasksMap: Record<string, any[]> = {};
-      for (const project of projects) {
-        try {
-          const { data: tasks } = await supabase
-            .from("project_tasks")
-            .select("*")
-            .eq("project_id", project.id)
-            .order("created_at", { ascending: false })
-            .limit(3);
-          tasksMap[project.id] = tasks || [];
-        } catch (err) {
-          tasksMap[project.id] = [];
-        }
-      }
-      setProjectTasks(tasksMap);
-    };
-    fetchAllTasks();
-  }, [projects]);
-
   // Fetch catalog from unified_projects view
   useEffect(() => {
     fetchCatalogProjects();
-  }, []);
+  }, [user?.id]);
 
   const fetchCatalogProjects = async () => {
     try {
+      setCatalogLoading(true);
       const { data, error } = await supabase
         .from("unified_projects" as any)
         .select("*")
@@ -217,15 +166,68 @@ const Projects: React.FC = () => {
     }
   };
 
+  const isProjectOwnedByUser = (project: CatalogProject) => {
+    if (!user) return false;
+
+    return (
+      project.owner_id === user.id ||
+      project.created_by === user.id ||
+      (project.owner_ids || []).includes(user.id)
+    );
+  };
+
   // Derived data
-  const myProjects = projects.filter((p) => projectOwnership[p.id]);
+  const myProjects = catalogProjects.filter(isProjectOwnedByUser);
 
   const filteredMyProjects = myProjects.filter(
     (project) =>
       project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (project.tags?.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))),
+      ((project.tech_stack || []).some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))),
   );
+
+  // Fetch tasks only for owned records that actually live in public.projects
+  useEffect(() => {
+    const ownedProjectIds = myProjects
+      .filter((project) => project.source_table === "projects")
+      .map((project) => project.id);
+
+    if (ownedProjectIds.length === 0) {
+      setProjectTasks({});
+      return;
+    }
+
+    const fetchOwnedProjectTasks = async () => {
+      try {
+        const { data: tasks, error } = await supabase
+          .from("project_tasks")
+          .select("*")
+          .in("project_id", ownedProjectIds)
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        const groupedTasks = (tasks || []).reduce<Record<string, any[]>>((acc, task) => {
+          if (!acc[task.project_id]) {
+            acc[task.project_id] = [];
+          }
+
+          if (acc[task.project_id].length < 3) {
+            acc[task.project_id].push(task);
+          }
+
+          return acc;
+        }, {});
+
+        setProjectTasks(groupedTasks);
+      } catch (err) {
+        console.error("Error fetching owned project tasks:", err);
+        setProjectTasks({});
+      }
+    };
+
+    fetchOwnedProjectTasks();
+  }, [myProjects]);
 
   // Catalog: collect all tech_stack tags and domains
   const allCatalogTags = Array.from(
@@ -379,7 +381,7 @@ const Projects: React.FC = () => {
       const { error } = await supabase.from("projects").delete().eq("id", projectToDelete);
       if (error) throw error;
       toast.success("Project deleted successfully");
-      refetch();
+      fetchCatalogProjects();
     } catch (error: any) {
       toast.error(`Failed to delete project: ${error.message}`);
     } finally {
@@ -415,10 +417,12 @@ const Projects: React.FC = () => {
     }
   };
 
-  const renderMyProjectCard = (project: Project) => {
+  const renderMyProjectCard = (project: CatalogProject) => {
     const tasks = projectTasks[project.id] || [];
-    const isOwner = projectOwnership[project.id] || false;
+    const isOwner = isProjectOwnedByUser(project);
     const completedTasks = tasks.filter((t) => t.status === "completed").length;
+    const projectLink = getCatalogProjectLink(project);
+    const canEditProject = isOwner && project.source_table === "projects";
 
     return (
       <Card key={project.id} className="flex flex-col h-full">
@@ -426,7 +430,7 @@ const Projects: React.FC = () => {
           <div className="flex-1">
             <h2 className="text-xl font-semibold mb-2 line-clamp-2">{project.name}</h2>
           </div>
-          {isOwner && (
+          {canEditProject && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -451,7 +455,7 @@ const Projects: React.FC = () => {
                 <Sparkles className="h-3 w-3 mr-1" />Featured
               </Badge>
             )}
-            {project.tags?.slice(0, 3).map((tag) => (
+            {(project.tech_stack || []).slice(0, 3).map((tag) => (
               <span key={tag} className="inline-block bg-muted px-2 py-0.5 rounded-full text-xs">{tag}</span>
             ))}
           </div>
@@ -480,21 +484,22 @@ const Projects: React.FC = () => {
             </div>
             <div>
               <p className="text-muted-foreground">Progress</p>
-              <p className="font-medium">{project.progress}%</p>
+              <p className="font-medium">{project.dev_progress ?? 0}%</p>
             </div>
           </div>
         </CardContent>
         <CardFooter className="pt-0">
-          {project.has_custom_landing || project.landing_page ? (
-            <div className="grid grid-cols-2 gap-2 w-full">
-              <Button variant="outline" onClick={() => handleViewProject(project.id)}>View Project</Button>
-              <Button variant="default" onClick={() => window.open(`/projects/${project.id}/landing`, "_blank")}>
-                <ExternalLink className="h-4 w-4 mr-2" />Landing
-              </Button>
-            </div>
-          ) : (
-            <Button variant="outline" className="w-full" onClick={() => handleViewProject(project.id)}>View Project</Button>
-          )}
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() =>
+              projectLink.external
+                ? window.open(projectLink.href, "_blank", "noopener,noreferrer")
+                : navigate(projectLink.href)
+            }
+          >
+            View Project
+          </Button>
         </CardFooter>
       </Card>
     );
@@ -709,7 +714,7 @@ const Projects: React.FC = () => {
     );
   };
 
-  if (isLoading) {
+  if (catalogLoading) {
     return (
       <Layout>
         <div className="container mx-auto py-8 px-4">
@@ -746,7 +751,7 @@ const Projects: React.FC = () => {
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                    <ToonImporter onComplete={() => { setImportDialogOpen(false); refetch(); }} />
+                    <ToonImporter onComplete={() => { setImportDialogOpen(false); fetchCatalogProjects(); }} />
                   </DialogContent>
                 </Dialog>
                 <Button onClick={handleCreateProject} size="sm">
