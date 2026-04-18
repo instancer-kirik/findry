@@ -20,8 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useProject } from "@/hooks/use-project";
-import { Project } from "@/types/project";
 import { useAuth } from "@/hooks/use-auth";
 import { useShareViews } from "@/hooks/use-share-views";
 import {
@@ -106,6 +104,7 @@ interface CatalogProject {
   dev_repo_url: string | null;
   category_name: string | null;
   owner_id: string | null;
+  owner_ids: string[] | null;
   created_by: string | null;
   is_public: boolean | null;
 }
@@ -113,12 +112,9 @@ interface CatalogProject {
 const Projects: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { useGetProjects } = useProject();
-  const { data: projects = [], isLoading, error, refetch } = useGetProjects();
   const { user } = useAuth();
   const { myViews, createView, updateView } = useShareViews();
   const [searchQuery, setSearchQuery] = useState("");
-  const [projectOwnership, setProjectOwnership] = useState<Record<string, boolean>>({});
   const [projectTasks, setProjectTasks] = useState<Record<string, any[]>>({});
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
@@ -147,61 +143,14 @@ const Projects: React.FC = () => {
     setSearchParams(params);
   };
 
-  // Check ownership for all projects
-  useEffect(() => {
-    if (!user || projects.length === 0) return;
-
-    const checkAllOwnership = async () => {
-      const ownershipMap: Record<string, boolean> = {};
-      for (const project of projects) {
-        try {
-          const { data: projectData } = await supabase
-            .from("projects")
-            .select("owner_id, created_by")
-            .eq("id", project.id)
-            .maybeSingle();
-          ownershipMap[project.id] =
-            projectData?.owner_id === user.id ||
-            projectData?.created_by === user.id;
-        } catch (err) {
-          ownershipMap[project.id] = false;
-        }
-      }
-      setProjectOwnership(ownershipMap);
-    };
-    checkAllOwnership();
-  }, [user, projects]);
-
-  // Fetch tasks for user projects
-  useEffect(() => {
-    if (projects.length === 0) return;
-    const fetchAllTasks = async () => {
-      const tasksMap: Record<string, any[]> = {};
-      for (const project of projects) {
-        try {
-          const { data: tasks } = await supabase
-            .from("project_tasks")
-            .select("*")
-            .eq("project_id", project.id)
-            .order("created_at", { ascending: false })
-            .limit(3);
-          tasksMap[project.id] = tasks || [];
-        } catch (err) {
-          tasksMap[project.id] = [];
-        }
-      }
-      setProjectTasks(tasksMap);
-    };
-    fetchAllTasks();
-  }, [projects]);
-
   // Fetch catalog from unified_projects view
   useEffect(() => {
     fetchCatalogProjects();
-  }, []);
+  }, [user?.id]);
 
   const fetchCatalogProjects = async () => {
     try {
+      setCatalogLoading(true);
       const { data, error } = await supabase
         .from("unified_projects" as any)
         .select("*")
@@ -217,15 +166,68 @@ const Projects: React.FC = () => {
     }
   };
 
+  const isProjectOwnedByUser = (project: CatalogProject) => {
+    if (!user) return false;
+
+    return (
+      project.owner_id === user.id ||
+      project.created_by === user.id ||
+      (project.owner_ids || []).includes(user.id)
+    );
+  };
+
   // Derived data
-  const myProjects = projects.filter((p) => projectOwnership[p.id]);
+  const myProjects = catalogProjects.filter(isProjectOwnedByUser);
 
   const filteredMyProjects = myProjects.filter(
     (project) =>
       project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (project.tags?.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))),
+      ((project.tech_stack || []).some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))),
   );
+
+  // Fetch tasks only for owned records that actually live in public.projects
+  useEffect(() => {
+    const ownedProjectIds = myProjects
+      .filter((project) => project.source_table === "projects")
+      .map((project) => project.id);
+
+    if (ownedProjectIds.length === 0) {
+      setProjectTasks({});
+      return;
+    }
+
+    const fetchOwnedProjectTasks = async () => {
+      try {
+        const { data: tasks, error } = await supabase
+          .from("project_tasks")
+          .select("*")
+          .in("project_id", ownedProjectIds)
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        const groupedTasks = (tasks || []).reduce<Record<string, any[]>>((acc, task) => {
+          if (!acc[task.project_id]) {
+            acc[task.project_id] = [];
+          }
+
+          if (acc[task.project_id].length < 3) {
+            acc[task.project_id].push(task);
+          }
+
+          return acc;
+        }, {});
+
+        setProjectTasks(groupedTasks);
+      } catch (err) {
+        console.error("Error fetching owned project tasks:", err);
+        setProjectTasks({});
+      }
+    };
+
+    fetchOwnedProjectTasks();
+  }, [myProjects]);
 
   // Catalog: collect all tech_stack tags and domains
   const allCatalogTags = Array.from(
