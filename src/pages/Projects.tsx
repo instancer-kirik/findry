@@ -247,10 +247,10 @@ const Projects: React.FC = () => {
       const q = searchQuery.toLowerCase();
       filtered = filtered.filter(
         (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.description?.toLowerCase().includes(q) ||
-          p.tech_stack?.some((t) => t.toLowerCase().includes(q)) ||
-          p.domain?.toLowerCase().includes(q),
+          (p.name || "").toLowerCase().includes(q) ||
+          (p.description || "").toLowerCase().includes(q) ||
+          (p.tech_stack || []).some((t) => (t || "").toLowerCase().includes(q)) ||
+          (p.domain || "").toLowerCase().includes(q),
       );
     }
 
