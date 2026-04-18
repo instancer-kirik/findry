@@ -484,7 +484,7 @@ const Projects: React.FC = () => {
             </div>
             <div>
               <p className="text-muted-foreground">Progress</p>
-              <p className="font-medium">{project.progress}%</p>
+              <p className="font-medium">{project.dev_progress ?? 0}%</p>
             </div>
           </div>
         </CardContent>
@@ -714,7 +714,7 @@ const Projects: React.FC = () => {
     );
   };
 
-  if (isLoading) {
+  if (catalogLoading) {
     return (
       <Layout>
         <div className="container mx-auto py-8 px-4">
@@ -751,7 +751,7 @@ const Projects: React.FC = () => {
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                    <ToonImporter onComplete={() => { setImportDialogOpen(false); refetch(); }} />
+                    <ToonImporter onComplete={() => { setImportDialogOpen(false); fetchCatalogProjects(); }} />
                   </DialogContent>
                 </Dialog>
                 <Button onClick={handleCreateProject} size="sm">
