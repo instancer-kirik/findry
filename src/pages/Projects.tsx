@@ -381,7 +381,7 @@ const Projects: React.FC = () => {
       const { error } = await supabase.from("projects").delete().eq("id", projectToDelete);
       if (error) throw error;
       toast.success("Project deleted successfully");
-      refetch();
+      fetchCatalogProjects();
     } catch (error: any) {
       toast.error(`Failed to delete project: ${error.message}`);
     } finally {
@@ -417,10 +417,12 @@ const Projects: React.FC = () => {
     }
   };
 
-  const renderMyProjectCard = (project: Project) => {
+  const renderMyProjectCard = (project: CatalogProject) => {
     const tasks = projectTasks[project.id] || [];
-    const isOwner = projectOwnership[project.id] || false;
+    const isOwner = isProjectOwnedByUser(project);
     const completedTasks = tasks.filter((t) => t.status === "completed").length;
+    const projectLink = getCatalogProjectLink(project);
+    const canEditProject = isOwner && project.source_table === "projects";
 
     return (
       <Card key={project.id} className="flex flex-col h-full">
@@ -428,7 +430,7 @@ const Projects: React.FC = () => {
           <div className="flex-1">
             <h2 className="text-xl font-semibold mb-2 line-clamp-2">{project.name}</h2>
           </div>
-          {isOwner && (
+          {canEditProject && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -453,7 +455,7 @@ const Projects: React.FC = () => {
                 <Sparkles className="h-3 w-3 mr-1" />Featured
               </Badge>
             )}
-            {project.tags?.slice(0, 3).map((tag) => (
+            {(project.tech_stack || []).slice(0, 3).map((tag) => (
               <span key={tag} className="inline-block bg-muted px-2 py-0.5 rounded-full text-xs">{tag}</span>
             ))}
           </div>
@@ -487,16 +489,17 @@ const Projects: React.FC = () => {
           </div>
         </CardContent>
         <CardFooter className="pt-0">
-          {project.has_custom_landing || project.landing_page ? (
-            <div className="grid grid-cols-2 gap-2 w-full">
-              <Button variant="outline" onClick={() => handleViewProject(project.id)}>View Project</Button>
-              <Button variant="default" onClick={() => window.open(`/projects/${project.id}/landing`, "_blank")}>
-                <ExternalLink className="h-4 w-4 mr-2" />Landing
-              </Button>
-            </div>
-          ) : (
-            <Button variant="outline" className="w-full" onClick={() => handleViewProject(project.id)}>View Project</Button>
-          )}
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() =>
+              projectLink.external
+                ? window.open(projectLink.href, "_blank", "noopener,noreferrer")
+                : navigate(projectLink.href)
+            }
+          >
+            View Project
+          </Button>
         </CardFooter>
       </Card>
     );
