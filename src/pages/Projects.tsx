@@ -179,12 +179,14 @@ const Projects: React.FC = () => {
   // Derived data
   const myProjects = catalogProjects.filter(isProjectOwnedByUser);
 
-  const filteredMyProjects = myProjects.filter(
-    (project) =>
-      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ((project.tech_stack || []).some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))),
-  );
+  const filteredMyProjects = myProjects.filter((project) => {
+    const q = searchQuery.toLowerCase();
+    return (
+      (project.name || "").toLowerCase().includes(q) ||
+      (project.description || "").toLowerCase().includes(q) ||
+      (project.tech_stack || []).some((tag) => (tag || "").toLowerCase().includes(q))
+    );
+  });
 
   // Fetch tasks only for owned records that actually live in public.projects
   useEffect(() => {
@@ -245,10 +247,10 @@ const Projects: React.FC = () => {
       const q = searchQuery.toLowerCase();
       filtered = filtered.filter(
         (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.description?.toLowerCase().includes(q) ||
-          p.tech_stack?.some((t) => t.toLowerCase().includes(q)) ||
-          p.domain?.toLowerCase().includes(q),
+          (p.name || "").toLowerCase().includes(q) ||
+          (p.description || "").toLowerCase().includes(q) ||
+          (p.tech_stack || []).some((t) => (t || "").toLowerCase().includes(q)) ||
+          (p.domain || "").toLowerCase().includes(q),
       );
     }
 
