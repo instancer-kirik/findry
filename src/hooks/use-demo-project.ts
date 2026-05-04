@@ -81,11 +81,11 @@ export const useDemoProject = (projectId: string) => {
         
         const demoProject: Project = {
           id: projectId,
-          name: 'Muster Platform Core',
+          name: 'Consparium Platform Core',
           description: 'The main platform for creative ecosystem connections',
           status: 'development',
           version: '0.5.0',
-          repo_url: 'https://github.com/user/muster',
+          repo_url: 'https://github.com/user/consparium',
           progress: 65,
           tags: ['core', 'platform', 'features'],
           created_at: now,

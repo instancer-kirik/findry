@@ -122,7 +122,7 @@ const PublicLanding: React.FC = () => {
               variant="outline"
               onClick={() => window.location.href = "/"}
             >
-              Go to Muster
+              Go to Consparium
             </Button>
           </CardContent>
         </Card>
@@ -156,7 +156,7 @@ const PublicLanding: React.FC = () => {
     <div>
       {/* SEO Meta Tags */}
       <head>
-        <title>{project.landing_page.hero_title || project.name} - Muster</title>
+        <title>{project.landing_page.hero_title || project.name} - Consparium</title>
         <meta
           name="description"
           content={project.landing_page.hero_subtitle || project.description}

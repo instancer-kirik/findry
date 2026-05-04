@@ -13,7 +13,7 @@ const About: React.FC = () => {
         <div className="max-w-5xl mx-auto">
           {/* Hero Section */}
           <section className="mb-12 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">About Muster</h1>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">About Consparium</h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                 from Ultimate Starter Kit - <a href="https://instance.select" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">instance.select</a>
             </p>
@@ -23,7 +23,7 @@ const About: React.FC = () => {
           <Card className="mb-12">
             <CardHeader>
               <CardTitle className="text-2xl">Our Mission</CardTitle>
-              <CardDescription>Why we built Muster</CardDescription>
+              <CardDescription>Why we built Consparium</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <p>
@@ -107,7 +107,7 @@ const About: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    With a background in both art and technology, he founded Muster to bridge the gap
+                    With a background in both art and technology, he founded Consparium to bridge the gap
                     between creative minds and the resources they need to thrive.
                   </p>
                   <div className="flex mt-4 gap-2">
@@ -136,7 +136,7 @@ const About: React.FC = () => {
                 <CardContent>
                   <p className="text-muted-foreground">
                     He brings a wealth of experience in UX design and community building, 
-                    ensuring that Muster remains intuitive and responsive.
+                    ensuring that Consparium remains intuitive and responsive.
                   </p>
                   <div className="flex mt-4 gap-2">
                     <Button variant="outline" size="icon">
@@ -162,7 +162,7 @@ const About: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    With a background in both art and technology, he founded Muster to bridge the gap 
+                    With a background in both art and technology, he founded Consparium to bridge the gap 
                     between creative minds and the resources they need to thrive.
                   </p>
                   <div className="flex mt-4 gap-2">
@@ -191,7 +191,7 @@ const About: React.FC = () => {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                Muster is in active development. Check out our roadmap to see completed features, 
+                Consparium is in active development. Check out our roadmap to see completed features, 
                 current priorities, and future plans. We're transparent about what's working and what needs improvement.
               </p>
               <Link to="/roadmap">
@@ -237,7 +237,7 @@ const About: React.FC = () => {
                 </CardHeader>
                 <CardContent className="flex-1">
                   <p className="text-muted-foreground mb-6">
-                    Have questions, feedback, or ideas for improving Muster? We'd love to hear from you.
+                    Have questions, feedback, or ideas for improving Consparium? We'd love to hear from you.
                     Reach out to our team and let's build a better platform together.
                   </p>
                 </CardContent>
@@ -257,9 +257,9 @@ const About: React.FC = () => {
             <h2 className="text-2xl font-bold mb-6">Frequently Asked Questions</h2>
             <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-semibold mb-2">What is Muster?</h3>
+                <h3 className="text-lg font-semibold mb-2">What is Consparium?</h3>
                 <p className="text-muted-foreground">
-                  Muster means to gather, rally, and assemble — exactly what we do for creative communities.
+                  Consparium means to gather, rally, and assemble — exactly what we do for creative communities.
                 </p>
               </div>
               <Separator className="my-4" />
@@ -271,16 +271,16 @@ const About: React.FC = () => {
               </div>
               <Separator className="my-4" />
               <div>
-                <h3 className="text-lg font-semibold mb-2">Is Muster available in my area?</h3>
+                <h3 className="text-lg font-semibold mb-2">Is Consparium available in my area?</h3>
                 <p className="text-muted-foreground">
-                  Muster is currently focused on building strong communities in select regions, with plans to expand. 
+                  Consparium is currently focused on building strong communities in select regions, with plans to expand. 
                   Even if you're outside our primary regions, you can still join and connect with resources and communities 
                   that might be relevant to your work.
                 </p>
               </div>
               <Separator className="my-4" />
               <div>
-                <h3 className="text-lg font-semibold mb-2">How can I contribute to Muster's development?</h3>
+                <h3 className="text-lg font-semibold mb-2">How can I contribute to Consparium's development?</h3>
                 <p className="text-muted-foreground">
                   We welcome feedback, feature suggestions, and community contributions. 
                   Contact us through our <Link to="/contact" className="text-primary hover:underline">contact page</Link> to 

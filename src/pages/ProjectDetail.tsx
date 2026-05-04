@@ -146,13 +146,13 @@ const ProjectDetail: React.FC = () => {
     const description =
       project?.landing_page?.hero_subtitle ||
       project?.description ||
-      "Check out this project on Muster!";
+      "Check out this project on Consparium!";
 
     if (platform) {
       let url = "";
       switch (platform) {
         case "twitter":
-          url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(shareUrl)}&hashtags=muster,project`;
+          url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(shareUrl)}&hashtags=consparium,project`;
           break;
         case "facebook":
           url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
@@ -314,9 +314,9 @@ const ProjectDetail: React.FC = () => {
 
       // Update document title and meta tags for SEO
       const title = project.name || "Project";
-      const description = project.description || "An amazing project on Muster";
+      const description = project.description || "An amazing project on Consparium";
 
-      document.title = `${title} - Muster`;
+      document.title = `${title} - Consparium`;
 
       // Update meta description
       let metaDescription = document.querySelector('meta[name="description"]');
@@ -457,7 +457,7 @@ const ProjectDetail: React.FC = () => {
   // Cleanup meta tags on unmount
   useEffect(() => {
     return () => {
-      document.title = "Muster";
+      document.title = "Consparium";
     };
   }, []);
 

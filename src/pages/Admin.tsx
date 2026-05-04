@@ -120,7 +120,7 @@ const statusColors: Record<string, string> = {
 
 const BetaOutreachTab: React.FC = () => {
   const [targets, setTargets] = useState<BetaTarget[]>(() => {
-    const saved = localStorage.getItem('muster-beta-targets');
+    const saved = localStorage.getItem('consparium-beta-targets');
     return saved ? JSON.parse(saved) : initialBetaTargets;
   });
 
@@ -128,7 +128,7 @@ const BetaOutreachTab: React.FC = () => {
     const updated = [...targets];
     updated[index] = { ...updated[index], status };
     setTargets(updated);
-    localStorage.setItem('muster-beta-targets', JSON.stringify(updated));
+    localStorage.setItem('consparium-beta-targets', JSON.stringify(updated));
     toast.success(`Updated ${updated[index].name}`);
   };
 

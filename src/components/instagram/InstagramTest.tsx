@@ -16,7 +16,7 @@ export const InstagramTest: React.FC<InstagramTestProps> = ({ className }) => {
   const { instagramToken, instagramUser, publishToInstagram, isConnected } = useInstagramAuth();
   const [isPublishing, setIsPublishing] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
-  const [caption, setCaption] = useState('Testing Instagram integration with Muster! 🎉 #MusterApp #EventPlatform');
+  const [caption, setCaption] = useState('Testing Instagram integration with Consparium! 🎉 #ConspariumApp #EventPlatform');
 
   const handleTestPublish = async () => {
     if (!isConnected) {
@@ -40,7 +40,7 @@ export const InstagramTest: React.FC<InstagramTestProps> = ({ className }) => {
 
       // Clear form
       setImageUrl('');
-      setCaption('Testing Instagram integration with Muster! 🎉 #MusterApp #EventPlatform');
+      setCaption('Testing Instagram integration with Consparium! 🎉 #ConspariumApp #EventPlatform');
 
     } catch (error) {
       console.error('Publishing error:', error);
