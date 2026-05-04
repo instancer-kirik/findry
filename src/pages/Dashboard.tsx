@@ -53,7 +53,7 @@ const recentActivity: ActivityItem[] = [
     id: "1",
     title: "Project Milestone Achieved",
     type: "project",
-    description: "The Muster Platform Core reached 75% completion",
+    description: "The Consparium Platform Core reached 75% completion",
     timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
     status: "completed"
   },

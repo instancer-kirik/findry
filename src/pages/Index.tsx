@@ -145,7 +145,7 @@ const Landing: React.FC = () => {
 
       {/* Quick Links Section */}
       <div className="container mx-auto px-4 py-12">
-        <h2 className="text-2xl font-bold mb-6 text-center">Explore Muster</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">Explore Consparium</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           <Button
             variant="outline"
@@ -459,7 +459,7 @@ const Landing: React.FC = () => {
         <div className="max-w-2xl mx-auto text-center space-y-6">
           <h2 className="text-2xl font-bold">Support the Project</h2>
           <p className="text-muted-foreground">
-            Help us continue building and improving Muster by supporting the
+            Help us continue building and improving Consparium by supporting the
             project.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

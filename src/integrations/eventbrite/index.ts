@@ -325,14 +325,14 @@ export const mockEventbriteEvents: EventbriteEvent[] = [
   {
     id: 'eb-123456789',
     name: {
-      text: 'Muster Creators Showcase',
-      html: '<p>Muster Creators Showcase</p>'
+      text: 'Consparium Creators Showcase',
+      html: '<p>Consparium Creators Showcase</p>'
     },
     description: {
-      text: 'Join us for an evening showcasing the best creative work from the Muster community. Meet artists, designers, and creators while enjoying live performances and exhibitions.',
-      html: '<p>Join us for an evening showcasing the best creative work from the Muster community. Meet artists, designers, and creators while enjoying live performances and exhibitions.</p>'
+      text: 'Join us for an evening showcasing the best creative work from the Consparium community. Meet artists, designers, and creators while enjoying live performances and exhibitions.',
+      html: '<p>Join us for an evening showcasing the best creative work from the Consparium community. Meet artists, designers, and creators while enjoying live performances and exhibitions.</p>'
     },
-    url: 'https://www.eventbrite.com/e/muster-creators-showcase-tickets-123456789',
+    url: 'https://www.eventbrite.com/e/consparium-creators-showcase-tickets-123456789',
     start: {
       timezone: 'America/Los_Angeles',
       local: '2023-09-15T18:00:00',
@@ -370,7 +370,7 @@ export const mockEventbriteEvents: EventbriteEvent[] = [
     source: 'create_event',
     is_free: true,
     version: '3.0.0',
-    summary: 'Muster Creators Showcase',
+    summary: 'Consparium Creators Showcase',
     logo_id: 'logo-123456',
     organizer_id: 'org-123456',
     venue_id: 'venue-123456',
@@ -399,7 +399,7 @@ export const mockEventbriteEvents: EventbriteEvent[] = [
       },
       resource_uri: 'https://www.eventbriteapi.com/v3/venues/venue-123456/',
       id: 'venue-123456',
-      name: 'Muster Creative Space',
+      name: 'Consparium Creative Space',
       latitude: '37.7749',
       longitude: '-122.4194'
     },
