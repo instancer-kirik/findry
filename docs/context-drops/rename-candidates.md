@@ -24,5 +24,9 @@ Brainstormed names for the project (now **Muster**, previously "Findry"):
 - **Yardy**
 - **Yardec**
 
+## Unsorted / Vibes (TBD)
+- **opatopa** — meaning unclear, save for later
+- **bowwow** — meaning unclear, save for later
+
 ---
-*Updated 2026-03-18*
+*Updated 2026-05-07*
