@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { formatDistanceToNow } from 'date-fns';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,6 +19,7 @@ import CreateEventModal from '@/components/communities/CreateEventModal';
 import { toast } from '@/components/ui/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import VideoCallModal from '@/components/video/VideoCallModal';
+import { supabase } from '@/integrations/supabase/client';
 
 const CommunityDashboard = () => {
   const { id: communityId } = useParams<{ id: string }>();
@@ -33,6 +36,62 @@ const CommunityDashboard = () => {
   const { data: community, isLoading } = useGetCommunity(communityId);
   const joinCommunity = useJoinCommunity();
   const leaveCommunity = useLeaveCommunity();
+
+  // Events count for this community
+  const { data: eventsCount = 0 } = useQuery({
+    queryKey: ['community-events-count', communityId],
+    enabled: !!communityId,
+    queryFn: async () => {
+      const { count } = await supabase
+        .from('events' as any)
+        .select('*', { count: 'exact', head: true })
+        .eq('community_id', communityId);
+      return count || 0;
+    },
+  });
+
+  // Recent discussions
+  const { data: recentPosts = [] } = useQuery({
+    queryKey: ['community-recent-posts', communityId],
+    enabled: !!communityId,
+    queryFn: async () => {
+      const { data: posts } = await supabase
+        .from('community_posts')
+        .select('id, content, created_at, user_id')
+        .eq('community_id', communityId!)
+        .order('created_at', { ascending: false })
+        .limit(3);
+      if (!posts || posts.length === 0) return [];
+      const userIds = [...new Set(posts.map((p: any) => p.user_id).filter(Boolean))];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, username, full_name, avatar_url')
+        .in('id', userIds);
+      const pmap = new Map((profiles || []).map((p: any) => [p.id, p]));
+      return posts.map((p: any) => ({ ...p, profile: pmap.get(p.user_id) }));
+    },
+  });
+
+  // Members
+  const { data: members = [] } = useQuery({
+    queryKey: ['community-members-list', communityId],
+    enabled: !!communityId,
+    queryFn: async () => {
+      const { data: rows } = await supabase
+        .from('community_members')
+        .select('user_id, role, joined_at')
+        .eq('community_id', communityId!)
+        .order('joined_at', { ascending: false });
+      if (!rows || rows.length === 0) return [];
+      const userIds = rows.map((r: any) => r.user_id);
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, username, full_name, avatar_url')
+        .in('id', userIds);
+      const pmap = new Map((profiles || []).map((p: any) => [p.id, p]));
+      return rows.map((r: any) => ({ ...r, profile: pmap.get(r.user_id) }));
+    },
+  });
 
   const handleJoinCommunity = () => {
     if (!user) {
@@ -200,7 +259,7 @@ const CommunityDashboard = () => {
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">{eventsCount}</div>
             </CardContent>
           </Card>
           <Card>
@@ -260,50 +319,36 @@ const CommunityDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="h-64 overflow-auto">
-                    {/* We'll only show a preview of the forum here */}
-                    <Card className="mb-2">
-                      <CardHeader className="py-2 px-3">
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarFallback>U</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="text-sm font-medium">User123</p>
-                            <p className="text-xs text-muted-foreground">2 hours ago</p>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="py-1 px-3">
-                        <p className="text-sm line-clamp-2">
-                          Has anyone worked on integrating the new API with React? I'm having trouble with authentication.
-                        </p>
-                      </CardContent>
-                      <CardFooter className="py-1 px-3 text-xs text-muted-foreground">
-                        5 replies
-                      </CardFooter>
-                    </Card>
-
-                    <Card>
-                      <CardHeader className="py-2 px-3">
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarFallback>A</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="text-sm font-medium">Admin</p>
-                            <p className="text-xs text-muted-foreground">Yesterday</p>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="py-1 px-3">
-                        <p className="text-sm line-clamp-2">
-                          Welcome to our community! Introduce yourself and let us know what you're working on.
-                        </p>
-                      </CardContent>
-                      <CardFooter className="py-1 px-3 text-xs text-muted-foreground">
-                        12 replies
-                      </CardFooter>
-                    </Card>
+                    {recentPosts.length === 0 ? (
+                      <div className="text-center py-8 text-sm text-muted-foreground">
+                        No discussions yet. Be the first to post in the Forum.
+                      </div>
+                    ) : (
+                      recentPosts.map((post: any) => {
+                        const name = post.profile?.full_name || post.profile?.username || 'Member';
+                        return (
+                          <Card key={post.id} className="mb-2">
+                            <CardHeader className="py-2 px-3">
+                              <div className="flex items-center gap-2">
+                                <Avatar className="h-6 w-6">
+                                  <AvatarImage src={post.profile?.avatar_url || undefined} />
+                                  <AvatarFallback>{name[0]?.toUpperCase() || 'M'}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="text-sm font-medium">{name}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                                  </p>
+                                </div>
+                              </div>
+                            </CardHeader>
+                            <CardContent className="py-1 px-3">
+                              <p className="text-sm line-clamp-2">{post.content}</p>
+                            </CardContent>
+                          </Card>
+                        );
+                      })
+                    )}
                   </div>
                   <div className="mt-4 text-center">
                     <Button 
@@ -351,13 +396,35 @@ const CommunityDashboard = () => {
                 <CardDescription>People who have joined this community</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12">
-                  <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium">Member listing coming soon</h3>
-                  <p className="text-muted-foreground mt-2">
-                    We're working on the member directory feature.
-                  </p>
-                </div>
+                {members.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-medium">No members yet</h3>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {members.map((m: any) => {
+                      const name = m.profile?.full_name || m.profile?.username || 'Member';
+                      return (
+                        <div key={m.user_id} className="flex items-center gap-3 p-3 rounded-lg border">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={m.profile?.avatar_url || undefined} />
+                            <AvatarFallback>{name[0]?.toUpperCase() || 'M'}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Joined {formatDistanceToNow(new Date(m.joined_at), { addSuffix: true })}
+                            </p>
+                          </div>
+                          {m.role && m.role !== 'member' && (
+                            <Badge variant="secondary" className="text-xs">{m.role}</Badge>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
