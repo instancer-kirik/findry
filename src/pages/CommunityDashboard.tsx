@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { formatDistanceToNow } from 'date-fns';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,6 +19,7 @@ import CreateEventModal from '@/components/communities/CreateEventModal';
 import { toast } from '@/components/ui/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import VideoCallModal from '@/components/video/VideoCallModal';
+import { supabase } from '@/integrations/supabase/client';
 
 const CommunityDashboard = () => {
   const { id: communityId } = useParams<{ id: string }>();
@@ -33,6 +36,62 @@ const CommunityDashboard = () => {
   const { data: community, isLoading } = useGetCommunity(communityId);
   const joinCommunity = useJoinCommunity();
   const leaveCommunity = useLeaveCommunity();
+
+  // Events count for this community
+  const { data: eventsCount = 0 } = useQuery({
+    queryKey: ['community-events-count', communityId],
+    enabled: !!communityId,
+    queryFn: async () => {
+      const { count } = await supabase
+        .from('events' as any)
+        .select('*', { count: 'exact', head: true })
+        .eq('community_id', communityId);
+      return count || 0;
+    },
+  });
+
+  // Recent discussions
+  const { data: recentPosts = [] } = useQuery({
+    queryKey: ['community-recent-posts', communityId],
+    enabled: !!communityId,
+    queryFn: async () => {
+      const { data: posts } = await supabase
+        .from('community_posts')
+        .select('id, content, created_at, user_id')
+        .eq('community_id', communityId!)
+        .order('created_at', { ascending: false })
+        .limit(3);
+      if (!posts || posts.length === 0) return [];
+      const userIds = [...new Set(posts.map((p: any) => p.user_id).filter(Boolean))];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, username, full_name, avatar_url')
+        .in('id', userIds);
+      const pmap = new Map((profiles || []).map((p: any) => [p.id, p]));
+      return posts.map((p: any) => ({ ...p, profile: pmap.get(p.user_id) }));
+    },
+  });
+
+  // Members
+  const { data: members = [] } = useQuery({
+    queryKey: ['community-members-list', communityId],
+    enabled: !!communityId,
+    queryFn: async () => {
+      const { data: rows } = await supabase
+        .from('community_members')
+        .select('user_id, role, joined_at')
+        .eq('community_id', communityId!)
+        .order('joined_at', { ascending: false });
+      if (!rows || rows.length === 0) return [];
+      const userIds = rows.map((r: any) => r.user_id);
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, username, full_name, avatar_url')
+        .in('id', userIds);
+      const pmap = new Map((profiles || []).map((p: any) => [p.id, p]));
+      return rows.map((r: any) => ({ ...r, profile: pmap.get(r.user_id) }));
+    },
+  });
 
   const handleJoinCommunity = () => {
     if (!user) {
@@ -200,7 +259,7 @@ const CommunityDashboard = () => {
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">{eventsCount}</div>
             </CardContent>
           </Card>
           <Card>
