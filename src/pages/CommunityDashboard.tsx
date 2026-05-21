@@ -319,50 +319,36 @@ const CommunityDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="h-64 overflow-auto">
-                    {/* We'll only show a preview of the forum here */}
-                    <Card className="mb-2">
-                      <CardHeader className="py-2 px-3">
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarFallback>U</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="text-sm font-medium">User123</p>
-                            <p className="text-xs text-muted-foreground">2 hours ago</p>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="py-1 px-3">
-                        <p className="text-sm line-clamp-2">
-                          Has anyone worked on integrating the new API with React? I'm having trouble with authentication.
-                        </p>
-                      </CardContent>
-                      <CardFooter className="py-1 px-3 text-xs text-muted-foreground">
-                        5 replies
-                      </CardFooter>
-                    </Card>
-
-                    <Card>
-                      <CardHeader className="py-2 px-3">
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarFallback>A</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="text-sm font-medium">Admin</p>
-                            <p className="text-xs text-muted-foreground">Yesterday</p>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="py-1 px-3">
-                        <p className="text-sm line-clamp-2">
-                          Welcome to our community! Introduce yourself and let us know what you're working on.
-                        </p>
-                      </CardContent>
-                      <CardFooter className="py-1 px-3 text-xs text-muted-foreground">
-                        12 replies
-                      </CardFooter>
-                    </Card>
+                    {recentPosts.length === 0 ? (
+                      <div className="text-center py-8 text-sm text-muted-foreground">
+                        No discussions yet. Be the first to post in the Forum.
+                      </div>
+                    ) : (
+                      recentPosts.map((post: any) => {
+                        const name = post.profile?.full_name || post.profile?.username || 'Member';
+                        return (
+                          <Card key={post.id} className="mb-2">
+                            <CardHeader className="py-2 px-3">
+                              <div className="flex items-center gap-2">
+                                <Avatar className="h-6 w-6">
+                                  <AvatarImage src={post.profile?.avatar_url || undefined} />
+                                  <AvatarFallback>{name[0]?.toUpperCase() || 'M'}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="text-sm font-medium">{name}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                                  </p>
+                                </div>
+                              </div>
+                            </CardHeader>
+                            <CardContent className="py-1 px-3">
+                              <p className="text-sm line-clamp-2">{post.content}</p>
+                            </CardContent>
+                          </Card>
+                        );
+                      })
+                    )}
                   </div>
                   <div className="mt-4 text-center">
                     <Button 
@@ -410,13 +396,35 @@ const CommunityDashboard = () => {
                 <CardDescription>People who have joined this community</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12">
-                  <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium">Member listing coming soon</h3>
-                  <p className="text-muted-foreground mt-2">
-                    We're working on the member directory feature.
-                  </p>
-                </div>
+                {members.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-medium">No members yet</h3>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {members.map((m: any) => {
+                      const name = m.profile?.full_name || m.profile?.username || 'Member';
+                      return (
+                        <div key={m.user_id} className="flex items-center gap-3 p-3 rounded-lg border">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={m.profile?.avatar_url || undefined} />
+                            <AvatarFallback>{name[0]?.toUpperCase() || 'M'}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Joined {formatDistanceToNow(new Date(m.joined_at), { addSuffix: true })}
+                            </p>
+                          </div>
+                          {m.role && m.role !== 'member' && (
+                            <Badge variant="secondary" className="text-xs">{m.role}</Badge>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
