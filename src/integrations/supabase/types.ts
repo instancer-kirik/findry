@@ -276,6 +276,48 @@ export type Database = {
           },
         ]
       }
+      community_share_views: {
+        Row: {
+          added_by: string | null
+          community_id: string
+          created_at: string
+          featured: boolean
+          id: string
+          share_view_id: string
+        }
+        Insert: {
+          added_by?: string | null
+          community_id: string
+          created_at?: string
+          featured?: boolean
+          id?: string
+          share_view_id: string
+        }
+        Update: {
+          added_by?: string | null
+          community_id?: string
+          created_at?: string
+          featured?: boolean
+          id?: string
+          share_view_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_share_views_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_share_views_share_view_id_fkey"
+            columns: ["share_view_id"]
+            isOneToOne: false
+            referencedRelation: "share_views"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           avg_rating: number | null
