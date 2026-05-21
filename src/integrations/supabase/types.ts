@@ -6088,6 +6088,54 @@ export type Database = {
           },
         ]
       }
+      project_share_variants: {
+        Row: {
+          accent_color: string | null
+          audience: string
+          created_at: string
+          created_by: string | null
+          cta_label: string | null
+          cta_url: string | null
+          headline: string
+          id: string
+          og_description: string | null
+          og_title: string | null
+          pitch: string
+          project_id: string
+          updated_at: string
+        }
+        Insert: {
+          accent_color?: string | null
+          audience: string
+          created_at?: string
+          created_by?: string | null
+          cta_label?: string | null
+          cta_url?: string | null
+          headline: string
+          id?: string
+          og_description?: string | null
+          og_title?: string | null
+          pitch: string
+          project_id: string
+          updated_at?: string
+        }
+        Update: {
+          accent_color?: string | null
+          audience?: string
+          created_at?: string
+          created_by?: string | null
+          cta_label?: string | null
+          cta_url?: string | null
+          headline?: string
+          id?: string
+          og_description?: string | null
+          og_title?: string | null
+          pitch?: string
+          project_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       project_tasks: {
         Row: {
           assigned_to: string | null
