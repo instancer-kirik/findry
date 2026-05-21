@@ -8,9 +8,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Calendar, Users, Trophy, Video, MapPin, Clock, MessageSquare, Settings, Bell, Phone, Flame } from 'lucide-react';
+import { Calendar, Users, Trophy, Video, MapPin, Clock, MessageSquare, Settings, Bell, Phone, Flame, FolderOpen, Plus, X, ExternalLink } from 'lucide-react';
 import { useCommunities } from '@/hooks/use-communities';
 import { useAuth } from '@/hooks/use-auth';
+import { useShareViews } from '@/hooks/use-share-views';
+import { useCommunityShareViews } from '@/hooks/use-community-share-views';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription,
+} from '@/components/ui/dialog';
+import { Link } from 'react-router-dom';
 import CommunityForum from '@/components/communities/CommunityForum';
 import CommunityCalendar from '@/components/communities/CommunityCalendar';
 import CommunityEvents from '@/components/communities/CommunityEvents';
@@ -36,6 +42,10 @@ const CommunityDashboard = () => {
   const { data: community, isLoading } = useGetCommunity(communityId);
   const joinCommunity = useJoinCommunity();
   const leaveCommunity = useLeaveCommunity();
+
+  const { list: attachedViews, attach, detach } = useCommunityShareViews(communityId);
+  const { myViews } = useShareViews();
+  const isOwner = !!user && user.id === community?.created_by;
 
   // Events count for this community
   const { data: eventsCount = 0 } = useQuery({
@@ -285,6 +295,10 @@ const CommunityDashboard = () => {
             <TabsTrigger value="calendar">Calendar</TabsTrigger>
             <TabsTrigger value="forum">Forum</TabsTrigger>
             <TabsTrigger value="members">Members</TabsTrigger>
+            <TabsTrigger value="collections" className="gap-1.5">
+              <FolderOpen className="h-3.5 w-3.5" />
+              Collections
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
