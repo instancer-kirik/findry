@@ -442,6 +442,127 @@ const CommunityDashboard = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="collections">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Featured Collections</CardTitle>
+                    <CardDescription>Share Views attached to this community</CardDescription>
+                  </div>
+                  {(isOwner || (myViews.data && myViews.data.length > 0)) && (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button size="sm">
+                          <Plus className="h-4 w-4 mr-1" /> Attach
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Attach one of your Share Views</DialogTitle>
+                          <DialogDescription>
+                            Feature a project collection on this community page.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-2 max-h-80 overflow-auto">
+                          {(myViews.data || []).length === 0 ? (
+                            <p className="text-sm text-muted-foreground">
+                              You don't have any Share Views yet.{' '}
+                              <Link to="/share-views" className="underline">Create one</Link>.
+                            </p>
+                          ) : (
+                            (myViews.data || []).map((v: any) => {
+                              const already = (attachedViews.data || []).some(
+                                (l: any) => l.share_view_id === v.id
+                              );
+                              return (
+                                <div
+                                  key={v.id}
+                                  className="flex items-center justify-between p-3 rounded-lg border"
+                                >
+                                  <div className="min-w-0">
+                                    <p className="font-medium truncate">{v.name}</p>
+                                    {v.description && (
+                                      <p className="text-xs text-muted-foreground truncate">
+                                        {v.description}
+                                      </p>
+                                    )}
+                                  </div>
+                                  <Button
+                                    size="sm"
+                                    variant={already ? 'outline' : 'default'}
+                                    disabled={already || attach.isPending}
+                                    onClick={() => attach.mutate(v.id)}
+                                  >
+                                    {already ? 'Attached' : 'Attach'}
+                                  </Button>
+                                </div>
+                              );
+                            })
+                          )}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                {(attachedViews.data || []).length === 0 ? (
+                  <div className="text-center py-12">
+                    <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">
+                      No collections yet. Attach a Share View to feature curated projects here.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {(attachedViews.data || []).map((link: any) => {
+                      const v = link.view;
+                      if (!v) return null;
+                      const canDetach =
+                        isOwner || (user && link.added_by === user.id) || (user && v.owner_id === user.id);
+                      return (
+                        <div key={link.id} className="p-4 rounded-lg border space-y-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <p className="font-medium truncate">{v.name}</p>
+                              {v.description && (
+                                <p className="text-xs text-muted-foreground line-clamp-2">
+                                  {v.description}
+                                </p>
+                              )}
+                            </div>
+                            {canDetach && (
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => detach.mutate(link.id)}
+                                className="h-7 w-7 shrink-0"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {(v.tags || []).slice(0, 4).map((t: string) => (
+                              <Badge key={t} variant="secondary" className="text-xs">{t}</Badge>
+                            ))}
+                          </div>
+                          <Link
+                            to={`/share/${v.share_key}`}
+                            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                          >
+                            Open collection <ExternalLink className="h-3 w-3" />
+                          </Link>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
 
         {/* Video Call Modal */}
