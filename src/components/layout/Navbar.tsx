@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import { navigation, mobileNavSections, createActions, type NavCategory } from "@/config/navigation";
+import MobileMenu from "./MobileMenu";
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
