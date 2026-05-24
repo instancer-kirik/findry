@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import { navigation, mobileNavSections, createActions, type NavCategory } from "@/config/navigation";
+import MobileMenu from "./MobileMenu";
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
@@ -368,134 +369,7 @@ const Navbar = () => {
           )}
 
           {/* Mobile Menu */}
-          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="lg:hidden h-9 w-9">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-full sm:w-80 overflow-y-auto p-0">
-              <div className="flex flex-col h-full">
-                {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b">
-                  <Link 
-                    to="/" 
-                    className="font-bold text-xl"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Consparium
-                  </Link>
-                  <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" onClick={toggleTheme}>
-                      <SunIcon className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                      <MoonIcon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <X className="h-5 w-5" />
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 overflow-y-auto py-4">
-                  {user && (
-                    <div className="px-4 mb-4">
-                      <Link
-                        to="/dashboard"
-                        className="flex items-center gap-3 p-3 bg-primary/5 rounded-lg border border-primary/10"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <LayoutDashboard className="h-5 w-5 text-primary" />
-                        <span className="font-medium">Dashboard</span>
-                      </Link>
-                    </div>
-                  )}
-
-                  {/* Navigation Sections */}
-                  {mobileNavSections.map((section, index) => (
-                    <div key={section.title} className={cn(
-                      "px-4 pb-4",
-                      index < mobileNavSections.length - 1 && "border-b mb-4"
-                    )}>
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                        {section.title}
-                      </p>
-                      <div className="space-y-1">
-                        {section.links.map((link) => (
-                          <Link
-                            key={link.href}
-                            to={link.href}
-                            className="flex items-center gap-3 py-2.5 px-3 hover:bg-accent rounded-lg transition-colors"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                          >
-                            <link.icon className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm">{link.title}</span>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-
-                  {/* Create Actions */}
-                  {user && (
-                    <div className="px-4 pb-4 border-b mb-4">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                        Create
-                      </p>
-                      <div className="space-y-1">
-                        {createActions.map((action) => (
-                          <Link
-                            key={action.href}
-                            to={action.href}
-                            className="flex items-center gap-3 py-2.5 px-3 hover:bg-accent rounded-lg transition-colors"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                          >
-                            <action.icon className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm">{action.title}</span>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Footer Auth */}
-                <div className="p-4 border-t mt-auto">
-                  {user ? (
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => {
-                        handleSignOut();
-                        setIsMobileMenuOpen(false);
-                      }}
-                    >
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Sign out
-                    </Button>
-                  ) : (
-                    <div className="flex flex-col gap-2">
-                      <Button variant="outline" asChild className="w-full">
-                        <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
-                          <LogIn className="h-4 w-4 mr-2" />
-                          Log In
-                        </Link>
-                      </Button>
-                      <Button asChild className="w-full">
-                        <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
-                          Sign Up
-                        </Link>
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+          <MobileMenu />
         </div>
       </div>
     </nav>
