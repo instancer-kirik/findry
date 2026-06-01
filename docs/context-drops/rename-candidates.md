@@ -1,9 +1,12 @@
 # Rename Candidates
 
-Brainstormed names for the project (now **Muster**, previously "Findry"):
+Brainstormed names for the project (now **Sparkyardy**, previously "Consparium", "Muster", "Findry"):
 
-## Community / Gathering ⭐
-- **Muster** — to gather, rally; has grit (top contender)
+## Current ⭐
+- **Sparkyardy** — spark + yard + sparky energy; current name
+
+## Community / Gathering
+- **Muster** — to gather, rally; has grit
 - **Kith** — friends & kin, intimate community
 - **Rove** — wandering gatherings, discovery
 - **Throng** — crowd energy
@@ -24,9 +27,15 @@ Brainstormed names for the project (now **Muster**, previously "Findry"):
 - **Yardy**
 - **Yardec**
 
+## Spar / Spark family
+- **Spar** — fun, sparks the best results
+- **Sparkplug** — most descriptive of creator energy
+- **Whetstone** — community as the sharpening stone
+- **Flint** — strikes the spark; short, hard, memorable
+
 ## Unsorted / Vibes (TBD)
 - **opatopa** — meaning unclear, save for later
 - **bowwow** — meaning unclear, save for later
 
 ---
-*Updated 2026-05-07*
+*Updated 2026-06-01*
