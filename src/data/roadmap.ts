@@ -1,8 +1,8 @@
 export const roadmapContent = `
-# Consparium Project Roadmap
+# Sparkyardy Project Roadmap
 
 ## Project Overview
-Consparium is a holistic event discovery and organization platform that bridges the gap between consumers, artists, and brands. The platform focuses on event discovery, social organization, and content management, with a special emphasis on the arts and entertainment industry.
+Sparkyardy is a holistic event discovery and organization platform that bridges the gap between consumers, artists, and brands. The platform focuses on event discovery, social organization, and content management, with a special emphasis on the arts and entertainment industry.
 
 ## Current Status
 - Basic project structure is set up ✅
