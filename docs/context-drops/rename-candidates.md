@@ -1,9 +1,9 @@
 # Rename Candidates
 
-Brainstormed names for the project (now **Sparkyardy**, previously "Consparium", "Muster", "Findry"):
+Brainstormed names for the project (now **Garflock**, previously "Consparium", "Muster", "Findry"):
 
 ## Current ⭐
-- **Sparkyardy** — spark + yard + sparky energy; current name
+- **Garflock** — spark + yard + sparky energy; current name
 
 ## Community / Gathering
 - **Muster** — to gather, rally; has grit
