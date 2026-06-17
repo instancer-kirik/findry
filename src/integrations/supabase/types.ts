@@ -65,6 +65,51 @@ export type Database = {
         }
         Relationships: []
       }
+      bots: {
+        Row: {
+          avatar_url: string | null
+          config: Json
+          created_at: string
+          description: string | null
+          id: string
+          is_public: boolean
+          kind: Database["public"]["Enums"]["bot_kind"]
+          model: string
+          name: string
+          owner_id: string
+          system_prompt: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          config?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          kind?: Database["public"]["Enums"]["bot_kind"]
+          model?: string
+          name: string
+          owner_id: string
+          system_prompt?: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          config?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          kind?: Database["public"]["Enums"]["bot_kind"]
+          model?: string
+          name?: string
+          owner_id?: string
+          system_prompt?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       brands: {
         Row: {
           created_at: string
@@ -4701,6 +4746,189 @@ export type Database = {
           },
         ]
       }
+      panel_attendees: {
+        Row: {
+          checked_in_at: string | null
+          created_at: string
+          panel_id: string
+          status: Database["public"]["Enums"]["panel_rsvp_status"]
+          user_id: string
+        }
+        Insert: {
+          checked_in_at?: string | null
+          created_at?: string
+          panel_id: string
+          status?: Database["public"]["Enums"]["panel_rsvp_status"]
+          user_id: string
+        }
+        Update: {
+          checked_in_at?: string | null
+          created_at?: string
+          panel_id?: string
+          status?: Database["public"]["Enums"]["panel_rsvp_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "panel_attendees_panel_id_fkey"
+            columns: ["panel_id"]
+            isOneToOne: false
+            referencedRelation: "panels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      panel_questions: {
+        Row: {
+          answered: boolean
+          asked_by: string | null
+          content: string
+          created_at: string
+          id: string
+          panel_id: string
+          promoted: boolean
+          upvotes: number
+        }
+        Insert: {
+          answered?: boolean
+          asked_by?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          panel_id: string
+          promoted?: boolean
+          upvotes?: number
+        }
+        Update: {
+          answered?: boolean
+          asked_by?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          panel_id?: string
+          promoted?: boolean
+          upvotes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "panel_questions_panel_id_fkey"
+            columns: ["panel_id"]
+            isOneToOne: false
+            referencedRelation: "panels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      panel_speakers: {
+        Row: {
+          bio: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          panel_id: string
+          position: number
+          role: Database["public"]["Enums"]["panel_speaker_role"]
+          user_id: string | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          panel_id: string
+          position?: number
+          role?: Database["public"]["Enums"]["panel_speaker_role"]
+          user_id?: string | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          panel_id?: string
+          position?: number
+          role?: Database["public"]["Enums"]["panel_speaker_role"]
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "panel_speakers_panel_id_fkey"
+            columns: ["panel_id"]
+            isOneToOne: false
+            referencedRelation: "panels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      panels: {
+        Row: {
+          backstage_thread_id: string | null
+          blurb: string | null
+          capacity: number | null
+          created_at: string
+          created_by: string
+          duration_min: number
+          event_id: string | null
+          id: string
+          livestream_url: string | null
+          recording_url: string | null
+          room: string | null
+          starts_at: string
+          status: Database["public"]["Enums"]["panel_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          backstage_thread_id?: string | null
+          blurb?: string | null
+          capacity?: number | null
+          created_at?: string
+          created_by: string
+          duration_min?: number
+          event_id?: string | null
+          id?: string
+          livestream_url?: string | null
+          recording_url?: string | null
+          room?: string | null
+          starts_at: string
+          status?: Database["public"]["Enums"]["panel_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          backstage_thread_id?: string | null
+          blurb?: string | null
+          capacity?: number | null
+          created_at?: string
+          created_by?: string
+          duration_min?: number
+          event_id?: string | null
+          id?: string
+          livestream_url?: string | null
+          recording_url?: string | null
+          room?: string | null
+          starts_at?: string
+          status?: Database["public"]["Enums"]["panel_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "panels_backstage_thread_id_fkey"
+            columns: ["backstage_thread_id"]
+            isOneToOne: false
+            referencedRelation: "threads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "panels_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       player_profiles: {
         Row: {
           avatar_url: string | null
@@ -7786,6 +8014,151 @@ export type Database = {
           },
         ]
       }
+      thread_bots: {
+        Row: {
+          added_at: string
+          added_by: string
+          bot_id: string
+          enabled: boolean
+          thread_id: string
+        }
+        Insert: {
+          added_at?: string
+          added_by: string
+          bot_id: string
+          enabled?: boolean
+          thread_id: string
+        }
+        Update: {
+          added_at?: string
+          added_by?: string
+          bot_id?: string
+          enabled?: boolean
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thread_bots_bot_id_fkey"
+            columns: ["bot_id"]
+            isOneToOne: false
+            referencedRelation: "bots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thread_bots_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      thread_members: {
+        Row: {
+          joined_at: string
+          role: Database["public"]["Enums"]["thread_member_role"]
+          thread_id: string
+          user_id: string
+        }
+        Insert: {
+          joined_at?: string
+          role?: Database["public"]["Enums"]["thread_member_role"]
+          thread_id: string
+          user_id: string
+        }
+        Update: {
+          joined_at?: string
+          role?: Database["public"]["Enums"]["thread_member_role"]
+          thread_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thread_members_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      thread_messages: {
+        Row: {
+          attachments: Json
+          content: string
+          created_at: string
+          id: string
+          metadata: Json
+          sender_bot_id: string | null
+          sender_kind: Database["public"]["Enums"]["message_sender_kind"]
+          sender_user_id: string | null
+          thread_id: string
+        }
+        Insert: {
+          attachments?: Json
+          content: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          sender_bot_id?: string | null
+          sender_kind?: Database["public"]["Enums"]["message_sender_kind"]
+          sender_user_id?: string | null
+          thread_id: string
+        }
+        Update: {
+          attachments?: Json
+          content?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          sender_bot_id?: string | null
+          sender_kind?: Database["public"]["Enums"]["message_sender_kind"]
+          sender_user_id?: string | null
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thread_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      threads: {
+        Row: {
+          context_id: string | null
+          context_type: string | null
+          created_at: string
+          created_by: string
+          id: string
+          kind: Database["public"]["Enums"]["thread_kind"]
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          context_id?: string | null
+          context_type?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          kind?: Database["public"]["Enums"]["thread_kind"]
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          context_id?: string | null
+          context_type?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["thread_kind"]
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       toon_projects: {
         Row: {
           created_at: string | null
@@ -9951,6 +10324,18 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_panel_organizer: {
+        Args: { _panel_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_thread_member: {
+        Args: { _thread_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_thread_owner: {
+        Args: { _thread_id: string; _user_id: string }
+        Returns: boolean
+      }
       record_template_analytics: {
         Args: {
           p_context_data?: Json
@@ -10082,6 +10467,7 @@ export type Database = {
       }
     }
     Enums: {
+      bot_kind: "assistant" | "scheduled" | "moderator"
       content_type:
         | "project"
         | "event"
@@ -10099,6 +10485,10 @@ export type Database = {
         | "catalog_entry"
       field_visibility: "public" | "matches" | "express"
       game_jam_status: "upcoming" | "active" | "completed"
+      message_sender_kind: "user" | "bot" | "system"
+      panel_rsvp_status: "interested" | "going" | "checked_in" | "cancelled"
+      panel_speaker_role: "host" | "speaker" | "moderator"
+      panel_status: "draft" | "scheduled" | "live" | "ended" | "cancelled"
       privacy_level: "public" | "friends_only" | "private" | "invite_only"
       project_aspect_type:
         | "software"
@@ -10124,6 +10514,13 @@ export type Database = {
         | "documentation"
         | "research"
         | "other"
+      thread_kind:
+        | "direct"
+        | "group"
+        | "panel_backstage"
+        | "panel_qa"
+        | "community"
+      thread_member_role: "owner" | "member"
       user_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
@@ -10252,6 +10649,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      bot_kind: ["assistant", "scheduled", "moderator"],
       content_type: [
         "project",
         "event",
@@ -10270,6 +10668,10 @@ export const Constants = {
       ],
       field_visibility: ["public", "matches", "express"],
       game_jam_status: ["upcoming", "active", "completed"],
+      message_sender_kind: ["user", "bot", "system"],
+      panel_rsvp_status: ["interested", "going", "checked_in", "cancelled"],
+      panel_speaker_role: ["host", "speaker", "moderator"],
+      panel_status: ["draft", "scheduled", "live", "ended", "cancelled"],
       privacy_level: ["public", "friends_only", "private", "invite_only"],
       project_aspect_type: [
         "software",
@@ -10297,6 +10699,14 @@ export const Constants = {
         "research",
         "other",
       ],
+      thread_kind: [
+        "direct",
+        "group",
+        "panel_backstage",
+        "panel_qa",
+        "community",
+      ],
+      thread_member_role: ["owner", "member"],
       user_role: ["admin", "moderator", "user"],
     },
   },

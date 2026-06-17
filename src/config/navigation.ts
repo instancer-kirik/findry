@@ -26,6 +26,8 @@ import {
   CheckSquare,
   Warehouse,
   Music,
+  Mic,
+  Bot,
   type LucideIcon,
 } from "lucide-react";
 
@@ -106,13 +108,15 @@ export const navigation: NavCategory[] = [
         links: [
           { href: "/communities", title: "Communities", description: "Join groups & circles", icon: Users2 },
           { href: "/collaboration", title: "Collaboration", description: "Manage partnerships", icon: Handshake },
-          { href: "/chats", title: "Messages", description: "Chat with collaborators", icon: MessageSquare },
+          { href: "/threads", title: "Group Threads", description: "Multi-artist chats with bots", icon: MessageSquare },
+          { href: "/bots", title: "Bots", description: "AI helpers for threads", icon: Bot },
         ],
       },
       {
         title: "Events",
         links: [
           { href: "/events/upcoming", title: "Upcoming Events", description: "Browse shows & gatherings", icon: Calendar },
+          { href: "/panels", title: "Convention Panels", description: "Live, timed multi-speaker sessions", icon: Mic },
           { href: "/events/interested", title: "My Events", description: "Events you're tracking", icon: Heart },
           { href: "/projects", title: "Projects", description: "Community projects", icon: FolderKanban },
         ],
@@ -195,10 +199,12 @@ export const mobileNavSections = [
     title: "Abet",
     links: [
       { href: "/communities", title: "Communities", icon: Users2 },
+      { href: "/threads", title: "Threads", icon: MessageSquare },
+      { href: "/panels", title: "Panels", icon: Mic },
+      { href: "/bots", title: "Bots", icon: Bot },
       { href: "/events/upcoming", title: "Events", icon: Calendar },
       { href: "/projects", title: "Projects", icon: FolderKanban },
       { href: "/collaboration", title: "Collaboration", icon: Handshake },
-      { href: "/chats", title: "Messages", icon: MessageSquare },
     ],
   },
   {
