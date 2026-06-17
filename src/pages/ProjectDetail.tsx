@@ -146,7 +146,7 @@ const ProjectDetail: React.FC = () => {
     const description =
       project?.landing_page?.hero_subtitle ||
       project?.description ||
-      "Check out this project on Sparkyardy!";
+      "Check out this project on Garflock!";
 
     if (platform) {
       let url = "";
@@ -314,9 +314,9 @@ const ProjectDetail: React.FC = () => {
 
       // Update document title and meta tags for SEO
       const title = project.name || "Project";
-      const description = project.description || "An amazing project on Sparkyardy";
+      const description = project.description || "An amazing project on Garflock";
 
-      document.title = `${title} - Sparkyardy`;
+      document.title = `${title} - Garflock`;
 
       // Update meta description
       let metaDescription = document.querySelector('meta[name="description"]');
@@ -457,7 +457,7 @@ const ProjectDetail: React.FC = () => {
   // Cleanup meta tags on unmount
   useEffect(() => {
     return () => {
-      document.title = "Sparkyardy";
+      document.title = "Garflock";
     };
   }, []);
 

@@ -81,7 +81,7 @@ export const useDemoProject = (projectId: string) => {
         
         const demoProject: Project = {
           id: projectId,
-          name: 'Sparkyardy Platform Core',
+          name: 'Garflock Platform Core',
           description: 'The main platform for creative ecosystem connections',
           status: 'development',
           version: '0.5.0',

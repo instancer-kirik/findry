@@ -16,7 +16,7 @@ export const InstagramTest: React.FC<InstagramTestProps> = ({ className }) => {
   const { instagramToken, instagramUser, publishToInstagram, isConnected } = useInstagramAuth();
   const [isPublishing, setIsPublishing] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
-  const [caption, setCaption] = useState('Testing Instagram integration with Sparkyardy! 🎉 #SparkyardyApp #EventPlatform');
+  const [caption, setCaption] = useState('Testing Instagram integration with Garflock! 🎉 #GarflockApp #EventPlatform');
 
   const handleTestPublish = async () => {
     if (!isConnected) {
@@ -40,7 +40,7 @@ export const InstagramTest: React.FC<InstagramTestProps> = ({ className }) => {
 
       // Clear form
       setImageUrl('');
-      setCaption('Testing Instagram integration with Sparkyardy! 🎉 #SparkyardyApp #EventPlatform');
+      setCaption('Testing Instagram integration with Garflock! 🎉 #GarflockApp #EventPlatform');
 
     } catch (error) {
       console.error('Publishing error:', error);

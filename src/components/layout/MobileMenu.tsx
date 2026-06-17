@@ -155,7 +155,7 @@ const MobileMenu: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between px-4 h-14 border-b shrink-0">
           <Link to="/" onClick={close} className="font-bold text-lg tracking-tight">
-            Sparkyardy
+            Garflock
           </Link>
           <div className="flex items-center gap-1">
             <Button

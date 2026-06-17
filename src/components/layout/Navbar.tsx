@@ -178,19 +178,19 @@ const Navbar = () => {
           <HoverCard openDelay={200} closeDelay={300}>
             <HoverCardTrigger asChild>
               <Link to="/" className="font-bold text-xl tracking-tight cursor-pointer">
-                Sparkyardy
+                Garflock
               </Link>
             </HoverCardTrigger>
             <HoverCardContent className="w-72 p-3" align="start">
               <p className="text-xs text-muted-foreground mb-2 font-medium">Rename candidates</p>
               <div className="flex flex-wrap gap-1.5">
-                {["Sparkyardy","Findry","ARTEX","Kith","Rove","Throng","Stoa","Grange","Forge","Beacon",
+                {["Garflock","Findry","ARTEX","Kith","Rove","Throng","Stoa","Grange","Forge","Beacon",
                   "Articutor","Articut","Articute","Yarder","Yarded","Yardy","Yardec",
                   "Bosk Mires","Bosk Merchant Co.","Bock & Company",
                   "FORN Transport","FORN Logistics","FORN Supply","FORN Systems","FORN Motorworks",
                   "Bankvoczick","Troyal","Bachrake","GUGGER"
                 ].map((name) => (
-                  <Badge key={name} variant={name === "Sparkyardy" ? "default" : "secondary"} className="text-xs cursor-default">
+                  <Badge key={name} variant={name === "Garflock" ? "default" : "secondary"} className="text-xs cursor-default">
                     {name}
                   </Badge>
                 ))}

@@ -25,10 +25,10 @@ const FeedbackQuestionnaire: React.FC = () => {
             <Star className="h-5 w-5 text-yellow-500" />
           </div>
           <h3 className="text-2xl md:text-3xl font-bold mb-2">
-            Help Shape Sparkyardy's Future
+            Help Shape Garflock's Future
           </h3>
           <p className="text-muted-foreground text-lg">
-            Your feedback is invaluable in making Sparkyardy the best platform for creators, artists, and communities.
+            Your feedback is invaluable in making Garflock the best platform for creators, artists, and communities.
           </p>
         </div>
 
