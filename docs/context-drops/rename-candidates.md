@@ -1,9 +1,10 @@
 # Rename Candidates
 
-Brainstormed names for the project (now **Garflock**, previously "Consparium", "Muster", "Findry"):
+Brainstormed names for the project (now **Garflock / GRF**, previously "Consparium", "Muster", "Findry"):
 
 ## Current ⭐
 - **Garflock** — spark + yard + sparky energy; current name
+- **GRF** — "gee our flock" — shorthand / acronym form
 
 ## Community / Gathering
 - **Muster** — to gather, rally; has grit
