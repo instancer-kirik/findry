@@ -78,6 +78,12 @@ import Feedback from "./pages/Feedback";
 import ShareViews from "./pages/ShareViews";
 import ShareViewPublic from "./pages/ShareViewPublic";
 import Lyrics from "./pages/Lyrics";
+import Panels from "./pages/Panels";
+import PanelDetail from "./pages/PanelDetail";
+import PanelLive from "./pages/PanelLive";
+import Threads from "./pages/Threads";
+import ThreadDetail from "./pages/ThreadDetail";
+import BotsPage from "./pages/Bots";
 const queryClient = new QueryClient();
 
 const App: React.FC = () => {
@@ -208,6 +214,12 @@ const App: React.FC = () => {
         <Route path="/share-views" element={<ShareViews />} />
         <Route path="/share/:shareKey" element={<ShareViewPublic />} />
         <Route path="/lyrics" element={<Lyrics />} />
+        <Route path="/panels" element={<Panels />} />
+        <Route path="/panels/:panelId" element={<PanelDetail />} />
+        <Route path="/panels/:panelId/live" element={<PanelLive />} />
+        <Route path="/threads" element={<Threads />} />
+        <Route path="/threads/:threadId" element={<ThreadDetail />} />
+        <Route path="/bots" element={<BotsPage />} />
         <Route path="*" element={<Navigate to="/not-found" replace />} />
       </Routes>
     </QueryClientProvider>
