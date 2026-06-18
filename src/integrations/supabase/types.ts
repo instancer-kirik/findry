@@ -1240,6 +1240,144 @@ export type Database = {
         }
         Relationships: []
       }
+      floorplan_assignments: {
+        Row: {
+          assigned_user_id: string | null
+          created_at: string
+          id: string
+          item_id: string
+          note: string | null
+          panel_id: string | null
+          project_id: string | null
+          status: Database["public"]["Enums"]["floorplan_assignment_status"]
+          ugc_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_user_id?: string | null
+          created_at?: string
+          id?: string
+          item_id: string
+          note?: string | null
+          panel_id?: string | null
+          project_id?: string | null
+          status?: Database["public"]["Enums"]["floorplan_assignment_status"]
+          ugc_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_user_id?: string | null
+          created_at?: string
+          id?: string
+          item_id?: string
+          note?: string | null
+          panel_id?: string | null
+          project_id?: string | null
+          status?: Database["public"]["Enums"]["floorplan_assignment_status"]
+          ugc_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "floorplan_assignments_assigned_user_id_fkey"
+            columns: ["assigned_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "floorplan_assignments_assigned_user_id_fkey"
+            columns: ["assigned_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "floorplan_assignments_assigned_user_id_fkey"
+            columns: ["assigned_user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "floorplan_assignments_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "floorplan_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "floorplan_assignments_panel_id_fkey"
+            columns: ["panel_id"]
+            isOneToOne: false
+            referencedRelation: "panels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "floorplan_assignments_ugc_id_fkey"
+            columns: ["ugc_id"]
+            isOneToOne: false
+            referencedRelation: "ugc_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      floorplan_items: {
+        Row: {
+          created_at: string
+          floorplan_id: string
+          h: number
+          id: string
+          kind: Database["public"]["Enums"]["floorplan_item_kind"]
+          label: string | null
+          meta: Json
+          rotation: number
+          updated_at: string
+          w: number
+          x: number
+          y: number
+          z: number
+        }
+        Insert: {
+          created_at?: string
+          floorplan_id: string
+          h?: number
+          id?: string
+          kind: Database["public"]["Enums"]["floorplan_item_kind"]
+          label?: string | null
+          meta?: Json
+          rotation?: number
+          updated_at?: string
+          w?: number
+          x?: number
+          y?: number
+          z?: number
+        }
+        Update: {
+          created_at?: string
+          floorplan_id?: string
+          h?: number
+          id?: string
+          kind?: Database["public"]["Enums"]["floorplan_item_kind"]
+          label?: string | null
+          meta?: Json
+          rotation?: number
+          updated_at?: string
+          w?: number
+          x?: number
+          y?: number
+          z?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "floorplan_items_floorplan_id_fkey"
+            columns: ["floorplan_id"]
+            isOneToOne: false
+            referencedRelation: "venue_floorplans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fumble_photos: {
         Row: {
           created_at: string
@@ -8892,6 +9030,84 @@ export type Database = {
         }
         Relationships: []
       }
+      venue_floorplans: {
+        Row: {
+          canvas: Json
+          claim_mode: Database["public"]["Enums"]["floorplan_claim_mode"]
+          created_at: string
+          created_by: string
+          description: string | null
+          event_id: string | null
+          id: string
+          is_public: boolean
+          title: string
+          updated_at: string
+          venue_id: string | null
+        }
+        Insert: {
+          canvas?: Json
+          claim_mode?: Database["public"]["Enums"]["floorplan_claim_mode"]
+          created_at?: string
+          created_by: string
+          description?: string | null
+          event_id?: string | null
+          id?: string
+          is_public?: boolean
+          title: string
+          updated_at?: string
+          venue_id?: string | null
+        }
+        Update: {
+          canvas?: Json
+          claim_mode?: Database["public"]["Enums"]["floorplan_claim_mode"]
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          event_id?: string | null
+          id?: string
+          is_public?: boolean
+          title?: string
+          updated_at?: string
+          venue_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_floorplans_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venue_floorplans_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venue_floorplans_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venue_floorplans_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venue_floorplans_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       venues: {
         Row: {
           amenities: string[] | null
@@ -10484,6 +10700,26 @@ export type Database = {
         | "video_project"
         | "catalog_entry"
       field_visibility: "public" | "matches" | "express"
+      floorplan_assignment_status:
+        | "assigned"
+        | "pending_claim"
+        | "confirmed"
+        | "declined"
+      floorplan_claim_mode: "organizer" | "open" | "hybrid"
+      floorplan_item_kind:
+        | "booth"
+        | "table"
+        | "wall"
+        | "pedestal"
+        | "stage"
+        | "seating"
+        | "tent"
+        | "truck"
+        | "path"
+        | "entrance"
+        | "power"
+        | "signage"
+        | "misc"
       game_jam_status: "upcoming" | "active" | "completed"
       message_sender_kind: "user" | "bot" | "system"
       panel_rsvp_status: "interested" | "going" | "checked_in" | "cancelled"
@@ -10667,6 +10903,28 @@ export const Constants = {
         "catalog_entry",
       ],
       field_visibility: ["public", "matches", "express"],
+      floorplan_assignment_status: [
+        "assigned",
+        "pending_claim",
+        "confirmed",
+        "declined",
+      ],
+      floorplan_claim_mode: ["organizer", "open", "hybrid"],
+      floorplan_item_kind: [
+        "booth",
+        "table",
+        "wall",
+        "pedestal",
+        "stage",
+        "seating",
+        "tent",
+        "truck",
+        "path",
+        "entrance",
+        "power",
+        "signage",
+        "misc",
+      ],
       game_jam_status: ["upcoming", "active", "completed"],
       message_sender_kind: ["user", "bot", "system"],
       panel_rsvp_status: ["interested", "going", "checked_in", "cancelled"],
