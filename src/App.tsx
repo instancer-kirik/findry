@@ -84,6 +84,9 @@ import PanelLive from "./pages/PanelLive";
 import Threads from "./pages/Threads";
 import ThreadDetail from "./pages/ThreadDetail";
 import BotsPage from "./pages/Bots";
+import Floorplans from "./pages/Floorplans";
+import FloorplanEditorPage from "./pages/FloorplanEditorPage";
+import FloorplanWalk from "./pages/FloorplanWalk";
 const queryClient = new QueryClient();
 
 const App: React.FC = () => {
@@ -220,6 +223,9 @@ const App: React.FC = () => {
         <Route path="/threads" element={<Threads />} />
         <Route path="/threads/:threadId" element={<ThreadDetail />} />
         <Route path="/bots" element={<BotsPage />} />
+        <Route path="/floorplans" element={<Floorplans />} />
+        <Route path="/floorplans/:floorplanId" element={<FloorplanEditorPage />} />
+        <Route path="/floorplans/:floorplanId/walk" element={<FloorplanWalk />} />
         <Route path="*" element={<Navigate to="/not-found" replace />} />
       </Routes>
     </QueryClientProvider>
