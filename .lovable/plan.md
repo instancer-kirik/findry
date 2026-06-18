@@ -1,61 +1,84 @@
-## Scope
 
-Three connected primitives for Garflock:
+# Venue Floorplans — vendor booths, panel rooms, gallery walls, outdoor festivals
 
-1. **Group Threads** — multi-artist persistent chats (project / gig / panel scoped)
-2. **Convention Panels** — IRL, timed, scheduled multi-speaker sessions at a venue/event (think "10:30am — Custom EV Conversions panel, 4 speakers, Hall B, 45min")
-3. **Bots** — chat assistants, scheduled agents, and moderators that live inside threads and panels
+A spatial planner attached to events. Organizers design the layout in a 2D top-down editor, viewers walk it in 3D. Spots can be assigned by the organizer or self-claimed by vendors/artists/speakers.
 
----
+## What gets built
 
-## 1. Group Threads
+### 1. Editor: top-down 2D canvas
+Extends the proven `LayoutConfigurator` pattern (palette → canvas → properties panel).
 
-New table `thread` + `thread_member` + `thread_message`.
-- `thread.kind`: `direct | group | panel_backstage | community`
-- `thread.context_ref`: optional FK to project / panel / community
-- Realtime via Supabase `postgres_changes` on `thread_message`
-- UI: `/threads`, `/threads/:id` with member list, typing, file/image attachments, @mentions, message reactions
-- Reuses existing `MarketplaceChat` / `ProjectChat` patterns but consolidated
+- **Canvas presets**: Indoor hall (rectangle), L-shape, multi-room gallery, outdoor field
+- **Tools**: pan, zoom, grid snap, ruler (feet/meters), aisle-width guides
+- **Item palette** (categorized):
+  - *Expo*: 10×10 booth, 10×20 booth, table, power drop, signage
+  - *Panel/Stage*: stage, seating block, AV booth, entrance
+  - *Gallery*: wall segment, pedestal, bench, lighting track
+  - *Outdoor*: tent, food truck, port-a-loo, generator, fence, path
+- **Per-item**: position, rotation, size, label, capacity, optional asset (artwork/vendor/panel)
 
-## 2. Convention Panels
+### 2. Walkable 3D view
+`@react-three/fiber@^8.18` + `@react-three/drei@^9.122.0` (React 18 compatible).
+- Extrudes 2D plan into 3D: walls 3m tall, booths as 2.5m boxes with signage decal, pedestals with floating artwork plane, tents as cones, stages as raised platforms
+- `PointerLockControls` for WASD + mouse-look fly-through, plus orbit fallback
+- Click a booth/wall/pedestal in 3D → opens its assignment drawer
+- Lazy-loaded route to keep bundle slim
 
-New tables `panel`, `panel_speaker`, `panel_attendee`, plus link to `events` (existing).
-Fields: `title, blurb, room, starts_at, duration_min, capacity, recording_url, livestream_url, status`.
-- Speakers: ordered list with role (`host | speaker | moderator`)
-- Each panel auto-spawns a backstage `thread` (kind = `panel_backstage`) for the speakers + a public Q&A thread for attendees
-- Attendee RSVP, "I'm here" check-in via QR at the room
-- Timed runtime view (`/panels/:id/live`): countdown, current speaker, timer, audience questions feed with upvote, moderator can promote a question
-- Public schedule grid at `/conventions/:eventId` (rooms × time)
+### 3. Assignment model (both organizer + self-claim)
+Per-floorplan setting: `claim_mode = organizer | open | hybrid`.
+- Organizer can pre-assign any spot from a roster
+- Open spots show a "Claim this spot" CTA to logged-in users; vendor/artist application includes a note, organizer approves
+- Each spot links to one of: `profiles`, `projects` (vendor brand), `panels`, `ugc_content` (artwork)
 
-## 3. Bots
+### 4. Where it lives
+- New page `/events/:id/floorplan` (editor for organizer, view for everyone)
+- New tab on event detail "Floorplan"
+- Standalone `/floorplans` index of public layouts
+- Walkable view at `/events/:id/floorplan/walk`
 
-One `bot` table + `thread_bot` membership.
-- `bot.kind`: `assistant | scheduled | moderator`
-- `bot.config` JSONB (prompt, schedule cron, moderation rules)
-- Edge function `bot-dispatch` invoked by:
-  - new `thread_message` (assistant + moderator paths)
-  - `pg_cron` (scheduled agents)
-- Uses Lovable AI Gateway (`google/gemini-3-flash-preview`) via AI SDK
-- Bot messages stored as normal `thread_message` rows with `sender_kind = 'bot'`
-- Per-thread toggle: which bots are active, with creator-only config
+## Data model
 
----
+```text
+venue_floorplans
+  event_id (nullable — also reusable for venues/garages)
+  venue_id (nullable)
+  title, description
+  canvas (jsonb)   -- {width, height, units, rooms:[{shape, points}], background}
+  claim_mode       -- organizer | open | hybrid
+  created_by, is_public
 
-## Build Order
+floorplan_items
+  floorplan_id
+  kind             -- booth | table | wall | pedestal | stage | tent | truck | path | misc
+  label
+  x, y, w, h, rotation, z   -- z used for 3D height override
+  meta (jsonb)              -- color, icon, capacity, etc.
 
-1. Migration: `thread`, `thread_member`, `thread_message`, `panel`, `panel_speaker`, `panel_attendee`, `bot`, `thread_bot` (+ GRANTs + RLS + realtime publication + triggers)
-2. Hooks: `use-threads`, `use-panel`, `use-bots`
-3. Pages: `/threads`, `/threads/:id`, `/panels`, `/panels/:id`, `/panels/:id/live`, `/bots`
-4. Edge function: `bot-dispatch` with assistant / moderator / scheduled paths
-5. Nav: add "Panels" + "Threads" to main menu; surface bots inside thread settings
-6. Seed: 2 demo panels at a fake convention, 1 assistant bot, 1 moderator bot
+floorplan_assignments
+  item_id
+  status           -- assigned | pending_claim | confirmed | declined
+  assigned_user_id (nullable)
+  project_id (nullable)     -- vendor brand
+  panel_id (nullable)
+  ugc_id (nullable)         -- artwork on a wall/pedestal
+  note
+```
+RLS: organizer of the event (creator) writes; everyone reads public floorplans; claimants can insert pending_claim rows for their own user_id.
 
----
+## Technical notes
 
-## Open questions before I build
+- Reuse the drag/select/rotate logic from `vehicle-build/LayoutConfigurator.tsx` — split it into a generic `<SpatialCanvas>` so vehicles and floorplans share it
+- 3D scene is a pure function of `floorplan_items` — no separate 3D file format
+- Artwork textures pulled from `ugc_content.media_url`; booth signage rendered as a Three.js `<Text>` from drei
+- Realtime: subscribe to `floorplan_items` + `floorplan_assignments` so collaborative editing and live claim updates work
+- Bundle: lazy-load the 3D route; keep Three.js out of the main chunk
 
-- Should panels live **under existing `events`** as a sub-type, or as a fully separate `panel` table linked to a parent event? (I'm leaning: separate `panel` table with optional `event_id` — keeps existing event flows untouched.)
-- Should the **public Q&A** for a panel be its own thread, or just an "audience questions" list with upvotes (no replies)? Upvote-only is the convention norm.
-- Bots: open to **anyone with a Garflock account** building bots, or **creator/admin only** in v1? I'd default to creator-only in v1 to avoid spam.
+## Build order
 
-Reply with answers (or "your call on all three") and I'll ship it.
+1. Migration: 3 tables + grants + RLS + realtime publication
+2. Generic `<SpatialCanvas>` extracted from vehicle configurator
+3. `/events/:id/floorplan` editor page + `use-floorplan` hook
+4. Assignment drawer (organizer assign + self-claim flow)
+5. Install `@react-three/fiber@8.18` + `@react-three/drei@9.122.0`, build `<FloorplanScene3D>` and `/walk` route
+6. Floorplan tab on event detail + `/floorplans` index
+7. Seed a demo expo, a gallery, and an outdoor festival on existing demo events
