@@ -1,4 +1,5 @@
-# This project is being renamed please wait. alternative names are listed on url main icon mouseover
+# Now it is named garflock
+
 
 ## Project info
 
