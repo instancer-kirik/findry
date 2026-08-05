@@ -157,6 +157,59 @@ export type Database = {
           },
         ]
       }
+      commit_activity: {
+        Row: {
+          commit_author: string | null
+          commit_date: string
+          commit_hash: string
+          commit_message: string
+          commit_url: string
+          created_at: string
+          id: string
+          project_id: string | null
+          provider: string
+          repo_name: string
+          repo_owner: string
+          updated_at: string
+        }
+        Insert: {
+          commit_author?: string | null
+          commit_date: string
+          commit_hash: string
+          commit_message: string
+          commit_url: string
+          created_at?: string
+          id?: string
+          project_id?: string | null
+          provider: string
+          repo_name: string
+          repo_owner: string
+          updated_at?: string
+        }
+        Update: {
+          commit_author?: string | null
+          commit_date?: string
+          commit_hash?: string
+          commit_message?: string
+          commit_url?: string
+          created_at?: string
+          id?: string
+          project_id?: string | null
+          provider?: string
+          repo_name?: string
+          repo_owner?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commit_activity_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects_catalog"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       communities: {
         Row: {
           category: string | null
@@ -905,6 +958,7 @@ export type Database = {
           message_count: number | null
           metadata: Json
           name: string
+          owner_id: string | null
           participant_count: number | null
           participants: string[]
           raw_content: string
@@ -921,6 +975,7 @@ export type Database = {
           message_count?: number | null
           metadata?: Json
           name: string
+          owner_id?: string | null
           participant_count?: number | null
           participants?: string[]
           raw_content: string
@@ -937,6 +992,7 @@ export type Database = {
           message_count?: number | null
           metadata?: Json
           name?: string
+          owner_id?: string | null
           participant_count?: number | null
           participants?: string[]
           raw_content?: string
@@ -1857,6 +1913,7 @@ export type Database = {
           location: string | null
           metadata: Json | null
           name: string
+          owner_id: string | null
           quantity: number | null
           status: string | null
           tags: string[] | null
@@ -1877,6 +1934,7 @@ export type Database = {
           location?: string | null
           metadata?: Json | null
           name: string
+          owner_id?: string | null
           quantity?: number | null
           status?: string | null
           tags?: string[] | null
@@ -1897,6 +1955,7 @@ export type Database = {
           location?: string | null
           metadata?: Json | null
           name?: string
+          owner_id?: string | null
           quantity?: number | null
           status?: string | null
           tags?: string[] | null
@@ -3130,6 +3189,7 @@ export type Database = {
       loreum_plot_thread_works: {
         Row: {
           created_at: string | null
+          created_by: string | null
           id: string
           notes: string | null
           plot_thread_id: string
@@ -3140,6 +3200,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          created_by?: string | null
           id?: string
           notes?: string | null
           plot_thread_id: string
@@ -3150,6 +3211,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          created_by?: string | null
           id?: string
           notes?: string | null
           plot_thread_id?: string
@@ -3206,6 +3268,7 @@ export type Database = {
       loreum_plot_threads: {
         Row: {
           created_at: string | null
+          created_by: string | null
           description: string
           id: string
           obstacles: Json | null
@@ -3225,6 +3288,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          created_by?: string | null
           description: string
           id?: string
           obstacles?: Json | null
@@ -3244,6 +3308,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          created_by?: string | null
           description?: string
           id?: string
           obstacles?: Json | null
@@ -3780,6 +3845,7 @@ export type Database = {
         Row: {
           collection_id: string
           created_at: string | null
+          created_by: string | null
           id: string
           membership_role: string | null
           notes: string | null
@@ -3789,6 +3855,7 @@ export type Database = {
         Insert: {
           collection_id: string
           created_at?: string | null
+          created_by?: string | null
           id?: string
           membership_role?: string | null
           notes?: string | null
@@ -3798,6 +3865,7 @@ export type Database = {
         Update: {
           collection_id?: string
           created_at?: string | null
+          created_by?: string | null
           id?: string
           membership_role?: string | null
           notes?: string | null
@@ -3832,6 +3900,7 @@ export type Database = {
         Row: {
           collection_type: string | null
           created_at: string | null
+          created_by: string | null
           description: string | null
           id: string
           is_public: boolean | null
@@ -3843,6 +3912,7 @@ export type Database = {
         Insert: {
           collection_type?: string | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           id?: string
           is_public?: boolean | null
@@ -3854,6 +3924,7 @@ export type Database = {
         Update: {
           collection_type?: string | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           id?: string
           is_public?: boolean | null
@@ -4055,6 +4126,7 @@ export type Database = {
       loreum_template_relationships: {
         Row: {
           created_at: string | null
+          created_by: string | null
           description: string | null
           id: string
           is_bidirectional: boolean | null
@@ -4066,6 +4138,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           id?: string
           is_bidirectional?: boolean | null
@@ -4077,6 +4150,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           id?: string
           is_bidirectional?: boolean | null
@@ -4690,6 +4764,136 @@ export type Database = {
           },
         ]
       }
+      missed_connection_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["missed_connection_reaction_kind"]
+          missed_connection_id: string
+          note: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: Database["public"]["Enums"]["missed_connection_reaction_kind"]
+          missed_connection_id: string
+          note?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["missed_connection_reaction_kind"]
+          missed_connection_id?: string
+          note?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "missed_connection_reactions_missed_connection_id_fkey"
+            columns: ["missed_connection_id"]
+            isOneToOne: false
+            referencedRelation: "missed_connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "missed_connection_reactions_missed_connection_id_fkey"
+            columns: ["missed_connection_id"]
+            isOneToOne: false
+            referencedRelation: "missed_connections_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "missed_connection_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "missed_connection_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "missed_connection_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      missed_connections: {
+        Row: {
+          author_id: string
+          category: Database["public"]["Enums"]["missed_connection_category"]
+          city: string | null
+          created_at: string
+          description: string
+          encounter_time: string | null
+          id: string
+          is_anonymous: boolean
+          location_text: string
+          looking_for: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          category: Database["public"]["Enums"]["missed_connection_category"]
+          city?: string | null
+          created_at?: string
+          description: string
+          encounter_time?: string | null
+          id?: string
+          is_anonymous?: boolean
+          location_text: string
+          looking_for?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          category?: Database["public"]["Enums"]["missed_connection_category"]
+          city?: string | null
+          created_at?: string
+          description?: string
+          encounter_time?: string | null
+          id?: string
+          is_anonymous?: boolean
+          location_text?: string
+          looking_for?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "missed_connections_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "missed_connections_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "missed_connections_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       names: {
         Row: {
           aliases: string[] | null
@@ -4790,6 +4994,7 @@ export type Database = {
           inventory_item_id: string
           is_packed: boolean | null
           location_notes: string | null
+          owner_id: string | null
           packing_configuration_id: string
           priority: number | null
           quantity: number | null
@@ -4800,6 +5005,7 @@ export type Database = {
           inventory_item_id: string
           is_packed?: boolean | null
           location_notes?: string | null
+          owner_id?: string | null
           packing_configuration_id: string
           priority?: number | null
           quantity?: number | null
@@ -4810,6 +5016,7 @@ export type Database = {
           inventory_item_id?: string
           is_packed?: boolean | null
           location_notes?: string | null
+          owner_id?: string | null
           packing_configuration_id?: string
           priority?: number | null
           quantity?: number | null
@@ -4838,6 +5045,7 @@ export type Database = {
           id: string
           metadata: Json | null
           name: string
+          owner_id: string | null
           purpose: string | null
           status: string | null
           tags: string[] | null
@@ -4852,6 +5060,7 @@ export type Database = {
           id?: string
           metadata?: Json | null
           name: string
+          owner_id?: string | null
           purpose?: string | null
           status?: string | null
           tags?: string[] | null
@@ -4866,6 +5075,7 @@ export type Database = {
           id?: string
           metadata?: Json | null
           name?: string
+          owner_id?: string | null
           purpose?: string | null
           status?: string | null
           tags?: string[] | null
@@ -5063,6 +5273,135 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      people: {
+        Row: {
+          avatar_url: string | null
+          contact_channel: string | null
+          contact_value: string | null
+          created_at: string
+          display_name: string
+          handle: string | null
+          id: string
+          intents: string[]
+          last_touched_at: string | null
+          link_url: string | null
+          next_action: string | null
+          next_action_due: string | null
+          notes: string | null
+          owner_id: string
+          priority: string
+          profile_id: string | null
+          reveal_to_person: boolean
+          status: string
+          tags: string[]
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          contact_channel?: string | null
+          contact_value?: string | null
+          created_at?: string
+          display_name: string
+          handle?: string | null
+          id?: string
+          intents?: string[]
+          last_touched_at?: string | null
+          link_url?: string | null
+          next_action?: string | null
+          next_action_due?: string | null
+          notes?: string | null
+          owner_id?: string
+          priority?: string
+          profile_id?: string | null
+          reveal_to_person?: boolean
+          status?: string
+          tags?: string[]
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          contact_channel?: string | null
+          contact_value?: string | null
+          created_at?: string
+          display_name?: string
+          handle?: string | null
+          id?: string
+          intents?: string[]
+          last_touched_at?: string | null
+          link_url?: string | null
+          next_action?: string | null
+          next_action_due?: string | null
+          notes?: string | null
+          owner_id?: string
+          priority?: string
+          profile_id?: string | null
+          reveal_to_person?: boolean
+          status?: string
+          tags?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "people_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "people_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "people_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      people_interactions: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          note: string | null
+          occurred_at: string
+          owner_id: string
+          person_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: string
+          note?: string | null
+          occurred_at?: string
+          owner_id?: string
+          person_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          note?: string | null
+          occurred_at?: string
+          owner_id?: string
+          person_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "people_interactions_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
             referencedColumns: ["id"]
           },
         ]
@@ -5997,14 +6336,21 @@ export type Database = {
       profiles: {
         Row: {
           age: number | null
+          age_max: number | null
+          age_min: number | null
           avatar_url: string | null
           bio: string | null
           contact_methods: Json | null
           created_at: string
           full_name: string | null
+          gender: string[]
+          gender_description: string | null
           id: string
+          interested_in: string[]
           is_public: boolean | null
+          looking_for: string[]
           onboarding_complete: boolean | null
+          orientation: string | null
           profile_types: string[] | null
           resonance_data: Json | null
           role_attributes: Json | null
@@ -6013,14 +6359,21 @@ export type Database = {
         }
         Insert: {
           age?: number | null
+          age_max?: number | null
+          age_min?: number | null
           avatar_url?: string | null
           bio?: string | null
           contact_methods?: Json | null
           created_at?: string
           full_name?: string | null
+          gender?: string[]
+          gender_description?: string | null
           id: string
+          interested_in?: string[]
           is_public?: boolean | null
+          looking_for?: string[]
           onboarding_complete?: boolean | null
+          orientation?: string | null
           profile_types?: string[] | null
           resonance_data?: Json | null
           role_attributes?: Json | null
@@ -6029,14 +6382,21 @@ export type Database = {
         }
         Update: {
           age?: number | null
+          age_max?: number | null
+          age_min?: number | null
           avatar_url?: string | null
           bio?: string | null
           contact_methods?: Json | null
           created_at?: string
           full_name?: string | null
+          gender?: string[]
+          gender_description?: string | null
           id?: string
+          interested_in?: string[]
           is_public?: boolean | null
+          looking_for?: string[]
           onboarding_complete?: boolean | null
+          orientation?: string | null
           profile_types?: string[] | null
           resonance_data?: Json | null
           role_attributes?: Json | null
@@ -6737,7 +7097,9 @@ export type Database = {
           featured: boolean | null
           featured_order: number | null
           features: string[] | null
+          home_url: string | null
           id: string
+          image_url: string | null
           is_public: boolean
           name: string
           owner_id: string | null
@@ -6759,7 +7121,9 @@ export type Database = {
           featured?: boolean | null
           featured_order?: number | null
           features?: string[] | null
+          home_url?: string | null
           id?: string
+          image_url?: string | null
           is_public?: boolean
           name: string
           owner_id?: string | null
@@ -6781,7 +7145,9 @@ export type Database = {
           featured?: boolean | null
           featured_order?: number | null
           features?: string[] | null
+          home_url?: string | null
           id?: string
+          image_url?: string | null
           is_public?: boolean
           name?: string
           owner_id?: string | null
@@ -9931,6 +10297,57 @@ export type Database = {
         }
         Relationships: []
       }
+      missed_connections_public: {
+        Row: {
+          author_id: string | null
+          category:
+            | Database["public"]["Enums"]["missed_connection_category"]
+            | null
+          city: string | null
+          created_at: string | null
+          description: string | null
+          encounter_time: string | null
+          id: string | null
+          is_anonymous: boolean | null
+          location_text: string | null
+          looking_for: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          author_id?: never
+          category?:
+            | Database["public"]["Enums"]["missed_connection_category"]
+            | null
+          city?: string | null
+          created_at?: string | null
+          description?: string | null
+          encounter_time?: string | null
+          id?: string | null
+          is_anonymous?: boolean | null
+          location_text?: string | null
+          looking_for?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          author_id?: never
+          category?:
+            | Database["public"]["Enums"]["missed_connection_category"]
+            | null
+          city?: string | null
+          created_at?: string | null
+          description?: string | null
+          encounter_time?: string | null
+          id?: string | null
+          is_anonymous?: boolean | null
+          location_text?: string | null
+          looking_for?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles_safe: {
         Row: {
           age: number | null
@@ -10047,7 +10464,9 @@ export type Database = {
           emoji: string | null
           featured: boolean | null
           features: string[] | null
+          home_url: string | null
           id: string | null
+          image_url: string | null
           is_public: boolean | null
           name: string | null
           owner_id: string | null
@@ -10225,6 +10644,7 @@ export type Database = {
           message_count: number | null
           metadata: Json
           name: string
+          owner_id: string | null
           participant_count: number | null
           participants: string[]
           raw_content: string
@@ -10296,6 +10716,17 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      get_public_identity: {
+        Args: { _username: string }
+        Returns: {
+          age: number
+          avatar_url: string
+          full_name: string
+          id: string
+          is_public: boolean
+          username: string
+        }[]
       }
       get_rating_count: { Args: { snack_id: string }; Returns: number }
       get_reading_order: {
@@ -10722,6 +11153,14 @@ export type Database = {
         | "misc"
       game_jam_status: "upcoming" | "active" | "completed"
       message_sender_kind: "user" | "bot" | "system"
+      missed_connection_category:
+        | "romantic"
+        | "friendly"
+        | "platonic"
+        | "funny"
+        | "collab"
+        | "lost_found"
+      missed_connection_reaction_kind: "relate" | "thats_me"
       panel_rsvp_status: "interested" | "going" | "checked_in" | "cancelled"
       panel_speaker_role: "host" | "speaker" | "moderator"
       panel_status: "draft" | "scheduled" | "live" | "ended" | "cancelled"
@@ -10927,6 +11366,15 @@ export const Constants = {
       ],
       game_jam_status: ["upcoming", "active", "completed"],
       message_sender_kind: ["user", "bot", "system"],
+      missed_connection_category: [
+        "romantic",
+        "friendly",
+        "platonic",
+        "funny",
+        "collab",
+        "lost_found",
+      ],
+      missed_connection_reaction_kind: ["relate", "thats_me"],
       panel_rsvp_status: ["interested", "going", "checked_in", "cancelled"],
       panel_speaker_role: ["host", "speaker", "moderator"],
       panel_status: ["draft", "scheduled", "live", "ended", "cancelled"],
