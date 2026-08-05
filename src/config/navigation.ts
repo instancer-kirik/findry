@@ -29,6 +29,7 @@ import {
   Mic,
   Bot,
   LayoutGrid,
+  Swords,
   type LucideIcon,
 } from "lucide-react";
 
@@ -118,6 +119,7 @@ export const navigation: NavCategory[] = [
         links: [
           { href: "/events/upcoming", title: "Upcoming Events", description: "Browse shows & gatherings", icon: Calendar },
           { href: "/panels", title: "Convention Panels", description: "Live, timed multi-speaker sessions", icon: Mic },
+          { href: "/matches", title: "Game Matches", description: "Tennis, D&D, racing & fighting game sessions", icon: Swords },
           { href: "/floorplans", title: "Venue Floorplans", description: "Vendor booths, gallery walls, walkable 3D", icon: LayoutGrid },
           { href: "/events/interested", title: "My Events", description: "Events you're tracking", icon: Heart },
           { href: "/projects", title: "Projects", description: "Community projects", icon: FolderKanban },
@@ -203,6 +205,7 @@ export const mobileNavSections = [
       { href: "/communities", title: "Communities", icon: Users2 },
       { href: "/threads", title: "Threads", icon: MessageSquare },
       { href: "/panels", title: "Panels", icon: Mic },
+      { href: "/matches", title: "Game Matches", icon: Swords },
       { href: "/floorplans", title: "Floorplans", icon: LayoutGrid },
       { href: "/bots", title: "Bots", icon: Bot },
       { href: "/events/upcoming", title: "Events", icon: Calendar },
