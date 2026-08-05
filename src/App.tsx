@@ -87,6 +87,7 @@ import BotsPage from "./pages/Bots";
 import Floorplans from "./pages/Floorplans";
 import FloorplanEditorPage from "./pages/FloorplanEditorPage";
 import FloorplanWalk from "./pages/FloorplanWalk";
+import GameMatches from "./pages/GameMatches";
 const queryClient = new QueryClient();
 
 const App: React.FC = () => {
@@ -226,6 +227,7 @@ const App: React.FC = () => {
         <Route path="/floorplans" element={<Floorplans />} />
         <Route path="/floorplans/:floorplanId" element={<FloorplanEditorPage />} />
         <Route path="/floorplans/:floorplanId/walk" element={<FloorplanWalk />} />
+        <Route path="/matches" element={<GameMatches />} />
         <Route path="*" element={<Navigate to="/not-found" replace />} />
       </Routes>
     </QueryClientProvider>
