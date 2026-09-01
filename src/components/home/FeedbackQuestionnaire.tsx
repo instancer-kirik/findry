@@ -49,7 +49,7 @@ const QUESTIONS: Question[] = [
   },
   {
     field: 'collaboration_types',
-    label: 'Can you describe the types of creative collaborations or events you get involved in?',
+    label: 'What kinds of creative work or events do you usually do?',
     kind: 'long',
   },
   { field: 'finding_opportunities', label: 'How do you typically find paid opportunities or brand partnerships?', kind: 'long' },
