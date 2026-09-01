@@ -1022,6 +1022,84 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_survey_responses: {
+        Row: {
+          collaboration_types: string | null
+          contact_email: string | null
+          country: string | null
+          created_at: string
+          discoverability: string | null
+          fell_through: string | null
+          finding_opportunities: string | null
+          hardest_part: string | null
+          id: string
+          instant_yes: string | null
+          issue_frequency: string | null
+          one_change: string | null
+          paid_tools: string | null
+          process: string | null
+          role: string | null
+          role_other: string | null
+          tools: string | null
+          trust_platforms: string | null
+          trust_requirements: string | null
+          updated_at: string
+          user_id: string | null
+          values_most: string | null
+          willing_to_pay: string | null
+        }
+        Insert: {
+          collaboration_types?: string | null
+          contact_email?: string | null
+          country?: string | null
+          created_at?: string
+          discoverability?: string | null
+          fell_through?: string | null
+          finding_opportunities?: string | null
+          hardest_part?: string | null
+          id?: string
+          instant_yes?: string | null
+          issue_frequency?: string | null
+          one_change?: string | null
+          paid_tools?: string | null
+          process?: string | null
+          role?: string | null
+          role_other?: string | null
+          tools?: string | null
+          trust_platforms?: string | null
+          trust_requirements?: string | null
+          updated_at?: string
+          user_id?: string | null
+          values_most?: string | null
+          willing_to_pay?: string | null
+        }
+        Update: {
+          collaboration_types?: string | null
+          contact_email?: string | null
+          country?: string | null
+          created_at?: string
+          discoverability?: string | null
+          fell_through?: string | null
+          finding_opportunities?: string | null
+          hardest_part?: string | null
+          id?: string
+          instant_yes?: string | null
+          issue_frequency?: string | null
+          one_change?: string | null
+          paid_tools?: string | null
+          process?: string | null
+          role?: string | null
+          role_other?: string | null
+          tools?: string | null
+          trust_platforms?: string | null
+          trust_requirements?: string | null
+          updated_at?: string
+          user_id?: string | null
+          values_most?: string | null
+          willing_to_pay?: string | null
+        }
+        Relationships: []
+      }
       development_projects: {
         Row: {
           created_at: string
