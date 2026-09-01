@@ -49,7 +49,7 @@ const QUESTIONS: Question[] = [
   },
   {
     field: 'collaboration_types',
-    label: 'Can you describe the types of creative collaborations or events you get involved in?',
+    label: 'What kinds of creative work or events do you usually do?',
     kind: 'long',
   },
   { field: 'finding_opportunities', label: 'How do you typically find paid opportunities or brand partnerships?', kind: 'long' },
@@ -80,7 +80,7 @@ const QUESTIONS: Question[] = [
   { field: 'trust_requirements', label: 'What would a platform need to have to earn your trust?', kind: 'long' },
   {
     field: 'paid_tools',
-    label: 'Have you ever paid for tools that help you get work, build exposure, or manage clients?',
+    label: 'Have you ever paid for a tool to find work, get exposure, or manage clients?',
     kind: 'long',
   },
   { field: 'willing_to_pay', label: 'What would make you willing to pay for or regularly use a platform?', kind: 'long' },
@@ -143,10 +143,8 @@ const FeedbackQuestionnaire: React.FC = () => {
     return (
       <div className="rounded-lg border bg-card p-8 text-center">
         <Check className="h-8 w-8 text-primary mx-auto mb-3" />
-        <h3 className="text-2xl font-bold mb-2">Thank you</h3>
-        <p className="text-muted-foreground">
-          Your answers landed with us directly — no third-party forms, no lost results.
-        </p>
+        <h3 className="text-2xl font-bold mb-2">Thanks</h3>
+        <p className="text-muted-foreground">We got it. No third-party form.</p>
       </div>
     );
   }
@@ -156,10 +154,9 @@ const FeedbackQuestionnaire: React.FC = () => {
       <div className="rounded-lg border bg-card p-6 md:p-8">
         <div className="max-w-3xl mx-auto text-center space-y-4">
           <MessageSquare className="h-6 w-6 text-primary mx-auto" />
-          <h3 className="text-2xl md:text-3xl font-bold">Help Shape Garflock's Future</h3>
+          <h3 className="text-2xl md:text-3xl font-bold">Quick survey</h3>
           <p className="text-muted-foreground text-lg">
-            {QUESTIONS.length} questions about how you actually collaborate, get discovered, and get paid.
-            Every question is skippable — answer what you feel like.
+            {QUESTIONS.length} questions about how you find work, work with others, and get paid. Skip anything you don't want to answer.
           </p>
           <div className="flex flex-wrap justify-center gap-2 pt-1">
             <Badge variant="outline">~4 minutes</Badge>
@@ -167,7 +164,7 @@ const FeedbackQuestionnaire: React.FC = () => {
             <Badge variant="outline">No account needed</Badge>
           </div>
           <Button size="lg" onClick={() => setStarted(true)}>
-            Start questionnaire
+            Start
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
