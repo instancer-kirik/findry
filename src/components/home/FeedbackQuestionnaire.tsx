@@ -154,10 +154,9 @@ const FeedbackQuestionnaire: React.FC = () => {
       <div className="rounded-lg border bg-card p-6 md:p-8">
         <div className="max-w-3xl mx-auto text-center space-y-4">
           <MessageSquare className="h-6 w-6 text-primary mx-auto" />
-          <h3 className="text-2xl md:text-3xl font-bold">Help Shape Garflock's Future</h3>
+          <h3 className="text-2xl md:text-3xl font-bold">Quick survey</h3>
           <p className="text-muted-foreground text-lg">
-            {QUESTIONS.length} questions about how you actually collaborate, get discovered, and get paid.
-            Every question is skippable — answer what you feel like.
+            {QUESTIONS.length} questions about how you find work, work with others, and get paid. Skip anything you don't want to answer.
           </p>
           <div className="flex flex-wrap justify-center gap-2 pt-1">
             <Badge variant="outline">~4 minutes</Badge>
@@ -165,7 +164,7 @@ const FeedbackQuestionnaire: React.FC = () => {
             <Badge variant="outline">No account needed</Badge>
           </div>
           <Button size="lg" onClick={() => setStarted(true)}>
-            Start questionnaire
+            Start
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
