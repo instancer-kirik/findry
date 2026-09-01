@@ -143,10 +143,8 @@ const FeedbackQuestionnaire: React.FC = () => {
     return (
       <div className="rounded-lg border bg-card p-8 text-center">
         <Check className="h-8 w-8 text-primary mx-auto mb-3" />
-        <h3 className="text-2xl font-bold mb-2">Thank you</h3>
-        <p className="text-muted-foreground">
-          Your answers landed with us directly — no third-party forms, no lost results.
-        </p>
+        <h3 className="text-2xl font-bold mb-2">Thanks</h3>
+        <p className="text-muted-foreground">We got it. No third-party form.</p>
       </div>
     );
   }
