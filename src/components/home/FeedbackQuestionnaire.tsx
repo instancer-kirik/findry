@@ -80,7 +80,7 @@ const QUESTIONS: Question[] = [
   { field: 'trust_requirements', label: 'What would a platform need to have to earn your trust?', kind: 'long' },
   {
     field: 'paid_tools',
-    label: 'Have you ever paid for tools that help you get work, build exposure, or manage clients?',
+    label: 'Have you ever paid for a tool to find work, get exposure, or manage clients?',
     kind: 'long',
   },
   { field: 'willing_to_pay', label: 'What would make you willing to pay for or regularly use a platform?', kind: 'long' },
