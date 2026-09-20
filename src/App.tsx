@@ -229,6 +229,8 @@ const App: React.FC = () => {
         <Route path="/floorplans/:floorplanId" element={<FloorplanEditorPage />} />
         <Route path="/floorplans/:floorplanId/walk" element={<FloorplanWalk />} />
         <Route path="/matches" element={<GameMatches />} />
+        <Route path="/spaces/baltimore" element={<CoworkingBaltimore />} />
+        <Route path="/coworking" element={<CoworkingBaltimore />} />
         <Route path="*" element={<Navigate to="/not-found" replace />} />
       </Routes>
     </QueryClientProvider>
