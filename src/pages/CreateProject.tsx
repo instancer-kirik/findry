@@ -12,6 +12,8 @@ import { useProject } from '@/hooks/use-project';
 import { ProjectOwnershipType } from '@/types/project';
 import { toast } from 'sonner';
 import AuthGateDialog from '@/components/auth/AuthGateDialog';
+import { supabase } from '@/integrations/supabase/client';
+import { Hammer, Volume2 } from 'lucide-react';
 
 interface ProjectFormData {
   name: string;
@@ -22,6 +24,28 @@ interface ProjectFormData {
   isPublic: boolean;
   projectType: string;
 }
+
+const ROLLING_WALL_DESCRIPTION = `Build one freestanding, rolling acoustic partition for flexible sound control in the community event space.
+
+Target size: 48 in wide × 84 in tall × about 6 in deep. Build a rigid wood frame, fill it with 4 in mineral wool, fully contain the fibers behind breathable fire-rated acoustic fabric, and mount the base on four locking casters. Add wide feet or outriggers so the wall cannot tip when moved.
+
+This is an absorber and movable room divider, not a soundproof wall. Confirm the final base width, caster rating, fabric fire rating, exits, and required local fire-code clearances before use in a public venue.`;
+
+const ROLLING_WALL_COMPONENTS = [
+  { name: 'Rolling frame and anti-tip base', type: 'structure', description: '48 × 84 in timber frame with cross-bracing, wide feet or outriggers, and four locking casters.', status: 'pending' },
+  { name: 'Absorber core', type: 'material', description: 'Nominal 4 in semi-rigid mineral wool sized to fit without gaps or compression.', status: 'pending' },
+  { name: 'Fabric enclosure', type: 'finish', description: 'Breathable, fire-rated acoustic fabric fully enclosing the absorber so fibers cannot escape.', status: 'pending' },
+  { name: 'Edge and impact protection', type: 'safety', description: 'Rounded exposed edges, protected lower corners, covered fasteners, and durable caster mounting plates.', status: 'pending' },
+];
+
+const ROLLING_WALL_TASKS = [
+  { title: 'Measure the space and travel path', description: 'Check door widths, storage clearance, floor transitions, exits, sprinkler clearance, and likely wall positions.', status: 'pending', priority: 'high' },
+  { title: 'Confirm public-space safety requirements', description: 'Verify fabric fire rating, required clearances, anti-tip geometry, and caster load rating before buying materials.', status: 'pending', priority: 'high' },
+  { title: 'Cut and assemble the frame', description: 'Build the 48 × 84 in frame square, add bracing, and round exposed corners.', status: 'pending', priority: 'medium' },
+  { title: 'Fit and fully enclose mineral wool', description: 'Wear appropriate protection while cutting. Wrap the core so no fibers remain exposed.', status: 'pending', priority: 'high' },
+  { title: 'Build the rolling anti-tip base', description: 'Install wide feet or outriggers, caster plates, and four locking casters rated above the finished wall weight.', status: 'pending', priority: 'high' },
+  { title: 'Roll, brake, and push-test', description: 'Test thresholds, locked-wheel movement, controlled lateral force, and storage before event use.', status: 'pending', priority: 'high' },
+];
 
 const CreateProject = () => {
   const { user, loading } = useAuth();
@@ -38,6 +62,19 @@ const CreateProject = () => {
     isPublic: false,
     projectType: 'general',
   });
+  const [loadedTemplate, setLoadedTemplate] = useState<'rolling-acoustic-wall' | null>(null);
+
+  const loadRollingWallPlan = () => {
+    setLoadedTemplate('rolling-acoustic-wall');
+    setFormData({
+      name: 'Rolling Acoustic Wall',
+      description: ROLLING_WALL_DESCRIPTION,
+      ownershipType: 'personal',
+      tags: ['fabrication', 'acoustics', 'community-space', 'rolling-wall'],
+      isPublic: false,
+      projectType: 'general',
+    });
+  };
 
   // Show auth gate if not logged in after loading
   React.useEffect(() => {
@@ -62,7 +99,7 @@ const CreateProject = () => {
     }
 
     try {
-      await createProject.mutateAsync({
+      const projectId = await createProject.mutateAsync({
         name: formData.name,
         description: formData.description,
         status: 'planning',
@@ -78,7 +115,23 @@ const CreateProject = () => {
         type: formData.projectType,
       });
 
-      navigate('/projects');
+      if (loadedTemplate === 'rolling-acoustic-wall') {
+        const [componentsResult, tasksResult] = await Promise.all([
+          supabase.from('project_components').insert(
+            ROLLING_WALL_COMPONENTS.map((component) => ({ ...component, project_id: projectId })),
+          ),
+          supabase.from('project_tasks').insert(
+            ROLLING_WALL_TASKS.map((task) => ({ ...task, project_id: projectId })),
+          ),
+        ]);
+
+        const setupError = componentsResult.error || tasksResult.error;
+        if (setupError) {
+          toast.error('The project was created, but part of the build checklist could not be added.');
+        }
+      }
+
+      navigate(loadedTemplate ? `/projects/${projectId}` : '/projects');
     } catch (error: any) {
       toast(`Failed to create project: ${error.message}`);
       console.error(error);
@@ -90,6 +143,22 @@ const CreateProject = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-3xl font-bold mb-8">Create New Project</h1>
+
+          <div className="mb-8 border border-border bg-muted/40 p-4">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded bg-primary/15 text-primary">
+                <Volume2 className="h-5 w-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h2 className="font-semibold">Rolling acoustic wall</h2>
+                <p className="mt-1 text-sm text-muted-foreground">Loads a practical 4 × 7 ft absorber plan with materials, safety checks, and build tasks.</p>
+                <Button type="button" variant={loadedTemplate ? 'secondary' : 'outline'} size="sm" className="mt-3" onClick={loadRollingWallPlan}>
+                  <Hammer className="mr-2 h-4 w-4" />
+                  {loadedTemplate ? 'Build plan loaded' : 'Use build plan'}
+                </Button>
+              </div>
+            </div>
+          </div>
           
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">

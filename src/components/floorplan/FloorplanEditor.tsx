@@ -6,15 +6,23 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Box, Square, RectangleHorizontal, Columns3, Tent, Truck,
-  Mic2, Plug, Sparkles, Footprints, DoorOpen, Trash2, RotateCw, Lock, Unlock
+  Mic2, Plug, Sparkles, Footprints, DoorOpen, Trash2, RotateCw, Lock, Unlock, Volume2
 } from "lucide-react";
 import type { FloorplanItem, FloorplanItemKind, FloorplanAssignment } from "@/hooks/use-floorplan";
 
-const PALETTE: { kind: FloorplanItemKind; label: string; w: number; h: number; icon: any; color: string }[] = [
+const PALETTE: { kind: FloorplanItemKind; label: string; w: number; h: number; z?: number; icon: React.ElementType; color: string; meta?: Record<string, unknown> }[] = [
   { kind: "booth", label: "10×10 Booth", w: 100, h: 100, icon: Square, color: "#fb923c" },
   { kind: "booth", label: "10×20 Booth", w: 200, h: 100, icon: RectangleHorizontal, color: "#fb923c" },
   { kind: "table", label: "Table", w: 60, h: 40, icon: RectangleHorizontal, color: "#f59e0b" },
   { kind: "wall", label: "Wall", w: 120, h: 10, icon: Columns3, color: "#a3a3a3" },
+  {
+    kind: "wall", label: "Rolling Acoustic Wall", w: 40, h: 5, z: 22, icon: Volume2, color: "#c26f3d",
+    meta: {
+      object_type: "rolling_acoustic_wall", rolling: true, absorber: true,
+      width_inches: 48, height_inches: 84, depth_inches: 6,
+      core: "4 in mineral wool", finish: "fire-rated acoustic fabric",
+    },
+  },
   { kind: "pedestal", label: "Pedestal", w: 30, h: 30, icon: Box, color: "#c084fc" },
   { kind: "stage", label: "Stage", w: 240, h: 120, icon: Mic2, color: "#f43f5e" },
   { kind: "seating", label: "Seating", w: 180, h: 100, icon: Footprints, color: "#60a5fa" },
@@ -51,13 +59,14 @@ export const FloorplanEditor: React.FC<Props> = ({
   const handleMouseDown = (e: React.MouseEvent, item: FloorplanItem) => {
     onSelect(item.id);
     if (readOnly || item.meta?.locked) return;
-    const rect = canvasRef.current!.getBoundingClientRect();
+    if (!canvasRef.current) return;
+    const rect = canvasRef.current.getBoundingClientRect();
     setDrag({ id: item.id, ox: (e.clientX - rect.left) / zoom - item.x, oy: (e.clientY - rect.top) / zoom - item.y });
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!drag) return;
-    const rect = canvasRef.current!.getBoundingClientRect();
+    if (!drag || !canvasRef.current) return;
+    const rect = canvasRef.current.getBoundingClientRect();
     const x = (e.clientX - rect.left) / zoom - drag.ox;
     const y = (e.clientY - rect.top) / zoom - drag.oy;
     onUpdate(drag.id, { x: Math.round(x), y: Math.round(y) });
@@ -77,11 +86,11 @@ export const FloorplanEditor: React.FC<Props> = ({
             {PALETTE.map((p, i) => {
               const Icon = p.icon;
               return (
-                <button key={i} onClick={() => onAdd({ kind: p.kind, label: p.label, w: p.w, h: p.h, meta: { color: p.color } })}
-                  className="flex flex-col items-center gap-1 p-2 rounded border border-border hover:bg-accent text-xs">
+                <Button key={i} type="button" variant="outline" onClick={() => onAdd({ kind: p.kind, label: p.label, w: p.w, h: p.h, z: p.z, meta: { color: p.color, ...p.meta } })}
+                  className="h-auto min-h-16 flex-col gap-1 p-2 text-xs">
                   <Icon className="h-4 w-4" style={{ color: p.color }} />
-                  <span className="truncate w-full text-center">{p.label}</span>
-                </button>
+                  <span className="w-full whitespace-normal text-center leading-tight">{p.label}</span>
+                </Button>
               );
             })}
           </div>
@@ -146,6 +155,13 @@ export const FloorplanEditor: React.FC<Props> = ({
               <Label className="text-xs">Label</Label>
               <Input value={selected.label ?? ""} onChange={(e) => onUpdate(selected.id, { label: e.target.value })} disabled={readOnly} />
             </div>
+            {selected.meta?.object_type === "rolling_acoustic_wall" && (
+              <div className="border-l-2 border-primary bg-muted/50 p-3 text-xs">
+                <p className="font-medium">48 × 84 × 6 in</p>
+                <p className="mt-1 text-muted-foreground">4 in mineral wool · fire-rated acoustic fabric · locking casters</p>
+                <p className="mt-2 text-muted-foreground">Absorbs reflections; it does not soundproof the room.</p>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-2">
               <div><Label className="text-xs">W</Label><Input type="number" value={selected.w} onChange={(e) => onUpdate(selected.id, { w: +e.target.value })} disabled={readOnly} /></div>
               <div><Label className="text-xs">H</Label><Input type="number" value={selected.h} onChange={(e) => onUpdate(selected.id, { h: +e.target.value })} disabled={readOnly} /></div>

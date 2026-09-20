@@ -24,10 +24,32 @@ function ItemMesh({ it }: { it: FloorplanItem }) {
     power: 0.4, signage: 2.2, misc: 1,
   };
   const h = (heightMap[it.kind] ?? 1) * (it.z / 30);
+  const isRollingAcousticWall = it.meta?.object_type === "rolling_acoustic_wall";
 
   return (
     <group position={[x, h / 2, z]} rotation={[0, (-it.rotation * Math.PI) / 180, 0]}>
-      {it.kind === "tent" ? (
+      {isRollingAcousticWall ? (
+        <group>
+          <mesh castShadow receiveShadow>
+            <boxGeometry args={[w, h, Math.max(d, 0.24)]} />
+            <meshStandardMaterial color={color} roughness={0.95} />
+          </mesh>
+          {[-w * 0.34, w * 0.34].map((footX) => (
+            <group key={footX} position={[footX, -h / 2 + 0.08, 0]}>
+              <mesh castShadow>
+                <boxGeometry args={[Math.min(w * 0.22, 0.45), 0.08, Math.max(d * 2.8, 0.65)]} />
+                <meshStandardMaterial color="#3f3a37" roughness={0.7} />
+              </mesh>
+              {[-1, 1].map((side) => (
+                <mesh key={side} position={[0, -0.1, side * Math.max(d * 1.1, 0.24)]} rotation={[0, 0, Math.PI / 2]} castShadow>
+                  <cylinderGeometry args={[0.08, 0.08, 0.06, 12]} />
+                  <meshStandardMaterial color="#191716" roughness={0.8} />
+                </mesh>
+              ))}
+            </group>
+          ))}
+        </group>
+      ) : it.kind === "tent" ? (
         <mesh>
           <coneGeometry args={[Math.max(w, d) / 1.5, h, 6]} />
           <meshStandardMaterial color={color} />
