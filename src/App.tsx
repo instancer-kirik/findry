@@ -41,6 +41,7 @@ import MeetingScheduler from "./pages/MeetingScheduler";
 import Offers from "./pages/Offers";
 import Items from "./pages/Items";
 import NotFound from "./pages/NotFound";
+import CoworkingBaltimore from "./pages/CoworkingBaltimore";
 
 import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/hooks/use-auth";
