@@ -41,6 +41,7 @@ import MeetingScheduler from "./pages/MeetingScheduler";
 import Offers from "./pages/Offers";
 import Items from "./pages/Items";
 import NotFound from "./pages/NotFound";
+import CoworkingBaltimore from "./pages/CoworkingBaltimore";
 
 import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/hooks/use-auth";
@@ -228,6 +229,8 @@ const App: React.FC = () => {
         <Route path="/floorplans/:floorplanId" element={<FloorplanEditorPage />} />
         <Route path="/floorplans/:floorplanId/walk" element={<FloorplanWalk />} />
         <Route path="/matches" element={<GameMatches />} />
+        <Route path="/spaces/baltimore" element={<CoworkingBaltimore />} />
+        <Route path="/coworking" element={<CoworkingBaltimore />} />
         <Route path="*" element={<Navigate to="/not-found" replace />} />
       </Routes>
     </QueryClientProvider>
