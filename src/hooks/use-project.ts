@@ -224,10 +224,14 @@ export const useCreateProject = () => {
             version: projectData.version,
             progress: projectData.progress,
             tags: projectData.tags,
+            type: projectData.type || "general",
+            timeline: projectData.timeline || null,
+            budget: projectData.budget || null,
+            location: projectData.location || null,
             owner_type: projectData.ownerType,
             owner_id: projectData.ownerId || user?.id,
             created_by: user?.id,
-            is_public: false,
+            is_public: projectData.is_public ?? false,
             featured: false,
           })
           .select("id")
