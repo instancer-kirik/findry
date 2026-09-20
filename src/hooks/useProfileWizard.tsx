@@ -108,6 +108,18 @@ export const useProfileWizard = (onComplete?: () => void) => {
         throw new Error('No authenticated user found');
       }
       
+      // Fetch existing contact methods so we merge instead of overwriting
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('contact_methods')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      const contactMethods = {
+        ...((existingProfile?.contact_methods as Record<string, unknown>) || {}),
+        ...(profileData.website ? { website: profileData.website } : {}),
+      };
+
       // Update profile in Supabase
       const { error } = await supabase
         .from('profiles')
@@ -115,7 +127,8 @@ export const useProfileWizard = (onComplete?: () => void) => {
           full_name: profileData.displayName,
           bio: profileData.bio,
           profile_types: selectedProfileTypes,
-          role_attributes: profileData.roleAttributes
+          role_attributes: profileData.roleAttributes,
+          contact_methods: contactMethods
         })
         .eq('id', user.id);
       
