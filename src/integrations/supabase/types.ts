@@ -1464,6 +1464,7 @@ export type Database = {
           id: string
           kind: Database["public"]["Enums"]["floorplan_item_kind"]
           label: string | null
+          level: number
           meta: Json
           rotation: number
           updated_at: string
@@ -1479,6 +1480,7 @@ export type Database = {
           id?: string
           kind: Database["public"]["Enums"]["floorplan_item_kind"]
           label?: string | null
+          level?: number
           meta?: Json
           rotation?: number
           updated_at?: string
@@ -1494,6 +1496,7 @@ export type Database = {
           id?: string
           kind?: Database["public"]["Enums"]["floorplan_item_kind"]
           label?: string | null
+          level?: number
           meta?: Json
           rotation?: number
           updated_at?: string
@@ -1505,6 +1508,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "floorplan_items_floorplan_id_fkey"
+            columns: ["floorplan_id"]
+            isOneToOne: false
+            referencedRelation: "venue_floorplans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      floorplan_layouts: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          floorplan_id: string
+          id: string
+          is_default: boolean
+          name: string
+          snapshot: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          floorplan_id: string
+          id?: string
+          is_default?: boolean
+          name: string
+          snapshot?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          floorplan_id?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          snapshot?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "floorplan_layouts_floorplan_id_fkey"
             columns: ["floorplan_id"]
             isOneToOne: false
             referencedRelation: "venue_floorplans"
