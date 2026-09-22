@@ -221,6 +221,36 @@ export const FloorplanEditor: React.FC<Props> = ({
                 <p className="mt-2 text-muted-foreground">Absorbs reflections; it does not soundproof the room.</p>
               </div>
             )}
+            {selected.meta?.object_type === "movable_wall" && (
+              <div className="border-l-2 border-primary bg-muted/50 p-3 text-xs">
+                <p className="font-medium">8 ft × 8 ft × 6 in, on locking casters</p>
+                <p className="mt-1 text-muted-foreground">2x4 frame, 3.5 in mineral wool, ply both faces. Gang several to define a room, then roll them away.</p>
+              </div>
+            )}
+            {selected.meta?.object_type === "acoustic_curtain" && (
+              <div className="border-l-2 border-primary bg-muted/50 p-3 text-xs">
+                <p className="font-medium">Ceiling-track curtain, 22 oz velour</p>
+                <p className="mt-1 text-muted-foreground">Cheapest way to tame a 20–30 ft tall room; slides open for full volume.</p>
+              </div>
+            )}
+            {selected.meta?.object_type === "recording_booth" && (
+              <div className="border-l-2 border-primary bg-muted/50 p-3 text-xs">
+                <p className="font-medium">8 × 7 ft booth, 8 ft inner ceiling</p>
+                <p className="mt-1 text-muted-foreground">Decoupled double-stud walls, two layers 5/8 drywall with damping compound, floating floor, sealed door and laminated window. This one is real isolation, so it stays put.</p>
+              </div>
+            )}
+            {selected.meta?.object_type === "workshop_room" && (
+              <div className="border-l-2 border-primary bg-muted/50 p-3 text-xs">
+                <p className="font-medium">Workshop room</p>
+                <p className="mt-1 text-muted-foreground">Plan for dust collection, a 240V drop, a wide double door, and a tool wall. Keep it away from the booth.</p>
+              </div>
+            )}
+            {selected.meta?.object_type === "mezzanine_deck" && (
+              <div className="border-l-2 border-primary bg-muted/50 p-3 text-xs">
+                <p className="font-medium">Mezzanine deck at 12 ft</p>
+                <p className="mt-1 text-muted-foreground">Put this on the mezzanine level and place items on top of it. Under-deck space stays usable at ground level.</p>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-2">
               <div><Label className="text-xs">W</Label><Input type="number" value={selected.w} onChange={(e) => onUpdate(selected.id, { w: +e.target.value })} disabled={readOnly} /></div>
               <div><Label className="text-xs">H</Label><Input type="number" value={selected.h} onChange={(e) => onUpdate(selected.id, { h: +e.target.value })} disabled={readOnly} /></div>
