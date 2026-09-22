@@ -106,8 +106,11 @@ export function useFloorplan(floorplanId: string | undefined) {
     if (!floorplanId) return;
     const channel = supabase
       .channel(`floorplan_${floorplanId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "floorplan_items", filter: `floorplan_id=eq.${floorplanId}` }, () => refresh())
-      .on("postgres_changes", { event: "*", schema: "public", table: "floorplan_assignments" }, () => refresh())
+      .on("postgres_changes", { event: "*", schema: "public", table: "floorplan_items", filter: `floorplan_id=eq.${floorplanId}` }, () => {
+        if (Date.now() - localWriteAt.current < 3000) return; // our own edit, keep local state
+        refresh(true);
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "floorplan_assignments" }, () => refresh(true))
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [floorplanId, refresh]);
@@ -129,12 +132,20 @@ export function useFloorplan(floorplanId: string | undefined) {
     if (data) setItems((prev) => [...prev, data]);
   };
 
-  const updateItem = async (id: string, patch: Partial<FloorplanItem>) => {
+  // local-only: use while dragging/resizing so no network write happens per frame
+  const patchItemLocal = (id: string, patch: Partial<FloorplanItem>) => {
+    localWriteAt.current = Date.now();
     setItems((prev) => prev.map((it) => (it.id === id ? { ...it, ...patch } as FloorplanItem : it)));
+  };
+
+  const updateItem = async (id: string, patch: Partial<FloorplanItem>) => {
+    patchItemLocal(id, patch);
     await db.from("floorplan_items").update(patch).eq("id", id);
+    localWriteAt.current = Date.now();
   };
 
   const removeItem = async (id: string) => {
+    localWriteAt.current = Date.now();
     setItems((prev) => prev.filter((it) => it.id !== id));
     await db.from("floorplan_items").delete().eq("id", id);
   };
