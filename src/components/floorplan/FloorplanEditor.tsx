@@ -83,6 +83,9 @@ export const FloorplanEditor: React.FC<Props> = ({
   const canvasRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(0.7);
   const [drag, setDrag] = useState<{ id: string; ox: number; oy: number } | null>(null);
+  const [level, setLevel] = useState(0);
+  const onLevel = items.filter((it) => (it.level ?? 0) === level);
+  const offLevel = items.filter((it) => (it.level ?? 0) !== level);
 
   const selected = items.find((i) => i.id === selectedId) || null;
   const assignedItemIds = new Set(assignments.filter(a => a.status !== "declined").map(a => a.item_id));
