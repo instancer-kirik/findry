@@ -32,7 +32,18 @@ export interface FloorplanItem {
   label: string | null;
   x: number; y: number; w: number; h: number;
   rotation: number; z: number;
+  level: number;
   meta: Record<string, any>;
+}
+
+export interface FloorplanLayout {
+  id: string;
+  floorplan_id: string;
+  name: string;
+  description: string | null;
+  snapshot: Array<Partial<FloorplanItem>>;
+  is_default: boolean;
+  created_at: string;
 }
 
 export interface FloorplanAssignment {
