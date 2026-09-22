@@ -133,7 +133,15 @@ export const FloorplanEditor: React.FC<Props> = ({
 
       {/* Canvas */}
       <Card className="p-3 overflow-auto bg-muted/30">
-        <div className="flex items-center gap-2 mb-2 text-xs">
+        <div className="flex flex-wrap items-center gap-2 mb-2 text-xs">
+          <div className="flex gap-1">
+            {[0, 1].map((lv) => (
+              <Button key={lv} size="sm" variant={level === lv ? "default" : "outline"} className="h-7 px-2 text-xs"
+                onClick={() => { setLevel(lv); onSelect(null); }}>
+                {lv === 0 ? "Ground" : "Mezzanine"}
+              </Button>
+            ))}
+          </div>
           <span>Zoom</span>
           <input type="range" min="0.3" max="2" step="0.1" value={zoom} onChange={(e) => setZoom(parseFloat(e.target.value))} />
           <span className="ml-auto text-muted-foreground">{canvas.width}×{canvas.height} {canvas.units}</span>
