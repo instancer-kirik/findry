@@ -12,7 +12,7 @@ import { toast } from "sonner";
 
 export default function FloorplanEditorPage() {
   const { floorplanId } = useParams();
-  const { plan, items, assignments, loading, isOwner, addItem, updateItem, removeItem, claimItem, refresh } = useFloorplan(floorplanId);
+  const { plan, items, assignments, loading, isOwner, addItem, updateItem, patchItemLocal, removeItem, claimItem, refresh } = useFloorplan(floorplanId);
   const { layouts, saveLayout, deleteLayout, applyLayout } = useFloorplanLayouts(floorplanId);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [layoutName, setLayoutName] = useState("");
@@ -79,6 +79,7 @@ export default function FloorplanEditorPage() {
           onSelect={setSelectedId}
           onAdd={addItem}
           onUpdate={updateItem}
+          onPreview={patchItemLocal}
           onRemove={removeItem}
           onClaim={onClaim}
         />
