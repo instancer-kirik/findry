@@ -159,7 +159,15 @@ export const FloorplanEditor: React.FC<Props> = ({
           onMouseLeave={handleMouseUp}
           onClick={(e) => { if (e.target === e.currentTarget) onSelect(null); }}
         >
-          {items.map((it) => {
+          {offLevel.map((it) => (
+            <div key={`ghost-${it.id}`} className="absolute pointer-events-none border border-dashed border-muted-foreground/40 opacity-30"
+              style={{
+                left: it.x * zoom, top: it.y * zoom,
+                width: it.w * zoom, height: it.h * zoom,
+                transform: `rotate(${it.rotation}deg)`,
+              }} />
+          ))}
+          {onLevel.map((it) => {
             const claimed = assignedItemIds.has(it.id);
             const sel = selectedId === it.id;
             return (
