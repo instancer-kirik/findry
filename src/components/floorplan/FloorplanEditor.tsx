@@ -23,6 +23,37 @@ const PALETTE: { kind: FloorplanItemKind; label: string; w: number; h: number; z
       core: "4 in mineral wool", finish: "fire-rated acoustic fabric",
     },
   },
+  {
+    kind: "wall", label: "Movable Wall (8 ft)", w: 80, h: 6, z: 24, icon: Columns3, color: "#b08968",
+    meta: {
+      object_type: "movable_wall", rolling: true,
+      width_inches: 96, height_inches: 96, depth_inches: 6,
+      core: "2x4 frame + 3.5 in mineral wool", finish: "ply both faces",
+    },
+  },
+  {
+    kind: "wall", label: "Acoustic Curtain", w: 120, h: 3, z: 26, icon: Volume2, color: "#8d6e63",
+    meta: { object_type: "acoustic_curtain", rolling: true, track: "ceiling track", finish: "22 oz velour" },
+  },
+  {
+    kind: "misc", label: "Recording Booth", w: 80, h: 70, z: 26, icon: Mic2, color: "#7c9cbf",
+    meta: {
+      object_type: "recording_booth", isolation: true,
+      footprint_ft: "8 x 7", inner_height_ft: 8,
+      build: "decoupled double-stud walls, 2 layers 5/8 drywall + green glue, floating floor, sealed door + laminated window",
+    },
+  },
+  {
+    kind: "misc", label: "Workshop Room", w: 240, h: 180, z: 26, icon: Box, color: "#9a8c98",
+    meta: {
+      object_type: "workshop_room",
+      needs: "dust collection, 240V drop, wide double door, tool wall",
+    },
+  },
+  {
+    kind: "misc", label: "Mezzanine Deck", w: 300, h: 200, z: 4, icon: Columns3, color: "#6b7280",
+    meta: { object_type: "mezzanine_deck", deck_height_ft: 12 },
+  },
   { kind: "pedestal", label: "Pedestal", w: 30, h: 30, icon: Box, color: "#c084fc" },
   { kind: "stage", label: "Stage", w: 240, h: 120, icon: Mic2, color: "#f43f5e" },
   { kind: "seating", label: "Seating", w: 180, h: 100, icon: Footprints, color: "#60a5fa" },
