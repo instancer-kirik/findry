@@ -173,7 +173,7 @@ export function useFloorplan(floorplanId: string | undefined) {
 
   return {
     plan, items, assignments, loading, isOwner,
-    addItem, updateItem, removeItem, claimItem, setAssignmentStatus, assignUser, refresh,
+    addItem, updateItem, patchItemLocal, removeItem, claimItem, setAssignmentStatus, assignUser, refresh,
   };
 }
 
