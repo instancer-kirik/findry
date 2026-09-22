@@ -120,7 +120,7 @@ export const FloorplanEditor: React.FC<Props> = ({
             {PALETTE.map((p, i) => {
               const Icon = p.icon;
               return (
-                <Button key={i} type="button" variant="outline" onClick={() => onAdd({ kind: p.kind, label: p.label, w: p.w, h: p.h, z: p.z, meta: { color: p.color, ...p.meta } })}
+                <Button key={i} type="button" variant="outline" onClick={() => onAdd({ kind: p.kind, label: p.label, w: p.w, h: p.h, z: p.z, level, meta: { color: p.color, ...p.meta } })}
                   className="h-auto min-h-16 flex-col gap-1 p-2 text-xs">
                   <Icon className="h-4 w-4" style={{ color: p.color }} />
                   <span className="w-full whitespace-normal text-center leading-tight">{p.label}</span>
