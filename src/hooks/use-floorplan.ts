@@ -121,6 +121,7 @@ export function useFloorplan(floorplanId: string | undefined) {
       x: patch.x ?? 100, y: patch.y ?? 100,
       w: patch.w ?? 60, h: patch.h ?? 60,
       rotation: patch.rotation ?? 0, z: patch.z ?? 30,
+      level: patch.level ?? 0,
       meta: patch.meta ?? {},
     }).select("*").single();
     if (data) setItems((prev) => [...prev, data]);
