@@ -360,8 +360,8 @@ export const FloorplanEditor: React.FC<Props> = ({
             onAdd({
               kind: selected.kind,
               label: selected.label ? `${selected.label} copy` : null,
-              x: Math.min(canvas.width - selected.w, snap(selected.x + SNAP * 4)),
-              y: Math.min(canvas.height - selected.h, snap(selected.y + SNAP * 4)),
+              x: Math.max(0, Math.min(canvas.width - selected.w, snap(selected.x + SNAP * 4))),
+              y: Math.max(0, Math.min(canvas.height - selected.h, snap(selected.y + SNAP * 4))),
               w: selected.w,
               h: selected.h,
               rotation: selected.rotation,
