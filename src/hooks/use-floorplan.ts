@@ -164,6 +164,49 @@ export function useFloorplan(floorplanId: string | undefined) {
   };
 }
 
+const SNAPSHOT_FIELDS = ["id", "x", "y", "w", "h", "rotation", "z", "level", "label"] as const;
+
+export function useFloorplanLayouts(floorplanId: string | undefined) {
+  const { user } = useAuth();
+  const [layouts, setLayouts] = useState<FloorplanLayout[]>([]);
+
+  const refresh = useCallback(async () => {
+    if (!floorplanId) return;
+    const { data } = await db.from("floorplan_layouts").select("*")
+      .eq("floorplan_id", floorplanId).order("created_at");
+    setLayouts(data ?? []);
+  }, [floorplanId]);
+
+  useEffect(() => { refresh(); }, [refresh]);
+
+  const saveLayout = async (name: string, items: FloorplanItem[], description?: string) => {
+    if (!floorplanId) return { error: "Missing floorplan" };
+    const snapshot = items.map((it) =>
+      Object.fromEntries(SNAPSHOT_FIELDS.map((f) => [f, (it as any)[f]])));
+    const { error } = await db.from("floorplan_layouts").insert({
+      floorplan_id: floorplanId, name, description: description ?? null,
+      snapshot, created_by: user?.id ?? null,
+    });
+    if (!error) refresh();
+    return { error: error?.message };
+  };
+
+  const deleteLayout = async (id: string) => {
+    await db.from("floorplan_layouts").delete().eq("id", id);
+    setLayouts((prev) => prev.filter((l) => l.id !== id));
+  };
+
+  const applyLayout = async (layout: FloorplanLayout) => {
+    for (const entry of layout.snapshot ?? []) {
+      if (!entry?.id) continue;
+      const { id, ...patch } = entry as any;
+      await db.from("floorplan_items").update(patch).eq("id", id);
+    }
+  };
+
+  return { layouts, saveLayout, deleteLayout, applyLayout, refresh };
+}
+
 export async function createFloorplan(input: {
   title: string; description?: string; event_id?: string | null;
   claim_mode?: ClaimMode; canvas?: Floorplan["canvas"]; is_public?: boolean;
