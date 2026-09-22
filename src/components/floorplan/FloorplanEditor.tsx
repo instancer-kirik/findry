@@ -199,8 +199,17 @@ export const FloorplanEditor: React.FC<Props> = ({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Badge variant="outline">{selected.kind}</Badge>
-              {assignedItemIds.has(selected.id) && <Badge>claimed</Badge>}
+              <div className="flex items-center gap-1">
+                <Badge variant="secondary">{(selected.level ?? 0) === 0 ? "ground" : "mezzanine"}</Badge>
+                {assignedItemIds.has(selected.id) && <Badge>claimed</Badge>}
+              </div>
             </div>
+            {!readOnly && (
+              <Button size="sm" variant="outline" className="w-full text-xs"
+                onClick={() => onUpdate(selected.id, { level: (selected.level ?? 0) === 0 ? 1 : 0 })}>
+                Move to {(selected.level ?? 0) === 0 ? "mezzanine" : "ground floor"}
+              </Button>
+            )}
             <div>
               <Label className="text-xs">Label</Label>
               <Input value={selected.label ?? ""} onChange={(e) => onUpdate(selected.id, { label: e.target.value })} disabled={readOnly} />
