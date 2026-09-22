@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -79,9 +79,11 @@ export function useFloorplan(floorplanId: string | undefined) {
   const [assignments, setAssignments] = useState<FloorplanAssignment[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const refresh = useCallback(async () => {
+  const localWriteAt = useRef(0);
+
+  const refresh = useCallback(async (silent = false) => {
     if (!floorplanId) return;
-    setLoading(true);
+    if (!silent) setLoading(true);
     const [p, i, a] = await Promise.all([
       db.from("venue_floorplans").select("*").eq("id", floorplanId).maybeSingle(),
       db.from("floorplan_items").select("*").eq("floorplan_id", floorplanId).order("created_at"),
