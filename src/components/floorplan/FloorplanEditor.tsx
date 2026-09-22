@@ -8,7 +8,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Box, Square, RectangleHorizontal, Columns3, Tent, Truck,
   Mic2, Plug, Sparkles, Footprints, DoorOpen, Trash2, RotateCw, Lock, Unlock, Volume2,
-  Plus, SlidersHorizontal, X,
+  Plus, SlidersHorizontal, X, Copy, Bath, CookingPot, Construction,
 } from "lucide-react";
 import type { FloorplanItem, FloorplanItemKind, FloorplanAssignment } from "@/hooks/use-floorplan";
 
@@ -61,6 +61,18 @@ const PALETTE: { kind: FloorplanItemKind; label: string; w: number; h: number; z
     kind: "misc", label: "Mezzanine Deck", w: 300, h: 200, z: 4, icon: Columns3, color: "#6b7280",
     meta: { object_type: "mezzanine_deck", sizable: true, deck_height_ft: 12 },
   },
+  {
+    kind: "misc", label: "5 Ton Crane", w: 300, h: 120, z: 30, icon: Construction, color: "#d97706",
+    meta: { object_type: "five_ton_crane", sizable: true, capacity_tons: 5, clearance_required: true },
+  },
+  {
+    kind: "misc", label: "Bathroom", w: 100, h: 80, z: 26, icon: Bath, color: "#38bdf8",
+    meta: { object_type: "bathroom", sizable: true, plumbing_required: true },
+  },
+  {
+    kind: "misc", label: "Kitchen", w: 160, h: 120, z: 26, icon: CookingPot, color: "#84cc16",
+    meta: { object_type: "kitchen", sizable: true, plumbing_required: true, ventilation_required: true },
+  },
   { kind: "pedestal", label: "Pedestal", w: 30, h: 30, icon: Box, color: "#c084fc" },
   { kind: "stage", label: "Stage", w: 240, h: 120, icon: Mic2, color: "#f43f5e", meta: { sizable: true } },
   { kind: "seating", label: "Seating", w: 180, h: 100, icon: Footprints, color: "#60a5fa", meta: { sizable: true } },
@@ -104,6 +116,7 @@ export const FloorplanEditor: React.FC<Props> = ({
 }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const gestureRef = useRef<Gesture | null>(null);
+  const gestureCleanupRef = useRef<(() => void) | null>(null);
   const isMobile = useIsMobile();
   const [isCompact, setIsCompact] = useState(() => typeof window !== "undefined" && window.innerWidth < 1200);
   const [zoom, setZoom] = useState(isMobile ? 0.45 : 0.7);
@@ -125,9 +138,69 @@ export const FloorplanEditor: React.FC<Props> = ({
     return () => query.removeEventListener("change", updateCompact);
   }, []);
 
+  useEffect(() => () => gestureCleanupRef.current?.(), []);
+
   const pickItem = (item: FloorplanItem) => {
     onSelect(item.id);
-    if (isMobile) setTray("inspect");
+    if (isCompact) setTray("inspect");
+  };
+
+  const updateGesture = (clientX: number, clientY: number) => {
+    const gesture = gestureRef.current;
+    if (!gesture || !canvasRef.current) return;
+    const distance = Math.hypot(clientX - gesture.sx, clientY - gesture.sy);
+    if (!gesture.active && distance < TOUCH_DRAG_THRESHOLD) return;
+    gesture.active = true;
+    if (gesture.mode === "move") {
+      const rect = canvasRef.current.getBoundingClientRect();
+      const item = items.find((entry) => entry.id === gesture.id);
+      const maxX = Math.max(0, canvas.width - (item?.w ?? 0));
+      const maxY = Math.max(0, canvas.height - (item?.h ?? 0));
+      const patch = {
+        x: Math.min(maxX, Math.max(0, snap((clientX - rect.left) / zoom - gesture.ox))),
+        y: Math.min(maxY, Math.max(0, snap((clientY - rect.top) / zoom - gesture.oy))),
+      };
+      gesture.latest = patch;
+      preview(gesture.id, patch);
+    } else {
+      const item = items.find((entry) => entry.id === gesture.id);
+      const maxW = Math.max(SNAP, canvas.width - (item?.x ?? 0));
+      const maxH = Math.max(SNAP, canvas.height - (item?.y ?? 0));
+      const patch = {
+        w: Math.min(maxW, Math.max(SNAP, snap(gesture.w0 + (clientX - gesture.sx) / zoom))),
+        h: Math.min(maxH, Math.max(SNAP, snap(gesture.h0 + (clientY - gesture.sy) / zoom))),
+      };
+      gesture.latest = patch;
+      preview(gesture.id, patch);
+    }
+  };
+
+  const finishGesture = (pointerId: number) => {
+    const gesture = gestureRef.current;
+    if (!gesture || pointerId !== gesture.pointerId) return;
+    if (gesture.active && Object.keys(gesture.latest).length > 0) onUpdate(gesture.id, gesture.latest);
+    gestureRef.current = null;
+    gestureCleanupRef.current?.();
+  };
+
+  const listenForGesture = () => {
+    gestureCleanupRef.current?.();
+    const move = (event: PointerEvent) => {
+      if (gestureRef.current?.pointerId !== event.pointerId) return;
+      event.preventDefault();
+      updateGesture(event.clientX, event.clientY);
+    };
+    const end = (event: PointerEvent) => finishGesture(event.pointerId);
+    const cleanup = () => {
+      window.removeEventListener("pointermove", move, true);
+      window.removeEventListener("pointerup", end, true);
+      window.removeEventListener("pointercancel", end, true);
+      gestureCleanupRef.current = null;
+    };
+    gestureCleanupRef.current = cleanup;
+    window.addEventListener("pointermove", move, { capture: true, passive: false });
+    window.addEventListener("pointerup", end, true);
+    window.addEventListener("pointercancel", end, true);
   };
 
   const startMove = (e: React.PointerEvent, item: FloorplanItem) => {
@@ -143,6 +216,7 @@ export const FloorplanEditor: React.FC<Props> = ({
       oy: (e.clientY - rect.top) / zoom - item.y,
       active: false, latest: {},
     };
+    listenForGesture();
   };
 
   const startResize = (e: React.PointerEvent, item: FloorplanItem) => {
@@ -154,42 +228,7 @@ export const FloorplanEditor: React.FC<Props> = ({
       mode: "resize", id: item.id, pointerId: e.pointerId, sx: e.clientX, sy: e.clientY,
       w0: item.w, h0: item.h, active: false, latest: {},
     };
-  };
-
-  const handlePointerMove = (e: React.PointerEvent) => {
-    const gesture = gestureRef.current;
-    if (!gesture || gesture.pointerId !== e.pointerId || !canvasRef.current) return;
-    const distance = Math.hypot(e.clientX - gesture.sx, e.clientY - gesture.sy);
-    if (!gesture.active && distance < TOUCH_DRAG_THRESHOLD) return;
-    gesture.active = true;
-    e.preventDefault();
-    if (gesture.mode === "move") {
-      const rect = canvasRef.current.getBoundingClientRect();
-      const patch = {
-        x: snap((e.clientX - rect.left) / zoom - gesture.ox),
-        y: snap((e.clientY - rect.top) / zoom - gesture.oy),
-      };
-      gesture.latest = patch;
-      preview(gesture.id, patch);
-    } else {
-      const patch = {
-        w: Math.max(SNAP, snap(gesture.w0 + (e.clientX - gesture.sx) / zoom)),
-        h: Math.max(SNAP, snap(gesture.h0 + (e.clientY - gesture.sy) / zoom)),
-      };
-      gesture.latest = patch;
-      preview(gesture.id, patch);
-    }
-  };
-
-  // one write when the gesture ends
-  const endGesture = (e?: React.PointerEvent) => {
-    const gesture = gestureRef.current;
-    if (!gesture) return;
-    if (e && e.pointerId !== gesture.pointerId) return;
-    if (gesture.active && Object.keys(gesture.latest).length > 0) {
-      onUpdate(gesture.id, gesture.latest);
-    }
-    gestureRef.current = null;
+    listenForGesture();
   };
 
   const colorFor = (kind: FloorplanItemKind) => PALETTE.find(p => p.kind === kind)?.color ?? "#888";
@@ -290,6 +329,24 @@ export const FloorplanEditor: React.FC<Props> = ({
           <p className="mt-1 text-muted-foreground">Put this on the mezzanine level and place items on top of it. Under-deck space stays usable at ground level.</p>
         </div>
       )}
+      {selected.meta?.object_type === "five_ton_crane" && (
+        <div className="border-l-2 border-primary bg-muted/50 p-3 text-xs">
+          <p className="font-medium">5 ton crane zone</p>
+          <p className="mt-1 text-muted-foreground">Keep the travel path and lift clearance unobstructed. Final placement requires structural review.</p>
+        </div>
+      )}
+      {selected.meta?.object_type === "bathroom" && (
+        <div className="border-l-2 border-primary bg-muted/50 p-3 text-xs">
+          <p className="font-medium">Bathroom</p>
+          <p className="mt-1 text-muted-foreground">Allow room for plumbing, ventilation, door clearance, and an accessible turning area.</p>
+        </div>
+      )}
+      {selected.meta?.object_type === "kitchen" && (
+        <div className="border-l-2 border-primary bg-muted/50 p-3 text-xs">
+          <p className="font-medium">Kitchen</p>
+          <p className="mt-1 text-muted-foreground">Reserve service runs for water, waste, power, and ventilation.</p>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-2">
         <div><Label className="text-xs">X</Label><Input type="number" value={selected.x} onChange={(e) => onUpdate(selected.id, { x: +e.target.value })} disabled={readOnly} /></div>
@@ -299,6 +356,20 @@ export const FloorplanEditor: React.FC<Props> = ({
       </div>
       {!readOnly && (
         <div className="flex gap-2">
+          <Button size="sm" variant="outline" className="h-11 w-11 p-0" aria-label="Duplicate item" title="Duplicate item" onClick={() => {
+            onAdd({
+              kind: selected.kind,
+              label: selected.label ? `${selected.label} copy` : null,
+              x: Math.max(0, Math.min(canvas.width - selected.w, snap(selected.x + SNAP * 4))),
+              y: Math.max(0, Math.min(canvas.height - selected.h, snap(selected.y + SNAP * 4))),
+              w: selected.w,
+              h: selected.h,
+              rotation: selected.rotation,
+              z: selected.z,
+              level: selected.level ?? 0,
+              meta: { ...selected.meta },
+            });
+          }}><Copy className="h-4 w-4" /></Button>
           <Button size="sm" variant="outline" className="h-11 w-11 p-0" aria-label="Rotate item" title="Rotate item" onClick={() => onUpdate(selected.id, { rotation: (selected.rotation + 15) % 360 })}><RotateCw className="h-4 w-4" /></Button>
           <Button size="sm" variant="outline" className="h-11 w-11 p-0" aria-label={selected.meta?.locked ? "Unlock item" : "Lock item"} title={selected.meta?.locked ? "Unlock item" : "Lock item"} onClick={() => onUpdate(selected.id, { meta: { ...selected.meta, locked: !selected.meta?.locked } })}>
             {selected.meta?.locked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
@@ -329,15 +400,13 @@ export const FloorplanEditor: React.FC<Props> = ({
       </div>
       <div
         ref={canvasRef}
-        className="relative mx-auto select-none touch-none border border-border bg-card overscroll-none"
+        className="relative mx-auto select-none border border-border bg-card overscroll-none"
         style={{
           width: canvas.width * zoom, height: canvas.height * zoom,
+          touchAction: "pan-x pan-y",
           backgroundImage: "linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px)",
           backgroundSize: `${UPF * zoom}px ${UPF * zoom}px`,
         }}
-        onPointerMove={handlePointerMove}
-        onPointerUp={endGesture}
-        onPointerCancel={endGesture}
         onClick={(e) => { if (e.target === e.currentTarget) onSelect(null); }}
       >
         {offLevel.map((it) => (
@@ -345,6 +414,7 @@ export const FloorplanEditor: React.FC<Props> = ({
             style={{
               left: it.x * zoom, top: it.y * zoom,
               width: it.w * zoom, height: it.h * zoom,
+                 touchAction: "none",
               transform: `rotate(${it.rotation}deg)`,
             }} />
         ))}
