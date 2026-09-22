@@ -23,6 +23,37 @@ const PALETTE: { kind: FloorplanItemKind; label: string; w: number; h: number; z
       core: "4 in mineral wool", finish: "fire-rated acoustic fabric",
     },
   },
+  {
+    kind: "wall", label: "Movable Wall (8 ft)", w: 80, h: 6, z: 24, icon: Columns3, color: "#b08968",
+    meta: {
+      object_type: "movable_wall", rolling: true,
+      width_inches: 96, height_inches: 96, depth_inches: 6,
+      core: "2x4 frame + 3.5 in mineral wool", finish: "ply both faces",
+    },
+  },
+  {
+    kind: "wall", label: "Acoustic Curtain", w: 120, h: 3, z: 26, icon: Volume2, color: "#8d6e63",
+    meta: { object_type: "acoustic_curtain", rolling: true, track: "ceiling track", finish: "22 oz velour" },
+  },
+  {
+    kind: "misc", label: "Recording Booth", w: 80, h: 70, z: 26, icon: Mic2, color: "#7c9cbf",
+    meta: {
+      object_type: "recording_booth", isolation: true,
+      footprint_ft: "8 x 7", inner_height_ft: 8,
+      build: "decoupled double-stud walls, 2 layers 5/8 drywall + green glue, floating floor, sealed door + laminated window",
+    },
+  },
+  {
+    kind: "misc", label: "Workshop Room", w: 240, h: 180, z: 26, icon: Box, color: "#9a8c98",
+    meta: {
+      object_type: "workshop_room",
+      needs: "dust collection, 240V drop, wide double door, tool wall",
+    },
+  },
+  {
+    kind: "misc", label: "Mezzanine Deck", w: 300, h: 200, z: 4, icon: Columns3, color: "#6b7280",
+    meta: { object_type: "mezzanine_deck", deck_height_ft: 12 },
+  },
   { kind: "pedestal", label: "Pedestal", w: 30, h: 30, icon: Box, color: "#c084fc" },
   { kind: "stage", label: "Stage", w: 240, h: 120, icon: Mic2, color: "#f43f5e" },
   { kind: "seating", label: "Seating", w: 180, h: 100, icon: Footprints, color: "#60a5fa" },
@@ -52,6 +83,9 @@ export const FloorplanEditor: React.FC<Props> = ({
   const canvasRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(0.7);
   const [drag, setDrag] = useState<{ id: string; ox: number; oy: number } | null>(null);
+  const [level, setLevel] = useState(0);
+  const onLevel = items.filter((it) => (it.level ?? 0) === level);
+  const offLevel = items.filter((it) => (it.level ?? 0) !== level);
 
   const selected = items.find((i) => i.id === selectedId) || null;
   const assignedItemIds = new Set(assignments.filter(a => a.status !== "declined").map(a => a.item_id));
@@ -86,7 +120,7 @@ export const FloorplanEditor: React.FC<Props> = ({
             {PALETTE.map((p, i) => {
               const Icon = p.icon;
               return (
-                <Button key={i} type="button" variant="outline" onClick={() => onAdd({ kind: p.kind, label: p.label, w: p.w, h: p.h, z: p.z, meta: { color: p.color, ...p.meta } })}
+                <Button key={i} type="button" variant="outline" onClick={() => onAdd({ kind: p.kind, label: p.label, w: p.w, h: p.h, z: p.z, level, meta: { color: p.color, ...p.meta } })}
                   className="h-auto min-h-16 flex-col gap-1 p-2 text-xs">
                   <Icon className="h-4 w-4" style={{ color: p.color }} />
                   <span className="w-full whitespace-normal text-center leading-tight">{p.label}</span>
@@ -99,7 +133,15 @@ export const FloorplanEditor: React.FC<Props> = ({
 
       {/* Canvas */}
       <Card className="p-3 overflow-auto bg-muted/30">
-        <div className="flex items-center gap-2 mb-2 text-xs">
+        <div className="flex flex-wrap items-center gap-2 mb-2 text-xs">
+          <div className="flex gap-1">
+            {[0, 1].map((lv) => (
+              <Button key={lv} size="sm" variant={level === lv ? "default" : "outline"} className="h-7 px-2 text-xs"
+                onClick={() => { setLevel(lv); onSelect(null); }}>
+                {lv === 0 ? "Ground" : "Mezzanine"}
+              </Button>
+            ))}
+          </div>
           <span>Zoom</span>
           <input type="range" min="0.3" max="2" step="0.1" value={zoom} onChange={(e) => setZoom(parseFloat(e.target.value))} />
           <span className="ml-auto text-muted-foreground">{canvas.width}×{canvas.height} {canvas.units}</span>
@@ -117,7 +159,15 @@ export const FloorplanEditor: React.FC<Props> = ({
           onMouseLeave={handleMouseUp}
           onClick={(e) => { if (e.target === e.currentTarget) onSelect(null); }}
         >
-          {items.map((it) => {
+          {offLevel.map((it) => (
+            <div key={`ghost-${it.id}`} className="absolute pointer-events-none border border-dashed border-muted-foreground/40 opacity-30"
+              style={{
+                left: it.x * zoom, top: it.y * zoom,
+                width: it.w * zoom, height: it.h * zoom,
+                transform: `rotate(${it.rotation}deg)`,
+              }} />
+          ))}
+          {onLevel.map((it) => {
             const claimed = assignedItemIds.has(it.id);
             const sel = selectedId === it.id;
             return (
@@ -149,8 +199,17 @@ export const FloorplanEditor: React.FC<Props> = ({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Badge variant="outline">{selected.kind}</Badge>
-              {assignedItemIds.has(selected.id) && <Badge>claimed</Badge>}
+              <div className="flex items-center gap-1">
+                <Badge variant="secondary">{(selected.level ?? 0) === 0 ? "ground" : "mezzanine"}</Badge>
+                {assignedItemIds.has(selected.id) && <Badge>claimed</Badge>}
+              </div>
             </div>
+            {!readOnly && (
+              <Button size="sm" variant="outline" className="w-full text-xs"
+                onClick={() => onUpdate(selected.id, { level: (selected.level ?? 0) === 0 ? 1 : 0 })}>
+                Move to {(selected.level ?? 0) === 0 ? "mezzanine" : "ground floor"}
+              </Button>
+            )}
             <div>
               <Label className="text-xs">Label</Label>
               <Input value={selected.label ?? ""} onChange={(e) => onUpdate(selected.id, { label: e.target.value })} disabled={readOnly} />
@@ -160,6 +219,36 @@ export const FloorplanEditor: React.FC<Props> = ({
                 <p className="font-medium">48 × 84 × 6 in</p>
                 <p className="mt-1 text-muted-foreground">4 in mineral wool · fire-rated acoustic fabric · locking casters</p>
                 <p className="mt-2 text-muted-foreground">Absorbs reflections; it does not soundproof the room.</p>
+              </div>
+            )}
+            {selected.meta?.object_type === "movable_wall" && (
+              <div className="border-l-2 border-primary bg-muted/50 p-3 text-xs">
+                <p className="font-medium">8 ft × 8 ft × 6 in, on locking casters</p>
+                <p className="mt-1 text-muted-foreground">2x4 frame, 3.5 in mineral wool, ply both faces. Gang several to define a room, then roll them away.</p>
+              </div>
+            )}
+            {selected.meta?.object_type === "acoustic_curtain" && (
+              <div className="border-l-2 border-primary bg-muted/50 p-3 text-xs">
+                <p className="font-medium">Ceiling-track curtain, 22 oz velour</p>
+                <p className="mt-1 text-muted-foreground">Cheapest way to tame a 20–30 ft tall room; slides open for full volume.</p>
+              </div>
+            )}
+            {selected.meta?.object_type === "recording_booth" && (
+              <div className="border-l-2 border-primary bg-muted/50 p-3 text-xs">
+                <p className="font-medium">8 × 7 ft booth, 8 ft inner ceiling</p>
+                <p className="mt-1 text-muted-foreground">Decoupled double-stud walls, two layers 5/8 drywall with damping compound, floating floor, sealed door and laminated window. This one is real isolation, so it stays put.</p>
+              </div>
+            )}
+            {selected.meta?.object_type === "workshop_room" && (
+              <div className="border-l-2 border-primary bg-muted/50 p-3 text-xs">
+                <p className="font-medium">Workshop room</p>
+                <p className="mt-1 text-muted-foreground">Plan for dust collection, a 240V drop, a wide double door, and a tool wall. Keep it away from the booth.</p>
+              </div>
+            )}
+            {selected.meta?.object_type === "mezzanine_deck" && (
+              <div className="border-l-2 border-primary bg-muted/50 p-3 text-xs">
+                <p className="font-medium">Mezzanine deck at 12 ft</p>
+                <p className="mt-1 text-muted-foreground">Put this on the mezzanine level and place items on top of it. Under-deck space stays usable at ground level.</p>
               </div>
             )}
             <div className="grid grid-cols-2 gap-2">

@@ -23,11 +23,19 @@ function ItemMesh({ it }: { it: FloorplanItem }) {
     seating: 0.5, tent: 3, truck: 2.6, path: 0.02, entrance: 0.05,
     power: 0.4, signage: 2.2, misc: 1,
   };
-  const h = (heightMap[it.kind] ?? 1) * (it.z / 30);
-  const isRollingAcousticWall = it.meta?.object_type === "rolling_acoustic_wall";
+  const objectHeights: Record<string, number> = {
+    movable_wall: 2.4, acoustic_curtain: 4.5, recording_booth: 2.6,
+    workshop_room: 3, mezzanine_deck: 0.3,
+  };
+  const objectType = it.meta?.object_type as string | undefined;
+  const h = objectType && objectHeights[objectType] !== undefined
+    ? objectHeights[objectType]
+    : (heightMap[it.kind] ?? 1) * (it.z / 30);
+  const base = (it.level ?? 0) * 3.6; // mezzanine deck sits ~12 ft up
+  const isRollingAcousticWall = objectType === "rolling_acoustic_wall" || objectType === "movable_wall";
 
   return (
-    <group position={[x, h / 2, z]} rotation={[0, (-it.rotation * Math.PI) / 180, 0]}>
+    <group position={[x, base + h / 2, z]} rotation={[0, (-it.rotation * Math.PI) / 180, 0]}>
       {isRollingAcousticWall ? (
         <group>
           <mesh castShadow receiveShadow>

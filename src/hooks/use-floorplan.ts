@@ -32,7 +32,18 @@ export interface FloorplanItem {
   label: string | null;
   x: number; y: number; w: number; h: number;
   rotation: number; z: number;
+  level: number;
   meta: Record<string, any>;
+}
+
+export interface FloorplanLayout {
+  id: string;
+  floorplan_id: string;
+  name: string;
+  description: string | null;
+  snapshot: Array<Partial<FloorplanItem>>;
+  is_default: boolean;
+  created_at: string;
 }
 
 export interface FloorplanAssignment {
@@ -110,6 +121,7 @@ export function useFloorplan(floorplanId: string | undefined) {
       x: patch.x ?? 100, y: patch.y ?? 100,
       w: patch.w ?? 60, h: patch.h ?? 60,
       rotation: patch.rotation ?? 0, z: patch.z ?? 30,
+      level: patch.level ?? 0,
       meta: patch.meta ?? {},
     }).select("*").single();
     if (data) setItems((prev) => [...prev, data]);
@@ -150,6 +162,49 @@ export function useFloorplan(floorplanId: string | undefined) {
     plan, items, assignments, loading, isOwner,
     addItem, updateItem, removeItem, claimItem, setAssignmentStatus, assignUser, refresh,
   };
+}
+
+const SNAPSHOT_FIELDS = ["id", "x", "y", "w", "h", "rotation", "z", "level", "label"] as const;
+
+export function useFloorplanLayouts(floorplanId: string | undefined) {
+  const { user } = useAuth();
+  const [layouts, setLayouts] = useState<FloorplanLayout[]>([]);
+
+  const refresh = useCallback(async () => {
+    if (!floorplanId) return;
+    const { data } = await db.from("floorplan_layouts").select("*")
+      .eq("floorplan_id", floorplanId).order("created_at");
+    setLayouts(data ?? []);
+  }, [floorplanId]);
+
+  useEffect(() => { refresh(); }, [refresh]);
+
+  const saveLayout = async (name: string, items: FloorplanItem[], description?: string) => {
+    if (!floorplanId) return { error: "Missing floorplan" };
+    const snapshot = items.map((it) =>
+      Object.fromEntries(SNAPSHOT_FIELDS.map((f) => [f, (it as any)[f]])));
+    const { error } = await db.from("floorplan_layouts").insert({
+      floorplan_id: floorplanId, name, description: description ?? null,
+      snapshot, created_by: user?.id ?? null,
+    });
+    if (!error) refresh();
+    return { error: error?.message };
+  };
+
+  const deleteLayout = async (id: string) => {
+    await db.from("floorplan_layouts").delete().eq("id", id);
+    setLayouts((prev) => prev.filter((l) => l.id !== id));
+  };
+
+  const applyLayout = async (layout: FloorplanLayout) => {
+    for (const entry of layout.snapshot ?? []) {
+      if (!entry?.id) continue;
+      const { id, ...patch } = entry as any;
+      await db.from("floorplan_items").update(patch).eq("id", id);
+    }
+  };
+
+  return { layouts, saveLayout, deleteLayout, applyLayout, refresh };
 }
 
 export async function createFloorplan(input: {
