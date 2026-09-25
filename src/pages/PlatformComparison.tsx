@@ -5,134 +5,43 @@ import { Check, X, Minus, Sparkles, Users, Calendar, Video, Wrench, MapPin } fro
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
+type V = boolean | "partial";
+const COLS = ["Planning Pod","Tagvenue","Tripleseat","Peerspace","Eventeny","Accelevents","Releventful","OkWhen","OninFive"] as const;
+
 interface FeatureComparison {
   feature: string;
   description: string;
-  us: boolean | "partial";
-  planningPod: boolean | "partial";
-  tagvenue: boolean | "partial";
-  tripleseat: boolean | "partial";
-  peerspace: boolean | "partial";
+  us: V;
+  others: V[]; // same order as COLS
 }
 
+const P = "partial" as const;
 const features: FeatureComparison[] = [
-  {
-    feature: "Non-Traditional Venues",
-    description: "Support for warehouses, studios, maker spaces, unconventional locations",
-    us: true,
-    planningPod: false,
-    tagvenue: "partial",
-    tripleseat: false,
-    peerspace: true,
-  },
-  {
-    feature: "Artist/Creator Profiles",
-    description: "Built-in profiles for performers, artists, and creative professionals",
-    us: true,
-    planningPod: false,
-    tagvenue: false,
-    tripleseat: false,
-    peerspace: false,
-  },
-  {
-    feature: "Equipment & Gear Tracking",
-    description: "Manage technical equipment, AV gear, and hardware inventory",
-    us: true,
-    planningPod: "partial",
-    tagvenue: false,
-    tripleseat: "partial",
-    peerspace: false,
-  },
-  {
-    feature: "UGC Content Feed",
-    description: "Social feed for behind-the-scenes, event highlights, venue tours",
-    us: true,
-    planningPod: false,
-    tagvenue: false,
-    tripleseat: false,
-    peerspace: "partial",
-  },
-  {
-    feature: "Brand Collaboration",
-    description: "Connect venues, artists, and brands for partnerships",
-    us: true,
-    planningPod: false,
-    tagvenue: false,
-    tripleseat: false,
-    peerspace: false,
-  },
-  {
-    feature: "Event Management",
-    description: "Full event scheduling, booking, and coordination",
-    us: true,
-    planningPod: true,
-    tagvenue: true,
-    tripleseat: true,
-    peerspace: true,
-  },
-  {
-    feature: "Payment Processing",
-    description: "Integrated payment and invoicing",
-    us: true,
-    planningPod: true,
-    tagvenue: true,
-    tripleseat: true,
-    peerspace: true,
-  },
-  {
-    feature: "Community Features",
-    description: "Forums, groups, and community building tools",
-    us: true,
-    planningPod: false,
-    tagvenue: false,
-    tripleseat: false,
-    peerspace: false,
-  },
-  {
-    feature: "Resource Marketplace",
-    description: "Rent/share equipment, services, and spaces",
-    us: true,
-    planningPod: false,
-    tagvenue: false,
-    tripleseat: false,
-    peerspace: "partial",
-  },
-  {
-    feature: "Travel/Touring Support",
-    description: "Route planning, POI discovery for mobile creators",
-    us: true,
-    planningPod: false,
-    tagvenue: false,
-    tripleseat: false,
-    peerspace: false,
-  },
+  { feature: "Non-Traditional Venues", description: "Warehouses, studios, maker spaces, unconventional locations", us: true, others: [false,P,false,true,P,false,P,false,P] },
+  { feature: "Artist/Creator Profiles", description: "Profiles for performers, artists, and makers", us: true, others: [false,false,false,false,P,false,false,false,true] },
+  { feature: "Booth & Floorplan Layout", description: "Sized booths, movable walls, multi-level plans, 3D walkthrough", us: true, others: [P,false,P,false,P,P,false,P,false] },
+  { feature: "Vendor Applications & Booth Assignment", description: "Collect applications, jury, assign approved vendors to booths", us: P, others: [P,false,false,false,true,P,false,false,false] },
+  { feature: "Equipment & Gear Tracking", description: "Technical equipment, AV gear, hardware inventory", us: true, others: [P,false,P,false,false,false,true,P,false] },
+  { feature: "Local Discovery Map", description: "Find what's happening nearby tonight", us: P, others: [false,P,false,P,P,false,false,false,true] },
+  { feature: "UGC Content Feed", description: "Behind-the-scenes, highlights, venue tours", us: true, others: [false,false,false,P,false,P,false,false,false] },
+  { feature: "Brand Collaboration", description: "Connect venues, artists, and brands", us: true, others: [false,false,false,false,P,P,false,false,false] },
+  { feature: "Event Management", description: "Scheduling, booking, and coordination", us: true, others: [true,true,true,true,true,true,true,true,P] },
+  { feature: "Payment Processing", description: "Integrated payment and invoicing", us: true, others: [true,true,true,true,true,true,true,true,false] },
+  { feature: "Community Features", description: "Forums, groups, community building", us: true, others: [false,false,false,false,false,P,false,false,false] },
+  { feature: "Resource Marketplace", description: "Rent/share equipment, services, spaces", us: true, others: [false,false,false,P,false,false,false,false,false] },
+  { feature: "Travel/Touring Support", description: "Route planning, POI discovery for mobile creators", us: true, others: [false,false,false,false,false,false,false,false,false] },
 ];
 
 const competitors = [
-  {
-    name: "Planning Pod",
-    focus: "Corporate Events",
-    pricing: "$$$",
-    bestFor: "Large corporate event planners",
-  },
-  {
-    name: "Tagvenue",
-    focus: "Venue Booking",
-    pricing: "$$",
-    bestFor: "Finding and booking traditional venues",
-  },
-  {
-    name: "Tripleseat",
-    focus: "Hospitality",
-    pricing: "$$$",
-    bestFor: "Restaurants and hotels with event spaces",
-  },
-  {
-    name: "Peerspace",
-    focus: "Creative Spaces",
-    pricing: "$$",
-    bestFor: "Hourly creative space rentals",
-  },
+  { name: "Planning Pod", focus: "Corporate Events", pricing: "$$$", bestFor: "Large corporate event planners" },
+  { name: "Tagvenue", focus: "Venue Booking", pricing: "$$", bestFor: "Finding and booking traditional venues" },
+  { name: "Tripleseat", focus: "Hospitality", pricing: "$$$", bestFor: "Restaurants and hotels with event spaces" },
+  { name: "Peerspace", focus: "Creative Spaces", pricing: "$$", bestFor: "Hourly creative space rentals" },
+  { name: "Eventeny", focus: "Vendors & Festivals", pricing: "$$", bestFor: "Vendor applications, jurying, booth maps" },
+  { name: "Accelevents", focus: "Conferences", pricing: "$$$", bestFor: "Registration, badges, attendee app" },
+  { name: "Releventful", focus: "Venue Back Office", pricing: "$$", bestFor: "Venues, restaurants, caterers: CRM, invoices" },
+  { name: "OkWhen", focus: "Full-Service Conferences", pricing: "$$$$", bestFor: "Software plus AV, staging, streaming" },
+  { name: "OninFive", focus: "Local Live Music", pricing: "Free", bestFor: "Map-first grassroots gig discovery" },
 ];
 
 const FeatureIcon = ({ value }: { value: boolean | "partial" }) => {
@@ -205,11 +114,8 @@ export default function PlatformComparison() {
                 <thead>
                   <tr className="border-b">
                     <th className="text-left py-3 px-4 font-semibold">Feature</th>
-                    <th className="text-center py-3 px-4 font-semibold text-primary">Us</th>
-                    <th className="text-center py-3 px-4 font-medium text-muted-foreground">Planning Pod</th>
-                    <th className="text-center py-3 px-4 font-medium text-muted-foreground">Tagvenue</th>
-                    <th className="text-center py-3 px-4 font-medium text-muted-foreground">Tripleseat</th>
-                    <th className="text-center py-3 px-4 font-medium text-muted-foreground">Peerspace</th>
+                    <th className="text-center py-3 px-4 font-semibold text-primary">Garflock</th>
+                    {COLS.map((c) => (<th key={c} className="text-center py-3 px-3 text-sm font-medium text-muted-foreground whitespace-nowrap">{c}</th>))}
                   </tr>
                 </thead>
                 <tbody>
@@ -224,26 +130,7 @@ export default function PlatformComparison() {
                           <FeatureIcon value={item.us} />
                         </div>
                       </td>
-                      <td className="text-center py-3 px-4">
-                        <div className="flex justify-center">
-                          <FeatureIcon value={item.planningPod} />
-                        </div>
-                      </td>
-                      <td className="text-center py-3 px-4">
-                        <div className="flex justify-center">
-                          <FeatureIcon value={item.tagvenue} />
-                        </div>
-                      </td>
-                      <td className="text-center py-3 px-4">
-                        <div className="flex justify-center">
-                          <FeatureIcon value={item.tripleseat} />
-                        </div>
-                      </td>
-                      <td className="text-center py-3 px-4">
-                        <div className="flex justify-center">
-                          <FeatureIcon value={item.peerspace} />
-                        </div>
-                      </td>
+                      {item.others.map((v, i) => (<td key={COLS[i]} className="text-center py-3 px-3"><div className="flex justify-center"><FeatureIcon value={v} /></div></td>))}
                     </tr>
                   ))}
                 </tbody>
@@ -255,7 +142,7 @@ export default function PlatformComparison() {
         {/* Competitor Cards */}
         <div className="space-y-6">
           <h2 className="text-2xl font-bold text-center">Who Are They Built For?</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {competitors.map((comp) => (
               <Card key={comp.name} className="text-center">
                 <CardHeader>
