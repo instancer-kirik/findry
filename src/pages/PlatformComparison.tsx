@@ -118,7 +118,15 @@ export default function PlatformComparison() {
                   <tr className="border-b">
                     <th className="text-left py-3 px-4 font-semibold">Feature</th>
                     <th className="text-center py-3 px-4 font-semibold text-primary">Garflock</th>
-                    {COLS.map((c) => (<th key={c} className="text-center py-3 px-3 text-sm font-medium text-muted-foreground whitespace-nowrap">{c}</th>))}
+                    {COLS.map((c) => { const info = competitors.find((x) => x.name === c); return (
+                      <th key={c} className="text-center align-top py-3 px-3 text-sm font-medium text-muted-foreground min-w-[140px]">
+                        <div className="whitespace-nowrap text-foreground">{c}</div>
+                        {info && (<div className="mt-1 space-y-1 font-normal">
+                          <Badge variant="outline" className="text-[10px]">{info.focus}</Badge>
+                          <div className="text-[11px] leading-snug">{info.bestFor}</div>
+                          <div className="font-mono text-[11px] text-primary">{info.pricing}</div>
+                        </div>)}
+                      </th>); })}
                   </tr>
                 </thead>
                 <tbody>
