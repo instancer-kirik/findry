@@ -21,7 +21,7 @@ const features: FeatureComparison[] = [
   { feature: "Ticketing & Registration", description: "Sell tickets, RSVPs, tiered pricing", us: P, others: [P,false,false,false,true,true,false,true,false,P,P,false,true,true,true,true,P,P,true,P] },
   { feature: "Resale & Secondary Market", description: "Fans resell tickets safely", us: false, others: [false,false,false,false,false,false,false,false,false,false,false,false,P,true,true,true,false,false,true,false] },
   { feature: "Check-In & Badges", description: "QR scanning, badge printing, door management", us: false, others: [P,false,false,false,true,true,false,true,false,false,P,false,true,true,true,true,false,false,true,P] },
-  { feature: "Attendee Mobile App", description: "Native app for attendees and fans", us: false, others: [false,true,false,true,true,true,false,true,true,false,true,P,true,true,true,true,true,true,true,true] },
+  { feature: "Attendee Mobile App", description: "Native app for attendees and fans (ours: installable web app)", us: P, others: [false,true,false,true,true,true,false,true,true,false,true,P,true,true,true,true,true,true,true,true] },
   { feature: "Email & Marketing Tools", description: "Promo campaigns, reminders, audience lists", us: P, others: [true,false,true,false,true,true,true,true,false,true,P,P,true,true,P,false,true,P,P,true] },
   { feature: "Analytics & Reporting", description: "Sales, attendance, revenue dashboards", us: P, others: [true,P,true,P,true,true,true,true,false,true,true,true,true,true,true,true,true,P,true,P] },
   { feature: "CRM & Client Management", description: "Leads, proposals, contracts, client history", us: P, others: [true,P,true,false,P,P,true,true,false,true,P,P,false,false,false,false,false,false,false,false] },
@@ -51,6 +51,9 @@ const features: FeatureComparison[] = [
   { feature: "Resource Marketplace", description: "Rent/share equipment, services, spaces", us: true, others: [false,false,false,P,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false] },
   { feature: "Travel/Touring Support", description: "Route planning, POI discovery for mobile creators", us: true, others: [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,P,false,false,false] },
 ];
+
+const ORDER = ["Event Management","Payment Processing","Ticketing & Registration","Non-Traditional Venues","Analytics & Reporting","Booth & Floorplan Layout","Email & Marketing Tools","Artist/Creator Profiles","Attendee Mobile App","Vendor Applications & Booth Assignment","CRM & Client Management","Local Discovery Map","Fan Following & Alerts","Community Features","Virtual & Hybrid Events","Equipment & Gear Tracking","Check-In & Badges","Multi-Level Space Planning","Large Audience Reach","3D Walkthrough Preview","Saved Layout Templates","Resale & Secondary Market","Space Module Library","Venue Hardware & Games","Recurring Community Programming","Collaborator & Skill Matching","Booth-Level Messaging","Creator Portfolio Pages","UGC Content Feed","Brand Collaboration","Resource Marketplace","Travel/Touring Support"];
+const orderedFeatures = [...features].sort((a, b) => { const ia = ORDER.indexOf(a.feature), ib = ORDER.indexOf(b.feature); return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib); });
 
 const competitors = [
   { name: "Planning Pod", focus: "Corporate Events", pricing: "$$$", bestFor: "Large corporate event planners" },
@@ -140,14 +143,14 @@ export default function PlatformComparison() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
+            <div className="overflow-auto max-h-[80vh] rounded-md border">
+              <table className="w-full border-separate border-spacing-0">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-3 px-4 font-semibold">Feature</th>
-                    <th className="text-center py-3 px-4 font-semibold text-primary">Garflock</th>
+                    <th className="sticky top-0 left-0 z-30 bg-card border-b text-left py-3 px-4 font-semibold min-w-[200px]">Feature</th>
+                    <th className="sticky top-0 z-20 bg-card border-b text-center py-3 px-4 font-semibold text-primary">Garflock</th>
                     {COLS.map((c) => (
-                      <th key={c} className="text-center py-3 px-3 text-sm font-semibold min-w-[140px]">
+                      <th key={c} className="sticky top-0 z-20 bg-card border-b text-center py-3 px-3 text-sm font-semibold min-w-[140px]">
                         <div className="whitespace-nowrap">{c}</div>
                       </th>
                     ))}
@@ -155,7 +158,7 @@ export default function PlatformComparison() {
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="py-3 px-4 font-medium text-muted-foreground">Focus / Best For / Pricing</td>
+                    <td className="sticky left-0 z-10 bg-card py-3 px-4 font-medium text-muted-foreground">Focus / Best For / Pricing</td>
                     <td className="text-center py-3 px-4">
                       <Badge variant="outline" className="text-[10px]">Makers & Communities</Badge>
                       <div className="text-[11px] leading-snug text-muted-foreground mt-1">Zero-to-one creators, venues, DIY fabricators</div>
@@ -170,9 +173,9 @@ export default function PlatformComparison() {
                         </div>)}
                       </td>); })}
                   </tr>
-                  {features.map((item, index) => (
+                  {orderedFeatures.map((item, index) => (
                     <tr key={item.feature} className={index % 2 === 0 ? "bg-muted/30" : ""}>
-                      <td className="py-3 px-4">
+                      <td className="sticky left-0 z-10 bg-card py-3 px-4 min-w-[200px]">
                         <div className="font-medium">{item.feature}</div>
                         <div className="text-sm text-muted-foreground">{item.description}</div>
                       </td>
