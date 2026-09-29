@@ -118,18 +118,30 @@ export default function PlatformComparison() {
                   <tr className="border-b">
                     <th className="text-left py-3 px-4 font-semibold">Feature</th>
                     <th className="text-center py-3 px-4 font-semibold text-primary">Garflock</th>
-                    {COLS.map((c) => { const info = competitors.find((x) => x.name === c); return (
-                      <th key={c} className="text-center align-top py-3 px-3 text-sm font-medium text-muted-foreground min-w-[140px]">
-                        <div className="whitespace-nowrap text-foreground">{c}</div>
-                        {info && (<div className="mt-1 space-y-1 font-normal">
-                          <Badge variant="outline" className="text-[10px]">{info.focus}</Badge>
-                          <div className="text-[11px] leading-snug">{info.bestFor}</div>
-                          <div className="font-mono text-[11px] text-primary">{info.pricing}</div>
-                        </div>)}
-                      </th>); })}
+                    {COLS.map((c) => (
+                      <th key={c} className="text-center py-3 px-3 text-sm font-semibold min-w-[140px]">
+                        <div className="whitespace-nowrap">{c}</div>
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
+                  <tr>
+                    <td className="py-3 px-4 font-medium text-muted-foreground">Focus / Best For / Pricing</td>
+                    <td className="text-center py-3 px-4">
+                      <Badge variant="outline" className="text-[10px]">Makers & Communities</Badge>
+                      <div className="text-[11px] leading-snug text-muted-foreground mt-1">Zero-to-one creators, venues, DIY fabricators</div>
+                      <div className="font-mono text-[11px] text-primary mt-1">Free</div>
+                    </td>
+                    {COLS.map((c) => { const info = competitors.find((x) => x.name === c); return (
+                      <td key={c} className="text-center align-top py-3 px-3">
+                        {info && (<div className="space-y-1">
+                          <div className="flex justify-center"><Badge variant="outline" className="text-[10px]">{info.focus}</Badge></div>
+                          <div className="text-[11px] leading-snug text-muted-foreground">{info.bestFor}</div>
+                          <div className="font-mono text-[11px] text-primary">{info.pricing}</div>
+                        </div>)}
+                      </td>); })}
+                  </tr>
                   {features.map((item, index) => (
                     <tr key={item.feature} className={index % 2 === 0 ? "bg-muted/30" : ""}>
                       <td className="py-3 px-4">
