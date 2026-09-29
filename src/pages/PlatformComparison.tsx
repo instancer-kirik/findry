@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 type V = boolean | "partial";
-const COLS = ["Planning Pod","Tagvenue","Tripleseat","Peerspace","Eventeny","Accelevents","Releventful","OkWhen","OninFive","Evently (venues)","Evently.ai","501 Fun"] as const;
+const COLS = ["Planning Pod","Tagvenue","Tripleseat","Peerspace","Eventeny","Accelevents","Releventful","OkWhen","OninFive","Evently (venues)","Evently.ai","501 Fun","Eventbrite","Ticketmaster","SeatGeek","StubHub","Bandsintown","Songkick","DICE","Meetup"] as const;
 
 interface FeatureComparison {
   feature: string;
@@ -45,6 +45,14 @@ const competitors = [
   { name: "Evently (venues)", focus: "Venue Bookings", pricing: "$$", bestFor: "Breweries, restaurants, event spaces: bookings, payments, menus" },
   { name: "Evently.ai", focus: "Exhibitor Meetings", pricing: "$$", bestFor: "Booth meeting scheduling at trade shows" },
   { name: "501 Fun", focus: "Venue Entertainment", pricing: "$$$", bestFor: "Bars and entertainment venues: darts scoring, AR games, sessions" },
+  { name: "Eventbrite", focus: "Ticketing & Events", pricing: "$", bestFor: "Organizers selling tickets to public events" },
+  { name: "Ticketmaster", focus: "Primary Ticketing", pricing: "$$$", bestFor: "Large venues and major tours" },
+  { name: "SeatGeek", focus: "Ticket Marketplace", pricing: "$$", bestFor: "Buying/reselling sports and concert tickets" },
+  { name: "StubHub", focus: "Ticket Resale", pricing: "$$$", bestFor: "Reselling tickets to big events" },
+  { name: "Bandsintown", focus: "Artist-Fan Marketing", pricing: "$", bestFor: "Tour promotion and fan announcements" },
+  { name: "Songkick", focus: "Concert Discovery", pricing: "Free", bestFor: "Tracking artists' tour dates" },
+  { name: "DICE", focus: "Music Ticketing", pricing: "$", bestFor: "Fan-first mobile ticketing for venues and promoters" },
+  { name: "Meetup", focus: "Community Groups", pricing: "$$", bestFor: "Recurring local interest groups" },
 ];
 
 const FeatureIcon = ({ value }: { value: boolean | "partial" }) => {
