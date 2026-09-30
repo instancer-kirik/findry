@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 
 type V = boolean | "partial";
 const BASE_COLS = ["Planning Pod","Tagvenue","Tripleseat","Peerspace","Eventeny","Accelevents","Releventful","OkWhen","OninFive","Evently (venues)","Evently.ai","501 Fun","Eventbrite","Ticketmaster","SeatGeek","StubHub","Bandsintown","Songkick","DICE","Meetup","Goodshuffle Pro","Prism.fm","Cvent (Social Tables)","AllSeated","Whova","Rentman","Luma","Partiful"] as const;
-const EXTRA_COLS = ["Zeffy","Humanitix","CrewBrain","YourStartupOperations","Klipboard","IBTM Events","Alchemer","TicketLeap","Attio","Eventist","Resi","HoneyBook","Passage","Live Circuit","Smoke & Mirrors","Forge Strategy","Vendelux","EventPro Suite","Gearhead Events","Ever Bridal","OnTheStage Tix","Huge Convention","Flicket","Fora","WeddingPro","AllBooked","We Crush Events","FeedIRL","Total Party Planner","Reunion"] as const;
+const EXTRA_COLS = ["Zeffy","Humanitix","CrewBrain","YourStartupOperations","Klipboard","IBTM Events","Alchemer","TicketLeap","Attio","Eventist","Resi","HoneyBook","Passage","Live Circuit","Smoke & Mirrors","Forge Strategy","Vendelux","EventPro Suite","Gearhead Events","Ever Bridal","OnTheStage Tix","Huge Convention","Flicket","Fora","WeddingPro","AllBooked","We Crush Events","FeedIRL","Total Party Planner","Reunion","RestauRent","SevenRooms","iVvy","VenueBook","Creventa"] as const;
 const COLS = [...BASE_COLS, ...EXTRA_COLS];
 
 interface FeatureComparison {
@@ -144,6 +144,11 @@ const competitors = [
   { name: "FeedIRL", focus: "Event Picks via Instagram DM", pricing: "Free", bestFor: "Going out in NYC, LA, Miami, Chicago, Austin, Nashville; promoters paying to reach them" },
   { name: "Total Party Planner", focus: "Catering Software", pricing: "$$", bestFor: "Caterers: BEOs, menu costing, packlists, staffing, CRM and payments" },
   { name: "Reunion", focus: "Private Event Software", pricing: "Free-$249/mo", bestFor: "Restaurants, hotels and activity venues: lead pipeline, AI proposals, BEOs, deposits, team-building directory" },
+  { name: "RestauRent", focus: "Private Event Marketplace", pricing: "Free for planners", bestFor: "Restaurants, bars, breweries and unique spaces receiving qualified event requests without commissions" },
+  { name: "SevenRooms", focus: "Guest Experience & Reservations", pricing: "$$$", bestFor: "Restaurants, hotels and nightlife: reservations, guest CRM, events and prepaid experiences" },
+  { name: "iVvy", focus: "Venue & Event Management", pricing: "$$$", bestFor: "Restaurants, hotels and caterers: bookings, BEOs, proposals, catering orders and inventory" },
+  { name: "VenueBook", focus: "Restaurant Private Hire", pricing: "$", bestFor: "Restaurants taking private hire and functions: enquiry pipeline, deposits, pre-orders, kitchen sheets" },
+  { name: "Creventa", focus: "Hospitality Event Journey", pricing: "$$", bestFor: "Restaurants, hotels and event venues: enquiries, proposals, guest pre-orders, seating, payments, ticketing" },
 ];
 
 const FeatureIcon = ({ value }: { value: boolean | "partial" }) => {
