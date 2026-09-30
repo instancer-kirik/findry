@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 
 type V = boolean | "partial";
 const BASE_COLS = ["Planning Pod","Tagvenue","Tripleseat","Peerspace","Eventeny","Accelevents","Releventful","OkWhen","OninFive","Evently (venues)","Evently.ai","501 Fun","Eventbrite","Ticketmaster","SeatGeek","StubHub","Bandsintown","Songkick","DICE","Meetup","Goodshuffle Pro","Prism.fm","Cvent (Social Tables)","AllSeated","Whova","Rentman","Luma","Partiful"] as const;
-const EXTRA_COLS = ["Zeffy","Humanitix","CrewBrain","YourStartupOperations","Klipboard","IBTM Events","Alchemer","TicketLeap","Attio","Eventist","Resi","HoneyBook"] as const;
+const EXTRA_COLS = ["Zeffy","Humanitix","CrewBrain","YourStartupOperations","Klipboard","IBTM Events","Alchemer","TicketLeap","Attio","Eventist","Resi","HoneyBook","Passage","Live Circuit","Smoke & Mirrors","Forge Strategy"] as const;
 const COLS = [...BASE_COLS, ...EXTRA_COLS];
 
 interface FeatureComparison {
@@ -56,23 +56,23 @@ const features: FeatureComparison[] = [
 
 type ExtraCol = typeof EXTRA_COLS[number];
 const EXTRA: Record<string, Partial<Record<ExtraCol, V>>> = {
-  "Ticketing & Registration": { Zeffy: true, Humanitix: true, TicketLeap: true, Eventist: true, "IBTM Events": P },
-  "Check-In & Badges": { Zeffy: P, Humanitix: true, TicketLeap: true, Eventist: true },
-  "Attendee Mobile App": { Humanitix: P, "IBTM Events": true, Resi: true, CrewBrain: P, HoneyBook: true },
-  "Email & Marketing Tools": { Zeffy: true, Humanitix: P, TicketLeap: P, Attio: true, Alchemer: P, Eventist: true, HoneyBook: true },
-  "Analytics & Reporting": { Zeffy: true, Humanitix: true, TicketLeap: true, Alchemer: true, Attio: true, Resi: true, CrewBrain: P, Klipboard: true, Eventist: true, HoneyBook: true },
-  "CRM & Client Management": { Zeffy: P, Attio: true, Klipboard: P, Eventist: true, HoneyBook: true },
-  "Virtual & Hybrid Events": { Resi: true, "IBTM Events": P },
+  "Ticketing & Registration": { Zeffy: true, Humanitix: true, TicketLeap: true, Eventist: true, "IBTM Events": P, Passage: true },
+  "Check-In & Badges": { Zeffy: P, Humanitix: true, TicketLeap: true, Eventist: true, Passage: true },
+  "Attendee Mobile App": { Humanitix: P, "IBTM Events": true, Resi: true, CrewBrain: P, HoneyBook: true, Passage: P },
+  "Email & Marketing Tools": { Zeffy: true, Humanitix: P, TicketLeap: P, Attio: true, Alchemer: P, Eventist: true, HoneyBook: true, Passage: P, "Forge Strategy": true },
+  "Analytics & Reporting": { Zeffy: true, Humanitix: true, TicketLeap: true, Alchemer: true, Attio: true, Resi: true, CrewBrain: P, Klipboard: true, Eventist: true, HoneyBook: true, Passage: true, "Forge Strategy": P },
+  "CRM & Client Management": { Zeffy: P, Attio: true, Klipboard: P, Eventist: true, HoneyBook: true, "Forge Strategy": P },
+  "Virtual & Hybrid Events": { Resi: true, "IBTM Events": P, Passage: P, "Smoke & Mirrors": P },
   "Large Audience Reach": { "IBTM Events": P, Eventist: P },
-  "Event Management": { Zeffy: P, Humanitix: true, TicketLeap: true, CrewBrain: true, "IBTM Events": P, Eventist: true, YourStartupOperations: P, HoneyBook: true },
-  "Payment Processing": { Zeffy: true, Humanitix: true, TicketLeap: true, Klipboard: true, Eventist: P, HoneyBook: true },
+  "Event Management": { Zeffy: P, Humanitix: true, TicketLeap: true, CrewBrain: true, "IBTM Events": P, Eventist: true, YourStartupOperations: P, HoneyBook: true, Passage: P, "Smoke & Mirrors": true },
+  "Payment Processing": { Zeffy: true, Humanitix: true, TicketLeap: true, Klipboard: true, Eventist: P, HoneyBook: true, Passage: true },
   "Booth & Floorplan Layout": { Eventist: true },
   "Vendor Applications & Booth Assignment": { Eventist: P },
   "Venue Hardware & Games": { Eventist: P },
-  "Equipment & Gear Tracking": { CrewBrain: P, Klipboard: true },
-  "Community Features": { Zeffy: P, "IBTM Events": P },
+  "Equipment & Gear Tracking": { CrewBrain: P, Klipboard: true, "Smoke & Mirrors": P },
+  "Community Features": { Zeffy: P, "IBTM Events": P, "Live Circuit": P },
   "Brand Collaboration": { "IBTM Events": P },
-  "Collaborator & Skill Matching": { CrewBrain: P, "IBTM Events": P },
+  "Collaborator & Skill Matching": { CrewBrain: P, "IBTM Events": P, "Live Circuit": true },
   "Recurring Community Programming": { Resi: P },
 };
 
@@ -121,6 +121,10 @@ const competitors = [
   { name: "Eventist", focus: "Canadian Event Operations", pricing: "Custom", bestFor: "Canadian organizers needing ticketing, check-in, booth maps, scheduling, staff, CRM, and scoring" },
   { name: "Resi", focus: "Livestreaming", pricing: "$$$", bestFor: "Churches and venues: reliable multi-site livestreams" },
   { name: "HoneyBook", focus: "Clientflow CRM", pricing: "$$", bestFor: "Independent event professionals managing leads, proposals, contracts, invoices, and client communication" },
+  { name: "Passage", focus: "Ticketing & Box Office", pricing: "Fee-based", bestFor: "Attractions, festivals, theaters: tickets, merch, reserved seating, white-label portals" },
+  { name: "Live Circuit", focus: "Crew & Vendor Directory", pricing: "Free", bestFor: "Finding stagehands, riggers, production vendors across North America" },
+  { name: "Smoke & Mirrors", focus: "AV Production Company", pricing: "$$$", bestFor: "LA events needing lighting, sound, video mapping, staging, on-site production" },
+  { name: "Forge Strategy", focus: "Outbound Lead Gen Agency", pricing: "$$$", bestFor: "Businesses wanting managed cold email and LinkedIn campaigns" },
 ];
 
 const FeatureIcon = ({ value }: { value: boolean | "partial" }) => {
