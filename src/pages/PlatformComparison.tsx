@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 
 type V = boolean | "partial";
 const BASE_COLS = ["Planning Pod","Tagvenue","Tripleseat","Peerspace","Eventeny","Accelevents","Releventful","OkWhen","OninFive","Evently (venues)","Evently.ai","501 Fun","Eventbrite","Ticketmaster","SeatGeek","StubHub","Bandsintown","Songkick","DICE","Meetup","Goodshuffle Pro","Prism.fm","Cvent (Social Tables)","AllSeated","Whova","Rentman","Luma","Partiful"] as const;
-const EXTRA_COLS = ["Zeffy","Humanitix","CrewBrain","YourStartupOperations","Klipboard","IBTM Events","Alchemer","TicketLeap","Attio","Eventist","Resi","HoneyBook","Passage","Live Circuit","Smoke & Mirrors","Forge Strategy","Vendelux","EventPro Suite","Gearhead Events","Ever Bridal","OnTheStage Tix","Huge Convention","Flicket","Fora","WeddingPro"] as const;
+const EXTRA_COLS = ["Zeffy","Humanitix","CrewBrain","YourStartupOperations","Klipboard","IBTM Events","Alchemer","TicketLeap","Attio","Eventist","Resi","HoneyBook","Passage","Live Circuit","Smoke & Mirrors","Forge Strategy","Vendelux","EventPro Suite","Gearhead Events","Ever Bridal","OnTheStage Tix","Huge Convention","Flicket","Fora","WeddingPro","AllBooked"] as const;
 const COLS = [...BASE_COLS, ...EXTRA_COLS];
 
 interface FeatureComparison {
@@ -60,23 +60,24 @@ const EXTRA: Record<string, Partial<Record<ExtraCol, V>>> = {
   "Check-In & Badges": { Zeffy: P, Humanitix: true, TicketLeap: true, Eventist: true, Passage: true, "OnTheStage Tix": true, Flicket: true, "Gearhead Events": true },
   "Attendee Mobile App": { Humanitix: P, "IBTM Events": true, Resi: true, CrewBrain: P, HoneyBook: true, Passage: P, WeddingPro: P },
   "Email & Marketing Tools": { Zeffy: true, Humanitix: P, TicketLeap: P, Attio: true, Alchemer: P, Eventist: true, HoneyBook: true, Passage: P, "Forge Strategy": true, Vendelux: P, "OnTheStage Tix": true, Flicket: true, WeddingPro: true, "Ever Bridal": true, "EventPro Suite": true, "Gearhead Events": P },
-  "Analytics & Reporting": { Zeffy: true, Humanitix: true, TicketLeap: true, Alchemer: true, Attio: true, Resi: true, CrewBrain: P, Klipboard: true, Eventist: true, HoneyBook: true, Passage: true, "Forge Strategy": P, Vendelux: true, "OnTheStage Tix": true, Flicket: true, WeddingPro: true, "Ever Bridal": P },
-  "CRM & Client Management": { Zeffy: P, Attio: true, Klipboard: P, Eventist: true, HoneyBook: true, "Forge Strategy": P, Vendelux: P, "EventPro Suite": true, WeddingPro: true, "Ever Bridal": P, "OnTheStage Tix": true, Fora: P },
+  "Analytics & Reporting": { Zeffy: true, Humanitix: true, TicketLeap: true, Alchemer: true, Attio: true, Resi: true, CrewBrain: P, Klipboard: true, Eventist: true, HoneyBook: true, Passage: true, "Forge Strategy": P, Vendelux: true, "OnTheStage Tix": true, Flicket: true, WeddingPro: true, "Ever Bridal": P, AllBooked: P },
+  "CRM & Client Management": { Zeffy: P, Attio: true, Klipboard: P, Eventist: true, HoneyBook: true, "Forge Strategy": P, Vendelux: P, "EventPro Suite": true, WeddingPro: true, "Ever Bridal": P, "OnTheStage Tix": true, Fora: P, AllBooked: P },
   "Virtual & Hybrid Events": { Resi: true, "IBTM Events": P, Passage: P, "Smoke & Mirrors": P },
   "Large Audience Reach": { "IBTM Events": P, Eventist: P, WeddingPro: true },
-  "Event Management": { Zeffy: P, Humanitix: true, TicketLeap: true, CrewBrain: true, "IBTM Events": P, Eventist: true, YourStartupOperations: P, HoneyBook: true, Passage: P, "Smoke & Mirrors": true, "EventPro Suite": true, "Gearhead Events": true, "OnTheStage Tix": true, Flicket: P, Fora: P },
-  "Payment Processing": { Zeffy: true, Humanitix: true, TicketLeap: true, Klipboard: true, Eventist: P, HoneyBook: true, Passage: true, "OnTheStage Tix": true, Flicket: true, "Gearhead Events": true, "EventPro Suite": P },
-  "Booth & Floorplan Layout": { Eventist: true, "Gearhead Events": P },
+  "Event Management": { Zeffy: P, Humanitix: true, TicketLeap: true, CrewBrain: true, "IBTM Events": P, Eventist: true, YourStartupOperations: P, HoneyBook: true, Passage: P, "Smoke & Mirrors": true, "EventPro Suite": true, "Gearhead Events": true, "OnTheStage Tix": true, Flicket: P, Fora: P, AllBooked: P },
+  "Payment Processing": { Zeffy: true, Humanitix: true, TicketLeap: true, Klipboard: true, Eventist: P, HoneyBook: true, Passage: true, "OnTheStage Tix": true, Flicket: true, "Gearhead Events": true, "EventPro Suite": P, AllBooked: true },
+  "Booth & Floorplan Layout": { Eventist: true, "Gearhead Events": P, AllBooked: P },
   "Vendor Applications & Booth Assignment": { Eventist: P, "Gearhead Events": true },
   "Venue Hardware & Games": { Eventist: P },
   "Equipment & Gear Tracking": { CrewBrain: P, Klipboard: true, "Smoke & Mirrors": P },
   "Community Features": { Zeffy: P, "IBTM Events": P, "Live Circuit": P, "Huge Convention": true, WeddingPro: P },
   "Brand Collaboration": { "IBTM Events": P, "Huge Convention": P },
   "Collaborator & Skill Matching": { CrewBrain: P, "IBTM Events": P, "Live Circuit": true, Fora: true },
-  "Recurring Community Programming": { Resi: P, "Huge Convention": P, Flicket: P },
+  "Recurring Community Programming": { Resi: P, "Huge Convention": P, Flicket: P, AllBooked: P },
   "Resale & Secondary Market": { Flicket: true },
   "Resource Marketplace": { Fora: P },
   "Creator Portfolio Pages": { WeddingPro: true },
+  "Non-Traditional Venues": { AllBooked: true },
 };
 
 const ORDER = ["Event Management","Payment Processing","Ticketing & Registration","Non-Traditional Venues","Analytics & Reporting","Booth & Floorplan Layout","Email & Marketing Tools","Artist/Creator Profiles","Attendee Mobile App","Vendor Applications & Booth Assignment","CRM & Client Management","Local Discovery Map","Fan Following & Alerts","Community Features","Virtual & Hybrid Events","Equipment & Gear Tracking","Check-In & Badges","Multi-Level Space Planning","Large Audience Reach","3D Walkthrough Preview","Saved Layout Templates","Resale & Secondary Market","Space Module Library","Venue Hardware & Games","Recurring Community Programming","Collaborator & Skill Matching","Booth-Level Messaging","Creator Portfolio Pages","UGC Content Feed","Brand Collaboration","Resource Marketplace","Travel/Touring Support"];
@@ -137,6 +138,7 @@ const competitors = [
   { name: "Flicket", focus: "White-Label Ticketing", pricing: "$", bestFor: "Promoters and festivals (NZ/AU/US): dynamic pricing, resale control, memberships, waitlists" },
   { name: "Fora", focus: "Shared Vendor Database", pricing: "Free-$", bestFor: "Event producers tracking photographers, caterers, venues with rates, tiers, insurance and W9s" },
   { name: "WeddingPro", focus: "Wedding Vendor Marketplace", pricing: "$$$", bestFor: "Wedding pros getting leads from The Knot and WeddingWire (15M+ monthly visitors)" },
+  { name: "AllBooked", focus: "Space & Court Booking", pricing: "$$", bestFor: "Sports centers, studios, coworking and community spaces renting by the hour: clickable floor-plan booking, memberships, pricing rules" },
 ];
 
 const FeatureIcon = ({ value }: { value: boolean | "partial" }) => {
