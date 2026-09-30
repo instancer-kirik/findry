@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 
 type V = boolean | "partial";
 const BASE_COLS = ["Planning Pod","Tagvenue","Tripleseat","Peerspace","Eventeny","Accelevents","Releventful","OkWhen","OninFive","Evently (venues)","Evently.ai","501 Fun","Eventbrite","Ticketmaster","SeatGeek","StubHub","Bandsintown","Songkick","DICE","Meetup","Goodshuffle Pro","Prism.fm","Cvent (Social Tables)","AllSeated","Whova","Rentman","Luma","Partiful"] as const;
-const EXTRA_COLS = ["Zeffy","Humanitix","CrewBrain","YourStartupOperations","Klipboard","IBTM Events","Alchemer","TicketLeap","Attio","Eventist","Resi","HoneyBook","Passage","Live Circuit","Smoke & Mirrors","Forge Strategy","Vendelux","EventPro Suite","Gearhead Events","Ever Bridal","OnTheStage Tix","Huge Convention","Flicket","Fora","WeddingPro","AllBooked","We Crush Events","FeedIRL","Total Party Planner"] as const;
+const EXTRA_COLS = ["Zeffy","Humanitix","CrewBrain","YourStartupOperations","Klipboard","IBTM Events","Alchemer","TicketLeap","Attio","Eventist","Resi","HoneyBook","Passage","Live Circuit","Smoke & Mirrors","Forge Strategy","Vendelux","EventPro Suite","Gearhead Events","Ever Bridal","OnTheStage Tix","Huge Convention","Flicket","Fora","WeddingPro","AllBooked","We Crush Events","FeedIRL","Total Party Planner","Reunion"] as const;
 const COLS = [...BASE_COLS, ...EXTRA_COLS];
 
 interface FeatureComparison {
@@ -59,13 +59,13 @@ const EXTRA: Record<string, Partial<Record<ExtraCol, V>>> = {
   "Ticketing & Registration": { Zeffy: true, Humanitix: true, TicketLeap: true, Eventist: true, "IBTM Events": P, Passage: true, "OnTheStage Tix": true, Flicket: true, "Gearhead Events": true, "Huge Convention": P },
   "Check-In & Badges": { Zeffy: P, Humanitix: true, TicketLeap: true, Eventist: true, Passage: true, "OnTheStage Tix": true, Flicket: true, "Gearhead Events": true },
   "Attendee Mobile App": { "Total Party Planner": P, FeedIRL: P, Humanitix: P, "IBTM Events": true, Resi: true, CrewBrain: P, HoneyBook: true, Passage: P, WeddingPro: P },
-  "Email & Marketing Tools": { FeedIRL: P, Zeffy: true, Humanitix: P, TicketLeap: P, Attio: true, Alchemer: P, Eventist: true, HoneyBook: true, Passage: P, "Forge Strategy": true, Vendelux: P, "OnTheStage Tix": true, Flicket: true, WeddingPro: true, "Ever Bridal": true, "EventPro Suite": true, "Gearhead Events": P },
-  "Analytics & Reporting": { "Total Party Planner": true, Zeffy: true, Humanitix: true, TicketLeap: true, Alchemer: true, Attio: true, Resi: true, CrewBrain: P, Klipboard: true, Eventist: true, HoneyBook: true, Passage: true, "Forge Strategy": P, Vendelux: true, "OnTheStage Tix": true, Flicket: true, WeddingPro: true, "Ever Bridal": P, AllBooked: P },
-  "CRM & Client Management": { "Total Party Planner": true, Zeffy: P, Attio: true, Klipboard: P, Eventist: true, HoneyBook: true, "Forge Strategy": P, Vendelux: P, "EventPro Suite": true, WeddingPro: true, "Ever Bridal": P, "OnTheStage Tix": true, Fora: P, AllBooked: P },
+  "Email & Marketing Tools": { FeedIRL: P, Zeffy: true, Humanitix: P, TicketLeap: P, Attio: true, Alchemer: P, Eventist: true, HoneyBook: true, Passage: P, "Forge Strategy": true, Vendelux: P, "OnTheStage Tix": true, Flicket: true, WeddingPro: true, "Ever Bridal": true, "EventPro Suite": true, "Gearhead Events": P, Reunion: true },
+  "Analytics & Reporting": { "Total Party Planner": true, Zeffy: true, Humanitix: true, TicketLeap: true, Alchemer: true, Attio: true, Resi: true, CrewBrain: P, Klipboard: true, Eventist: true, HoneyBook: true, Passage: true, "Forge Strategy": P, Vendelux: true, "OnTheStage Tix": true, Flicket: true, WeddingPro: true, "Ever Bridal": P, AllBooked: P, Reunion: P },
+  "CRM & Client Management": { "Total Party Planner": true, Zeffy: P, Attio: true, Klipboard: P, Eventist: true, HoneyBook: true, "Forge Strategy": P, Vendelux: P, "EventPro Suite": true, WeddingPro: true, "Ever Bridal": P, "OnTheStage Tix": true, Fora: P, AllBooked: P, Reunion: true },
   "Virtual & Hybrid Events": { "We Crush Events": true, Resi: true, "IBTM Events": P, Passage: P, "Smoke & Mirrors": P },
   "Large Audience Reach": { FeedIRL: P, "IBTM Events": P, Eventist: P, WeddingPro: true },
-  "Event Management": { "We Crush Events": true, "Total Party Planner": true, Zeffy: P, Humanitix: true, TicketLeap: true, CrewBrain: true, "IBTM Events": P, Eventist: true, YourStartupOperations: P, HoneyBook: true, Passage: P, "Smoke & Mirrors": true, "EventPro Suite": true, "Gearhead Events": true, "OnTheStage Tix": true, Flicket: P, Fora: P, AllBooked: P },
-  "Payment Processing": { "Total Party Planner": true, Zeffy: true, Humanitix: true, TicketLeap: true, Klipboard: true, Eventist: P, HoneyBook: true, Passage: true, "OnTheStage Tix": true, Flicket: true, "Gearhead Events": true, "EventPro Suite": P, AllBooked: true },
+  "Event Management": { "We Crush Events": true, "Total Party Planner": true, Zeffy: P, Humanitix: true, TicketLeap: true, CrewBrain: true, "IBTM Events": P, Eventist: true, YourStartupOperations: P, HoneyBook: true, Passage: P, "Smoke & Mirrors": true, "EventPro Suite": true, "Gearhead Events": true, "OnTheStage Tix": true, Flicket: P, Fora: P, AllBooked: P, Reunion: true },
+  "Payment Processing": { "Total Party Planner": true, Zeffy: true, Humanitix: true, TicketLeap: true, Klipboard: true, Eventist: P, HoneyBook: true, Passage: true, "OnTheStage Tix": true, Flicket: true, "Gearhead Events": true, "EventPro Suite": P, AllBooked: true, Reunion: true },
   "Booth & Floorplan Layout": { Eventist: true, "Gearhead Events": P, AllBooked: P },
   "Vendor Applications & Booth Assignment": { Eventist: P, "Gearhead Events": true },
   "Venue Hardware & Games": { Eventist: P },
@@ -77,7 +77,8 @@ const EXTRA: Record<string, Partial<Record<ExtraCol, V>>> = {
   "Resale & Secondary Market": { Flicket: true },
   "Resource Marketplace": { Fora: P },
   "Creator Portfolio Pages": { WeddingPro: true },
-  "Non-Traditional Venues": { "We Crush Events": P, AllBooked: true },
+  "Non-Traditional Venues": { "We Crush Events": P, AllBooked: true, Reunion: P },
+  "Local Discovery Map": { Reunion: P },
 };
 
 const ORDER = ["Event Management","Payment Processing","Ticketing & Registration","Non-Traditional Venues","Analytics & Reporting","Booth & Floorplan Layout","Email & Marketing Tools","Artist/Creator Profiles","Attendee Mobile App","Vendor Applications & Booth Assignment","CRM & Client Management","Local Discovery Map","Fan Following & Alerts","Community Features","Virtual & Hybrid Events","Equipment & Gear Tracking","Check-In & Badges","Multi-Level Space Planning","Large Audience Reach","3D Walkthrough Preview","Saved Layout Templates","Resale & Secondary Market","Space Module Library","Venue Hardware & Games","Recurring Community Programming","Collaborator & Skill Matching","Booth-Level Messaging","Creator Portfolio Pages","UGC Content Feed","Brand Collaboration","Resource Marketplace","Travel/Touring Support"];
@@ -142,6 +143,7 @@ const competitors = [
   { name: "We Crush Events", focus: "Corporate Event Agency", pricing: "Free to client", bestFor: "Companies wanting a full-service team for offsites, parties, conferences and virtual tastings" },
   { name: "FeedIRL", focus: "Event Picks via Instagram DM", pricing: "Free", bestFor: "Going out in NYC, LA, Miami, Chicago, Austin, Nashville; promoters paying to reach them" },
   { name: "Total Party Planner", focus: "Catering Software", pricing: "$$", bestFor: "Caterers: BEOs, menu costing, packlists, staffing, CRM and payments" },
+  { name: "Reunion", focus: "Private Event Software", pricing: "Free-$249/mo", bestFor: "Restaurants, hotels and activity venues: lead pipeline, AI proposals, BEOs, deposits, team-building directory" },
 ];
 
 const FeatureIcon = ({ value }: { value: boolean | "partial" }) => {
