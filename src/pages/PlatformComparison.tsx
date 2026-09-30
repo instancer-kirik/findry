@@ -125,6 +125,7 @@ const competitors = [
   { name: "Live Circuit", focus: "Crew & Vendor Directory", pricing: "Free", bestFor: "Finding stagehands, riggers, production vendors across North America" },
   { name: "Smoke & Mirrors", focus: "AV Production Company", pricing: "$$$", bestFor: "LA events needing lighting, sound, video mapping, staging, on-site production" },
   { name: "Forge Strategy", focus: "Outbound Lead Gen Agency", pricing: "$$$", bestFor: "Businesses wanting managed cold email and LinkedIn campaigns" },
+  { name: "Vendelux", focus: "Sponsorship Intelligence", pricing: "$$$$", bestFor: "Brands and agencies choosing which events to sponsor, with audience data and event insights" },
 ];
 
 const FeatureIcon = ({ value }: { value: boolean | "partial" }) => {
