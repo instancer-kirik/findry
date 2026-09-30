@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 type V = boolean | "partial";
-const COLS = ["Planning Pod","Tagvenue","Tripleseat","Peerspace","Eventeny","Accelevents","Releventful","OkWhen","OninFive","Evently (venues)","Evently.ai","501 Fun","Eventbrite","Ticketmaster","SeatGeek","StubHub","Bandsintown","Songkick","DICE","Meetup"] as const;
+const COLS = ["Planning Pod","Tagvenue","Tripleseat","Peerspace","Eventeny","Accelevents","Releventful","OkWhen","OninFive","Evently (venues)","Evently.ai","501 Fun","Eventbrite","Ticketmaster","SeatGeek","StubHub","Bandsintown","Songkick","DICE","Meetup","Goodshuffle Pro"] as const;
 
 interface FeatureComparison {
   feature: string;
@@ -76,6 +76,7 @@ const competitors = [
   { name: "Songkick", focus: "Concert Discovery", pricing: "Free", bestFor: "Tracking artists' tour dates" },
   { name: "DICE", focus: "Music Ticketing", pricing: "$", bestFor: "Fan-first mobile ticketing for venues and promoters" },
   { name: "Meetup", focus: "Community Groups", pricing: "$$", bestFor: "Recurring local interest groups" },
+  { name: "Goodshuffle Pro", focus: "Event Rentals", pricing: "$$$", bestFor: "Rental companies: inventory, quotes, contracts, dispatch" },
 ];
 
 const FeatureIcon = ({ value }: { value: boolean | "partial" }) => {
