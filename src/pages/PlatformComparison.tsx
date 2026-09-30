@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 type V = boolean | "partial";
-const COLS = ["Planning Pod","Tagvenue","Tripleseat","Peerspace","Eventeny","Accelevents","Releventful","OkWhen","OninFive","Evently (venues)","Evently.ai","501 Fun","Eventbrite","Ticketmaster","SeatGeek","StubHub","Bandsintown","Songkick","DICE","Meetup"] as const;
+const COLS = ["Planning Pod","Tagvenue","Tripleseat","Peerspace","Eventeny","Accelevents","Releventful","OkWhen","OninFive","Evently (venues)","Evently.ai","501 Fun","Eventbrite","Ticketmaster","SeatGeek","StubHub","Bandsintown","Songkick","DICE","Meetup","Goodshuffle Pro"] as const;
 
 interface FeatureComparison {
   feature: string;
@@ -17,39 +17,39 @@ interface FeatureComparison {
 
 const P = "partial" as const;
 const features: FeatureComparison[] = [
-  // Order: PlanningPod,Tagvenue,Tripleseat,Peerspace,Eventeny,Accelevents,Releventful,OkWhen,OninFive,Evently,Evently.ai,501Fun,Eventbrite,Ticketmaster,SeatGeek,StubHub,Bandsintown,Songkick,DICE,Meetup
-  { feature: "Ticketing & Registration", description: "Sell tickets, RSVPs, tiered pricing", us: P, others: [P,false,false,false,true,true,false,true,false,P,P,false,true,true,true,true,P,P,true,P] },
-  { feature: "Resale & Secondary Market", description: "Fans resell tickets safely", us: false, others: [false,false,false,false,false,false,false,false,false,false,false,false,P,true,true,true,false,false,true,false] },
-  { feature: "Check-In & Badges", description: "QR scanning, badge printing, door management", us: false, others: [P,false,false,false,true,true,false,true,false,false,P,false,true,true,true,true,false,false,true,P] },
-  { feature: "Attendee Mobile App", description: "Native app for attendees and fans (ours: installable web app)", us: P, others: [false,true,false,true,true,true,false,true,true,false,true,P,true,true,true,true,true,true,true,true] },
-  { feature: "Email & Marketing Tools", description: "Promo campaigns, reminders, audience lists", us: P, others: [true,false,true,false,true,true,true,true,false,true,P,P,true,true,P,false,true,P,P,true] },
-  { feature: "Analytics & Reporting", description: "Sales, attendance, revenue dashboards", us: P, others: [true,P,true,P,true,true,true,true,false,true,true,true,true,true,true,true,true,P,true,P] },
-  { feature: "CRM & Client Management", description: "Leads, proposals, contracts, client history", us: P, others: [true,P,true,false,P,P,true,true,false,true,P,P,false,false,false,false,false,false,false,false] },
-  { feature: "Virtual & Hybrid Events", description: "Livestream, virtual lobbies, online sessions", us: P, others: [false,false,false,false,false,true,false,true,false,false,P,false,true,false,false,false,true,P,P,true] },
-  { feature: "Fan Following & Alerts", description: "Follow artists, get notified of nearby shows", us: P, others: [false,false,false,false,false,false,false,false,true,false,false,false,true,true,true,P,true,true,true,true] },
-  { feature: "Large Audience Reach", description: "Built-in audience of millions discovering events", us: false, others: [false,P,false,P,P,false,false,false,false,false,false,false,true,true,true,true,true,true,true,true] },
-  { feature: "Venue Hardware & Games", description: "In-venue scoring, AR games, POS integration", us: false, others: [false,false,P,false,false,false,true,false,false,P,false,true,false,false,false,false,false,false,false,false] },
-  { feature: "Non-Traditional Venues", description: "Warehouses, studios, maker spaces, unconventional locations", us: true, others: [false,P,false,true,P,false,P,false,P,P,false,false,false,false,false,false,false,false,false,false] },
-  { feature: "Artist/Creator Profiles", description: "Profiles for performers, artists, and makers", us: true, others: [false,false,false,false,P,false,false,false,true,false,false,false,P,false,false,false,true,true,false,false] },
-  { feature: "Booth & Floorplan Layout", description: "Sized booths, movable walls, multi-level plans, 3D walkthrough", us: true, others: [P,false,P,false,P,P,false,P,false,false,P,false,false,false,false,false,false,false,false,false] },
-  { feature: "Multi-Level Space Planning", description: "Ground floor + mezzanine levels in one plan", us: true, others: [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false] },
-  { feature: "3D Walkthrough Preview", description: "Walk the venue layout before setup day", us: true, others: [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false] },
-  { feature: "Saved Layout Templates", description: "Save and reuse past venue setups", us: true, others: [P,false,P,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false] },
-  { feature: "Space Module Library", description: "Real-sized pieces: booths, walls, cranes, restrooms, kitchens", us: true, others: [false,false,false,false,P,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false] },
-  { feature: "Vendor Applications & Booth Assignment", description: "Collect applications, jury, assign approved vendors to booths", us: P, others: [P,false,false,false,true,P,false,false,false,false,false,false,false,false,false,false,false,false,false,false] },
-  { feature: "Equipment & Gear Tracking", description: "Technical equipment, AV gear, hardware inventory", us: true, others: [P,false,P,false,false,false,true,P,false,false,false,false,false,false,false,false,false,false,false,false] },
-  { feature: "Local Discovery Map", description: "Find what's happening nearby tonight", us: P, others: [false,P,false,P,P,false,false,false,true,false,false,false,P,P,P,false,true,true,P,true] },
-  { feature: "UGC Content Feed", description: "Behind-the-scenes, highlights, venue tours", us: true, others: [false,false,false,P,false,P,false,false,false,false,false,false,false,false,false,false,P,false,false,false] },
-  { feature: "Brand Collaboration", description: "Connect venues, artists, and brands", us: true, others: [false,false,false,false,P,P,false,false,false,false,P,false,false,false,false,false,P,false,false,false] },
-  { feature: "Event Management", description: "Scheduling, booking, and coordination", us: true, others: [true,true,true,true,true,true,true,true,P,true,P,P,true,true,false,false,P,false,true,true] },
-  { feature: "Payment Processing", description: "Integrated payment and invoicing", us: true, others: [true,true,true,true,true,true,true,true,false,true,false,true,true,true,true,true,false,false,true,P] },
-  { feature: "Community Features", description: "Forums, groups, community building", us: true, others: [false,false,false,false,false,P,false,false,false,false,false,false,false,false,false,false,P,false,false,true] },
-  { feature: "Recurring Community Programming", description: "Scheduled circles, weekly gatherings, RSVPs", us: true, others: [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true] },
-  { feature: "Collaborator & Skill Matching", description: "Find makers, artists, and venues to work with", us: true, others: [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false] },
-  { feature: "Booth-Level Messaging", description: "Threads and coordination per booth or project", us: true, others: [false,false,false,false,false,false,false,false,false,false,P,false,false,false,false,false,false,false,false,false] },
-  { feature: "Creator Portfolio Pages", description: "Public showcase of builds, art, and projects", us: true, others: [false,false,false,false,P,false,false,false,P,false,false,false,false,false,false,false,false,false,false,false] },
-  { feature: "Resource Marketplace", description: "Rent/share equipment, services, spaces", us: true, others: [false,false,false,P,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false] },
-  { feature: "Travel/Touring Support", description: "Route planning, POI discovery for mobile creators", us: true, others: [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,P,false,false,false] },
+  // Order: PlanningPod,Tagvenue,Tripleseat,Peerspace,Eventeny,Accelevents,Releventful,OkWhen,OninFive,Evently,Evently.ai,501Fun,Eventbrite,Ticketmaster,SeatGeek,StubHub,Bandsintown,Songkick,DICE,Meetup,GoodshufflePro
+  { feature: "Ticketing & Registration", description: "Sell tickets, RSVPs, tiered pricing", us: P, others: [P,false,false,false,true,true,false,true,false,P,P,false,true,true,true,true,P,P,true,P,false] },
+  { feature: "Resale & Secondary Market", description: "Fans resell tickets safely", us: false, others: [false,false,false,false,false,false,false,false,false,false,false,false,P,true,true,true,false,false,true,false,false] },
+  { feature: "Check-In & Badges", description: "QR scanning, badge printing, door management", us: false, others: [P,false,false,false,true,true,false,true,false,false,P,false,true,true,true,true,false,false,true,P,false] },
+  { feature: "Attendee Mobile App", description: "Native app for attendees and fans (ours: installable web app)", us: P, others: [false,true,false,true,true,true,false,true,true,false,true,P,true,true,true,true,true,true,true,true,false] },
+  { feature: "Email & Marketing Tools", description: "Promo campaigns, reminders, audience lists", us: P, others: [true,false,true,false,true,true,true,true,false,true,P,P,true,true,P,false,true,P,P,true,true] },
+  { feature: "Analytics & Reporting", description: "Sales, attendance, revenue dashboards", us: P, others: [true,P,true,P,true,true,true,true,false,true,true,true,true,true,true,true,true,P,true,P,true] },
+  { feature: "CRM & Client Management", description: "Leads, proposals, contracts, client history", us: P, others: [true,P,true,false,P,P,true,true,false,true,P,P,false,false,false,false,false,false,false,false,true] },
+  { feature: "Virtual & Hybrid Events", description: "Livestream, virtual lobbies, online sessions", us: P, others: [false,false,false,false,false,true,false,true,false,false,P,false,true,false,false,false,true,P,P,true,false] },
+  { feature: "Fan Following & Alerts", description: "Follow artists, get notified of nearby shows", us: P, others: [false,false,false,false,false,false,false,false,true,false,false,false,true,true,true,P,true,true,true,true,false] },
+  { feature: "Large Audience Reach", description: "Built-in audience of millions discovering events", us: false, others: [false,P,false,P,P,false,false,false,false,false,false,false,true,true,true,true,true,true,true,true,false] },
+  { feature: "Venue Hardware & Games", description: "In-venue scoring, AR games, POS integration", us: false, others: [false,false,P,false,false,false,true,false,false,P,false,true,false,false,false,false,false,false,false,false,false] },
+  { feature: "Non-Traditional Venues", description: "Warehouses, studios, maker spaces, unconventional locations", us: true, others: [false,P,false,true,P,false,P,false,P,P,false,false,false,false,false,false,false,false,false,false,false] },
+  { feature: "Artist/Creator Profiles", description: "Profiles for performers, artists, and makers", us: true, others: [false,false,false,false,P,false,false,false,true,false,false,false,P,false,false,false,true,true,false,false,false] },
+  { feature: "Booth & Floorplan Layout", description: "Sized booths, movable walls, multi-level plans, 3D walkthrough", us: true, others: [P,false,P,false,P,P,false,P,false,false,P,false,false,false,false,false,false,false,false,false,false] },
+  { feature: "Multi-Level Space Planning", description: "Ground floor + mezzanine levels in one plan", us: true, others: [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false] },
+  { feature: "3D Walkthrough Preview", description: "Walk the venue layout before setup day", us: true, others: [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false] },
+  { feature: "Saved Layout Templates", description: "Save and reuse past venue setups", us: true, others: [P,false,P,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false] },
+  { feature: "Space Module Library", description: "Real-sized pieces: booths, walls, cranes, restrooms, kitchens", us: true, others: [false,false,false,false,P,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true] },
+  { feature: "Vendor Applications & Booth Assignment", description: "Collect applications, jury, assign approved vendors to booths", us: P, others: [P,false,false,false,true,P,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false] },
+  { feature: "Equipment & Gear Tracking", description: "Technical equipment, AV gear, hardware inventory", us: true, others: [P,false,P,false,false,false,true,P,false,false,false,false,false,false,false,false,false,false,false,false,true] },
+  { feature: "Local Discovery Map", description: "Find what's happening nearby tonight", us: P, others: [false,P,false,P,P,false,false,false,true,false,false,false,P,P,P,false,true,true,P,true,P] },
+  { feature: "UGC Content Feed", description: "Behind-the-scenes, highlights, venue tours", us: true, others: [false,false,false,P,false,P,false,false,false,false,false,false,false,false,false,false,P,false,false,false,false] },
+  { feature: "Brand Collaboration", description: "Connect venues, artists, and brands", us: true, others: [false,false,false,false,P,P,false,false,false,false,P,false,false,false,false,false,P,false,false,false,false] },
+  { feature: "Event Management", description: "Scheduling, booking, and coordination", us: true, others: [true,true,true,true,true,true,true,true,P,true,P,P,true,true,false,false,P,false,true,true,true] },
+  { feature: "Payment Processing", description: "Integrated payment and invoicing", us: true, others: [true,true,true,true,true,true,true,true,false,true,false,true,true,true,true,true,false,false,true,P,true] },
+  { feature: "Community Features", description: "Forums, groups, community building", us: true, others: [false,false,false,false,false,P,false,false,false,false,false,false,false,false,false,false,P,false,false,true,false] },
+  { feature: "Recurring Community Programming", description: "Scheduled circles, weekly gatherings, RSVPs", us: true, others: [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,false] },
+  { feature: "Collaborator & Skill Matching", description: "Find makers, artists, and venues to work with", us: true, others: [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false] },
+  { feature: "Booth-Level Messaging", description: "Threads and coordination per booth or project", us: true, others: [false,false,false,false,false,false,false,false,false,false,P,false,false,false,false,false,false,false,false,false,false] },
+  { feature: "Creator Portfolio Pages", description: "Public showcase of builds, art, and projects", us: true, others: [false,false,false,false,P,false,false,false,P,false,false,false,false,false,false,false,false,false,false,false,false] },
+  { feature: "Resource Marketplace", description: "Rent/share equipment, services, spaces", us: true, others: [false,false,false,P,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,P] },
+  { feature: "Travel/Touring Support", description: "Route planning, POI discovery for mobile creators", us: true, others: [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,P,false,false,false,false] },
 ];
 
 const ORDER = ["Event Management","Payment Processing","Ticketing & Registration","Non-Traditional Venues","Analytics & Reporting","Booth & Floorplan Layout","Email & Marketing Tools","Artist/Creator Profiles","Attendee Mobile App","Vendor Applications & Booth Assignment","CRM & Client Management","Local Discovery Map","Fan Following & Alerts","Community Features","Virtual & Hybrid Events","Equipment & Gear Tracking","Check-In & Badges","Multi-Level Space Planning","Large Audience Reach","3D Walkthrough Preview","Saved Layout Templates","Resale & Secondary Market","Space Module Library","Venue Hardware & Games","Recurring Community Programming","Collaborator & Skill Matching","Booth-Level Messaging","Creator Portfolio Pages","UGC Content Feed","Brand Collaboration","Resource Marketplace","Travel/Touring Support"];
@@ -76,6 +76,7 @@ const competitors = [
   { name: "Songkick", focus: "Concert Discovery", pricing: "Free", bestFor: "Tracking artists' tour dates" },
   { name: "DICE", focus: "Music Ticketing", pricing: "$", bestFor: "Fan-first mobile ticketing for venues and promoters" },
   { name: "Meetup", focus: "Community Groups", pricing: "$$", bestFor: "Recurring local interest groups" },
+  { name: "Goodshuffle Pro", focus: "Event Rentals", pricing: "$$$", bestFor: "Rental companies: inventory, quotes, contracts, dispatch" },
 ];
 
 const FeatureIcon = ({ value }: { value: boolean | "partial" }) => {
