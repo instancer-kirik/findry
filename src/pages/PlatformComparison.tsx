@@ -74,7 +74,6 @@ const EXTRA: Record<string, Partial<Record<ExtraCol, V>>> = {
   "Brand Collaboration": { "IBTM Events": P, "Huge Convention": P },
   "Collaborator & Skill Matching": { CrewBrain: P, "IBTM Events": P, "Live Circuit": true, Fora: true },
   "Recurring Community Programming": { Resi: P, "Huge Convention": P, Flicket: P },
-  "Travel/Touring Support": { Fora: true },
   "Resale & Secondary Market": { Flicket: true },
   "Resource Marketplace": { Fora: P },
   "Creator Portfolio Pages": { WeddingPro: true },
