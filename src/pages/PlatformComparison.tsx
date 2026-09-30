@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 type V = boolean | "partial";
-const COLS = ["Planning Pod","Tagvenue","Tripleseat","Peerspace","Eventeny","Accelevents","Releventful","OkWhen","OninFive","Evently (venues)","Evently.ai","501 Fun","Eventbrite","Ticketmaster","SeatGeek","StubHub","Bandsintown","Songkick","DICE","Meetup","Goodshuffle Pro","Prism.fm","Cvent (Social Tables)","AllSeated","Whova","Rentman","Luma","Partiful"] as const;
+const BASE_COLS = ["Planning Pod","Tagvenue","Tripleseat","Peerspace","Eventeny","Accelevents","Releventful","OkWhen","OninFive","Evently (venues)","Evently.ai","501 Fun","Eventbrite","Ticketmaster","SeatGeek","StubHub","Bandsintown","Songkick","DICE","Meetup","Goodshuffle Pro","Prism.fm","Cvent (Social Tables)","AllSeated","Whova","Rentman","Luma","Partiful"] as const;
+const EXTRA_COLS = ["Zeffy","Humanitix","CrewBrain","YourStartupOperations","Klipboard","IBTM Events","Alchemer","TicketLeap","Attio","Eventist","Resi"] as const;
+const COLS = [...BASE_COLS, ...EXTRA_COLS];
 
 interface FeatureComparison {
   feature: string;
@@ -52,8 +54,29 @@ const features: FeatureComparison[] = [
   { feature: "Travel/Touring Support", description: "Route planning, POI discovery for mobile creators", us: true, others: [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,P,false,false,false,false,false, false, false, false, false, false, false] },
 ];
 
+type ExtraCol = typeof EXTRA_COLS[number];
+const EXTRA: Record<string, Partial<Record<ExtraCol, V>>> = {
+  "Ticketing & Registration": { Zeffy: true, Humanitix: true, TicketLeap: true, Eventist: P, "IBTM Events": P },
+  "Check-In & Badges": { Zeffy: P, Humanitix: true, TicketLeap: true },
+  "Attendee Mobile App": { Humanitix: P, "IBTM Events": true, Resi: true, CrewBrain: P },
+  "Email & Marketing Tools": { Zeffy: true, Humanitix: P, TicketLeap: P, Attio: true, Alchemer: P, Eventist: P },
+  "Analytics & Reporting": { Zeffy: true, Humanitix: true, TicketLeap: true, Alchemer: true, Attio: true, Resi: true, CrewBrain: P, Klipboard: true },
+  "CRM & Client Management": { Zeffy: P, Attio: true, Klipboard: P, YourStartupOperations: P },
+  "Virtual & Hybrid Events": { Resi: true, "IBTM Events": P },
+  "Large Audience Reach": { "IBTM Events": P, Eventist: P },
+  "Local Discovery Map": { Eventist: P },
+  "Event Management": { Zeffy: P, Humanitix: true, TicketLeap: true, CrewBrain: true, "IBTM Events": P, Eventist: P, YourStartupOperations: P },
+  "Payment Processing": { Zeffy: true, Humanitix: true, TicketLeap: true, Klipboard: true },
+  "Equipment & Gear Tracking": { CrewBrain: P, Klipboard: true },
+  "Community Features": { Zeffy: P, "IBTM Events": P },
+  "Brand Collaboration": { "IBTM Events": P },
+  "Collaborator & Skill Matching": { CrewBrain: P, "IBTM Events": P },
+  "Recurring Community Programming": { Resi: P },
+};
+
 const ORDER = ["Event Management","Payment Processing","Ticketing & Registration","Non-Traditional Venues","Analytics & Reporting","Booth & Floorplan Layout","Email & Marketing Tools","Artist/Creator Profiles","Attendee Mobile App","Vendor Applications & Booth Assignment","CRM & Client Management","Local Discovery Map","Fan Following & Alerts","Community Features","Virtual & Hybrid Events","Equipment & Gear Tracking","Check-In & Badges","Multi-Level Space Planning","Large Audience Reach","3D Walkthrough Preview","Saved Layout Templates","Resale & Secondary Market","Space Module Library","Venue Hardware & Games","Recurring Community Programming","Collaborator & Skill Matching","Booth-Level Messaging","Creator Portfolio Pages","UGC Content Feed","Brand Collaboration","Resource Marketplace","Travel/Touring Support"];
-const orderedFeatures = [...features].sort((a, b) => { const ia = ORDER.indexOf(a.feature), ib = ORDER.indexOf(b.feature); return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib); });
+const allFeatures = features.map((f) => ({ ...f, others: [...f.others, ...EXTRA_COLS.map((c) => EXTRA[f.feature]?.[c] ?? false)] }));
+const orderedFeatures = [...allFeatures].sort((a, b) => { const ia = ORDER.indexOf(a.feature), ib = ORDER.indexOf(b.feature); return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib); });
 
 const competitors = [
   { name: "Planning Pod", focus: "Corporate Events", pricing: "$$$", bestFor: "Large corporate event planners" },
@@ -84,6 +107,17 @@ const competitors = [
   { name: "Rentman", focus: "AV Equipment Rental", pricing: "$$$", bestFor: "AV rental companies: gear planning, crews, dispatch" },
   { name: "Luma", focus: "Community Event Hosting", pricing: "$", bestFor: "Recurring series and communities: calendars, RSVPs, ticketing" },
   { name: "Partiful", focus: "Party Invites", pricing: "Free", bestFor: "Casual one-off gatherings: playful invites, text RSVPs" },
+  { name: "Zeffy", focus: "Nonprofit Fundraising", pricing: "Free", bestFor: "Nonprofits: donations, ticketing, auctions with zero fees" },
+  { name: "Humanitix", focus: "Charity Ticketing", pricing: "$", bestFor: "Organizers who want booking fees to go to charity" },
+  { name: "CrewBrain", focus: "Crew Scheduling", pricing: "$$", bestFor: "Event-tech companies: crew planning, shifts, time tracking" },
+  { name: "YourStartupOperations", focus: "Startup Ops Services", pricing: "$$", bestFor: "Early-stage teams outsourcing operations (best guess)" },
+  { name: "Klipboard", focus: "Field Service & Hire", pricing: "$$$", bestFor: "Trade and hire businesses: jobs, stock, invoicing" },
+  { name: "IBTM Events", focus: "Industry Trade Shows", pricing: "$$$$", bestFor: "Event pros meeting suppliers at IBTM World and regional shows" },
+  { name: "Alchemer", focus: "Surveys & Feedback", pricing: "$$$", bestFor: "Post-event surveys and feedback analysis" },
+  { name: "TicketLeap", focus: "Simple Ticketing", pricing: "$", bestFor: "Small to mid events: ticket sales and check-in" },
+  { name: "Attio", focus: "Flexible CRM", pricing: "$$", bestFor: "Teams tracking relationships, sponsors, and deals" },
+  { name: "Eventist", focus: "Canadian Event Listings", pricing: "Free", bestFor: "Finding local events in Canada (best guess)" },
+  { name: "Resi", focus: "Livestreaming", pricing: "$$$", bestFor: "Churches and venues: reliable multi-site livestreams" },
 ];
 
 const FeatureIcon = ({ value }: { value: boolean | "partial" }) => {
