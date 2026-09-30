@@ -143,6 +143,7 @@ const competitors = [
   { name: "We Crush Events", focus: "Corporate Event Agency", pricing: "Free to client", bestFor: "Companies wanting a full-service team for offsites, parties, conferences and virtual tastings" },
   { name: "FeedIRL", focus: "Event Picks via Instagram DM", pricing: "Free", bestFor: "Going out in NYC, LA, Miami, Chicago, Austin, Nashville; promoters paying to reach them" },
   { name: "Total Party Planner", focus: "Catering Software", pricing: "$$", bestFor: "Caterers: BEOs, menu costing, packlists, staffing, CRM and payments" },
+  { name: "Reunion", focus: "Private Event Software", pricing: "Free-$249/mo", bestFor: "Restaurants, hotels and activity venues: lead pipeline, AI proposals, BEOs, deposits, team-building directory" },
 ];
 
 const FeatureIcon = ({ value }: { value: boolean | "partial" }) => {
