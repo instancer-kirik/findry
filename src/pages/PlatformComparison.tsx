@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 
 type V = boolean | "partial";
 const BASE_COLS = ["Planning Pod","Tagvenue","Tripleseat","Peerspace","Eventeny","Accelevents","Releventful","OkWhen","OninFive","Evently (venues)","Evently.ai","501 Fun","Eventbrite","Ticketmaster","SeatGeek","StubHub","Bandsintown","Songkick","DICE","Meetup","Goodshuffle Pro","Prism.fm","Cvent (Social Tables)","AllSeated","Whova","Rentman","Luma","Partiful"] as const;
-const EXTRA_COLS = ["Zeffy","Humanitix","CrewBrain","YourStartupOperations","Klipboard","IBTM Events","Alchemer","TicketLeap","Attio","Eventist","Resi"] as const;
+const EXTRA_COLS = ["Zeffy","Humanitix","CrewBrain","YourStartupOperations","Klipboard","IBTM Events","Alchemer","TicketLeap","Attio","Eventist","Resi","HoneyBook"] as const;
 const COLS = [...BASE_COLS, ...EXTRA_COLS];
 
 interface FeatureComparison {
@@ -56,17 +56,19 @@ const features: FeatureComparison[] = [
 
 type ExtraCol = typeof EXTRA_COLS[number];
 const EXTRA: Record<string, Partial<Record<ExtraCol, V>>> = {
-  "Ticketing & Registration": { Zeffy: true, Humanitix: true, TicketLeap: true, Eventist: P, "IBTM Events": P },
-  "Check-In & Badges": { Zeffy: P, Humanitix: true, TicketLeap: true },
-  "Attendee Mobile App": { Humanitix: P, "IBTM Events": true, Resi: true, CrewBrain: P },
-  "Email & Marketing Tools": { Zeffy: true, Humanitix: P, TicketLeap: P, Attio: true, Alchemer: P, Eventist: P },
-  "Analytics & Reporting": { Zeffy: true, Humanitix: true, TicketLeap: true, Alchemer: true, Attio: true, Resi: true, CrewBrain: P, Klipboard: true },
-  "CRM & Client Management": { Zeffy: P, Attio: true, Klipboard: P, YourStartupOperations: P },
+  "Ticketing & Registration": { Zeffy: true, Humanitix: true, TicketLeap: true, Eventist: true, "IBTM Events": P },
+  "Check-In & Badges": { Zeffy: P, Humanitix: true, TicketLeap: true, Eventist: true },
+  "Attendee Mobile App": { Humanitix: P, "IBTM Events": true, Resi: true, CrewBrain: P, HoneyBook: true },
+  "Email & Marketing Tools": { Zeffy: true, Humanitix: P, TicketLeap: P, Attio: true, Alchemer: P, Eventist: true, HoneyBook: true },
+  "Analytics & Reporting": { Zeffy: true, Humanitix: true, TicketLeap: true, Alchemer: true, Attio: true, Resi: true, CrewBrain: P, Klipboard: true, Eventist: true, HoneyBook: true },
+  "CRM & Client Management": { Zeffy: P, Attio: true, Klipboard: P, Eventist: true, HoneyBook: true },
   "Virtual & Hybrid Events": { Resi: true, "IBTM Events": P },
   "Large Audience Reach": { "IBTM Events": P, Eventist: P },
-  "Local Discovery Map": { Eventist: P },
-  "Event Management": { Zeffy: P, Humanitix: true, TicketLeap: true, CrewBrain: true, "IBTM Events": P, Eventist: P, YourStartupOperations: P },
-  "Payment Processing": { Zeffy: true, Humanitix: true, TicketLeap: true, Klipboard: true },
+  "Event Management": { Zeffy: P, Humanitix: true, TicketLeap: true, CrewBrain: true, "IBTM Events": P, Eventist: true, YourStartupOperations: P, HoneyBook: true },
+  "Payment Processing": { Zeffy: true, Humanitix: true, TicketLeap: true, Klipboard: true, Eventist: P, HoneyBook: true },
+  "Booth & Floorplan Layout": { Eventist: true },
+  "Vendor Applications & Booth Assignment": { Eventist: P },
+  "Venue Hardware & Games": { Eventist: P },
   "Equipment & Gear Tracking": { CrewBrain: P, Klipboard: true },
   "Community Features": { Zeffy: P, "IBTM Events": P },
   "Brand Collaboration": { "IBTM Events": P },
@@ -110,14 +112,15 @@ const competitors = [
   { name: "Zeffy", focus: "Nonprofit Fundraising", pricing: "Free", bestFor: "Nonprofits: donations, ticketing, auctions with zero fees" },
   { name: "Humanitix", focus: "Charity Ticketing", pricing: "$", bestFor: "Organizers who want booking fees to go to charity" },
   { name: "CrewBrain", focus: "Crew Scheduling", pricing: "$$", bestFor: "Event-tech companies: crew planning, shifts, time tracking" },
-  { name: "YourStartupOperations", focus: "Startup Ops Services", pricing: "$$", bestFor: "Early-stage teams outsourcing operations (best guess)" },
+  { name: "YourStartupOperations", focus: "Event Operations Support", pricing: "Custom", bestFor: "Event professionals offloading admin, SOPs, follow-ups, and virtual-assistant work" },
   { name: "Klipboard", focus: "Field Service & Hire", pricing: "$$$", bestFor: "Trade and hire businesses: jobs, stock, invoicing" },
   { name: "IBTM Events", focus: "Industry Trade Shows", pricing: "$$$$", bestFor: "Event pros meeting suppliers at IBTM World and regional shows" },
   { name: "Alchemer", focus: "Surveys & Feedback", pricing: "$$$", bestFor: "Post-event surveys and feedback analysis" },
   { name: "TicketLeap", focus: "Simple Ticketing", pricing: "$", bestFor: "Small to mid events: ticket sales and check-in" },
   { name: "Attio", focus: "Flexible CRM", pricing: "$$", bestFor: "Teams tracking relationships, sponsors, and deals" },
-  { name: "Eventist", focus: "Canadian Event Listings", pricing: "Free", bestFor: "Finding local events in Canada (best guess)" },
+  { name: "Eventist", focus: "Canadian Event Operations", pricing: "Custom", bestFor: "Canadian organizers needing ticketing, check-in, booth maps, scheduling, staff, CRM, and scoring" },
   { name: "Resi", focus: "Livestreaming", pricing: "$$$", bestFor: "Churches and venues: reliable multi-site livestreams" },
+  { name: "HoneyBook", focus: "Clientflow CRM", pricing: "$$", bestFor: "Independent event professionals managing leads, proposals, contracts, invoices, and client communication" },
 ];
 
 const FeatureIcon = ({ value }: { value: boolean | "partial" }) => {
