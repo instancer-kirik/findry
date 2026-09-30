@@ -56,20 +56,20 @@ const features: FeatureComparison[] = [
 
 type ExtraCol = typeof EXTRA_COLS[number];
 const EXTRA: Record<string, Partial<Record<ExtraCol, V>>> = {
-  "Ticketing & Registration": { Zeffy: true, Humanitix: true, TicketLeap: true, Eventist: true, "IBTM Events": P, Passage: true, "OnTheStage Tix": true, Flicket: true, "Gearhead Events": true, "Huge Convention": P },
+  "Ticketing & Registration": { Zeffy: true, Humanitix: true, TicketLeap: true, Eventist: true, "IBTM Events": P, Passage: true, "OnTheStage Tix": true, Flicket: true, "Gearhead Events": true, "Huge Convention": P, SevenRooms: true, Creventa: true },
   "Check-In & Badges": { Zeffy: P, Humanitix: true, TicketLeap: true, Eventist: true, Passage: true, "OnTheStage Tix": true, Flicket: true, "Gearhead Events": true },
   "Attendee Mobile App": { "Total Party Planner": P, FeedIRL: P, Humanitix: P, "IBTM Events": true, Resi: true, CrewBrain: P, HoneyBook: true, Passage: P, WeddingPro: P },
-  "Email & Marketing Tools": { FeedIRL: P, Zeffy: true, Humanitix: P, TicketLeap: P, Attio: true, Alchemer: P, Eventist: true, HoneyBook: true, Passage: P, "Forge Strategy": true, Vendelux: P, "OnTheStage Tix": true, Flicket: true, WeddingPro: true, "Ever Bridal": true, "EventPro Suite": true, "Gearhead Events": P, Reunion: true },
-  "Analytics & Reporting": { "Total Party Planner": true, Zeffy: true, Humanitix: true, TicketLeap: true, Alchemer: true, Attio: true, Resi: true, CrewBrain: P, Klipboard: true, Eventist: true, HoneyBook: true, Passage: true, "Forge Strategy": P, Vendelux: true, "OnTheStage Tix": true, Flicket: true, WeddingPro: true, "Ever Bridal": P, AllBooked: P, Reunion: P },
-  "CRM & Client Management": { "Total Party Planner": true, Zeffy: P, Attio: true, Klipboard: P, Eventist: true, HoneyBook: true, "Forge Strategy": P, Vendelux: P, "EventPro Suite": true, WeddingPro: true, "Ever Bridal": P, "OnTheStage Tix": true, Fora: P, AllBooked: P, Reunion: true },
+  "Email & Marketing Tools": { FeedIRL: P, Zeffy: true, Humanitix: P, TicketLeap: P, Attio: true, Alchemer: P, Eventist: true, HoneyBook: true, Passage: P, "Forge Strategy": true, Vendelux: P, "OnTheStage Tix": true, Flicket: true, WeddingPro: true, "Ever Bridal": true, "EventPro Suite": true, "Gearhead Events": P, Reunion: true, SevenRooms: true, iVvy: P, VenueBook: P, Creventa: P },
+  "Analytics & Reporting": { "Total Party Planner": true, Zeffy: true, Humanitix: true, TicketLeap: true, Alchemer: true, Attio: true, Resi: true, CrewBrain: P, Klipboard: true, Eventist: true, HoneyBook: true, Passage: true, "Forge Strategy": P, Vendelux: true, "OnTheStage Tix": true, Flicket: true, WeddingPro: true, "Ever Bridal": P, AllBooked: P, Reunion: P, SevenRooms: true, iVvy: true, Creventa: true },
+  "CRM & Client Management": { "Total Party Planner": true, Zeffy: P, Attio: true, Klipboard: P, Eventist: true, HoneyBook: true, "Forge Strategy": P, Vendelux: P, "EventPro Suite": true, WeddingPro: true, "Ever Bridal": P, "OnTheStage Tix": true, Fora: P, AllBooked: P, Reunion: true, RestauRent: P, SevenRooms: true, iVvy: true, VenueBook: P, Creventa: P },
   "Virtual & Hybrid Events": { "We Crush Events": true, Resi: true, "IBTM Events": P, Passage: P, "Smoke & Mirrors": P },
   "Large Audience Reach": { FeedIRL: P, "IBTM Events": P, Eventist: P, WeddingPro: true },
-  "Event Management": { "We Crush Events": true, "Total Party Planner": true, Zeffy: P, Humanitix: true, TicketLeap: true, CrewBrain: true, "IBTM Events": P, Eventist: true, YourStartupOperations: P, HoneyBook: true, Passage: P, "Smoke & Mirrors": true, "EventPro Suite": true, "Gearhead Events": true, "OnTheStage Tix": true, Flicket: P, Fora: P, AllBooked: P, Reunion: true },
-  "Payment Processing": { "Total Party Planner": true, Zeffy: true, Humanitix: true, TicketLeap: true, Klipboard: true, Eventist: P, HoneyBook: true, Passage: true, "OnTheStage Tix": true, Flicket: true, "Gearhead Events": true, "EventPro Suite": P, AllBooked: true, Reunion: true },
+  "Event Management": { "We Crush Events": true, "Total Party Planner": true, Zeffy: P, Humanitix: true, TicketLeap: true, CrewBrain: true, "IBTM Events": P, Eventist: true, YourStartupOperations: P, HoneyBook: true, Passage: P, "Smoke & Mirrors": true, "EventPro Suite": true, "Gearhead Events": true, "OnTheStage Tix": true, Flicket: P, Fora: P, AllBooked: P, Reunion: true, RestauRent: P, SevenRooms: true, iVvy: true, VenueBook: true, Creventa: true },
+  "Payment Processing": { "Total Party Planner": true, Zeffy: true, Humanitix: true, TicketLeap: true, Klipboard: true, Eventist: P, HoneyBook: true, Passage: true, "OnTheStage Tix": true, Flicket: true, "Gearhead Events": true, "EventPro Suite": P, AllBooked: true, Reunion: true, SevenRooms: true, iVvy: P, VenueBook: true, Creventa: true },
   "Booth & Floorplan Layout": { Eventist: true, "Gearhead Events": P, AllBooked: P },
   "Vendor Applications & Booth Assignment": { Eventist: P, "Gearhead Events": true },
   "Venue Hardware & Games": { Eventist: P },
-  "Equipment & Gear Tracking": { "Total Party Planner": P, CrewBrain: P, Klipboard: true, "Smoke & Mirrors": P },
+  "Equipment & Gear Tracking": { "Total Party Planner": P, CrewBrain: P, Klipboard: true, "Smoke & Mirrors": P, iVvy: P },
   "Community Features": { Zeffy: P, "IBTM Events": P, "Live Circuit": P, "Huge Convention": true, WeddingPro: P },
   "Brand Collaboration": { FeedIRL: P, "IBTM Events": P, "Huge Convention": P },
   "Collaborator & Skill Matching": { CrewBrain: P, "IBTM Events": P, "Live Circuit": true, Fora: true },
@@ -77,8 +77,8 @@ const EXTRA: Record<string, Partial<Record<ExtraCol, V>>> = {
   "Resale & Secondary Market": { Flicket: true },
   "Resource Marketplace": { Fora: P },
   "Creator Portfolio Pages": { WeddingPro: true },
-  "Non-Traditional Venues": { "We Crush Events": P, AllBooked: true, Reunion: P },
-  "Local Discovery Map": { Reunion: P },
+  "Non-Traditional Venues": { "We Crush Events": P, AllBooked: true, Reunion: P, RestauRent: P },
+  "Local Discovery Map": { Reunion: P, RestauRent: P },
 };
 
 const ORDER = ["Event Management","Payment Processing","Ticketing & Registration","Non-Traditional Venues","Analytics & Reporting","Booth & Floorplan Layout","Email & Marketing Tools","Artist/Creator Profiles","Attendee Mobile App","Vendor Applications & Booth Assignment","CRM & Client Management","Local Discovery Map","Fan Following & Alerts","Community Features","Virtual & Hybrid Events","Equipment & Gear Tracking","Check-In & Badges","Multi-Level Space Planning","Large Audience Reach","3D Walkthrough Preview","Saved Layout Templates","Resale & Secondary Market","Space Module Library","Venue Hardware & Games","Recurring Community Programming","Collaborator & Skill Matching","Booth-Level Messaging","Creator Portfolio Pages","UGC Content Feed","Brand Collaboration","Resource Marketplace","Travel/Touring Support"];
