@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 
 type V = boolean | "partial";
 const BASE_COLS = ["Planning Pod","Tagvenue","Tripleseat","Peerspace","Eventeny","Accelevents","Releventful","OkWhen","OninFive","Evently (venues)","Evently.ai","501 Fun","Eventbrite","Ticketmaster","SeatGeek","StubHub","Bandsintown","Songkick","DICE","Meetup","Goodshuffle Pro","Prism.fm","Cvent (Social Tables)","AllSeated","Whova","Rentman","Luma","Partiful"] as const;
-const EXTRA_COLS = ["Zeffy","Humanitix","CrewBrain","YourStartupOperations","Klipboard","IBTM Events","Alchemer","TicketLeap","Attio","Eventist","Resi","HoneyBook","Passage","Live Circuit","Smoke & Mirrors","Forge Strategy","Vendelux","EventPro Suite","Gearhead Events","Ever Bridal","OnTheStage Tix","Huge Convention","Flicket","Fora","WeddingPro","AllBooked","We Crush Events","FeedIRL","Total Party Planner","Reunion","RestauRent","SevenRooms","iVvy","VenueBook","Creventa"] as const;
+const EXTRA_COLS = ["Zeffy","Humanitix","CrewBrain","YourStartupOperations","Klipboard","IBTM Events","Alchemer","TicketLeap","Attio","Eventist","Resi","HoneyBook","Passage","Live Circuit","Smoke & Mirrors","Forge Strategy","Vendelux","EventPro Suite","Gearhead Events","Ever Bridal","OnTheStage Tix","Huge Convention","Flicket","Fora","WeddingPro","AllBooked","We Crush Events","FeedIRL","Total Party Planner","Reunion","RestauRent","SevenRooms","iVvy","VenueBook","Creventa","Curate","Mr Black","VenueSumo","EventPipe","Moose Planet Media","Geeks Who Drink","Eventnoire","VenueX360","BeyondMenu","TicketBlox","Feathr","Mr Happy Hours","Parafait (Semnox)","EMP.DJ","Zola","Posh","ISDE Digital","Paddle Up"] as const;
 const COLS = [...BASE_COLS, ...EXTRA_COLS];
 
 interface FeatureComparison {
@@ -56,29 +56,32 @@ const features: FeatureComparison[] = [
 
 type ExtraCol = typeof EXTRA_COLS[number];
 const EXTRA: Record<string, Partial<Record<ExtraCol, V>>> = {
-  "Ticketing & Registration": { Zeffy: true, Humanitix: true, TicketLeap: true, Eventist: true, "IBTM Events": P, Passage: true, "OnTheStage Tix": true, Flicket: true, "Gearhead Events": true, "Huge Convention": P, SevenRooms: true, Creventa: true },
-  "Check-In & Badges": { Zeffy: P, Humanitix: true, TicketLeap: true, Eventist: true, Passage: true, "OnTheStage Tix": true, Flicket: true, "Gearhead Events": true },
-  "Attendee Mobile App": { "Total Party Planner": P, FeedIRL: P, Humanitix: P, "IBTM Events": true, Resi: true, CrewBrain: P, HoneyBook: true, Passage: P, WeddingPro: P },
-  "Email & Marketing Tools": { FeedIRL: P, Zeffy: true, Humanitix: P, TicketLeap: P, Attio: true, Alchemer: P, Eventist: true, HoneyBook: true, Passage: P, "Forge Strategy": true, Vendelux: P, "OnTheStage Tix": true, Flicket: true, WeddingPro: true, "Ever Bridal": true, "EventPro Suite": true, "Gearhead Events": P, Reunion: true, SevenRooms: true, iVvy: P, VenueBook: P, Creventa: P },
-  "Analytics & Reporting": { "Total Party Planner": true, Zeffy: true, Humanitix: true, TicketLeap: true, Alchemer: true, Attio: true, Resi: true, CrewBrain: P, Klipboard: true, Eventist: true, HoneyBook: true, Passage: true, "Forge Strategy": P, Vendelux: true, "OnTheStage Tix": true, Flicket: true, WeddingPro: true, "Ever Bridal": P, AllBooked: P, Reunion: P, SevenRooms: true, iVvy: true, Creventa: true },
-  "CRM & Client Management": { "Total Party Planner": true, Zeffy: P, Attio: true, Klipboard: P, Eventist: true, HoneyBook: true, "Forge Strategy": P, Vendelux: P, "EventPro Suite": true, WeddingPro: true, "Ever Bridal": P, "OnTheStage Tix": true, Fora: P, AllBooked: P, Reunion: true, RestauRent: P, SevenRooms: true, iVvy: true, VenueBook: P, Creventa: P },
+  "Artist/Creator Profiles": { "EMP.DJ": true },
+  "Fan Following & Alerts": { "Posh": P, "Mr Happy Hours": P },
+  "3D Walkthrough Preview": { "VenueX360": true },
+  "Ticketing & Registration": { "Posh": true, "Parafait (Semnox)": true, "TicketBlox": true, "Eventnoire": true, Zeffy: true, Humanitix: true, TicketLeap: true, Eventist: true, "IBTM Events": P, Passage: true, "OnTheStage Tix": true, Flicket: true, "Gearhead Events": true, "Huge Convention": P, SevenRooms: true, Creventa: true },
+  "Check-In & Badges": { "TicketBlox": true, "Mr Black": true, Zeffy: P, Humanitix: true, TicketLeap: true, Eventist: true, Passage: true, "OnTheStage Tix": true, Flicket: true, "Gearhead Events": true },
+  "Attendee Mobile App": { "Posh": true, "Total Party Planner": P, FeedIRL: P, Humanitix: P, "IBTM Events": true, Resi: true, CrewBrain: P, HoneyBook: true, Passage: P, WeddingPro: P },
+  "Email & Marketing Tools": { "ISDE Digital": P, "Posh": true, "Mr Happy Hours": P, "Feathr": true, "BeyondMenu": P, "Eventnoire": P, "Moose Planet Media": P, "EventPipe": P, "Mr Black": P, FeedIRL: P, Zeffy: true, Humanitix: P, TicketLeap: P, Attio: true, Alchemer: P, Eventist: true, HoneyBook: true, Passage: P, "Forge Strategy": true, Vendelux: P, "OnTheStage Tix": true, Flicket: true, WeddingPro: true, "Ever Bridal": true, "EventPro Suite": true, "Gearhead Events": P, Reunion: true, SevenRooms: true, iVvy: P, VenueBook: P, Creventa: P },
+  "Analytics & Reporting": { "Parafait (Semnox)": true, "Feathr": true, "TicketBlox": P, "Mr Black": true, "Curate": P, "Total Party Planner": true, Zeffy: true, Humanitix: true, TicketLeap: true, Alchemer: true, Attio: true, Resi: true, CrewBrain: P, Klipboard: true, Eventist: true, HoneyBook: true, Passage: true, "Forge Strategy": P, Vendelux: true, "OnTheStage Tix": true, Flicket: true, WeddingPro: true, "Ever Bridal": P, AllBooked: P, Reunion: P, SevenRooms: true, iVvy: true, Creventa: true },
+  "CRM & Client Management": { "Zola": P, "Parafait (Semnox)": P, "Feathr": P, "EventPipe": true, "VenueSumo": P, "Mr Black": true, "Curate": true, "Total Party Planner": true, Zeffy: P, Attio: true, Klipboard: P, Eventist: true, HoneyBook: true, "Forge Strategy": P, Vendelux: P, "EventPro Suite": true, WeddingPro: true, "Ever Bridal": P, "OnTheStage Tix": true, Fora: P, AllBooked: P, Reunion: true, RestauRent: P, SevenRooms: true, iVvy: true, VenueBook: P, Creventa: P },
   "Virtual & Hybrid Events": { "We Crush Events": true, Resi: true, "IBTM Events": P, Passage: P, "Smoke & Mirrors": P },
-  "Large Audience Reach": { FeedIRL: P, "IBTM Events": P, Eventist: P, WeddingPro: true },
-  "Event Management": { "We Crush Events": true, "Total Party Planner": true, Zeffy: P, Humanitix: true, TicketLeap: true, CrewBrain: true, "IBTM Events": P, Eventist: true, YourStartupOperations: P, HoneyBook: true, Passage: P, "Smoke & Mirrors": true, "EventPro Suite": true, "Gearhead Events": true, "OnTheStage Tix": true, Flicket: P, Fora: P, AllBooked: P, Reunion: true, RestauRent: P, SevenRooms: true, iVvy: true, VenueBook: true, Creventa: true },
-  "Payment Processing": { "Total Party Planner": true, Zeffy: true, Humanitix: true, TicketLeap: true, Klipboard: true, Eventist: P, HoneyBook: true, Passage: true, "OnTheStage Tix": true, Flicket: true, "Gearhead Events": true, "EventPro Suite": P, AllBooked: true, Reunion: true, SevenRooms: true, iVvy: P, VenueBook: true, Creventa: true },
-  "Booth & Floorplan Layout": { Eventist: true, "Gearhead Events": P, AllBooked: P },
+  "Large Audience Reach": { "Zola": true, "Eventnoire": P, FeedIRL: P, "IBTM Events": P, Eventist: P, WeddingPro: true },
+  "Event Management": { "Paddle Up": P, "Zola": true, "Parafait (Semnox)": P, "Geeks Who Drink": P, "EventPipe": true, "VenueSumo": P, "Mr Black": true, "Curate": true, "We Crush Events": true, "Total Party Planner": true, Zeffy: P, Humanitix: true, TicketLeap: true, CrewBrain: true, "IBTM Events": P, Eventist: true, YourStartupOperations: P, HoneyBook: true, Passage: P, "Smoke & Mirrors": true, "EventPro Suite": true, "Gearhead Events": true, "OnTheStage Tix": true, Flicket: P, Fora: P, AllBooked: P, Reunion: true, RestauRent: P, SevenRooms: true, iVvy: true, VenueBook: true, Creventa: true },
+  "Payment Processing": { "Paddle Up": true, "Posh": true, "Zola": P, "EMP.DJ": P, "Parafait (Semnox)": true, "TicketBlox": true, "BeyondMenu": true, "Eventnoire": true, "EventPipe": P, "Mr Black": true, "Curate": true, "Total Party Planner": true, Zeffy: true, Humanitix: true, TicketLeap: true, Klipboard: true, Eventist: P, HoneyBook: true, Passage: true, "OnTheStage Tix": true, Flicket: true, "Gearhead Events": true, "EventPro Suite": P, AllBooked: true, Reunion: true, SevenRooms: true, iVvy: P, VenueBook: true, Creventa: true },
+  "Booth & Floorplan Layout": { "VenueX360": P, Eventist: true, "Gearhead Events": P, AllBooked: P },
   "Vendor Applications & Booth Assignment": { Eventist: P, "Gearhead Events": true },
-  "Venue Hardware & Games": { Eventist: P },
-  "Equipment & Gear Tracking": { "Total Party Planner": P, CrewBrain: P, Klipboard: true, "Smoke & Mirrors": P, iVvy: P },
-  "Community Features": { Zeffy: P, "IBTM Events": P, "Live Circuit": P, "Huge Convention": true, WeddingPro: P },
-  "Brand Collaboration": { FeedIRL: P, "IBTM Events": P, "Huge Convention": P },
-  "Collaborator & Skill Matching": { CrewBrain: P, "IBTM Events": P, "Live Circuit": true, Fora: true },
-  "Recurring Community Programming": { Resi: P, "Huge Convention": P, Flicket: P, AllBooked: P },
+  "Venue Hardware & Games": { "Parafait (Semnox)": true, "Geeks Who Drink": P, Eventist: P },
+  "Equipment & Gear Tracking": { "Paddle Up": P, "Total Party Planner": P, CrewBrain: P, Klipboard: true, "Smoke & Mirrors": P, iVvy: P },
+  "Community Features": { "Posh": P, "Eventnoire": P, Zeffy: P, "IBTM Events": P, "Live Circuit": P, "Huge Convention": true, WeddingPro: P },
+  "Brand Collaboration": { "Feathr": P, "Moose Planet Media": P, FeedIRL: P, "IBTM Events": P, "Huge Convention": P },
+  "Collaborator & Skill Matching": { "EMP.DJ": P, CrewBrain: P, "IBTM Events": P, "Live Circuit": true, Fora: true },
+  "Recurring Community Programming": { "Geeks Who Drink": true, Resi: P, "Huge Convention": P, Flicket: P, AllBooked: P },
   "Resale & Secondary Market": { Flicket: true },
   "Resource Marketplace": { Fora: P },
   "Creator Portfolio Pages": { WeddingPro: true },
-  "Non-Traditional Venues": { "We Crush Events": P, AllBooked: true, Reunion: P, RestauRent: P },
-  "Local Discovery Map": { Reunion: P, RestauRent: P },
+  "Non-Traditional Venues": { "VenueX360": P, "VenueSumo": true, "We Crush Events": P, AllBooked: true, Reunion: P, RestauRent: P },
+  "Local Discovery Map": { "Mr Happy Hours": true, "BeyondMenu": P, "Geeks Who Drink": true, "VenueSumo": P, Reunion: P, RestauRent: P },
 };
 
 const ORDER = ["Event Management","Payment Processing","Ticketing & Registration","Non-Traditional Venues","Analytics & Reporting","Booth & Floorplan Layout","Email & Marketing Tools","Artist/Creator Profiles","Attendee Mobile App","Vendor Applications & Booth Assignment","CRM & Client Management","Local Discovery Map","Fan Following & Alerts","Community Features","Virtual & Hybrid Events","Equipment & Gear Tracking","Check-In & Badges","Multi-Level Space Planning","Large Audience Reach","3D Walkthrough Preview","Saved Layout Templates","Resale & Secondary Market","Space Module Library","Venue Hardware & Games","Recurring Community Programming","Collaborator & Skill Matching","Booth-Level Messaging","Creator Portfolio Pages","UGC Content Feed","Brand Collaboration","Resource Marketplace","Travel/Touring Support"];
@@ -149,6 +152,24 @@ const competitors = [
   { name: "iVvy", focus: "Venue & Event Management", pricing: "$$$", bestFor: "Restaurants, hotels and caterers: bookings, BEOs, proposals, catering orders and inventory" },
   { name: "VenueBook", focus: "Restaurant Private Hire", pricing: "$", bestFor: "Restaurants taking private hire and functions: enquiry pipeline, deposits, pre-orders, kitchen sheets" },
   { name: "Creventa", focus: "Hospitality Event Journey", pricing: "$$", bestFor: "Restaurants, hotels and event venues: enquiries, proposals, guest pre-orders, seating, payments, ticketing" },
+  { name: "Curate", focus: "Event Proposal Software", pricing: "$$", bestFor: "Florists and caterers: proposals, recipes, ordering, invoices" },
+  { name: "Mr Black", focus: "Nightlife Venue CRM", pricing: "$$", bestFor: "Clubs and lounges: guest lists, table bookings, promoter tracking" },
+  { name: "VenueSumo", focus: "Venue Booking Marketplace", pricing: "Free-$$", bestFor: "Planners finding and booking event venues" },
+  { name: "EventPipe", focus: "Event Sales Pipeline", pricing: "$$", bestFor: "Venues and planners: lead pipeline, proposals, contracts" },
+  { name: "Moose Planet Media", focus: "Event Media Agency", pricing: "$$$", bestFor: "Brands and events: video, photo, promo content" },
+  { name: "Geeks Who Drink", focus: "Bar Trivia Programming", pricing: "$$", bestFor: "Bars hosting weekly hosted quiz nights" },
+  { name: "Eventnoire", focus: "Culture Event Ticketing", pricing: "Low fees", bestFor: "Black-owned and culture-focused event organizers" },
+  { name: "VenueX360", focus: "Venue Virtual Tours", pricing: "$$", bestFor: "Venues showcasing spaces with 360 tours" },
+  { name: "BeyondMenu", focus: "Restaurant Online Ordering", pricing: "Free-$", bestFor: "Restaurants taking online orders" },
+  { name: "TicketBlox", focus: "Event Ticketing", pricing: "Low fees", bestFor: "Organizers selling tickets and passes" },
+  { name: "Feathr", focus: "Nonprofit & Event Marketing", pricing: "$$$", bestFor: "Associations and events: ad retargeting, sponsor ads, email" },
+  { name: "Mr Happy Hours", focus: "Happy Hour Discovery", pricing: "Free", bestFor: "Locals finding deals; bars promoting specials" },
+  { name: "Parafait (Semnox)", focus: "Entertainment Venue POS", pricing: "$$$", bestFor: "Arcades, parks, FECs: game cards, POS, party bookings" },
+  { name: "EMP.DJ", focus: "DJ Booking Platform", pricing: "$", bestFor: "Booking DJs for events" },
+  { name: "Zola", focus: "Wedding Planning", pricing: "Free", bestFor: "Couples: registry, website, guest list, vendors" },
+  { name: "Posh", focus: "Social Event Ticketing", pricing: "Low fees", bestFor: "Nightlife and party hosts: tickets, community, SMS blasts" },
+  { name: "ISDE Digital", focus: "Digital Agency", pricing: "$$", bestFor: "Businesses needing web and marketing" },
+  { name: "Paddle Up", focus: "Paddle Sports Booking", pricing: "$", bestFor: "Rental and tour operators: bookings, waivers" },
 ];
 
 const FeatureIcon = ({ value }: { value: boolean | "partial" }) => {
