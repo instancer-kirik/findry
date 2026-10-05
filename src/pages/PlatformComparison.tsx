@@ -78,9 +78,9 @@ const EXTRA: Record<string, Partial<Record<ExtraCol, V>>> = {
   "Collaborator & Skill Matching": { "Zola": P, CrewBrain: P, "IBTM Events": P, "Live Circuit": true, Fora: true },
   "Recurring Community Programming": { "Paddle Up": true, "Geeks Who Drink": true, Resi: P, "Huge Convention": P, Flicket: P, AllBooked: P, BiggerCrowds: true },
   "Resale & Secondary Market": { Flicket: true },
-  "Resource Marketplace": { Booqable: P, Fora: P "Mallard Bay": P },
+  "Resource Marketplace": { Booqable: P, Fora: P, "Mallard Bay": P },
   "Creator Portfolio Pages": { WeddingPro: true },
-  "Non-Traditional Venues": { OpenTable: P, "Zola": P, "VenueSumo": P, "We Crush Events": P, AllBooked: true, Reunion: P, RestauRent: P, Mews: P "Mallard Bay": P },
+  "Non-Traditional Venues": { OpenTable: P, "Zola": P, "VenueSumo": P, "We Crush Events": P, AllBooked: true, Reunion: P, RestauRent: P, Mews: P, "Mallard Bay": P },
   "Local Discovery Map": { OpenTable: true, "Paddle Up": P, "Posh": true, "Mr Happy Hours": true, "BeyondMenu": P, "Eventnoire": P, "Geeks Who Drink": true, Reunion: P, RestauRent: P, Thryv: P, Toast: P, "Mallard Bay": true },
 };
 
