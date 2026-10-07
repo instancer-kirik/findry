@@ -6297,6 +6297,7 @@ export type Database = {
           id: string
           image: string | null
           slug: string | null
+          status: string
           title: string
           updated_at: string | null
         }
@@ -6310,6 +6311,7 @@ export type Database = {
           id?: string
           image?: string | null
           slug?: string | null
+          status?: string
           title: string
           updated_at?: string | null
         }
@@ -6323,6 +6325,7 @@ export type Database = {
           id?: string
           image?: string | null
           slug?: string | null
+          status?: string
           title?: string
           updated_at?: string | null
         }
