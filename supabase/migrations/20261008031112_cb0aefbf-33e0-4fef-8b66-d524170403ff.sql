@@ -1,0 +1,3 @@
+GRANT SELECT ON public.venue_floorplans, public.floorplan_items, public.floorplan_layouts, public.floorplan_assignments TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.venue_floorplans, public.floorplan_items, public.floorplan_layouts, public.floorplan_assignments TO authenticated;
+GRANT ALL ON public.venue_floorplans, public.floorplan_items, public.floorplan_layouts, public.floorplan_assignments TO service_role;
