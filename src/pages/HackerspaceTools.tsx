@@ -64,7 +64,7 @@ const HackerspaceTools = () => {
   const [zones, setZones] = useState<string[]>([]);
   useEffect(() => {
     db.from("floorplan_items").select("label").eq("floorplan_id", HACKERSPACE_FLOORPLAN_ID)
-      .or("kind.eq.booth,meta->>object_type.eq.room_zone")
+      .or("kind.eq.booth,meta->>object_type.eq.room_zone,meta->>object_type.eq.storage_rack")
       .then(({ data }: any) => setZones([...new Set<string>((data ?? []).map((d: any) => d.label).filter(Boolean))]));
   }, []);
   useEffect(() => {

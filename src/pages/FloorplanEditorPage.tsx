@@ -42,6 +42,7 @@ export default function FloorplanEditorPage() {
             <Badge variant="outline" className="hidden sm:inline-flex">{plan.claim_mode}</Badge>
             {isOwner && <Badge className="hidden sm:inline-flex">owner</Badge>}
           </div>
+          {plan.id === "617b20a6-8edf-4218-a6b4-ed6cfca9f749" && <Link className="self-end sm:self-auto" to="/spaces/baltimore-hackerspace"><Button size="sm" variant="outline" className="min-h-10">Inventory</Button></Link>}
           <Link className="self-end sm:self-auto" to={`/floorplans/${plan.id}/walk`}><Button size="sm" className="min-h-10"><Eye className="mr-1 h-4 w-4" />Walk in 3D</Button></Link>
         </div>
 
