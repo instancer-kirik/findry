@@ -73,6 +73,13 @@ const PALETTE: { kind: FloorplanItemKind; label: string; w: number; h: number; z
     kind: "misc", label: "Kitchen", w: 160, h: 120, z: 26, icon: CookingPot, color: "#84cc16",
     meta: { object_type: "kitchen", sizable: true, plumbing_required: true, ventilation_required: true },
   },
+  // Large shop tools (footprints include working clearance). Owned by individual members.
+  { kind: "misc", label: "CNC Router 5x10 (Shopbot)", w: 80, h: 140, z: 26, icon: Box, color: "#e11d48", meta: { object_type: "shop_tool", tool: "shopbot", sizable: true, member_owned: true, needs: "dust collection, 240V" } },
+  { kind: "misc", label: "Laser Cutter (100W CO2)", w: 50, h: 40, z: 26, icon: Sparkles, color: "#f43f5e", meta: { object_type: "shop_tool", tool: "co2_laser", sizable: true, member_owned: true, needs: "exhaust vent" } },
+  { kind: "misc", label: "Bridgeport Mill", w: 60, h: 60, z: 26, icon: Box, color: "#64748b", meta: { object_type: "shop_tool", tool: "bridgeport", sizable: true, member_owned: true, needs: "240V, level floor" } },
+  { kind: "misc", label: "Table Saw", w: 80, h: 80, z: 26, icon: Square, color: "#a16207", meta: { object_type: "shop_tool", tool: "tablesaw", sizable: true, member_owned: true, needs: "infeed/outfeed clearance" } },
+  { kind: "misc", label: "Welding Station", w: 60, h: 60, z: 26, icon: Sparkles, color: "#ea580c", meta: { object_type: "shop_tool", tool: "welding", sizable: true, member_owned: true, needs: "fire-safe zone, screens, ventilation" } },
+  { kind: "table", label: "Workbench", w: 80, h: 30, icon: RectangleHorizontal, color: "#92400e", meta: { object_type: "shop_tool", tool: "workbench", sizable: true, member_owned: true } },
   { kind: "pedestal", label: "Pedestal", w: 30, h: 30, icon: Box, color: "#c084fc" },
   { kind: "stage", label: "Stage", w: 240, h: 120, icon: Mic2, color: "#f43f5e", meta: { sizable: true } },
   { kind: "seating", label: "Seating", w: 180, h: 100, icon: Footprints, color: "#60a5fa", meta: { sizable: true } },
