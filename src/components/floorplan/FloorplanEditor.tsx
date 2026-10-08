@@ -10,7 +10,7 @@ import {
   Mic2, Plug, Sparkles, Footprints, DoorOpen, Trash2, RotateCw, Lock, Unlock, Volume2,
   Plus, SlidersHorizontal, X, Copy, Bath, CookingPot, Construction,
 } from "lucide-react";
-import { ZoneContents } from "./ZoneContents";
+import { ZoneContents, isZone } from "./ZoneContents";
 import type { FloorplanItem, FloorplanItemKind, FloorplanAssignment } from "@/hooks/use-floorplan";
 
 // canvas units per foot (seeded plans use 1 ft = 10 units)
@@ -81,6 +81,7 @@ const PALETTE: { kind: FloorplanItemKind; label: string; w: number; h: number; z
   { kind: "misc", label: "Table Saw", w: 80, h: 80, z: 26, icon: Square, color: "#a16207", meta: { object_type: "shop_tool", tool: "tablesaw", sizable: true, member_owned: true, needs: "infeed/outfeed clearance" } },
   { kind: "misc", label: "Welding Station", w: 60, h: 60, z: 26, icon: Sparkles, color: "#ea580c", meta: { object_type: "shop_tool", tool: "welding", sizable: true, member_owned: true, needs: "fire-safe zone, screens, ventilation" } },
   { kind: "table", label: "Workbench", w: 80, h: 30, icon: RectangleHorizontal, color: "#92400e", meta: { object_type: "shop_tool", tool: "workbench", sizable: true, member_owned: true } },
+  { kind: "misc", label: "Storage Rack (3 tier)", w: 80, h: 20, z: 96, icon: Columns3, color: "#78716c", meta: { object_type: "storage_rack", tiers: 3, sizable: true } },
   { kind: "pedestal", label: "Pedestal", w: 30, h: 30, icon: Box, color: "#c084fc" },
   { kind: "stage", label: "Stage", w: 240, h: 120, icon: Mic2, color: "#f43f5e", meta: { sizable: true } },
   { kind: "seating", label: "Seating", w: 180, h: 100, icon: Footprints, color: "#60a5fa", meta: { sizable: true } },
@@ -300,8 +301,8 @@ export const FloorplanEditor: React.FC<Props> = ({
         <p className="mt-1 text-[11px] text-muted-foreground">Drag the corner handle on the plan to resize.</p>
       </div>
 
-      {(selected.kind === "booth" || selected.meta?.object_type === "room_zone") && (
-        <ZoneContents item={selected} readOnly={readOnly} />
+      {isZone(selected) && (
+        <ZoneContents item={selected} items={items} readOnly={readOnly} onUpdate={onUpdate} />
       )}
 
       {selected.meta?.object_type === "rolling_acoustic_wall" && (

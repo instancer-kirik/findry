@@ -64,7 +64,7 @@ const HackerspaceTools = () => {
   const [zones, setZones] = useState<string[]>([]);
   useEffect(() => {
     db.from("floorplan_items").select("label").eq("floorplan_id", HACKERSPACE_FLOORPLAN_ID)
-      .or("kind.eq.booth,meta->>object_type.eq.room_zone")
+      .or("kind.eq.booth,meta->>object_type.eq.room_zone,meta->>object_type.eq.storage_rack")
       .then(({ data }: any) => setZones([...new Set<string>((data ?? []).map((d: any) => d.label).filter(Boolean))]));
   }, []);
   useEffect(() => {
@@ -108,7 +108,7 @@ const HackerspaceTools = () => {
         </p>
         <div className="mt-3 flex gap-3 text-sm">
           <a href={SOURCE} target="_blank" rel="noreferrer" className="text-primary underline">Original list</a>
-          <Link to="/floorplans" className="text-primary underline">Place big tools on a floorplan</Link>
+          <Link to={`/floorplans/${HACKERSPACE_FLOORPLAN_ID}`} className="text-primary underline">Open the hackerspace floorplan</Link>
         </div>
 
         <div className="mt-6 flex flex-col gap-3">
