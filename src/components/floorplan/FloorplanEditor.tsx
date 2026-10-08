@@ -10,6 +10,7 @@ import {
   Mic2, Plug, Sparkles, Footprints, DoorOpen, Trash2, RotateCw, Lock, Unlock, Volume2,
   Plus, SlidersHorizontal, X, Copy, Bath, CookingPot, Construction,
 } from "lucide-react";
+import { ZoneContents } from "./ZoneContents";
 import type { FloorplanItem, FloorplanItemKind, FloorplanAssignment } from "@/hooks/use-floorplan";
 
 // canvas units per foot (seeded plans use 1 ft = 10 units)
@@ -298,6 +299,10 @@ export const FloorplanEditor: React.FC<Props> = ({
         )}
         <p className="mt-1 text-[11px] text-muted-foreground">Drag the corner handle on the plan to resize.</p>
       </div>
+
+      {(selected.kind === "booth" || selected.meta?.object_type === "room_zone") && (
+        <ZoneContents item={selected} readOnly={readOnly} />
+      )}
 
       {selected.meta?.object_type === "rolling_acoustic_wall" && (
         <div className="border-l-2 border-primary bg-muted/50 p-3 text-xs">
