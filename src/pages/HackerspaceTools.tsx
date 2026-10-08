@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { Plus, Trash2, Save, Pencil, Undo2, ChevronDown } from "lucide-react";
 
 const PLACE = "Baltimore Hackerspace";
+const HACKERSPACE_FLOORPLAN_ID = "617b20a6-8edf-4218-a6b4-ed6cfca9f749";
 const SOURCE = "https://baltimorehackerspace.com/2025/06/tools-and-equipment/";
 
 type Tool = {
@@ -60,6 +61,12 @@ const HackerspaceTools = () => {
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
+  const [zones, setZones] = useState<string[]>([]);
+  useEffect(() => {
+    db.from("floorplan_items").select("label").eq("floorplan_id", HACKERSPACE_FLOORPLAN_ID)
+      .or("kind.eq.booth,meta->>object_type.eq.room_zone")
+      .then(({ data }: any) => setZones([...new Set<string>((data ?? []).map((d: any) => d.label).filter(Boolean))]));
+  }, []);
   useEffect(() => {
     if (!user) { setIsAdmin(false); return; }
     db.rpc("has_role", { _role: "admin", _user_id: user.id }).then(({ data }: any) => setIsAdmin(!!data));
@@ -121,6 +128,7 @@ const HackerspaceTools = () => {
 
         {loading ? <p className="mt-8 text-muted-foreground">Loading…</p> : editMode ? (
           <div className="mt-6 max-h-[70vh] overflow-auto rounded-md border bg-background">
+            <datalist id="hackerspace-zones">{zones.map(z => <option key={z} value={z} />)}</datalist>
             <table className="w-full min-w-[2200px] border-separate border-spacing-0 text-sm">
               <thead>
                 <tr>
@@ -277,7 +285,7 @@ const ToolEditor = ({ tool, onSaved, onDeleted }: { tool: Tool; onSaved: (t: Too
       </td>
       <td className={cell}><Input aria-label={label("Category")} className={input} value={f.category} onChange={e => set("category", e.target.value)} /></td>
       <td className={cell}><Input aria-label={label("Owner")} className={input} value={f.owner_name ?? ""} placeholder="—" onChange={e => set("owner_name", e.target.value)} /></td>
-      <td className={cell}><Input aria-label={label("Location")} className={input} value={f.location ?? ""} placeholder="—" onChange={e => set("location", e.target.value)} /></td>
+      <td className={cell}><Input aria-label={label("Location")} className={input} list="hackerspace-zones" value={f.location ?? ""} placeholder="Zone or text" onChange={e => set("location", e.target.value)} /></td>
       <td className={cell}><Input aria-label={label("Quantity")} className={`${input} min-w-[90px]`} value={f.quantity ?? ""} placeholder="—" onChange={e => set("quantity", e.target.value)} /></td>
       <td className={cell}><Textarea aria-label={label("Description")} className={area} rows={2} value={f.description ?? ""} onChange={e => set("description", e.target.value)} /></td>
       <td className={cell}><Textarea aria-label={label("Details")} title="One detail per line" className={area} rows={2} value={f.detailsText} onChange={e => set("detailsText", e.target.value)} /></td>
