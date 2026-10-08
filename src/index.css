@@ -260,3 +260,18 @@
     animation-delay: 1000ms;
   }
 }
+
+@layer components {
+  .cat-dot {
+    @apply inline-block h-2 w-2 shrink-0 rounded-full;
+  }
+  .cat-amber { @apply bg-amber-500; }
+  .cat-emerald { @apply bg-emerald-500; }
+  .cat-cyan { @apply bg-cyan-500; }
+  .cat-yellow { @apply bg-yellow-500; }
+  .cat-slate { @apply bg-slate-400; }
+  .cat-violet { @apply bg-violet-500; }
+  .cat-rose { @apply bg-rose-500; }
+  .cat-neutral { @apply bg-neutral-400; }
+  .cat-blue { @apply bg-blue-500; }
+}
