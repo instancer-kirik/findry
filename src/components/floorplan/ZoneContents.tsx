@@ -12,7 +12,6 @@ type Tool = { id: string; name: string; kind: string | null; category: string | 
 /** Lists inventory whose location matches this zone's label; editors can move items in/out. */
 export function ZoneContents({ item, readOnly }: { item: FloorplanItem; readOnly?: boolean }) {
   const [tools, setTools] = useState<Tool[]>([]);
-  const [pick, setPick] = useState("");
   const zone = (item.label ?? "").trim();
 
   const load = async () => {
@@ -62,15 +61,7 @@ export function ZoneContents({ item, readOnly }: { item: FloorplanItem; readOnly
               ))}
             </ul>
           )}
-        {!readOnly && zone && (
-          <div className="mt-2 flex gap-2">
-            <select className="h-10 min-w-0 flex-1 rounded-md border bg-background px-2 text-xs" value={pick} onChange={e => setPick(e.target.value)}>
-              <option value="">Add tool or material…</option>
-              {others.map(t => <option key={t.id} value={t.id}>{t.name}{t.location ? ` (in ${t.location})` : ""}</option>)}
-            </select>
-            <Button size="sm" className="h-10" disabled={!pick} onClick={async () => { await setLocation(pick, zone); setPick(""); }}>Add</Button>
-          </div>
-        )}
+        <p className="mt-1 text-[11px] text-muted-foreground">Set a location to this zone name in the inventory table.</p>
       </div>
     </div>
   );
