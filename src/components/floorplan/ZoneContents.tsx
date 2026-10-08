@@ -13,7 +13,7 @@ export const isZone = (i: FloorplanItem) => i.kind === "booth" || i.meta?.object
 const norm = (s: string | null | undefined) => (s ?? "").trim().toLowerCase();
 
 /** Zone props, parent/child zones, and inventory whose location matches this zone (or a child zone). */
-export function ZoneContents({ item, items, readOnly, onUpdate }: {
+export function ZoneContents({ item, items = [], readOnly, onUpdate }: {
   item: FloorplanItem; items: FloorplanItem[]; readOnly?: boolean;
   onUpdate: (id: string, patch: Partial<FloorplanItem>) => void;
 }) {
