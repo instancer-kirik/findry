@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import type { FloorplanItem } from "@/hooks/use-floorplan";
 
 const db = supabase as any;
-type Tool = { id: string; name: string; item_type: string | null; category: string | null; location: string | null; owner_name: string | null; quantity: string | null };
+type Tool = { id: string; name: string; kind: string | null; category: string | null; location: string | null; owner_name: string | null; quantity: string | null };
 
 /** Lists inventory whose location matches this zone's label; editors can move items in/out. */
 export function ZoneContents({ item, readOnly }: { item: FloorplanItem; readOnly?: boolean }) {
@@ -16,7 +16,7 @@ export function ZoneContents({ item, readOnly }: { item: FloorplanItem; readOnly
   const zone = (item.label ?? "").trim();
 
   const load = async () => {
-    const { data } = await db.from("space_tools").select("id,name,item_type,category,location,owner_name,quantity").order("name");
+    const { data } = await db.from("space_tools").select("id,name,kind,category,location,owner_name,quantity").order("name");
     setTools(data ?? []);
   };
   useEffect(() => { load(); }, []);
@@ -55,7 +55,7 @@ export function ZoneContents({ item, readOnly }: { item: FloorplanItem; readOnly
                 <li key={t.id} className="flex items-center gap-2 p-2">
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium">{t.name}{t.quantity ? ` ×${t.quantity}` : ""}</p>
-                    <p className="truncate text-muted-foreground">{[t.item_type, t.category, t.owner_name].filter(Boolean).join(" · ")}</p>
+                    <p className="truncate text-muted-foreground">{[t.kind, t.category, t.owner_name].filter(Boolean).join(" · ")}</p>
                   </div>
                   {!readOnly && <Button size="sm" variant="ghost" className="h-9 w-9 p-0" aria-label={`Remove ${t.name}`} onClick={() => setLocation(t.id, null)}><X className="h-3 w-3" /></Button>}
                 </li>
