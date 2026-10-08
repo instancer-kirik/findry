@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, Pencil, Undo2 } from "lucide-react";
+import { Plus, Trash2, Save, Pencil, Undo2, ChevronDown } from "lucide-react";
 
 const PLACE = "Baltimore Hackerspace";
 const SOURCE = "https://baltimorehackerspace.com/2025/06/tools-and-equipment/";
@@ -26,6 +26,19 @@ type Tool = {
 const db = supabase as any;
 const lines = (s: string) => s.split("\n").map(x => x.trim()).filter(Boolean);
 
+const CAT_COLOR: Record<string, string> = {
+  "Automotive": "amber",
+  "Carpentry": "emerald",
+  "CNC Tools": "cyan",
+  "Electrical": "yellow",
+  "General": "slate",
+  "Machinist Tools": "violet",
+  "Metalworking": "rose",
+  "Miscellaneous": "neutral",
+  "Stock / materials": "blue",
+};
+const catDot = (c: string) => `cat-dot cat-${CAT_COLOR[c] ?? "neutral"}`;
+
 const HackerspaceTools = () => {
   const { user } = useAuth() as any;
   const [tools, setTools] = useState<Tool[]>([]);
@@ -34,6 +47,12 @@ const HackerspaceTools = () => {
   const [editMode, setEditMode] = useState(false);
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string | null>(null);
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const toggleCat = (c: string) => setCollapsed(p => {
+    const n = new Set(p);
+    if (n.has(c)) n.delete(c); else n.add(c);
+    return n;
+  });
 
   const load = async () => {
     const { data, error } = await db.from("space_tools").select("*").eq("place", PLACE).order("sort_order");
@@ -88,9 +107,12 @@ const HackerspaceTools = () => {
         <div className="mt-6 flex flex-col gap-3">
           <Input placeholder="Search name, owner, location, details" value={q} onChange={e => setQ(e.target.value)} />
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" variant={cat ? "outline" : "default"} onClick={() => setCat(null)}>All</Button>
+            <Button size="sm" variant={cat ? "outline" : "default"} onClick={() => setCat(null)}>
+              All <span className="ml-1 opacity-60">{tools.length}</span>
+            </Button>
             {cats.map(c => (
               <Button key={c} size="sm" variant={cat === c ? "default" : "outline"} onClick={() => setCat(c)}>
+                <span className={catDot(c)} />
                 {c} <span className="ml-1 opacity-60">{tools.filter(t => t.category === c).length}</span>
               </Button>
             ))}
@@ -124,12 +146,25 @@ const HackerspaceTools = () => {
             {cats.filter(c => !cat || c === cat).map(c => {
               const items = filtered.filter(t => t.category === c);
               if (!items.length) return null;
+              const isCollapsed = collapsed.has(c);
               return (
                 <section key={c}>
-                  <h2 className="text-xl font-semibold mb-3">{c}</h2>
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {items.map(t => <ToolCard key={t.id} t={t} />)}
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => toggleCat(c)}
+                    aria-expanded={!isCollapsed}
+                    className="mb-3 flex w-full items-center gap-2 text-left"
+                  >
+                    <span className={catDot(c)} />
+                    <span className="text-xl font-semibold">{c}</span>
+                    <span className="text-sm text-muted-foreground">{items.length}</span>
+                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isCollapsed ? "" : "rotate-180"}`} />
+                  </button>
+                  {!isCollapsed && (
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      {items.map(t => <ToolCard key={t.id} t={t} />)}
+                    </div>
+                  )}
                 </section>
               );
             })}
@@ -226,8 +261,13 @@ const ToolEditor = ({ tool, onSaved, onDeleted }: { tool: Tool; onSaved: (t: Too
   return (
     <tr className={dirty ? "bg-accent/30" : "bg-background"} aria-label={tool.name}>
       <td className={`${cell} sticky left-0 z-10 border-r bg-background`}>
-        <Input aria-label={label("Name")} className={`${input} min-w-[220px] font-medium`} value={f.name} onChange={e => set("name", e.target.value)} disabled={saving || deleting} />
-        {dirty && <span className="px-3 text-xs text-primary">Unsaved</span>}
+        <div className="flex items-start gap-2">
+          <span className={`${catDot(f.category)} mt-3.5`} />
+          <div>
+            <Input aria-label={label("Name")} className={`${input} min-w-[220px] font-medium`} value={f.name} onChange={e => set("name", e.target.value)} disabled={saving || deleting} />
+            {dirty && <span className="px-3 text-xs text-primary">Unsaved</span>}
+          </div>
+        </div>
       </td>
       <td className={cell}>
         <Select value={f.kind} onValueChange={v => set("kind", v)}>
