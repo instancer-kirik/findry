@@ -7,10 +7,11 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, Pencil, X } from "lucide-react";
+import { Plus, Trash2, Save, Pencil, Undo2 } from "lucide-react";
 
 const PLACE = "Baltimore Hackerspace";
 const SOURCE = "https://baltimorehackerspace.com/2025/06/tools-and-equipment/";
@@ -97,12 +98,26 @@ const HackerspaceTools = () => {
         </div>
 
         {loading ? <p className="mt-8 text-muted-foreground">Loading…</p> : editMode ? (
-          <div className="mt-8 space-y-3">
-            {filtered.map(t => (
-              <ToolEditor key={t.id} tool={t}
-                onSaved={n => setTools(ts => ts.map(x => x.id === n.id ? n : x))}
-                onDeleted={id => setTools(ts => ts.filter(x => x.id !== id))} />
-            ))}
+          <div className="mt-6 max-h-[70vh] overflow-auto rounded-md border bg-background">
+            <table className="w-full min-w-[2200px] border-separate border-spacing-0 text-sm">
+              <thead>
+                <tr>
+                  {["Name", "Type", "Category", "Owner", "Location", "Quantity", "Description", "Details", "Parameters (JSON)", "Links", "Training", "Order", "Actions"].map((label, i) => (
+                    <th key={label} scope="col" className={`sticky top-0 border-b bg-muted px-3 py-3 text-left text-xs font-medium text-muted-foreground ${i === 0 ? "left-0 z-30 min-w-[240px] border-r" : "z-20"} ${label === "Actions" ? "right-0 border-l" : ""}`}>
+                      {label}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map(t => (
+                  <ToolEditor key={t.id} tool={t}
+                    onSaved={n => setTools(ts => ts.map(x => x.id === n.id ? n : x))}
+                    onDeleted={id => setTools(ts => ts.filter(x => x.id !== id))} />
+                ))}
+                {!filtered.length && <tr><td colSpan={13} className="p-6 text-muted-foreground">Nothing matches.</td></tr>}
+              </tbody>
+            </table>
           </div>
         ) : (
           <div className="mt-8 space-y-8">
@@ -157,20 +172,31 @@ const ToolCard = ({ t }: { t: Tool }) => (
   </Card>
 );
 
-const ToolEditor = ({ tool, onSaved, onDeleted }: { tool: Tool; onSaved: (t: Tool) => void; onDeleted: (id: string) => void }) => {
-  const [f, setF] = useState({
+const toolDraft = (tool: Tool) => ({
     ...tool,
     detailsText: tool.details.join("\n"),
     linksText: tool.links.join("\n"),
-    paramsText: Object.entries(tool.params ?? {}).map(([k, v]) => `${k}: ${v}`).join("\n"),
+    paramsText: JSON.stringify(tool.params ?? {}),
   });
+
+const ToolEditor = ({ tool, onSaved, onDeleted }: { tool: Tool; onSaved: (t: Tool) => void; onDeleted: (id: string) => void }) => {
+  const [f, setF] = useState(() => toolDraft(tool));
   const [saving, setSaving] = useState(false);
-  const set = (k: string, v: unknown) => setF(p => ({ ...p, [k]: v }));
+  const [deleting, setDeleting] = useState(false);
+  const dirty = JSON.stringify(f) !== JSON.stringify(toolDraft(tool));
+  const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF(p => ({ ...p, [k]: v }));
 
   const save = async () => {
     if (!f.name.trim()) return toast.error("Name can't be empty");
-    const params: Record<string, string> = {};
-    lines(f.paramsText).forEach(l => { const i = l.indexOf(":"); if (i > 0) params[l.slice(0, i).trim()] = l.slice(i + 1).trim(); });
+    let params: Record<string, unknown>;
+    try {
+      const parsed = JSON.parse(f.paramsText || "{}");
+      if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error();
+      params = parsed;
+    } catch {
+      return toast.error(`Parameters for "${f.name}" must be a JSON object`);
+    }
+    if (lines(f.linksText).some(l => !/^https?:\/\//.test(l))) return toast.error("Links must start with https:// or http://");
     setSaving(true);
     const { data, error } = await db.from("space_tools").update({
       name: f.name.trim().slice(0, 200), category: f.category.trim() || "General", kind: f.kind,
@@ -181,45 +207,53 @@ const ToolEditor = ({ tool, onSaved, onDeleted }: { tool: Tool; onSaved: (t: Too
     }).eq("id", tool.id).select().single();
     setSaving(false);
     if (error) return toast.error(error.message);
-    onSaved(data); toast.success("Saved");
+    setF(toolDraft(data)); onSaved(data); toast.success(`Saved ${data.name}`);
   };
   const remove = async () => {
     if (!confirm(`Delete "${tool.name}"?`)) return;
+    setDeleting(true);
     const { error } = await db.from("space_tools").delete().eq("id", tool.id);
+    setDeleting(false);
     if (error) return toast.error(error.message);
     onDeleted(tool.id);
   };
 
+  const cell = "border-b p-2 align-top";
+  const input = "h-9 min-w-[150px] rounded-sm border-transparent bg-transparent shadow-none hover:border-input focus-visible:border-input";
+  const area = `${input} min-h-9 min-w-[240px] resize-y`;
+  const label = (field: string) => `${field} for ${tool.name}`;
+
   return (
-    <Card className="p-4 grid gap-3 md:grid-cols-4">
-      <Field label="Name"><Input value={f.name} onChange={e => set("name", e.target.value)} /></Field>
-      <Field label="Category"><Input value={f.category} onChange={e => set("category", e.target.value)} /></Field>
-      <Field label="Owner"><Input value={f.owner_name ?? ""} placeholder="Member name" onChange={e => set("owner_name", e.target.value)} /></Field>
-      <Field label="Location"><Input value={f.location ?? ""} placeholder="e.g. Wood shop, shelf B" onChange={e => set("location", e.target.value)} /></Field>
-      <Field label="Description" className="md:col-span-2"><Textarea rows={2} value={f.description ?? ""} onChange={e => set("description", e.target.value)} /></Field>
-      <Field label="Details (one per line)" className="md:col-span-2"><Textarea rows={2} value={f.detailsText} onChange={e => set("detailsText", e.target.value)} /></Field>
-      <Field label="Settings (key: value per line)" className="md:col-span-2"><Textarea rows={2} placeholder={"voltage: 240V\nbed: 24x30 in"} value={f.paramsText} onChange={e => set("paramsText", e.target.value)} /></Field>
-      <Field label="Links (one per line)" className="md:col-span-2"><Textarea rows={2} value={f.linksText} onChange={e => set("linksText", e.target.value)} /></Field>
-      <Field label="Quantity"><Input value={f.quantity ?? ""} onChange={e => set("quantity", e.target.value)} /></Field>
-      <Field label="Type">
+    <tr className={dirty ? "bg-accent/30" : "bg-background"} aria-label={tool.name}>
+      <td className={`${cell} sticky left-0 z-10 border-r bg-background`}>
+        <Input aria-label={label("Name")} className={`${input} min-w-[220px] font-medium`} value={f.name} onChange={e => set("name", e.target.value)} disabled={saving || deleting} />
+        {dirty && <span className="px-3 text-xs text-primary">Unsaved</span>}
+      </td>
+      <td className={cell}>
+        <Select value={f.kind} onValueChange={v => set("kind", v)}>
+          <SelectTrigger aria-label={label("Type")} className={`${input} min-w-[120px]`}><SelectValue /></SelectTrigger>
+          <SelectContent><SelectItem value="tool">Tool</SelectItem><SelectItem value="material">Material</SelectItem></SelectContent>
+        </Select>
+      </td>
+      <td className={cell}><Input aria-label={label("Category")} className={input} value={f.category} onChange={e => set("category", e.target.value)} /></td>
+      <td className={cell}><Input aria-label={label("Owner")} className={input} value={f.owner_name ?? ""} placeholder="—" onChange={e => set("owner_name", e.target.value)} /></td>
+      <td className={cell}><Input aria-label={label("Location")} className={input} value={f.location ?? ""} placeholder="—" onChange={e => set("location", e.target.value)} /></td>
+      <td className={cell}><Input aria-label={label("Quantity")} className={`${input} min-w-[90px]`} value={f.quantity ?? ""} placeholder="—" onChange={e => set("quantity", e.target.value)} /></td>
+      <td className={cell}><Textarea aria-label={label("Description")} className={area} rows={2} value={f.description ?? ""} onChange={e => set("description", e.target.value)} /></td>
+      <td className={cell}><Textarea aria-label={label("Details")} title="One detail per line" className={area} rows={2} value={f.detailsText} onChange={e => set("detailsText", e.target.value)} /></td>
+      <td className={cell}><Textarea aria-label={label("Parameters")} className={`${area} font-mono text-xs`} rows={2} value={f.paramsText} onChange={e => set("paramsText", e.target.value)} /></td>
+      <td className={cell}><Textarea aria-label={label("Links")} title="One link per line" className={area} rows={2} value={f.linksText} onChange={e => set("linksText", e.target.value)} /></td>
+      <td className={`${cell} text-center`}><Switch aria-label={label("Training required")} className="mt-2" checked={f.training_required} onCheckedChange={v => set("training_required", v)} /></td>
+      <td className={cell}><Input aria-label={label("Order")} className={`${input} min-w-[80px] w-20`} type="number" value={f.sort_order} onChange={e => set("sort_order", Number(e.target.value))} /></td>
+      <td className={`${cell} sticky right-0 z-10 border-l bg-background`}>
         <div className="flex gap-1">
-          {["tool", "material"].map(k => (
-            <Button key={k} type="button" size="sm" variant={f.kind === k ? "default" : "outline"} onClick={() => set("kind", k)}>{k}</Button>
-          ))}
+          <Button variant="ghost" size="icon" title={`Save ${tool.name}`} aria-label={`Save ${tool.name}`} onClick={save} disabled={!dirty || saving || deleting}><Save className={`h-4 w-4 ${saving ? "animate-pulse" : ""}`} /></Button>
+          <Button variant="ghost" size="icon" title={`Revert ${tool.name}`} aria-label={`Revert ${tool.name}`} onClick={() => setF(toolDraft(tool))} disabled={!dirty || saving || deleting}><Undo2 className="h-4 w-4" /></Button>
+          <Button variant="ghost" size="icon" title={`Delete ${tool.name}`} aria-label={`Delete ${tool.name}`} onClick={remove} disabled={saving || deleting}><Trash2 className="h-4 w-4" /></Button>
         </div>
-      </Field>
-      <Field label="Training required"><Switch checked={f.training_required} onCheckedChange={v => set("training_required", v)} /></Field>
-      <Field label="Order"><Input type="number" value={f.sort_order} onChange={e => set("sort_order", e.target.value)} /></Field>
-      <div className="md:col-span-4 flex justify-end gap-2">
-        <Button variant="ghost" size="sm" onClick={remove}><Trash2 className="w-4 h-4 mr-1" />Delete</Button>
-        <Button size="sm" onClick={save} disabled={saving}><Save className="w-4 h-4 mr-1" />{saving ? "Saving…" : "Save"}</Button>
-      </div>
-    </Card>
+      </td>
+    </tr>
   );
 };
-
-const Field = ({ label, children, className = "" }: { label: string; children: React.ReactNode; className?: string }) => (
-  <label className={`flex flex-col gap-1 text-xs text-muted-foreground ${className}`}>{label}{children}</label>
-);
 
 export default HackerspaceTools;
