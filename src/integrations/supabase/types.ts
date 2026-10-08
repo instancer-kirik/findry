@@ -8928,6 +8928,88 @@ export type Database = {
           },
         ]
       }
+      space_tools: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          details: string[]
+          id: string
+          kind: string
+          links: string[]
+          location: string | null
+          name: string
+          owner_id: string | null
+          owner_name: string | null
+          params: Json
+          place: string
+          quantity: string | null
+          sort_order: number
+          training_required: boolean
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          details?: string[]
+          id?: string
+          kind?: string
+          links?: string[]
+          location?: string | null
+          name: string
+          owner_id?: string | null
+          owner_name?: string | null
+          params?: Json
+          place?: string
+          quantity?: string | null
+          sort_order?: number
+          training_required?: boolean
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          details?: string[]
+          id?: string
+          kind?: string
+          links?: string[]
+          location?: string | null
+          name?: string
+          owner_id?: string | null
+          owner_name?: string | null
+          params?: Json
+          place?: string
+          quantity?: string | null
+          sort_order?: number
+          training_required?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "space_tools_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "space_tools_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "space_tools_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       swipes: {
         Row: {
           created_at: string
