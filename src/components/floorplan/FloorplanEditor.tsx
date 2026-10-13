@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { ZoneContents, isZone } from "./ZoneContents";
 import { DrawingLines } from "./DrawingLines";
+import { getDrawingSegments } from "@/lib/floorplan-drawing-data";
 import type { FloorplanItem, FloorplanItemKind, FloorplanAssignment } from "@/hooks/use-floorplan";
 
 // canvas units per foot (seeded plans use 1 ft = 10 units)
@@ -462,7 +463,7 @@ export const FloorplanEditor: React.FC<Props> = ({
           );
         })}
         {onLevel.filter(it => it.meta?.object_type === "dxf_reference").map(it => <div key={it.id} className="pointer-events-none absolute z-20" style={{ left: it.x * zoom, top: it.y * zoom, width: it.w * zoom, height: it.h * zoom, transform: `rotate(${it.rotation}deg)` }}>
-          <DrawingLines segments={it.meta.segments ?? []} width={it.w} height={it.h} />
+          <DrawingLines segments={getDrawingSegments(it.meta)} width={it.w} height={it.h} />
         </div>)}
       </div>
     </Card>
