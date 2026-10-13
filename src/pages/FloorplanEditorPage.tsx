@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useFloorplan, useFloorplanLayouts } from "@/hooks/use-floorplan";
 import { FloorplanEditor } from "@/components/floorplan/FloorplanEditor";
+import { DxfImportDialog } from "@/components/floorplan/DxfImportDialog";
 import { Eye, ArrowLeft, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -43,7 +44,10 @@ export default function FloorplanEditorPage() {
             {isOwner && <Badge className="hidden sm:inline-flex">owner</Badge>}
           </div>
           {plan.id === "617b20a6-8edf-4218-a6b4-ed6cfca9f749" && <Link className="self-end sm:self-auto" to="/spaces/baltimore-hackerspace"><Button size="sm" variant="outline" className="min-h-10">Inventory</Button></Link>}
-          <Link className="self-end sm:self-auto" to={`/floorplans/${plan.id}/walk`}><Button size="sm" className="min-h-10"><Eye className="mr-1 h-4 w-4" />Walk in 3D</Button></Link>
+          <div className="flex flex-wrap justify-end gap-2">
+            <DxfImportDialog items={items} onAdd={addItem} disabled={!isOwner} />
+            <Link to={`/floorplans/${plan.id}/walk`}><Button size="sm" className="min-h-10"><Eye className="mr-1 h-4 w-4" />Walk in 3D</Button></Link>
+          </div>
         </div>
 
         <Card className="mb-3 flex flex-wrap items-center gap-2 overflow-x-auto p-2 sm:p-3">

@@ -1,6 +1,7 @@
 import React, { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Text, Sky, PointerLockControls } from "@react-three/drei";
+import { OrbitControls, Text, Sky, PointerLockControls, Line } from "@react-three/drei";
+import type { DrawingSegment } from "@/lib/floorplan-dxf";
 import type { FloorplanItem } from "@/hooks/use-floorplan";
 
 interface Props {
@@ -33,6 +34,10 @@ function ItemMesh({ it }: { it: FloorplanItem }) {
     : (heightMap[it.kind] ?? 1) * (it.z / 30);
   const base = (it.level ?? 0) * 3.6; // mezzanine deck sits ~12 ft up
   const isRollingAcousticWall = objectType === "rolling_acoustic_wall" || objectType === "movable_wall";
+
+  if (objectType === "dxf_reference") return <group position={[x, base + 0.06, z]} rotation={[0, (-it.rotation * Math.PI) / 180, 0]}>
+    {(it.meta.segments as DrawingSegment[] ?? []).map(([x1, y1, x2, y2], i) => <Line key={i} points={[[x1 * w - w / 2, 0, y1 * d - d / 2], [x2 * w - w / 2, 0, y2 * d - d / 2]]} color={color} lineWidth={1.5} />)}
+  </group>;
 
   return (
     <group position={[x, base + h / 2, z]} rotation={[0, (-it.rotation * Math.PI) / 180, 0]}>

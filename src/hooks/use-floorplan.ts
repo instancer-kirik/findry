@@ -119,7 +119,7 @@ export function useFloorplan(floorplanId: string | undefined) {
 
   const addItem = async (patch: Partial<FloorplanItem> & { kind: FloorplanItemKind }) => {
     if (!floorplanId) return;
-    const { data } = await db.from("floorplan_items").insert({
+    const { data, error } = await db.from("floorplan_items").insert({
       floorplan_id: floorplanId,
       kind: patch.kind,
       label: patch.label ?? null,
@@ -129,6 +129,7 @@ export function useFloorplan(floorplanId: string | undefined) {
       level: patch.level ?? 0,
       meta: patch.meta ?? {},
     }).select("*").single();
+    if (error) throw error;
     if (data) setItems((prev) => [...prev, data]);
   };
 

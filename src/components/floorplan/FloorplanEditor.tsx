@@ -11,6 +11,7 @@ import {
   Plus, SlidersHorizontal, X, Copy, Bath, CookingPot, Construction,
 } from "lucide-react";
 import { ZoneContents, isZone } from "./ZoneContents";
+import { DrawingLines } from "./DrawingLines";
 import type { FloorplanItem, FloorplanItemKind, FloorplanAssignment } from "@/hooks/use-floorplan";
 
 // canvas units per foot (seeded plans use 1 ft = 10 units)
@@ -409,6 +410,7 @@ export const FloorplanEditor: React.FC<Props> = ({
         </div>
         <span>Zoom</span>
         <input aria-label="Plan zoom" className="h-10 w-28 touch-manipulation accent-primary" type="range" min="0.2" max="2" step="0.1" value={zoom} onChange={(e) => setZoom(parseFloat(e.target.value))} />
+        {onLevel.filter(it => it.meta?.object_type === "dxf_reference").map(it => <Button key={it.id} variant="outline" size="sm" onClick={() => pickItem(it)}>{it.label}</Button>)}
         <span className="ml-auto text-muted-foreground">{ft(canvas.width)} × {ft(canvas.height)} ft</span>
       </div>
       <div
@@ -431,7 +433,7 @@ export const FloorplanEditor: React.FC<Props> = ({
               transform: `rotate(${it.rotation}deg)`,
             }} />
         ))}
-        {onLevel.map((it) => {
+        {onLevel.filter(it => it.meta?.object_type !== "dxf_reference").map((it) => {
           const claimed = assignedItemIds.has(it.id);
           const sel = selectedId === it.id;
           return (
@@ -459,6 +461,9 @@ export const FloorplanEditor: React.FC<Props> = ({
             </div>
           );
         })}
+        {onLevel.filter(it => it.meta?.object_type === "dxf_reference").map(it => <div key={it.id} className="pointer-events-none absolute z-20" style={{ left: it.x * zoom, top: it.y * zoom, width: it.w * zoom, height: it.h * zoom, transform: `rotate(${it.rotation}deg)` }}>
+          <DrawingLines segments={it.meta.segments ?? []} width={it.w} height={it.h} />
+        </div>)}
       </div>
     </Card>
   );
