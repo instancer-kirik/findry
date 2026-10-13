@@ -1,0 +1,4 @@
+INSERT INTO public.floorplan_items (floorplan_id,kind,label,x,y,w,h,rotation,z,level,meta)
+SELECT '617b20a6-8edf-4218-a6b4-ed6cfca9f749','misc','Workshop — shop.DXF',-8.0/12*10,-8.0/12*10,290.0/12*10,550.0/12*10,0,0,0,
+jsonb_build_object('object_type','dxf_reference','locked',true,'drawing_key','baltimore_workshop_shop_dxf','source_units','in','source_width',290,'source_height',550,'interior_width_inches',274,'interior_height_inches',534,'wall_thickness_inches',8)
+WHERE NOT EXISTS (SELECT 1 FROM public.floorplan_items WHERE floorplan_id='617b20a6-8edf-4218-a6b4-ed6cfca9f749' AND meta->>'drawing_key'='baltimore_workshop_shop_dxf');

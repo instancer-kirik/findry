@@ -392,7 +392,7 @@ export const FloorplanEditor: React.FC<Props> = ({
           <Button size="sm" variant="destructive" className="h-11 w-11 p-0" aria-label="Delete item" title="Delete item" onClick={() => { onRemove(selected.id); if (isCompact) setTray(null); }}><Trash2 className="h-4 w-4" /></Button>
         </div>
       )}
-      {readOnly && onClaim && !assignedItemIds.has(selected.id) && (
+      {readOnly && onClaim && selected.meta?.object_type !== "dxf_reference" && !assignedItemIds.has(selected.id) && (
         <Button size="sm" className="w-full" onClick={() => onClaim(selected.id)}>Claim this spot</Button>
       )}
     </div>
