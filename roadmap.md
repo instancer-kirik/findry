@@ -5,6 +5,7 @@
 - [ ] Verify signed-in file import and save — blocked by external Supabase without a managed test session.
 
 # Faster zone assignment
+- [x] Add side inventory location filtering and distinguish building floors from rack tiers in selected details.
 - [x] Add a searchable inventory side panel with touch and mouse drag-to-zone assignment.
 - [x] Add searchable assignment in zone details and keep contents synchronized.
 - [x] Add a floating hide/show details control.

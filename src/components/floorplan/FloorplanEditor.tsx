@@ -324,16 +324,18 @@ export const FloorplanEditor: React.FC<Props> = ({
       <div className="flex items-center justify-between">
         <Badge variant="outline">{selected.kind}</Badge>
         <div className="flex items-center gap-1">
-          <Badge variant="secondary">{(selected.level ?? 0) === 0 ? "ground" : "mezzanine"}</Badge>
+          <Badge variant="secondary">{(selected.level ?? 0) === 0 ? "Ground floor" : "Upper floor"}</Badge>
           {assignedItemIds.has(selected.id) && <Badge>claimed</Badge>}
         </div>
       </div>
-      {!readOnly && (
-          <Button size="sm" variant="outline" className="min-h-11 w-full text-xs"
-          onClick={() => onUpdate(selected.id, { level: (selected.level ?? 0) === 0 ? 1 : 0 })}>
-          Move to {(selected.level ?? 0) === 0 ? "mezzanine" : "ground floor"}
-        </Button>
-      )}
+      <div>
+        <Label htmlFor="item-building-floor" className="text-xs">Building floor</Label>
+        <select id="item-building-floor" className="mt-1 h-11 w-full rounded-md border bg-background px-2 text-xs" disabled={readOnly} value={selected.level ?? 0}
+          onChange={event => onUpdate(selected.id, { level: Number(event.target.value) })}>
+          <option value={0}>Ground floor</option>
+          <option value={1}>Upper floor (mezzanine)</option>
+        </select>
+      </div>
       <div>
         <Label className="text-xs">Label</Label>
         <Input value={selected.label ?? ""} onChange={(e) => onUpdate(selected.id, { label: e.target.value })} disabled={readOnly} />
@@ -462,7 +464,7 @@ export const FloorplanEditor: React.FC<Props> = ({
           {[0, 1].map((lv) => (
             <Button key={lv} size="sm" variant={level === lv ? "default" : "outline"} className="h-7 px-2 text-xs"
               onClick={() => { setLevel(lv); onSelect(null); }}>
-              {lv === 0 ? "Ground" : "Mezzanine"}
+              {lv === 0 ? "Ground floor" : "Upper floor"}
             </Button>
           ))}
         </div>
