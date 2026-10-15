@@ -24,6 +24,10 @@ const ft = (units: number) => Math.round((units / UPF) * 10) / 10;
 const toUnits = (feet: number) => Math.round(feet * UPF);
 const SNAP = 5; // half a foot
 
+const SWATCH_COLORS = [
+  "#fb923c", "#f59e0b", "#ef4444", "#f43f5e", "#e879f9", "#a78bfa",
+  "#60a5fa", "#38bdf8", "#14b8a6", "#22c55e", "#92400e", "#78716c", "#94a3b8",
+];
 const PALETTE: { kind: FloorplanItemKind; label: string; w: number; h: number; z?: number; icon: React.ElementType; color: string; meta?: Record<string, unknown> }[] = [
   { kind: "booth", label: "Booth", w: 100, h: 100, icon: Square, color: "#fb923c", meta: { sizable: true } },
   { kind: "table", label: "Table", w: 60, h: 40, icon: RectangleHorizontal, color: "#f59e0b", meta: { sizable: true } },
