@@ -1,30 +1,25 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import { toast } from "sonner";
+import { InventoryPanel } from "./InventoryPanel";
+import type { SpaceTool } from "@/hooks/use-floorplan-inventory";
 import type { FloorplanItem } from "@/hooks/use-floorplan";
 
-const db = supabase as any;
-type Tool = { id: string; name: string; kind: string | null; category: string | null; location: string | null; owner_name: string | null; quantity: string | null };
 
 export const isZone = (i: FloorplanItem) => i.kind === "booth" || i.meta?.object_type === "room_zone" || i.meta?.object_type === "storage_rack";
 const norm = (s: string | null | undefined) => (s ?? "").trim().toLowerCase();
 
 /** Zone props, parent/child zones, and inventory whose location matches this zone (or a child zone). */
-export function ZoneContents({ item, items = [], readOnly, onUpdate }: {
+export function ZoneContents({ item, items = [], readOnly, onUpdate, tools = [], canEditInventory, saving, setLocation }: {
   item: FloorplanItem; items: FloorplanItem[]; readOnly?: boolean;
+  tools?: SpaceTool[]; canEditInventory?: boolean; saving?: boolean;
+  setLocation?: (id: string, location: string | null) => Promise<boolean>;
   onUpdate: (id: string, patch: Partial<FloorplanItem>) => void;
 }) {
-  const [tools, setTools] = useState<Tool[]>([]);
-  const [pick, setPick] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
   const zone = (item.label ?? "").trim();
 
-  useEffect(() => {
-    db.from("space_tools").select("id,name,kind,category,location,owner_name,quantity").order("name")
-      .then(({ data }: any) => setTools(data ?? []));
-  }, []);
 
   const zones = items.filter(isZone);
   const parentId = (item.meta?.parent_id as string) || "";
@@ -36,15 +31,10 @@ export function ZoneContents({ item, items = [], readOnly, onUpdate }: {
     walk(item.id); return out;
   }, [zones, item.id]);
   const children = descendants.filter(d => d.meta?.parent_id === item.id);
-  const zoneOf = (t: Tool) => [item, ...descendants].find(z => z.label && norm(z.label) === norm(t.location));
+  const zoneOf = (t: SpaceTool) => [item, ...descendants].find(z => z.label && norm(z.label) === norm(t.location));
   const inside = tools.filter(t => zone && zoneOf(t));
   const others = tools.filter(t => !inside.includes(t));
 
-  const setLocation = async (id: string, location: string | null) => {
-    const { error } = await db.from("space_tools").update({ location }).eq("id", id);
-    if (error) return toast.error(error.message);
-    setTools(ts => ts.map(t => t.id === id ? { ...t, location } : t));
-  };
 
   const props = Object.entries(item.meta ?? {}).filter(([k]) => !["color", "parent_id"].includes(k));
   const blocked = new Set([item.id, ...descendants.map(d => d.id)]);
@@ -88,19 +78,16 @@ export function ZoneContents({ item, items = [], readOnly, onUpdate }: {
                       <p className="truncate font-medium">{t.name}{t.quantity ? ` ×${t.quantity}` : ""}</p>
                       <p className="truncate text-muted-foreground">{[z && z.id !== item.id ? `in ${z.label}` : null, t.kind, t.category, t.owner_name].filter(Boolean).join(" · ")}</p>
                     </div>
-                    {!readOnly && <Button size="sm" variant="ghost" className="h-9 w-9 p-0" aria-label={`Remove ${t.name}`} onClick={() => setLocation(t.id, null)}><X className="h-3 w-3" /></Button>}
+                    {canEditInventory && <Button size="sm" variant="ghost" disabled={saving} className="h-9 w-9 p-0" aria-label={`Remove ${t.name}`} onClick={() => setLocation?.(t.id, null)}><X className="h-3 w-3" /></Button>}
                   </li>
                 );
               })}
             </ul>
           )}
-        {!readOnly && zone && (
-          <div className="mt-2 flex gap-2">
-            <select className="h-10 min-w-0 flex-1 rounded-md border bg-background px-2 text-xs" value={pick} onChange={e => setPick(e.target.value)}>
-              <option value="">Add tool or material…</option>
-              {others.map(t => <option key={t.id} value={t.id}>{t.name}{t.location ? ` (in ${t.location})` : ""}</option>)}
-            </select>
-            <Button size="sm" className="h-10" disabled={!pick} onClick={async () => { await setLocation(pick, zone); setPick(""); }}>Add</Button>
+        {zone && setLocation && (
+          <div className="mt-2 space-y-2">
+            <Button size="sm" variant="outline" className="h-10 w-full" onClick={() => setShowSearch(value => !value)}>{showSearch ? "Hide inventory search" : "Search tools & materials"}</Button>
+            {showSearch && <InventoryPanel tools={others} canEdit={!!canEditInventory} saving={!!saving} target={zone} onAssign={id => { void setLocation(id, zone); }} />}
           </div>
         )}
       </div>
