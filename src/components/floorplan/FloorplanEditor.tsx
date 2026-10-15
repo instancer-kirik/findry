@@ -458,7 +458,7 @@ export const FloorplanEditor: React.FC<Props> = ({
 
   const canvasCard = (
     <Card className="overflow-auto bg-muted/30 p-2 sm:p-3 overscroll-contain">
-      <div className="flex flex-wrap items-center gap-2 mb-2 text-xs">
+      <div className="sticky top-0 z-20 -mx-2 -mt-2 mb-2 flex flex-wrap items-center gap-2 border-b bg-background/95 px-2 pb-1 pt-3 text-xs backdrop-blur sm:-mx-3 sm:-mt-3 sm:px-3 sm:pt-4">
         {inventoryPlace && <Button size="sm" variant={inventoryOpen ? "default" : "outline"} className="h-10" onClick={() => { setInventoryOpen(value => !value); setTray(null); }}><Package className="mr-1 h-4 w-4" />Tools & materials</Button>}
         <div className="flex gap-1">
           {[0, 1].map((lv) => (
@@ -538,7 +538,7 @@ export const FloorplanEditor: React.FC<Props> = ({
       <div className="relative min-h-[55vh] pb-20">
         {canvasCard}
         {dragOverlay}
-        {inventoryOpen && <aside aria-label="Zone inventory" className="fixed bottom-20 left-2 top-40 z-30 w-[240px] max-w-[45vw] overflow-y-auto rounded-md border bg-background p-2 shadow-lg"><div className="sticky top-0 mb-2 flex items-center justify-between bg-background"><span className="text-xs font-semibold">Inventory</span><Button size="icon" variant="ghost" aria-label="Hide inventory" className="h-10 w-10" onClick={() => setInventoryOpen(false)}><X className="h-4 w-4" /></Button></div>{inventoryBody}</aside>}
+        {inventoryOpen && <aside aria-label="Zone inventory" className="fixed bottom-20 left-0 top-0 z-30 w-[280px] max-w-[85vw] overflow-y-auto rounded-r-lg border bg-background p-2 shadow-lg"><div className="sticky top-14 z-10 -mt-2 mb-2 flex items-center justify-between bg-background pb-1 pt-2"><span className="text-xs font-semibold">Inventory</span><Button size="icon" variant="ghost" aria-label="Hide inventory" className="h-10 w-10" onClick={() => setInventoryOpen(false)}><X className="h-4 w-4" /></Button></div>{inventoryBody}</aside>}
         {/* Mobile tray */}
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] shadow-lg backdrop-blur">
           {tray && (
