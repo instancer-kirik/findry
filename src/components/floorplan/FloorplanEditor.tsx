@@ -456,23 +456,26 @@ export const FloorplanEditor: React.FC<Props> = ({
     </div>
   );
 
+  const canvasToolbar = (
+    <div className="sticky top-14 z-30 mb-2 flex flex-wrap items-center gap-2 rounded-lg border bg-background/95 px-2 py-2 text-xs shadow-sm backdrop-blur">
+      {inventoryPlace && <Button size="sm" variant={inventoryOpen ? "default" : "outline"} className="h-10" onClick={() => { setInventoryOpen(value => !value); setTray(null); }}><Package className="mr-1 h-4 w-4" />Tools & materials</Button>}
+      <div className="flex gap-1">
+        {[0, 1].map((lv) => (
+          <Button key={lv} size="sm" variant={level === lv ? "default" : "outline"} className="h-7 px-2 text-xs"
+            onClick={() => { setLevel(lv); onSelect(null); }}>
+            {lv === 0 ? "Ground floor" : "Upper floor"}
+          </Button>
+        ))}
+      </div>
+      <span>Zoom</span>
+      <input aria-label="Plan zoom" className="h-10 w-28 touch-manipulation accent-primary" type="range" min="0.2" max="2" step="0.1" value={zoom} onChange={(e) => setZoom(parseFloat(e.target.value))} />
+      {onLevel.filter(it => it.meta?.object_type === "dxf_reference").map(it => <Button key={it.id} variant="outline" size="sm" onClick={() => pickItem(it)}>{it.label}</Button>)}
+      <span className="ml-auto text-muted-foreground">{ft(canvas.width)} × {ft(canvas.height)} ft</span>
+    </div>
+  );
+
   const canvasCard = (
     <Card className="overflow-auto bg-muted/30 p-2 sm:p-3 overscroll-contain">
-      <div className="flex flex-wrap items-center gap-2 mb-2 text-xs">
-        {inventoryPlace && <Button size="sm" variant={inventoryOpen ? "default" : "outline"} className="h-10" onClick={() => { setInventoryOpen(value => !value); setTray(null); }}><Package className="mr-1 h-4 w-4" />Tools & materials</Button>}
-        <div className="flex gap-1">
-          {[0, 1].map((lv) => (
-            <Button key={lv} size="sm" variant={level === lv ? "default" : "outline"} className="h-7 px-2 text-xs"
-              onClick={() => { setLevel(lv); onSelect(null); }}>
-              {lv === 0 ? "Ground floor" : "Upper floor"}
-            </Button>
-          ))}
-        </div>
-        <span>Zoom</span>
-        <input aria-label="Plan zoom" className="h-10 w-28 touch-manipulation accent-primary" type="range" min="0.2" max="2" step="0.1" value={zoom} onChange={(e) => setZoom(parseFloat(e.target.value))} />
-        {onLevel.filter(it => it.meta?.object_type === "dxf_reference").map(it => <Button key={it.id} variant="outline" size="sm" onClick={() => pickItem(it)}>{it.label}</Button>)}
-        <span className="ml-auto text-muted-foreground">{ft(canvas.width)} × {ft(canvas.height)} ft</span>
-      </div>
       <div
         ref={canvasRef}
         className="relative mx-auto select-none border border-border bg-card overscroll-none"
@@ -536,9 +539,10 @@ export const FloorplanEditor: React.FC<Props> = ({
   if (isCompact) {
     return (
       <div className="relative min-h-[55vh] pb-20">
+        {canvasToolbar}
         {canvasCard}
         {dragOverlay}
-        {inventoryOpen && <aside aria-label="Zone inventory" className="fixed bottom-20 left-2 top-40 z-30 w-[240px] max-w-[45vw] overflow-y-auto rounded-md border bg-background p-2 shadow-lg"><div className="sticky top-0 mb-2 flex items-center justify-between bg-background"><span className="text-xs font-semibold">Inventory</span><Button size="icon" variant="ghost" aria-label="Hide inventory" className="h-10 w-10" onClick={() => setInventoryOpen(false)}><X className="h-4 w-4" /></Button></div>{inventoryBody}</aside>}
+        {inventoryOpen && <aside aria-label="Zone inventory" className="fixed bottom-20 left-0 top-0 z-30 w-[280px] max-w-[85vw] overflow-y-auto rounded-r-lg border bg-background p-2 shadow-lg"><div className="sticky top-14 z-10 -mt-2 mb-2 flex items-center justify-between bg-background pb-1 pt-2"><span className="text-xs font-semibold">Inventory</span><Button size="icon" variant="ghost" aria-label="Hide inventory" className="h-10 w-10" onClick={() => setInventoryOpen(false)}><X className="h-4 w-4" /></Button></div>{inventoryBody}</aside>}
         {/* Mobile tray */}
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] shadow-lg backdrop-blur">
           {tray && (
@@ -580,7 +584,7 @@ export const FloorplanEditor: React.FC<Props> = ({
           {inventoryOpen ? inventoryBody : paletteBody}
         </aside>
       )}
-      {canvasCard}
+      <div className="min-w-0">{canvasToolbar}{canvasCard}</div>
       <Button size="icon" variant="secondary" className="absolute right-3 top-3 z-30 h-11 w-11 border shadow-lg" aria-label={detailsHidden ? "Show selected item details" : "Hide selected item details"} title={detailsHidden ? "Show selected item details" : "Hide selected item details"} onClick={() => setDetailsHidden(value => !value)}>{detailsHidden ? <SlidersHorizontal className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}</Button>
       {!detailsHidden && <aside className="p-3 pt-16 overflow-y-auto border-l">{inspectorBody}</aside>}
     </div>
