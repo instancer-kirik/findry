@@ -76,6 +76,7 @@ export default function FloorplanEditorPage() {
         </Card>
 
         <FloorplanEditor
+          inventoryPlace={plan.id === "617b20a6-8edf-4218-a6b4-ed6cfca9f749" ? "Baltimore Hackerspace" : undefined}
           items={items}
           assignments={assignments}
           canvas={plan.canvas}
