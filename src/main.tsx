@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client'
 import { ThemeProvider } from '@/hooks/use-theme'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App.tsx'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import './index.css'
 
 const root = createRoot(document.getElementById("root")!);
@@ -10,7 +11,7 @@ const root = createRoot(document.getElementById("root")!);
 root.render(
   <BrowserRouter>
     <ThemeProvider defaultTheme="dark" storageKey="theme">
-      <App />
+      <ErrorBoundary><App /></ErrorBoundary>
     </ThemeProvider>
   </BrowserRouter>
 );
