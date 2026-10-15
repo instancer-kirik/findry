@@ -8,12 +8,15 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Box, Square, RectangleHorizontal, Columns3, Tent, Truck,
   Mic2, Plug, Sparkles, Footprints, DoorOpen, Trash2, RotateCw, Lock, Unlock, Volume2,
-  Plus, SlidersHorizontal, X, Copy, Bath, CookingPot, Construction,
+  Plus, SlidersHorizontal, X, Copy, Bath, CookingPot, Construction, Package, EyeOff,
 } from "lucide-react";
 import { ZoneContents, isZone } from "./ZoneContents";
 import { DrawingLines } from "./DrawingLines";
 import { getDrawingSegments } from "@/lib/floorplan-drawing-data";
 import type { FloorplanItem, FloorplanItemKind, FloorplanAssignment } from "@/hooks/use-floorplan";
+import { useFloorplanInventory, type SpaceTool } from "@/hooks/use-floorplan-inventory";
+import { InventoryPanel } from "./InventoryPanel";
+import { toast } from "sonner";
 
 // canvas units per foot (seeded plans use 1 ft = 10 units)
 const UPF = 10;
@@ -102,6 +105,7 @@ const BOOTH_PRESETS: { label: string; w: number; h: number }[] = [
 ];
 
 interface Props {
+  inventoryPlace?: string;
   items: FloorplanItem[];
   assignments: FloorplanAssignment[];
   canvas: { width: number; height: number; units: string };
@@ -123,7 +127,7 @@ type Gesture =
 const TOUCH_DRAG_THRESHOLD = 6;
 
 export const FloorplanEditor: React.FC<Props> = ({
-  items, assignments, canvas, readOnly, selectedId, onSelect, onAdd, onUpdate, onPreview, onRemove, onClaim,
+  items, assignments, canvas, readOnly, selectedId, onSelect, onAdd, onUpdate, onPreview, onRemove, onClaim, inventoryPlace,
 }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const gestureRef = useRef<Gesture | null>(null);
@@ -133,6 +137,12 @@ export const FloorplanEditor: React.FC<Props> = ({
   const [zoom, setZoom] = useState(isMobile ? 0.45 : 0.7);
   const [level, setLevel] = useState(0);
   const [tray, setTray] = useState<"add" | "inspect" | null>(null);
+  const [inventoryOpen, setInventoryOpen] = useState(false);
+  const [detailsHidden, setDetailsHidden] = useState(false);
+  const [draggedTool, setDraggedTool] = useState<{ tool: SpaceTool; x: number; y: number } | null>(null);
+  const [dropZone, setDropZone] = useState<string | null>(null);
+  const inventory = useFloorplanInventory(inventoryPlace);
+  const inventoryDragCleanup = useRef<(() => void) | null>(null);
   const onLevel = items.filter((it) => (it.level ?? 0) === level);
   const offLevel = items.filter((it) => (it.level ?? 0) !== level);
 
@@ -150,9 +160,55 @@ export const FloorplanEditor: React.FC<Props> = ({
   }, []);
 
   useEffect(() => () => gestureCleanupRef.current?.(), []);
+  useEffect(() => () => inventoryDragCleanup.current?.(), []);
+
+  const startInventoryDrag = (event: React.PointerEvent, tool: SpaceTool) => {
+    if (!inventory.canEdit || inventory.saving || event.button !== 0) return;
+    event.preventDefault(); event.stopPropagation();
+    inventoryDragCleanup.current?.();
+    const pointerId = event.pointerId;
+    const sx = event.clientX; const sy = event.clientY;
+    let active = false;
+    let target: FloorplanItem | undefined;
+    const findZone = (x: number, y: number) => {
+      const ids = document.elementsFromPoint(x, y).map(element => element.getAttribute("data-zone-id")).filter(Boolean);
+      return items.filter(item => ids.includes(item.id) && isZone(item) && (item.level ?? 0) === level).sort((a, b) => a.w * a.h - b.w * b.h)[0];
+    };
+    const move = (e: PointerEvent) => {
+      if (e.pointerId !== pointerId) return;
+      e.preventDefault();
+      if (!active && Math.hypot(e.clientX - sx, e.clientY - sy) < TOUCH_DRAG_THRESHOLD) return;
+      active = true;
+      if (isCompact) setTray(null);
+      target = findZone(e.clientX, e.clientY);
+      setDropZone(target?.id ?? null);
+      setDraggedTool({ tool, x: e.clientX, y: e.clientY });
+    };
+    const cleanup = () => {
+      window.removeEventListener("pointermove", move, true);
+      window.removeEventListener("pointerup", end, true);
+      window.removeEventListener("pointercancel", cancel, true);
+      setDraggedTool(null); setDropZone(null); inventoryDragCleanup.current = null;
+    };
+    const end = (e: PointerEvent) => {
+      if (e.pointerId !== pointerId) return;
+      target = findZone(e.clientX, e.clientY);
+      cleanup();
+      if (!active) return;
+      if (!target?.label?.trim()) { toast.error("Drop on a named zone"); return; }
+      const zone = target;
+      void inventory.setLocation(tool.id, zone.label?.trim() ?? null).then(saved => { if (saved) onSelect(zone.id); });
+    };
+    const cancel = (e: PointerEvent) => { if (e.pointerId === pointerId) cleanup(); };
+    inventoryDragCleanup.current = cleanup;
+    window.addEventListener("pointermove", move, { capture: true, passive: false });
+    window.addEventListener("pointerup", end, true);
+    window.addEventListener("pointercancel", cancel, true);
+  };
 
   const pickItem = (item: FloorplanItem) => {
     onSelect(item.id);
+    setDetailsHidden(false);
     if (isCompact) setTray("inspect");
   };
 
@@ -304,7 +360,7 @@ export const FloorplanEditor: React.FC<Props> = ({
       </div>
 
       {isZone(selected) && (
-        <ZoneContents item={selected} items={items} readOnly={readOnly} onUpdate={onUpdate} />
+        <ZoneContents item={selected} items={items} readOnly={readOnly} onUpdate={onUpdate} tools={inventory.tools} canEditInventory={inventory.canEdit} saving={inventory.saving} setLocation={inventoryPlace ? inventory.setLocation : undefined} />
       )}
 
       {selected.meta?.object_type === "rolling_acoustic_wall" && (
@@ -401,6 +457,7 @@ export const FloorplanEditor: React.FC<Props> = ({
   const canvasCard = (
     <Card className="overflow-auto bg-muted/30 p-2 sm:p-3 overscroll-contain">
       <div className="flex flex-wrap items-center gap-2 mb-2 text-xs">
+        {inventoryPlace && <Button size="sm" variant={inventoryOpen ? "default" : "outline"} className="h-10" onClick={() => { setInventoryOpen(value => !value); setTray(null); }}><Package className="mr-1 h-4 w-4" />Tools & materials</Button>}
         <div className="flex gap-1">
           {[0, 1].map((lv) => (
             <Button key={lv} size="sm" variant={level === lv ? "default" : "outline"} className="h-7 px-2 text-xs"
@@ -440,8 +497,10 @@ export const FloorplanEditor: React.FC<Props> = ({
           return (
             <div
               key={it.id}
+              data-zone-id={isZone(it) ? it.id : undefined}
+              aria-label={`Plan item ${it.label ?? it.kind}`}
               onPointerDown={(e) => startMove(e, it)}
-              className={`absolute flex items-center justify-center text-[10px] font-medium cursor-move select-none touch-none ${sel ? "z-10 ring-2 ring-primary ring-offset-2 ring-offset-background" : ""} ${it.meta?.locked ? "cursor-default" : "active:cursor-grabbing"}`}
+              className={`absolute flex items-center justify-center text-[10px] font-medium cursor-move select-none touch-none ${dropZone === it.id ? "z-10 ring-4 ring-primary" : sel ? "z-10 ring-2 ring-primary ring-offset-2 ring-offset-background" : ""} ${it.meta?.locked ? "cursor-default" : "active:cursor-grabbing"}`}
               style={{
                 left: it.x * zoom, top: it.y * zoom,
                 width: it.w * zoom, height: it.h * zoom,
@@ -469,19 +528,27 @@ export const FloorplanEditor: React.FC<Props> = ({
     </Card>
   );
 
+  const inventoryBody = <InventoryPanel {...inventory} target={selected && isZone(selected) ? selected.label : null} onAssign={id => { if (selected?.label && isZone(selected)) void inventory.setLocation(id, selected.label.trim()); }} onDrag={startInventoryDrag} />;
+  const dragOverlay = draggedTool && <div className="pointer-events-none fixed z-[100] max-w-56 rounded-md border border-primary bg-background px-3 py-2 text-xs shadow-lg" style={{ left: Math.min(draggedTool.x + 12, window.innerWidth - 230), top: Math.max(8, draggedTool.y - 48) }}>{draggedTool.tool.name}<p className="text-primary">{items.find(item => item.id === dropZone)?.label ?? "…"}</p></div>;
+
   if (isCompact) {
     return (
       <div className="relative min-h-[55vh] pb-20">
         {canvasCard}
+        {dragOverlay}
+        {inventoryOpen && <aside aria-label="Zone inventory" className="fixed bottom-20 left-2 top-40 z-30 w-[240px] max-w-[45vw] overflow-y-auto rounded-md border bg-background p-2 shadow-lg"><div className="sticky top-0 mb-2 flex items-center justify-between bg-background"><span className="text-xs font-semibold">Inventory</span><Button size="icon" variant="ghost" aria-label="Hide inventory" className="h-10 w-10" onClick={() => setInventoryOpen(false)}><X className="h-4 w-4" /></Button></div>{inventoryBody}</aside>}
         {/* Mobile tray */}
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] shadow-lg backdrop-blur">
           {tray && (
+            <div className="relative">
+              <Button size="icon" variant="secondary" className="absolute -top-12 right-3 z-50 h-11 w-11 border shadow-lg" title="Hide selected item details" aria-label="Hide selected item details" onClick={() => setTray(null)}><EyeOff className="h-4 w-4" /></Button>
             <div className="max-h-[45vh] overflow-y-auto p-3">
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-sm font-semibold">{tray === "add" ? "Add to floor" : "Selected item"}</span>
                 <Button size="sm" variant="ghost" className="h-11 w-11 p-0" aria-label="Close tray" onClick={() => setTray(null)}><X className="h-4 w-4" /></Button>
               </div>
               {tray === "add" ? paletteBody : inspectorBody}
+            </div>
             </div>
           )}
           <div className="flex gap-2 p-2">
@@ -493,8 +560,8 @@ export const FloorplanEditor: React.FC<Props> = ({
             )}
             <Button className="min-h-12 flex-1" variant={tray === "inspect" ? "default" : "outline"}
               onClick={() => setTray(tray === "inspect" ? null : "inspect")}>
-              <SlidersHorizontal className="mr-1 h-4 w-4" />
-              {selected ? (selected.label ?? selected.kind) : "Details"}
+              <SlidersHorizontal className="mr-1 h-4 w-4 shrink-0" />
+              <span className="truncate">{selected ? (selected.label ?? selected.kind) : "Details"}</span>
             </Button>
           </div>
         </div>
@@ -503,15 +570,17 @@ export const FloorplanEditor: React.FC<Props> = ({
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr_280px] gap-3 h-[calc(100vh-180px)]">
-      {!readOnly && (
-        <Card className="p-3 overflow-y-auto">
-          <h3 className="font-semibold mb-2 text-sm">Drop into floor</h3>
-          {paletteBody}
-        </Card>
+    <div className={`relative grid gap-3 h-[calc(100vh-180px)] ${!readOnly || inventoryOpen ? detailsHidden ? "grid-cols-[240px_minmax(0,1fr)]" : "grid-cols-[240px_minmax(0,1fr)_280px]" : detailsHidden ? "grid-cols-1" : "grid-cols-[minmax(0,1fr)_280px]"}`}>
+      {dragOverlay}
+      {(!readOnly || inventoryOpen) && (
+        <aside className="p-3 overflow-y-auto border-r">
+          <h3 className="font-semibold mb-2 text-sm">{inventoryOpen ? "Tools & materials" : "Add to floor"}</h3>
+          {inventoryOpen ? inventoryBody : paletteBody}
+        </aside>
       )}
       {canvasCard}
-      <Card className="p-3 overflow-y-auto">{inspectorBody}</Card>
+      <Button size="icon" variant="secondary" className="absolute right-3 top-3 z-30 h-11 w-11 border shadow-lg" aria-label={detailsHidden ? "Show selected item details" : "Hide selected item details"} title={detailsHidden ? "Show selected item details" : "Hide selected item details"} onClick={() => setDetailsHidden(value => !value)}>{detailsHidden ? <SlidersHorizontal className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}</Button>
+      {!detailsHidden && <aside className="p-3 pt-16 overflow-y-auto border-l">{inspectorBody}</aside>}
     </div>
   );
 };
