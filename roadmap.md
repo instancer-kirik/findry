@@ -5,7 +5,8 @@
 - [ ] Verify signed-in file import and save — blocked by external Supabase without a managed test session.
 
 # Faster zone assignment
-- [ ] Add a searchable inventory side panel with touch and mouse drag-to-zone assignment.
-- [ ] Add searchable assignment in zone details and keep contents synchronized.
-- [ ] Add a floating hide/show details control.
-- [ ] Verify public rendering and assignment controls; authenticated saving requires an available session.
+- [x] Add a searchable inventory side panel with touch and mouse drag-to-zone assignment.
+- [x] Add searchable assignment in zone details and keep contents synchronized.
+- [x] Add a floating hide/show details control.
+- [x] Verify public inventory search and compact/desktop hide/show controls without runtime errors.
+- [ ] Verify authenticated drag assignment and saved location readback — blocked by external Supabase without a managed test session.
