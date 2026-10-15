@@ -159,6 +159,49 @@ export const FloorplanEditor: React.FC<Props> = ({
     return () => query.removeEventListener("change", updateCompact);
   }, []);
 
+  const scrollCardRef = useRef<HTMLDivElement>(null);
+  const zoomRef = useRef(zoom);
+  zoomRef.current = zoom;
+  useEffect(() => {
+    const card = scrollCardRef.current;
+    if (!card) return;
+    const onWheel = (e: WheelEvent) => {
+      if (!e.ctrlKey && !e.metaKey) return;
+      e.preventDefault();
+      const el = canvasRef.current;
+      if (!el) return;
+      const z = zoomRef.current;
+      const dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 100 : 1);
+      const next = Math.min(2, Math.max(0.2, z * Math.exp(-dy * 0.002)));
+      if (next === z) return;
+      const rect = el.getBoundingClientRect();
+      const px = e.clientX - rect.left, py = e.clientY - rect.top;
+      const k = next / z;
+      zoomRef.current = next;
+      setZoom(next);
+      requestAnimationFrame(() => {
+        card.scrollLeft += px * (k - 1);
+        window.scrollBy(0, py * (k - 1));
+      });
+    };
+    card.addEventListener("wheel", onWheel, { passive: false });
+    return () => card.removeEventListener("wheel", onWheel);
+  }, []);
+
+  const startPan = (e: React.PointerEvent) => {
+    if (e.pointerType !== "mouse" || e.button !== 0 || e.target !== e.currentTarget) return;
+    const card = scrollCardRef.current;
+    let lx = e.clientX, ly = e.clientY;
+    const move = (ev: PointerEvent) => {
+      if (card) card.scrollLeft -= ev.clientX - lx;
+      window.scrollBy(0, -(ev.clientY - ly));
+      lx = ev.clientX; ly = ev.clientY;
+    };
+    const up = () => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+  };
+
   useEffect(() => () => gestureCleanupRef.current?.(), []);
   useEffect(() => () => inventoryDragCleanup.current?.(), []);
 
@@ -475,16 +518,17 @@ export const FloorplanEditor: React.FC<Props> = ({
   );
 
   const canvasCard = (
-    <Card className="overflow-auto bg-muted/30 p-2 sm:p-3 overscroll-contain">
+    <Card ref={scrollCardRef} className="overflow-x-auto overflow-y-visible bg-muted/30 p-2 sm:p-3">
       <div
         ref={canvasRef}
-        className="relative mx-auto select-none border border-border bg-card overscroll-none"
+        className="relative mx-auto select-none border border-border bg-card cursor-grab active:cursor-grabbing"
         style={{
           width: canvas.width * zoom, height: canvas.height * zoom,
           touchAction: "pan-x pan-y",
           backgroundImage: "linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px)",
           backgroundSize: `${UPF * zoom}px ${UPF * zoom}px`,
         }}
+        onPointerDown={startPan}
         onClick={(e) => { if (e.target === e.currentTarget) onSelect(null); }}
       >
         {offLevel.map((it) => (
