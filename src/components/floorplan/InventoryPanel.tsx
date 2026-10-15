@@ -11,13 +11,28 @@ export function InventoryPanel({ tools, loading, error, canEdit, saving, target,
 }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  const [location, setLocation] = useState("all");
+  const normalizeLocation = (value: string | null | undefined) => (value ?? "").trim().toLowerCase();
+  const locations = new Map<string, { label: string; count: number }>();
+  tools.forEach(tool => {
+    const key = normalizeLocation(tool.location);
+    if (!key) return;
+    const entry = locations.get(key);
+    locations.set(key, { label: entry?.label ?? tool.location?.trim() ?? key, count: (entry?.count ?? 0) + 1 });
+  });
   const query = search.trim().toLowerCase();
-  const results = tools.filter(tool => (filter === "all" || (filter === "unassigned" ? !tool.location : tool.kind === filter)) &&
+  const results = tools.filter(tool => (filter === "all" || (filter === "unassigned" ? !normalizeLocation(tool.location) : tool.kind === filter)) &&
+    (location === "all" || (location === "unassigned" ? !normalizeLocation(tool.location) : normalizeLocation(tool.location) === location.slice(4))) &&
     (!query || [tool.name, tool.category, tool.location, tool.owner_name, tool.description].some(value => value?.toLowerCase().includes(query))));
   return <div className="space-y-2">
     <Input aria-label="Search zone inventory" placeholder="Search tools & materials" value={search} onChange={event => setSearch(event.target.value)} />
     <select aria-label="Inventory type" className="h-10 w-full rounded-md border bg-background px-2 text-xs" value={filter} onChange={event => setFilter(event.target.value)}>
       <option value="all">All inventory ({tools.length})</option><option value="unassigned">Without a location</option><option value="tool">Tools</option><option value="material">Materials</option>
+    </select>
+    <select aria-label="Inventory location" className="h-10 w-full rounded-md border bg-background px-2 text-xs" value={location} onChange={event => setLocation(event.target.value)}>
+      <option value="all">All locations</option>
+      <option value="unassigned">No location ({tools.filter(tool => !normalizeLocation(tool.location)).length})</option>
+      {Array.from(locations.entries()).sort((a, b) => a[1].label.localeCompare(b[1].label, undefined, { numeric: true })).map(([key, entry]) => <option key={key} value={`loc:${key}`}>{entry.label} ({entry.count})</option>)}
     </select>
     {target && <p className="break-words text-xs font-medium text-primary">{target}</p>}
     {loading ? <p className="text-xs text-muted-foreground">Loading inventory…</p> : error ? <p role="alert" className="text-xs text-destructive">{error}</p> : <ul className="divide-y border-y">

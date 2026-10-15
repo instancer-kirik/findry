@@ -57,7 +57,8 @@ export function ZoneContents({ item, items = [], readOnly, onUpdate, tools = [],
         <dl className="mt-1 grid grid-cols-2 gap-x-2 gap-y-1 rounded-md bg-muted/50 p-2 text-xs">
           <dt className="text-muted-foreground">Size</dt><dd>{(item.w / 10).toFixed(1)} × {(item.h / 10).toFixed(1)} ft</dd>
           <dt className="text-muted-foreground">Kind</dt><dd>{item.kind}</dd>
-          <dt className="text-muted-foreground">Level</dt><dd>{(item.level ?? 0) === 0 ? "ground" : "mezzanine"}</dd>
+          <dt className="text-muted-foreground">Building floor</dt><dd>{(item.level ?? 0) === 0 ? "Ground floor" : "Upper floor"}</dd>
+          {item.meta?.object_type === "storage_rack" && <><dt className="text-muted-foreground">Rack tiers</dt><dd>{String(item.meta?.tiers ?? 3)}</dd></>}
           {parent && <><dt className="text-muted-foreground">Inside</dt><dd>{parent.label}</dd></>}
           {props.map(([k, v]) => (
             <React.Fragment key={k}><dt className="truncate text-muted-foreground">{k.replace(/_/g, " ")}</dt><dd className="break-words">{String(v)}</dd></React.Fragment>
