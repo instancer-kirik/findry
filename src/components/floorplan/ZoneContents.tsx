@@ -61,7 +61,7 @@ export function ZoneContents({ item, items = [], readOnly, onUpdate, tools = [],
           {item.meta?.object_type === "storage_rack" && <><dt className="text-muted-foreground">Rack tiers</dt><dd>{String(item.meta?.tiers ?? 3)}</dd></>}
           {parent && <><dt className="text-muted-foreground">Inside</dt><dd>{parent.label}</dd></>}
           {props.map(([k, v]) => (
-            <React.Fragment key={k}><dt className="truncate text-muted-foreground">{k.replace(/_/g, " ")}</dt><dd className="break-words">{String(v)}</dd></React.Fragment>
+            <div key={k} className="contents"><dt className="truncate text-muted-foreground">{k.replace(/_/g, " ")}</dt><dd className="break-words">{typeof v === "object" && v !== null ? JSON.stringify(v) : String(v)}</dd></div>
           ))}
         </dl>
       </div>
