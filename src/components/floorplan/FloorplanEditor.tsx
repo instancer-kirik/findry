@@ -384,6 +384,33 @@ export const FloorplanEditor: React.FC<Props> = ({
         <Input value={selected.label ?? ""} onChange={(e) => onUpdate(selected.id, { label: e.target.value })} disabled={readOnly} />
       </div>
 
+      <div>
+        <Label className="text-xs">Color</Label>
+        {!readOnly && (
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+            {SWATCH_COLORS.map((c) => (
+              <button key={c} type="button" aria-label={`Set color ${c}`} title={c}
+                className={`h-7 w-7 rounded-full border-2 ${current === c ? "border-foreground" : "border-transparent"}`}
+                style={{ background: c }}
+                onClick={() => onUpdate(selected.id, { meta: { ...selected.meta, color: c } })} />
+            ))}
+            <label className="relative ml-1 h-7 w-7 cursor-pointer overflow-hidden rounded-full border-2 border-dashed border-muted-foreground" title="Custom color">
+              <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-[10px] leading-none text-muted-foreground">+</span>
+              <input type="color" aria-label="Custom color" className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                value={/^#[0-9a-fA-F]{6}$/.test(current) ? current : "#fb923c"}
+                onChange={(e) => onUpdate(selected.id, { meta: { ...selected.meta, color: e.target.value } })} />
+            </label>
+            {selected.meta?.color && (
+              <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px]" onClick={() => {
+                const { color, ...rest } = selected.meta ?? {};
+                onUpdate(selected.id, { meta: rest });
+              }}>Reset</Button>
+            )}
+          </div>
+        )}
+      </div>
+
+
       {/* footprint in feet */}
       <div>
         <Label className="text-xs">Footprint (ft)</Label>
