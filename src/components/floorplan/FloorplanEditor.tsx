@@ -539,6 +539,7 @@ export const FloorplanEditor: React.FC<Props> = ({
   if (isCompact) {
     return (
       <div className="relative min-h-[55vh] pb-20">
+        {canvasToolbar}
         {canvasCard}
         {dragOverlay}
         {inventoryOpen && <aside aria-label="Zone inventory" className="fixed bottom-20 left-0 top-0 z-30 w-[280px] max-w-[85vw] overflow-y-auto rounded-r-lg border bg-background p-2 shadow-lg"><div className="sticky top-14 z-10 -mt-2 mb-2 flex items-center justify-between bg-background pb-1 pt-2"><span className="text-xs font-semibold">Inventory</span><Button size="icon" variant="ghost" aria-label="Hide inventory" className="h-10 w-10" onClick={() => setInventoryOpen(false)}><X className="h-4 w-4" /></Button></div>{inventoryBody}</aside>}
@@ -583,7 +584,7 @@ export const FloorplanEditor: React.FC<Props> = ({
           {inventoryOpen ? inventoryBody : paletteBody}
         </aside>
       )}
-      {canvasCard}
+      <div className="min-w-0">{canvasToolbar}{canvasCard}</div>
       <Button size="icon" variant="secondary" className="absolute right-3 top-3 z-30 h-11 w-11 border shadow-lg" aria-label={detailsHidden ? "Show selected item details" : "Hide selected item details"} title={detailsHidden ? "Show selected item details" : "Hide selected item details"} onClick={() => setDetailsHidden(value => !value)}>{detailsHidden ? <SlidersHorizontal className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}</Button>
       {!detailsHidden && <aside className="p-3 pt-16 overflow-y-auto border-l">{inspectorBody}</aside>}
     </div>
