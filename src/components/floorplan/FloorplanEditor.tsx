@@ -24,6 +24,10 @@ const ft = (units: number) => Math.round((units / UPF) * 10) / 10;
 const toUnits = (feet: number) => Math.round(feet * UPF);
 const SNAP = 5; // half a foot
 
+const SWATCH_COLORS = [
+  "#fb923c", "#f59e0b", "#ef4444", "#f43f5e", "#e879f9", "#a78bfa",
+  "#60a5fa", "#38bdf8", "#14b8a6", "#22c55e", "#92400e", "#78716c", "#94a3b8",
+];
 const PALETTE: { kind: FloorplanItemKind; label: string; w: number; h: number; z?: number; icon: React.ElementType; color: string; meta?: Record<string, unknown> }[] = [
   { kind: "booth", label: "Booth", w: 100, h: 100, icon: Square, color: "#fb923c", meta: { sizable: true } },
   { kind: "table", label: "Table", w: 60, h: 40, icon: RectangleHorizontal, color: "#f59e0b", meta: { sizable: true } },
@@ -342,6 +346,8 @@ export const FloorplanEditor: React.FC<Props> = ({
   };
 
   const colorFor = (kind: FloorplanItemKind) => PALETTE.find(p => p.kind === kind)?.color ?? "#888";
+  const currentColor = (selected.meta?.color as string) ?? colorFor(selected.kind);
+
 
   const paletteBody = (
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-2">
@@ -383,6 +389,34 @@ export const FloorplanEditor: React.FC<Props> = ({
         <Label className="text-xs">Label</Label>
         <Input value={selected.label ?? ""} onChange={(e) => onUpdate(selected.id, { label: e.target.value })} disabled={readOnly} />
       </div>
+
+      <div>
+        <Label className="text-xs">Color</Label>
+        {!readOnly && (
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+            {SWATCH_COLORS.map((c) => (
+              <button key={c} type="button" aria-label={`Set color ${c}`} title={c}
+                className={`h-7 w-7 rounded-full border-2 ${currentColor === c ? "border-foreground" : "border-transparent"}`}
+                style={{ background: c }}
+                onClick={() => onUpdate(selected.id, { meta: { ...selected.meta, color: c } })} />
+            ))}
+            <label className="relative ml-1 h-7 w-7 cursor-pointer overflow-hidden rounded-full border-2 border-dashed border-muted-foreground" title="Custom color">
+              <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-[10px] leading-none text-muted-foreground">+</span>
+              <input type="color" aria-label="Custom color" className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                value={/^#[0-9a-fA-F]{6}$/.test(currentColor) ? currentColor : "#fb923c"}
+                onChange={(e) => onUpdate(selected.id, { meta: { ...selected.meta, color: e.target.value } })} />
+            </label>
+
+            {selected.meta?.color && (
+              <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px]" onClick={() => {
+                const { color, ...rest } = selected.meta ?? {};
+                onUpdate(selected.id, { meta: rest });
+              }}>Reset</Button>
+            )}
+          </div>
+        )}
+      </div>
+
 
       {/* footprint in feet */}
       <div>
