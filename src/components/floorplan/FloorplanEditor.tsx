@@ -342,6 +342,8 @@ export const FloorplanEditor: React.FC<Props> = ({
   };
 
   const colorFor = (kind: FloorplanItemKind) => PALETTE.find(p => p.kind === kind)?.color ?? "#888";
+  const currentColor = (selected.meta?.color as string) ?? colorFor(selected.kind);
+
 
   const paletteBody = (
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-2">
