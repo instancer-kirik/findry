@@ -456,23 +456,26 @@ export const FloorplanEditor: React.FC<Props> = ({
     </div>
   );
 
+  const canvasToolbar = (
+    <div className="sticky top-14 z-30 mb-2 flex flex-wrap items-center gap-2 rounded-lg border bg-background/95 px-2 py-2 text-xs shadow-sm backdrop-blur">
+      {inventoryPlace && <Button size="sm" variant={inventoryOpen ? "default" : "outline"} className="h-10" onClick={() => { setInventoryOpen(value => !value); setTray(null); }}><Package className="mr-1 h-4 w-4" />Tools & materials</Button>}
+      <div className="flex gap-1">
+        {[0, 1].map((lv) => (
+          <Button key={lv} size="sm" variant={level === lv ? "default" : "outline"} className="h-7 px-2 text-xs"
+            onClick={() => { setLevel(lv); onSelect(null); }}>
+            {lv === 0 ? "Ground floor" : "Upper floor"}
+          </Button>
+        ))}
+      </div>
+      <span>Zoom</span>
+      <input aria-label="Plan zoom" className="h-10 w-28 touch-manipulation accent-primary" type="range" min="0.2" max="2" step="0.1" value={zoom} onChange={(e) => setZoom(parseFloat(e.target.value))} />
+      {onLevel.filter(it => it.meta?.object_type === "dxf_reference").map(it => <Button key={it.id} variant="outline" size="sm" onClick={() => pickItem(it)}>{it.label}</Button>)}
+      <span className="ml-auto text-muted-foreground">{ft(canvas.width)} × {ft(canvas.height)} ft</span>
+    </div>
+  );
+
   const canvasCard = (
     <Card className="overflow-auto bg-muted/30 p-2 sm:p-3 overscroll-contain">
-      <div className="sticky top-0 z-20 -mx-2 -mt-2 mb-2 flex flex-wrap items-center gap-2 border-b bg-background/95 px-2 pb-1 pt-3 text-xs backdrop-blur sm:-mx-3 sm:-mt-3 sm:px-3 sm:pt-4">
-        {inventoryPlace && <Button size="sm" variant={inventoryOpen ? "default" : "outline"} className="h-10" onClick={() => { setInventoryOpen(value => !value); setTray(null); }}><Package className="mr-1 h-4 w-4" />Tools & materials</Button>}
-        <div className="flex gap-1">
-          {[0, 1].map((lv) => (
-            <Button key={lv} size="sm" variant={level === lv ? "default" : "outline"} className="h-7 px-2 text-xs"
-              onClick={() => { setLevel(lv); onSelect(null); }}>
-              {lv === 0 ? "Ground floor" : "Upper floor"}
-            </Button>
-          ))}
-        </div>
-        <span>Zoom</span>
-        <input aria-label="Plan zoom" className="h-10 w-28 touch-manipulation accent-primary" type="range" min="0.2" max="2" step="0.1" value={zoom} onChange={(e) => setZoom(parseFloat(e.target.value))} />
-        {onLevel.filter(it => it.meta?.object_type === "dxf_reference").map(it => <Button key={it.id} variant="outline" size="sm" onClick={() => pickItem(it)}>{it.label}</Button>)}
-        <span className="ml-auto text-muted-foreground">{ft(canvas.width)} × {ft(canvas.height)} ft</span>
-      </div>
       <div
         ref={canvasRef}
         className="relative mx-auto select-none border border-border bg-card overscroll-none"
