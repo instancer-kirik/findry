@@ -8704,6 +8704,68 @@ export type Database = {
           },
         ]
       }
+      snack_materials: {
+        Row: {
+          base_ingredient_class: string | null
+          chemical_profile: string | null
+          created_at: string
+          density: string | null
+          effect_purpose: string | null
+          hardening_process: string | null
+          id: string
+          microwave_behavior: string | null
+          oxidation_weathering: string | null
+          snack_id: string
+          solubility: string | null
+          stickiness: string | null
+          strength_metrics: string | null
+          texture_consistency: string | null
+          updated_at: string
+        }
+        Insert: {
+          base_ingredient_class?: string | null
+          chemical_profile?: string | null
+          created_at?: string
+          density?: string | null
+          effect_purpose?: string | null
+          hardening_process?: string | null
+          id?: string
+          microwave_behavior?: string | null
+          oxidation_weathering?: string | null
+          snack_id: string
+          solubility?: string | null
+          stickiness?: string | null
+          strength_metrics?: string | null
+          texture_consistency?: string | null
+          updated_at?: string
+        }
+        Update: {
+          base_ingredient_class?: string | null
+          chemical_profile?: string | null
+          created_at?: string
+          density?: string | null
+          effect_purpose?: string | null
+          hardening_process?: string | null
+          id?: string
+          microwave_behavior?: string | null
+          oxidation_weathering?: string | null
+          snack_id?: string
+          solubility?: string | null
+          stickiness?: string | null
+          strength_metrics?: string | null
+          texture_consistency?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "snack_materials_snack_id_fkey"
+            columns: ["snack_id"]
+            isOneToOne: true
+            referencedRelation: "snacks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       snack_ratings: {
         Row: {
           comment: string | null
