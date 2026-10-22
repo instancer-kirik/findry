@@ -20,6 +20,7 @@ import { Clock, Users, CalendarDays, Video, MapPin } from 'lucide-react';
 import { ContentItemProps } from '@/components/marketplace/ContentCard';
 import MeetingsCard from '@/components/meetings/MeetingsCard';
 import { toast } from 'sonner';
+import MeetingAvailability from '@/components/meetings/MeetingAvailability';
 
 // Sample data for meetings
 const sampleMeetings = [
@@ -207,6 +208,7 @@ const MeetingScheduler: React.FC = () => {
                     <Clock className="mr-2 h-4 w-4" />
                     Schedule
                   </TabsTrigger>
+                  <TabsTrigger value="availability">Find a time</TabsTrigger>
                   {meetingId && (
                     <TabsTrigger value="view" className="flex items-center">
                       <Users className="mr-2 h-4 w-4" />
@@ -293,6 +295,7 @@ const MeetingScheduler: React.FC = () => {
                 <MeetingsCard meetings={sampleMeetings} title="All Upcoming Meetings" showAll={true} />
               </TabsContent>
               
+              <TabsContent value="availability"><MeetingAvailability /></TabsContent>
               <TabsContent value="schedule">
                 <Card>
                   <CardHeader>
@@ -634,6 +637,7 @@ const MeetingScheduler: React.FC = () => {
                 <CardTitle className="text-lg">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
+                <Button variant="outline" className="w-full justify-start" onClick={() => setActiveTab('availability')}><Users className="mr-2 h-4 w-4" />Find a time</Button>
                 <Button 
                   className="w-full justify-start" 
                   onClick={() => setActiveTab('schedule')}

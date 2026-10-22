@@ -1,0 +1,2 @@
+CREATE POLICY "Server processes manage availability responses" ON public.meeting_availability_responses FOR ALL TO service_role USING (true) WITH CHECK (true);
+CREATE INDEX meeting_availability_responses_poll_idx ON public.meeting_availability_responses(poll_id);

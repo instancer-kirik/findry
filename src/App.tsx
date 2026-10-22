@@ -38,6 +38,7 @@ import CreateShop from "./pages/CreateShop";
 import Collaboration from "./pages/Collaboration";
 import Chats from "./pages/Chats";
 import MeetingScheduler from "./pages/MeetingScheduler";
+import MeetingAvailabilityPage from "./pages/MeetingAvailabilityPage";
 import Offers from "./pages/Offers";
 import Items from "./pages/Items";
 import NotFound from "./pages/NotFound";
@@ -189,6 +190,9 @@ const App: React.FC = () => {
         />
         <Route path="/create-resource" element={<CreateResource />} />
         <Route path="/chats" element={<Chats />} />
+        <Route path="/meetings" element={<MeetingScheduler />} />
+        <Route path="/meetings/availability/:token" element={<MeetingAvailabilityPage />} />
+        <Route path="/meetings/:meetingId" element={<MeetingScheduler />} />
         <Route path="/artist/:artistId" element={<ArtistProfile />} />
         <Route
           path="/resourcer/:resourcerId"
