@@ -5070,6 +5070,86 @@ export type Database = {
           },
         ]
       }
+      meeting_availability_polls: {
+        Row: {
+          created_at: string
+          description: string
+          duration_minutes: number
+          id: string
+          organizer_id: string
+          selected_start: string | null
+          share_token: string
+          slots: string[]
+          timezone: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          duration_minutes?: number
+          id?: string
+          organizer_id: string
+          selected_start?: string | null
+          share_token?: string
+          slots: string[]
+          timezone: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          duration_minutes?: number
+          id?: string
+          organizer_id?: string
+          selected_start?: string | null
+          share_token?: string
+          slots?: string[]
+          timezone?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      meeting_availability_responses: {
+        Row: {
+          available_slots: string[]
+          created_at: string
+          edit_key: string
+          id: string
+          name: string
+          poll_id: string
+          updated_at: string
+        }
+        Insert: {
+          available_slots?: string[]
+          created_at?: string
+          edit_key?: string
+          id?: string
+          name: string
+          poll_id: string
+          updated_at?: string
+        }
+        Update: {
+          available_slots?: string[]
+          created_at?: string
+          edit_key?: string
+          id?: string
+          name?: string
+          poll_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_availability_responses_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "meeting_availability_polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meeting_schedules: {
         Row: {
           created_at: string | null
@@ -11299,6 +11379,10 @@ export type Database = {
           world_name: string
         }[]
       }
+      get_meeting_availability_poll: {
+        Args: { p_token: string }
+        Returns: Json
+      }
       get_project_components: {
         Args: { p_project_id: string }
         Returns: {
@@ -11624,6 +11708,15 @@ export type Database = {
         Returns: undefined
       }
       refresh_work_discovery: { Args: never; Returns: undefined }
+      save_meeting_availability_response: {
+        Args: {
+          p_edit_key: string
+          p_name: string
+          p_slots: string[]
+          p_token: string
+        }
+        Returns: string
+      }
       search_context_drops: {
         Args: {
           limit_count?: number
