@@ -1,6 +1,11 @@
 # DXF floorplan import
  
 # Meeting availability
+# Cutting-part maintenance
+- [ ] Add inline sharpening/replacement status, part specs, notes and replacement links with maintenance filtering.
+- [ ] Identify existing cutting tools as inspection candidates without inventing condition or compatibility.
+- [ ] Test maintenance rules and public inventory display; signed-in saves require an external Supabase session.
+
 - [x] Add shareable meeting polls, respondent availability selection, overlap results and organizer time confirmation.
 - [x] Verify availability calculations and guest response saving, reload, editing and overlap readback with a temporary poll; remove test data.
 - [ ] Verify signed-in poll creation and organizer time confirmation — blocked by external Supabase without a managed test session.
