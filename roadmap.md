@@ -1,8 +1,9 @@
 # DXF floorplan import
  
 # Meeting availability
-- [ ] Add shareable meeting polls, respondent availability selection, overlap results and organizer time confirmation.
-- [ ] Verify availability calculations and the public response flow; signed-in creation requires an external Supabase session.
+- [x] Add shareable meeting polls, respondent availability selection, overlap results and organizer time confirmation.
+- [x] Verify availability calculations and guest response saving, reload, editing and overlap readback with a temporary poll; remove test data.
+- [ ] Verify signed-in poll creation and organizer time confirmation — blocked by external Supabase without a managed test session.
 
 - [x] Add DXF import with units, preview and placement without resizing rooms.
 - [x] Add the uploaded workshop drawing as a locked reference on the hackerspace plan.
