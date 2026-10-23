@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
-export type SpaceTool = { id: string; name: string; kind: string | null; category: string | null; location: string | null; owner_name: string | null; quantity: string | null; description?: string | null };
+export type SpaceTool = { id: string; name: string; kind: string | null; category: string | null; location: string | null; owner_name: string | null; quantity: string | null; description?: string | null; params?: Record<string, unknown> | null };
 const db = supabase as any;
 
 export function useFloorplanInventory(place?: string) {
@@ -24,7 +24,7 @@ export function useFloorplanInventory(place?: string) {
     setTools([]); setError(null);
     if (!place) return;
     setLoading(true);
-    db.from("space_tools").select("id,name,kind,category,location,owner_name,quantity,description").eq("place", place).order("name")
+    db.from("space_tools").select("id,name,kind,category,location,owner_name,quantity,description,params").eq("place", place).order("name")
       .then(({ data, error }: any) => { if (alive) { setTools(data ?? []); setError(error?.message ?? null); setLoading(false); } });
     return () => { alive = false; };
   }, [place]);

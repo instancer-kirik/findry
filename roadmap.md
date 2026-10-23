@@ -2,9 +2,10 @@
  
 # Meeting availability
 # Cutting-part maintenance
-- [ ] Add inline sharpening/replacement status, part specs, notes and replacement links with maintenance filtering.
-- [ ] Identify existing cutting tools as inspection candidates without inventing condition or compatibility.
-- [ ] Test maintenance rules and public inventory display; signed-in saves require an external Supabase session.
+- [x] Add inline sharpening/replacement status, part specs, notes and replacement links with maintenance filtering.
+- [x] Identify 21 existing cutting-tool/consumable inspection candidates without inventing condition or compatibility.
+- [x] Test maintenance rules and public inventory display.
+- [ ] Verify signed-in maintenance saves — blocked by external Supabase without a managed test session.
 
 - [x] Add shareable meeting polls, respondent availability selection, overlap results and organizer time confirmation.
 - [x] Verify availability calculations and guest response saving, reload, editing and overlap readback with a temporary poll; remove test data.

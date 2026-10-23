@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { InventoryPanel } from "./InventoryPanel";
 import type { SpaceTool } from "@/hooks/use-floorplan-inventory";
 import type { FloorplanItem } from "@/hooks/use-floorplan";
+import { CuttingMaintenanceBadge } from './CuttingMaintenanceBadge';
 
 
 export const isZone = (i: FloorplanItem) => i.kind === "booth" || i.meta?.object_type === "room_zone" || i.meta?.object_type === "storage_rack";
@@ -78,6 +79,7 @@ export function ZoneContents({ item, items = [], readOnly, onUpdate, tools = [],
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-medium">{t.name}{t.quantity ? ` ×${t.quantity}` : ""}</p>
                       <p className="truncate text-muted-foreground">{[z && z.id !== item.id ? `in ${z.label}` : null, t.kind, t.category, t.owner_name].filter(Boolean).join(" · ")}</p>
+                      <CuttingMaintenanceBadge tool={t} />
                     </div>
                     {canEditInventory && <Button size="sm" variant="ghost" disabled={saving} className="h-9 w-9 p-0" aria-label={`Remove ${t.name}`} onClick={() => setLocation?.(t.id, null)}><X className="h-3 w-3" /></Button>}
                   </li>

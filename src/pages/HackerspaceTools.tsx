@@ -12,6 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Plus, Trash2, Save, Pencil, Undo2, ChevronDown } from "lucide-react";
+import { getCuttingMaintenance, maintenanceLabels, maintenanceSchema, matchesMaintenance } from '@/lib/cutting-maintenance';
+import { CuttingMaintenanceBadge } from '@/components/floorplan/CuttingMaintenanceBadge';
 
 const PLACE = "Baltimore Hackerspace";
 const HACKERSPACE_FLOORPLAN_ID = "617b20a6-8edf-4218-a6b4-ed6cfca9f749";
@@ -48,6 +50,7 @@ const HackerspaceTools = () => {
   const [editMode, setEditMode] = useState(false);
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string | null>(null);
+  const [maintenanceFilter, setMaintenanceFilter] = useState('all');
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const toggleCat = (c: string) => setCollapsed(p => {
     const n = new Set(p);
@@ -75,9 +78,9 @@ const HackerspaceTools = () => {
   const cats = useMemo(() => Array.from(new Set(tools.map(t => t.category))), [tools]);
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    return tools.filter(t => (!cat || t.category === cat) && (!s ||
-      [t.name, t.description, t.location, t.owner_name, ...t.details].some(v => (v ?? "").toLowerCase().includes(s))));
-  }, [tools, q, cat]);
+    return tools.filter(t => (!cat || t.category === cat) && matchesMaintenance(t, maintenanceFilter) && (!s ||
+      [t.name, t.description, t.location, t.owner_name, ...t.details, getCuttingMaintenance(t).part, getCuttingMaintenance(t).notes].some(v => (v ?? "").toLowerCase().includes(s))));
+  }, [tools, q, cat, maintenanceFilter]);
 
   const addTool = async () => {
     const { data, error } = await db.from("space_tools").insert({
@@ -113,6 +116,7 @@ const HackerspaceTools = () => {
 
         <div className="mt-6 flex flex-col gap-3">
           <Input placeholder="Search name, owner, location, details" value={q} onChange={e => setQ(e.target.value)} />
+          <Select value={maintenanceFilter} onValueChange={setMaintenanceFilter}><SelectTrigger aria-label="Maintenance filter" className="w-full sm:w-72"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All maintenance states</SelectItem><SelectItem value="cutting">Bits, blades & consumables</SelectItem><SelectItem value="attention">Needs attention</SelectItem>{Object.entries(maintenanceLabels).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent></Select>
           <div className="flex flex-wrap gap-2">
             <Button size="sm" variant={cat ? "outline" : "default"} onClick={() => setCat(null)}>
               All <span className="ml-1 opacity-60">{tools.length}</span>
@@ -132,7 +136,7 @@ const HackerspaceTools = () => {
             <table className="w-full min-w-[2200px] border-separate border-spacing-0 text-sm">
               <thead>
                 <tr>
-                  {["Name", "Type", "Category", "Owner", "Location", "Quantity", "Description", "Details", "Parameters (JSON)", "Links", "Training", "Order", "Actions"].map((label, i) => (
+                  {["Name", "Maintenance", "Part / specification", "Maintenance notes", "Replacement link", "Last inspected", "Type", "Category", "Owner", "Location", "Quantity", "Description", "Details", "Parameters (JSON)", "Links", "Training", "Order", "Actions"].map((label, i) => (
                     <th key={label} scope="col" className={`sticky top-0 border-b bg-muted px-3 py-3 text-left text-xs font-medium text-muted-foreground ${i === 0 ? "left-0 z-30 min-w-[240px] border-r" : "z-20"} ${label === "Actions" ? "right-0 border-l" : ""}`}>
                       {label}
                     </th>
@@ -145,7 +149,7 @@ const HackerspaceTools = () => {
                     onSaved={n => setTools(ts => ts.map(x => x.id === n.id ? n : x))}
                     onDeleted={id => setTools(ts => ts.filter(x => x.id !== id))} />
                 ))}
-                {!filtered.length && <tr><td colSpan={13} className="p-6 text-muted-foreground">Nothing matches.</td></tr>}
+                {!filtered.length && <tr><td colSpan={18} className="p-6 text-muted-foreground">Nothing matches.</td></tr>}
               </tbody>
             </table>
           </div>
@@ -191,6 +195,8 @@ const ToolCard = ({ t }: { t: Tool }) => (
       {t.kind === "material" && <Badge variant="secondary" className="text-xs">Material</Badge>}
     </div>
     {t.description && <p className="mt-1 text-sm">{t.description}</p>}
+    <CuttingMaintenanceBadge tool={t} />
+    {getCuttingMaintenance(t).status !== 'untracked' && <div className="mt-2 space-y-1 text-xs"><p className="font-medium">{getCuttingMaintenance(t).part}</p><p className="text-muted-foreground">{getCuttingMaintenance(t).notes}</p>{getCuttingMaintenance(t).checked_on && <p>Last inspected: {getCuttingMaintenance(t).checked_on}</p>}{getCuttingMaintenance(t).replacement_url && <a className="text-primary underline" href={getCuttingMaintenance(t).replacement_url} target="_blank" rel="noreferrer">Replacement part</a>}</div>}
     {t.details.length > 0 && (
       <ul className="mt-2 text-sm text-muted-foreground list-disc pl-4 space-y-0.5">
         {t.details.map((d, i) => <li key={i}>{d}</li>)}
@@ -208,7 +214,7 @@ const ToolCard = ({ t }: { t: Tool }) => (
       {t.location && <Badge variant="outline" className="text-xs">📍 {t.location}</Badge>}
       {t.quantity && <Badge variant="outline" className="text-xs">Qty {t.quantity}</Badge>}
       {t.training_required && <Badge className="text-xs">Training required</Badge>}
-      {Object.entries(t.params ?? {}).map(([k, v]) => (
+      {Object.entries(t.params ?? {}).filter(([k]) => k !== 'cutting_maintenance').map(([k, v]) => (
         <Badge key={k} variant="outline" className="text-xs">{k}: {String(v)}</Badge>
       ))}
     </div>
@@ -220,6 +226,7 @@ const toolDraft = (tool: Tool) => ({
     detailsText: tool.details.join("\n"),
     linksText: tool.links.join("\n"),
     paramsText: JSON.stringify(tool.params ?? {}),
+    maintenance: getCuttingMaintenance(tool),
   });
 
 const ToolEditor = ({ tool, onSaved, onDeleted }: { tool: Tool; onSaved: (t: Tool) => void; onDeleted: (id: string) => void }) => {
@@ -228,6 +235,7 @@ const ToolEditor = ({ tool, onSaved, onDeleted }: { tool: Tool; onSaved: (t: Too
   const [deleting, setDeleting] = useState(false);
   const dirty = JSON.stringify(f) !== JSON.stringify(toolDraft(tool));
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF(p => ({ ...p, [k]: v }));
+  const setMaintenance = (key: keyof typeof f.maintenance, value: string) => setF(p => ({ ...p, maintenance: { ...p.maintenance, [key]: value, suggested: false } }));
 
   const save = async () => {
     if (!f.name.trim()) return toast.error("Name can't be empty");
@@ -240,6 +248,9 @@ const ToolEditor = ({ tool, onSaved, onDeleted }: { tool: Tool; onSaved: (t: Too
       return toast.error(`Parameters for "${f.name}" must be a JSON object`);
     }
     if (lines(f.linksText).some(l => !/^https?:\/\//.test(l))) return toast.error("Links must start with https:// or http://");
+    const checked = maintenanceSchema.safeParse(f.maintenance);
+    if (!checked.success) return toast.error(checked.error.issues[0]?.message || 'Check maintenance details');
+    if (!f.maintenance.suggested && (checked.data.status !== 'untracked' || tool.params?.cutting_maintenance)) params.cutting_maintenance = checked.data;
     setSaving(true);
     const { data, error } = await db.from("space_tools").update({
       name: f.name.trim().slice(0, 200), category: f.category.trim() || "General", kind: f.kind,
@@ -277,6 +288,11 @@ const ToolEditor = ({ tool, onSaved, onDeleted }: { tool: Tool; onSaved: (t: Too
           </div>
         </div>
       </td>
+      <td className={cell}><Select value={f.maintenance.status} onValueChange={v => setMaintenance('status', v)}><SelectTrigger aria-label={label('Maintenance')} className={`${input} min-w-[200px]`}><SelectValue /></SelectTrigger><SelectContent>{Object.entries(maintenanceLabels).map(([value, text]) => <SelectItem key={value} value={value}>{text}</SelectItem>)}</SelectContent></Select>{f.maintenance.suggested && <p className="px-3 text-xs text-muted-foreground">Suggested · condition unknown</p>}</td>
+      <td className={cell}><Input aria-label={label('Part specification')} className={area} maxLength={300} value={f.maintenance.part} onChange={e => setMaintenance('part', e.target.value)} /></td>
+      <td className={cell}><Textarea aria-label={label('Maintenance notes')} className={area} rows={3} maxLength={2000} value={f.maintenance.notes} onChange={e => setMaintenance('notes', e.target.value)} /></td>
+      <td className={cell}><Input aria-label={label('Replacement link')} className={area} type="url" maxLength={2000} value={f.maintenance.replacement_url} onChange={e => setMaintenance('replacement_url', e.target.value)} /></td>
+      <td className={cell}><Input aria-label={label('Last inspected')} className={input} type="date" value={f.maintenance.checked_on} onChange={e => setMaintenance('checked_on', e.target.value)} /></td>
       <td className={cell}>
         <Select value={f.kind} onValueChange={v => set("kind", v)}>
           <SelectTrigger aria-label={label("Type")} className={`${input} min-w-[120px]`}><SelectValue /></SelectTrigger>
