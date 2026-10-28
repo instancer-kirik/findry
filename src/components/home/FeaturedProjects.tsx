@@ -26,6 +26,7 @@ interface FeaturedProject {
   status: string;
   progress: number;
   profiles?: ProjectProfile | null;
+  path?: string;
 }
 
 const FeaturedProjects: React.FC = () => {
@@ -40,73 +41,48 @@ const FeaturedProjects: React.FC = () => {
 
   const fetchProjects = async () => {
     try {
-      // Fetch featured projects with creator profile
-      const { data: featured, error: featuredError } = await supabase
-        .from('projects')
-        .select(`
-          *,
-          profiles:created_by(username, full_name, avatar_url)
-        `)
-        .eq('is_public', true)
-        .eq('featured', true)
-        .order('view_count', { ascending: false })
-        .limit(3);
-
-      if (featuredError) throw featuredError;
-
-      // Fetch trending projects (high view count, recent activity)
-      const { data: trending, error: trendingError } = await supabase
-        .from('projects')
-        .select(`
-          *,
-          profiles:created_by(username, full_name, avatar_url)
-        `)
-        .eq('is_public', true)
-        .gte('view_count', 10)
-        .order('view_count', { ascending: false })
-        .limit(3);
-
-      if (trendingError) throw trendingError;
-
-      // Fetch recent projects
-      const { data: recent, error: recentError } = await supabase
-        .from('projects')
-        .select(`
-          *,
-          profiles:created_by(username, full_name, avatar_url)
-        `)
+      // Pull from the unified_projects view (authoritative across all project tables)
+      const { data, error } = await supabase
+        .from('unified_projects')
+        .select('*')
         .eq('is_public', true)
         .order('created_at', { ascending: false })
-        .limit(3);
+        .limit(200);
+      if (error) throw error;
 
-      if (recentError) throw recentError;
+      const all: FeaturedProject[] = (data || [])
+        .filter((p: any) => p.id && p.name)
+        .map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          description: p.description || '',
+          tags: [...(p.tech_stack || []), ...(p.features || [])],
+          image_url: p.image_url,
+          view_count: 0,
+          like_count: 0,
+          featured: !!p.featured,
+          created_at: p.created_at,
+          status: p.status || p.project_type || 'project',
+          progress: Math.round(p.dev_progress || 0),
+          path: p.path || `/projects/${p.id}`,
+        }));
 
-      setFeaturedProjects(featured || []);
-      setTrendingProjects(trending || []);
-      setRecentProjects(recent || []);
+      const featured = all.filter((p) => p.featured).slice(0, 3);
+      const used = new Set(featured.map((p) => p.id));
+      const trending = all
+        .filter((p) => !used.has(p.id) && (p.image_url || p.progress > 0))
+        .sort((a, b) => b.progress - a.progress)
+        .slice(0, 3);
+      trending.forEach((p) => used.add(p.id));
+      const recent = all.filter((p) => !used.has(p.id)).slice(0, 3);
+
+      setFeaturedProjects(featured);
+      setTrendingProjects(trending);
+      setRecentProjects(recent);
     } catch (error: any) {
       console.error('Error fetching projects:', error);
-      // Don't show error toast for empty results - just log it
     } finally {
       setLoading(false);
-    }
-  };
-
-  const incrementViewCount = async (projectId: string) => {
-    try {
-      const project = [...featuredProjects, ...trendingProjects, ...recentProjects]
-        .find(p => p.id === projectId);
-
-      if (!project) return;
-
-      const { error } = await supabase
-        .from('projects')
-        .update({ view_count: (project.view_count || 0) + 1 })
-        .eq('id', projectId);
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error incrementing view count:', error);
     }
   };
 
