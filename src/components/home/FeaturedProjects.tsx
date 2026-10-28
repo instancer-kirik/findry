@@ -91,8 +91,7 @@ const FeaturedProjects: React.FC = () => {
     showBadge
   }) => (
     <Link
-      to={`/projects/${project.id}`}
-      onClick={() => incrementViewCount(project.id)}
+      to={project.path || `/projects/${project.id}`}
       className="group"
     >
       <Card className="h-full hover:shadow-lg transition-all duration-200 hover:scale-105 group-hover:border-primary/20">
