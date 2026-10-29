@@ -97,7 +97,6 @@ const queryClient = new QueryClient();
 const App: React.FC = () => {
   const { session, user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const location = useLocation();
 
   useEffect(() => {
     const fetchProfile = async () => {
