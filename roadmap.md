@@ -1,5 +1,10 @@
 # DXF floorplan import
  
+# Rapid camera cataloging
+- [ ] Keep a real desktop/mobile camera preview open with sequential automatic recognition and repeat suppression.
+- [ ] Keep batch review and explicit inventory saves; stop automatic scanning on recognition errors.
+- [ ] Verify camera capture, pause, repeat handling, and small-screen layout; authenticated recognition/save requires an external Supabase session.
+ 
 # Meeting availability
 # Cutting-part maintenance
 - [x] Add inline sharpening/replacement status, part specs, notes and replacement links with maintenance filtering.
