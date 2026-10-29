@@ -39,7 +39,7 @@ const shrink = (file: File) => new Promise<string>((resolve, reject) => {
 });
 
 const HackerspaceScan = () => {
-  const { user } = useAuth() as any;
+  const { user, loading: authLoading } = useAuth() as any;
   const [isAdmin, setIsAdmin] = useState(false);
   const [roleChecked, setRoleChecked] = useState(false);
   const [zones, setZones] = useState<string[]>([]);
@@ -57,11 +57,12 @@ const HackerspaceScan = () => {
       .then(({ data }: any) => setZones([...new Set<string>((data ?? []).map((d: any) => d.label).filter(Boolean))].sort()));
   }, []);
   useEffect(() => {
+    if (authLoading) return;
     if (!user) { setIsAdmin(false); setRoleChecked(true); return; }
     setRoleChecked(false);
     Promise.all(["admin", "moderator"].map(r => db.rpc("has_role", { _role: r, _user_id: user.id })))
       .then((res: any[]) => { setIsAdmin(res.some(x => !!x.data)); setRoleChecked(true); });
-  }, [user]);
+  }, [user, authLoading]);
 
   const scan = async (files: FileList | null) => {
     if (!files?.length) return;
