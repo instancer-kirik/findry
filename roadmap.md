@@ -1,9 +1,10 @@
 # DXF floorplan import
  
 # Rapid camera cataloging
-- [ ] Keep a real desktop/mobile camera preview open with sequential automatic recognition and repeat suppression.
-- [ ] Keep batch review and explicit inventory saves; stop automatic scanning on recognition errors.
-- [ ] Verify camera capture, pause, repeat handling, and small-screen layout; authenticated recognition/save requires an external Supabase session.
+- [x] Keep a real desktop/mobile camera preview open with sequential automatic recognition and repeat suppression.
+- [x] Keep batch review and explicit inventory saves; stop automatic scanning on recognition errors.
+- [x] Verify camera capture, pause, repeat handling, and compact layout with a fake webcam and simulated authorized recognition; three batch tests pass.
+- [ ] Verify real authenticated recognition and inventory save — blocked by external Supabase without a managed session.
  
 # Meeting availability
 # Cutting-part maintenance
