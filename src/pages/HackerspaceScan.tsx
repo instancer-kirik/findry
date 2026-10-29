@@ -41,6 +41,7 @@ const shrink = (file: File) => new Promise<string>((resolve, reject) => {
 const HackerspaceScan = () => {
   const { user } = useAuth() as any;
   const [isAdmin, setIsAdmin] = useState(false);
+  const [roleChecked, setRoleChecked] = useState(false);
   const [zones, setZones] = useState<string[]>([]);
   const [zone, setZone] = useState("");
   const [mode, setMode] = useState<"pile" | "single">("pile");
@@ -56,8 +57,10 @@ const HackerspaceScan = () => {
       .then(({ data }: any) => setZones([...new Set<string>((data ?? []).map((d: any) => d.label).filter(Boolean))].sort()));
   }, []);
   useEffect(() => {
-    if (!user) { setIsAdmin(false); return; }
-    db.rpc("has_role", { _role: "admin", _user_id: user.id }).then(({ data }: any) => setIsAdmin(!!data));
+    if (!user) { setIsAdmin(false); setRoleChecked(true); return; }
+    setRoleChecked(false);
+    Promise.all(["admin", "moderator"].map(r => db.rpc("has_role", { _role: r, _user_id: user.id })))
+      .then((res: any[]) => { setIsAdmin(res.some(x => !!x.data)); setRoleChecked(true); });
   }, [user]);
 
   const scan = async (files: FileList | null) => {
@@ -113,7 +116,7 @@ const HackerspaceScan = () => {
         <p className="text-sm text-muted-foreground"><Link to="/spaces/baltimore-hackerspace" className="underline">{PLACE} inventory</Link></p>
         <h1 className="mt-1 text-3xl font-bold">Scan items</h1>
         <p className="mt-2 text-muted-foreground">Pick where the stuff is, snap photos, check the list, save.</p>
-        {!isAdmin && <p className="mt-3 rounded-md border bg-muted p-3 text-sm">{user ? "Only inventory admins can add items." : "Sign in as an inventory admin to scan items."}</p>}
+        {roleChecked && !isAdmin && <p className="mt-3 rounded-md border bg-muted p-3 text-sm">{user ? `Signed in as ${user.email}, which is not an inventory admin or manager.` : "Sign in as an inventory admin or manager to scan items."}</p>}
 
         <Card className="mt-6 space-y-4 p-4">
           <div>

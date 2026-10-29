@@ -58,8 +58,8 @@ Deno.serve(async (req) => {
     });
     const { data: u } = await sb.auth.getUser(auth.replace(/^Bearer\s+/i, ""));
     if (!u?.user) return j({ error: "Sign in to scan items" }, 401);
-    const { data: isAdmin } = await sb.rpc("has_role", { _role: "admin", _user_id: u.user.id });
-    if (!isAdmin) return j({ error: "Only inventory admins can scan items" }, 403);
+    const roles = await Promise.all(["admin", "moderator"].map((r) => sb.rpc("has_role", { _role: r, _user_id: u.user!.id })));
+    if (!roles.some((r) => r.data)) return j({ error: "Only inventory admins or managers can scan items" }, 403);
 
     const { image, mode } = await req.json();
     if (typeof image !== "string" || !image.startsWith("data:image/") || image.length > 8_000_000)
