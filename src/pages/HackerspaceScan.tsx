@@ -87,7 +87,10 @@ const HackerspaceScan = () => {
         headers: { "Content-Type": "application/json", apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${sessionData.session.access_token}` },
         body: JSON.stringify({ image, mode }),
       });
-      const data = await response.json();
+      const text = await response.text();
+      let data: any = null;
+      try { data = text ? JSON.parse(text) : null; }
+      catch { throw new Error(response.ok ? "Recognition returned an unreadable reply. Scanning paused." : `Recognition failed (${response.status}). Scanning paused.`); }
       if (signal.aborted) { setShots(s => s.filter(x => x.id !== id)); return false; }
       const msg = !response.ok ? data?.error ?? data?.message ?? `Recognition failed (${response.status})` : data?.error;
       if (msg) throw new Error(msg);

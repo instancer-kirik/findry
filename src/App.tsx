@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Route, Routes, useLocation, Link, Navigate } from "react-router-dom";
+import { Route, Routes, Link, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Index from "./pages/Index";
 import About from "./pages/About";
@@ -97,7 +97,6 @@ const queryClient = new QueryClient();
 const App: React.FC = () => {
   const { session, user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const location = useLocation();
 
   useEffect(() => {
     const fetchProfile = async () => {
