@@ -10,6 +10,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { Camera, ImagePlus, Loader2, Save, Trash2 } from "lucide-react";
+import CatalogCamera from "@/components/floorplan/CatalogCamera";
+import { freshCatalogItems } from "@/lib/catalog-batch";
 
 const PLACE = "Baltimore Hackerspace";
 const FLOORPLAN_ID = "617b20a6-8edf-4218-a6b4-ed6cfca9f749";
@@ -30,7 +32,9 @@ const shrink = (file: File) => new Promise<string>((resolve, reject) => {
     const s = Math.min(1, 1600 / Math.max(img.width, img.height));
     const c = document.createElement("canvas");
     c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
-    c.getContext("2d")!.drawImage(img, 0, 0, c.width, c.height);
+    const context = c.getContext("2d");
+    if (!context) { reject(new Error("Couldn't prepare that photo")); return; }
+    context.drawImage(img, 0, 0, c.width, c.height);
     URL.revokeObjectURL(img.src);
     resolve(c.toDataURL("image/jpeg", 0.82));
   };
@@ -48,8 +52,14 @@ const HackerspaceScan = () => {
   const [shots, setShots] = useState<Shot[]>([]);
   const [found, setFound] = useState<Found[]>([]);
   const [saving, setSaving] = useState(false);
-  const cameraRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [scanError, setScanError] = useState("");
+  const [lastCount, setLastCount] = useState<number | null>(null);
+  const busyRef = useRef(false);
+  const seenRef = useRef(new Set<string>());
+  const uploadAbortRef = useRef<AbortController | null>(null);
   const libraryRef = useRef<HTMLInputElement>(null);
+  useEffect(() => () => uploadAbortRef.current?.abort(), []);
 
   useEffect(() => {
     db.from("floorplan_items").select("label").eq("floorplan_id", FLOORPLAN_ID)
@@ -64,24 +74,45 @@ const HackerspaceScan = () => {
       .then((res: any[]) => { setIsAdmin(res.some(x => !!x.data)); setRoleChecked(true); });
   }, [user, authLoading]);
 
-  const scan = async (files: FileList | null) => {
-    if (!files?.length) return;
-    for (const file of Array.from(files)) {
-      const id = crypto.randomUUID();
-      let image: string;
-      try { image = await shrink(file); } catch (e: any) { toast.error(e.message); continue; }
-      setShots(s => [{ id, preview: image, status: "working" }, ...s]);
-      const { data, error } = await supabase.functions.invoke("catalog-detect", { body: { image, mode } });
-      const msg = error ? (await (error as any).context?.json?.().catch(() => null))?.error ?? error.message : data?.error;
-      if (msg) {
-        setShots(s => s.map(x => x.id === id ? { ...x, status: "error", error: msg } : x));
-        toast.error(msg);
-        continue;
-      }
-      const items: Found[] = (data.items ?? []).map((it: any) => ({ ...it, key: crypto.randomUUID(), keep: true }));
-      setFound(f => [...items, ...f]);
+  const recognize = async (image: string, signal: AbortSignal): Promise<boolean> => {
+    if (busyRef.current || !isAdmin || signal.aborted) return false;
+    busyRef.current = true; setBusy(true); setScanError("");
+    const id = crypto.randomUUID();
+    setShots(s => [{ id, preview: image, status: "working" as const }, ...s].slice(0, 12));
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) throw new Error("Sign in to scan items");
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/catalog-detect`, {
+        method: "POST", signal,
+        headers: { "Content-Type": "application/json", apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${sessionData.session.access_token}` },
+        body: JSON.stringify({ image, mode }),
+      });
+      const data = await response.json();
+      if (signal.aborted) { setShots(s => s.filter(x => x.id !== id)); return false; }
+      const msg = !response.ok ? data?.error ?? data?.message ?? `Recognition failed (${response.status})` : data?.error;
+      if (msg) throw new Error(msg);
+      if (!Array.isArray(data?.items)) throw new Error("Recognition returned an invalid list. Scanning paused.");
+      const items: Found[] = freshCatalogItems<Found>((data.items as any[]).map(it => ({ ...it, key: crypto.randomUUID(), keep: true })), seenRef.current);
+      setFound(f => [...items, ...f]); setLastCount(items.length);
       setShots(s => s.map(x => x.id === id ? { ...x, status: "done" } : x));
-      if (!items.length) toast("Nothing recognizable in that photo");
+      return true;
+    } catch (cause) {
+      if (signal.aborted) { setShots(s => s.filter(x => x.id !== id)); return false; }
+      const msg = cause instanceof Error ? cause.message : "Recognition failed. Scanning paused.";
+      setScanError(msg); toast.error(msg);
+      setShots(s => s.map(x => x.id === id ? { ...x, status: "error", error: msg } : x));
+      return false;
+    } finally { busyRef.current = false; setBusy(false); }
+  };
+
+  const scan = async (files: FileList | null) => {
+    if (!files?.length || busyRef.current) return;
+    const controller = new AbortController();
+    uploadAbortRef.current = controller;
+    for (const file of Array.from(files)) {
+      if (controller.signal.aborted) break;
+      try { if (!await recognize(await shrink(file), controller.signal)) break; }
+      catch (cause) { toast.error(cause instanceof Error ? cause.message : "Couldn't read that photo"); break; }
     }
   };
 
@@ -95,7 +126,7 @@ const HackerspaceScan = () => {
     let order = last?.[0]?.sort_order ?? 0;
     const rows = kept.map(f => {
       const params: Record<string, string> = {};
-      (["shape", "brand", "model", "power"] as const).forEach(k => { if (f[k]?.trim()) params[k] = f[k]!.trim(); });
+      (["shape", "brand", "model", "power"] as const).forEach(k => { const value = f[k]?.trim(); if (value) params[k] = value; });
       const details = [f.brand && `Brand: ${f.brand}`, f.model && `Model: ${f.model}`, f.shape && `Shape: ${f.shape}`, f.power && `Power: ${f.power}`].filter(Boolean);
       return {
         place: PLACE, name: f.name.trim(), kind: f.kind, category: f.category,
@@ -107,7 +138,8 @@ const HackerspaceScan = () => {
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success(`Saved ${rows.length} item${rows.length === 1 ? "" : "s"}${zone ? ` to ${zone}` : ""}`);
-    setFound(f => f.filter(x => !x.keep));
+    const savedKeys = new Set(kept.map(x => x.key));
+    setFound(f => f.filter(x => !savedKeys.has(x.key)));
   };
 
   const disabled = !isAdmin;
@@ -116,30 +148,30 @@ const HackerspaceScan = () => {
       <div className="container mx-auto max-w-4xl px-4 py-8 pb-32">
         <p className="text-sm text-muted-foreground"><Link to="/spaces/baltimore-hackerspace" className="underline">{PLACE} inventory</Link></p>
         <h1 className="mt-1 text-3xl font-bold">Scan items</h1>
-        <p className="mt-2 text-muted-foreground">Pick where the stuff is, snap photos, check the list, save.</p>
         {roleChecked && !isAdmin && <p className="mt-3 rounded-md border bg-muted p-3 text-sm">{user ? `Signed in as ${user.email}, which is not an inventory admin or manager.` : "Sign in as an inventory admin or manager to scan items."}</p>}
 
-        <Card className="mt-6 space-y-4 p-4">
+        <div className="mt-6 space-y-4 border-b pb-6">
           <div>
             <label className="text-sm font-medium" htmlFor="scan-zone">1. Location for this batch</label>
-            <Input id="scan-zone" className="mt-1" list="scan-zones" value={zone} onChange={e => setZone(e.target.value)} placeholder="Zone name or any text, e.g. Milling Bay" disabled={disabled} />
+            <Input id="scan-zone" className="mt-1" list="scan-zones" value={zone} onChange={e => setZone(e.target.value)} placeholder="Zone name or any text, e.g. Milling Bay" disabled={disabled || busy || saving || found.length > 0} />
             <datalist id="scan-zones">{zones.map(z => <option key={z} value={z} />)}</datalist>
           </div>
           <div>
             <p className="text-sm font-medium">2. What's in the photo</p>
             <div className="mt-1 flex gap-2">
-              <Button size="sm" variant={mode === "pile" ? "default" : "outline"} onClick={() => setMode("pile")} disabled={disabled}>Box or pile</Button>
-              <Button size="sm" variant={mode === "single" ? "default" : "outline"} onClick={() => setMode("single")} disabled={disabled}>One item</Button>
+              <Button size="sm" variant={mode === "pile" ? "default" : "outline"} onClick={() => setMode("pile")} disabled={disabled || busy}>Box or pile</Button>
+              <Button size="sm" variant={mode === "single" ? "default" : "outline"} onClick={() => setMode("single")} disabled={disabled || busy}>One item</Button>
             </div>
           </div>
           <div>
-            <p className="text-sm font-medium">3. Take photos</p>
+            <CatalogCamera disabled={disabled || saving} busy={busy} onRecognize={recognize} />
             <div className="mt-1 flex flex-wrap gap-2">
-              <Button size="lg" onClick={() => cameraRef.current?.click()} disabled={disabled}><Camera className="mr-2 h-5 w-5" />Camera</Button>
-              <Button size="lg" variant="outline" onClick={() => libraryRef.current?.click()} disabled={disabled}><ImagePlus className="mr-2 h-5 w-5" />Choose photos</Button>
+              <Button variant="outline" onClick={() => libraryRef.current?.click()} disabled={disabled || busy || saving}><ImagePlus className="mr-2 h-4 w-4" />Choose photos</Button>
+              <Button variant="outline" disabled={disabled || busy || saving || found.length > 0} onClick={() => { seenRef.current.clear(); setShots([]); setLastCount(null); setScanError(""); toast("New batch started"); }}><Camera className="mr-2 h-4 w-4" />New batch</Button>
             </div>
-            <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={e => { scan(e.target.files); e.target.value = ""; }} />
             <input ref={libraryRef} type="file" accept="image/*" multiple className="hidden" onChange={e => { scan(e.target.files); e.target.value = ""; }} />
+            {scanError && <p role="alert" className="mt-2 text-sm text-destructive">{scanError}</p>}
+            {lastCount !== null && <p className="mt-2 text-sm text-muted-foreground" role="status">Last scan: {lastCount} new · repeated matches skipped</p>}
           </div>
           {shots.length > 0 && (
             <div className="flex gap-2 overflow-x-auto">
@@ -152,11 +184,12 @@ const HackerspaceScan = () => {
               ))}
             </div>
           )}
-        </Card>
+        </div>
 
         {found.length > 0 && (
           <div className="mt-6 space-y-3">
             <h2 className="text-lg font-semibold">Found {found.length} · {kept.length} selected</h2>
+            <Button variant="ghost" size="sm" disabled={busy || saving} onClick={() => setFound([])}><Trash2 className="mr-2 h-4 w-4" />Discard batch</Button>
             {found.map(f => (
               <Card key={f.key} className={`p-3 ${f.keep ? "" : "opacity-50"}`}>
                 <div className="flex items-start gap-3">
