@@ -1,6 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 import { createOpenAI } from "npm:@ai-sdk/openai@2";
 import { streamText, Output, jsonSchema } from "npm:ai@5";
+import { createLovableAiGatewayRunIdFetch } from "./run-id.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -53,22 +54,28 @@ Deno.serve(async (req) => {
     if (!apiKey) return j({ error: "AI is not configured" }, 500);
 
     const auth = req.headers.get("Authorization") ?? "";
-    const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    if (!supabaseUrl || !anonKey) return j({ error: "Recognition service is not configured" }, 500);
+    const sb = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: auth } },
     });
     const { data: u } = await sb.auth.getUser(auth.replace(/^Bearer\s+/i, ""));
     if (!u?.user) return j({ error: "Sign in to scan items" }, 401);
-    const roles = await Promise.all(["admin", "moderator"].map((r) => sb.rpc("has_role", { _role: r, _user_id: u.user!.id })));
+    const userId = u.user.id;
+    const roles = await Promise.all(["admin", "moderator"].map((r) => sb.rpc("has_role", { _role: r, _user_id: userId })));
     if (!roles.some((r) => r.data)) return j({ error: "Only inventory admins or managers can scan items" }, 403);
 
     const { image, mode } = await req.json();
     if (typeof image !== "string" || !image.startsWith("data:image/") || image.length > 8_000_000)
       return j({ error: "Send a JPEG or PNG photo under ~6 MB" }, 400);
 
+    const gateway = createLovableAiGatewayRunIdFetch();
     const provider = createOpenAI({
       baseURL: "https://ai.gateway.lovable.dev/v1",
       apiKey,
       headers: { "Lovable-API-Key": apiKey, "X-Lovable-AIG-SDK": "vercel-ai-sdk" },
+      fetch: gateway.fetch,
     });
     const hint = mode === "single"
       ? "This photo shows ONE main item. Return just that item with as much detail as is readable."
@@ -80,6 +87,7 @@ Deno.serve(async (req) => {
       experimental_output: Output.object({ schema }),
       messages: [{ role: "user", content: [{ type: "text", text: hint }, { type: "image", image: new URL(image) }] }],
       abortSignal: req.signal,
+      maxRetries: 0,
       providerOptions: {
         openai: {
           forceReasoning: true,
@@ -91,22 +99,47 @@ Deno.serve(async (req) => {
       },
     });
 
-    let text = "";
-    let failure: unknown = null;
-    for await (const part of result.fullStream) {
-      if (part.type === "text-delta") text += part.text;
-      if (part.type === "error") failure = part.error;
-    }
-    if (failure) {
-      const status = (failure as { statusCode?: number })?.statusCode ?? 502;
-      const msg = status === 402 ? "Out of AI credits. Add more in Settings → Plans & credits."
-        : status === 429 ? "Too many scans at once. Wait a moment and try again."
-        : (failure as Error)?.message ?? "AI request failed";
-      console.error("catalog-detect AI error", status, failure);
-      return j({ error: msg }, status);
-    }
-    const parsed = JSON.parse(text);
-    return j({ items: Array.isArray(parsed?.items) ? parsed.items : [] });
+    const encoder = new TextEncoder();
+    const body = new ReadableStream({
+      async start(controller) {
+        const send = (event: unknown) => controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
+        send({ type: "progress" });
+        // Keep the browser connection alive without aborting or replaying billed work.
+        const heartbeat = setInterval(() => send({ type: "progress" }), 5000);
+        try {
+          let text = "";
+          for await (const part of result.fullStream) {
+            if (part.type === "text-delta") text += part.text;
+            if (part.type === "error") throw part.error;
+          }
+          let parsed: { items?: unknown[] };
+          try { parsed = JSON.parse(text); }
+          catch { throw new Error("Recognition returned an unreadable item list. Scanning paused; your batch is still here."); }
+          if (!Array.isArray(parsed.items)) throw new Error("Recognition returned an invalid item list. Scanning paused.");
+          send({ type: "result", items: parsed.items });
+          console.info("catalog-detect completed", { runId: gateway.getRunId(), itemCount: parsed.items.length });
+        } catch (error) {
+          const failure = error as { statusCode?: number; message?: string; name?: string; responseBody?: string };
+          const status = failure.statusCode ?? 502;
+          let message = failure.message ?? "Recognition failed. Scanning paused.";
+          // SDK parser errors can embed a full HTML response; never show that as the scan error.
+          if (error instanceof SyntaxError || /<!doctype|<html|unexpected token/i.test(message)) {
+            message = `Recognition service returned a web-page error (${status}). Scanning paused; your batch is still here.`;
+          } else if (failure.responseBody) {
+            try {
+              const upstream = JSON.parse(failure.responseBody);
+              message = upstream.message ?? upstream.error?.message ?? message;
+            } catch { /* preserve the safe fallback */ }
+          }
+          console.error("catalog-detect failed", { status, runId: gateway.getRunId(), errorType: failure.name });
+          send({ type: "error", status, error: message });
+        } finally {
+          clearInterval(heartbeat);
+          controller.close();
+        }
+      },
+    });
+    return new Response(body, { headers: { ...corsHeaders, "Content-Type": "application/x-ndjson", "Cache-Control": "no-store" } });
   } catch (e) {
     if ((e as Error)?.name === "AbortError") return j({ error: "cancelled" }, 499);
     console.error(e);
