@@ -78,12 +78,18 @@ const HackerspaceScan = () => {
     if (busyRef.current || !isAdmin || signal.aborted) return false;
     busyRef.current = true; setBusy(true); setScanError("");
     const id = crypto.randomUUID();
-    setShots(s => [{ id, preview: image, status: "working" }, ...s].slice(0, 12));
+    setShots(s => [{ id, preview: image, status: "working" as const }, ...s].slice(0, 12));
     try {
-      const { data, error } = await supabase.functions.invoke("catalog-detect", { body: { image, mode }, signal });
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) throw new Error("Sign in to scan items");
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/catalog-detect`, {
+        method: "POST", signal,
+        headers: { "Content-Type": "application/json", apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${sessionData.session.access_token}` },
+        body: JSON.stringify({ image, mode }),
+      });
+      const data = await response.json();
       if (signal.aborted) { setShots(s => s.filter(x => x.id !== id)); return false; }
-      const body = error ? await (error as any).context?.json?.().catch(() => null) : null;
-      const msg = error ? body?.error ?? body?.message ?? error.message : data?.error;
+      const msg = !response.ok ? data?.error ?? data?.message ?? `Recognition failed (${response.status})` : data?.error;
       if (msg) throw new Error(msg);
       if (!Array.isArray(data?.items)) throw new Error("Recognition returned an invalid list. Scanning paused.");
       const items: Found[] = freshCatalogItems<Found>((data.items as any[]).map(it => ({ ...it, key: crypto.randomUUID(), keep: true })), seenRef.current);
