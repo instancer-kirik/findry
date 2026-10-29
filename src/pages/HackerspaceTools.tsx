@@ -112,6 +112,7 @@ const HackerspaceTools = () => {
         <div className="mt-3 flex gap-3 text-sm">
           <a href={SOURCE} target="_blank" rel="noreferrer" className="text-primary underline">Original list</a>
           <Link to={`/floorplans/${HACKERSPACE_FLOORPLAN_ID}`} className="text-primary underline">Open the hackerspace floorplan</Link>
+          <Link to="/spaces/baltimore-hackerspace/scan" className="text-primary underline">Scan items with camera</Link>
         </div>
 
         <div className="mt-6 flex flex-col gap-3">
