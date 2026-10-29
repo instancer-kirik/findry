@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Camera, ImagePlus, Loader2, Save, Trash2 } from "lucide-react";
 import CatalogCamera from "@/components/floorplan/CatalogCamera";
 import { freshCatalogItems } from "@/lib/catalog-batch";
+import { readCatalogResponse } from "@/lib/catalog-response";
 
 const PLACE = "Baltimore Hackerspace";
 const FLOORPLAN_ID = "617b20a6-8edf-4218-a6b4-ed6cfca9f749";
@@ -87,10 +88,7 @@ const HackerspaceScan = () => {
         headers: { "Content-Type": "application/json", apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${sessionData.session.access_token}` },
         body: JSON.stringify({ image, mode }),
       });
-      const text = await response.text();
-      let data: any = null;
-      try { data = text ? JSON.parse(text) : null; }
-      catch { throw new Error(response.ok ? "Recognition returned an unreadable reply. Scanning paused." : `Recognition failed (${response.status}). Scanning paused.`); }
+      const data: any = await readCatalogResponse(response);
       if (signal.aborted) { setShots(s => s.filter(x => x.id !== id)); return false; }
       const msg = !response.ok ? data?.error ?? data?.message ?? `Recognition failed (${response.status})` : data?.error;
       if (msg) throw new Error(msg);
