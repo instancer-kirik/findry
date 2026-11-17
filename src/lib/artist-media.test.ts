@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "node:test";
+import assert from "node:assert/strict";
 import {
   isExternalStreamingPage,
   safeUploadFilename,
@@ -12,28 +13,24 @@ const makeFile = (name: string, type: string, size = 100) =>
 
 describe("artist intro media", () => {
   it("accepts only complete HTTP links", () => {
-    expect(validateHttpUrl("https://example.com/demo.mp3")).toBeNull();
-    expect(validateHttpUrl("javascript:alert(1)")).toContain("http");
-    expect(validateHttpUrl("not a url")).toContain("valid URL");
+    assert.equal(validateHttpUrl("https://example.com/demo.mp3"), null);
+    assert.match(validateHttpUrl("javascript:alert(1)") ?? "", /http/);
+    assert.match(validateHttpUrl("not a url") ?? "", /valid URL/);
   });
 
-  it("rejects the wrong file kind and oversized files", () => {
-    expect(validateMediaFile(makeFile("demo.mp3", "audio/mpeg"), "audio")).toBeNull();
-    expect(validateMediaFile(makeFile("demo.mp3", "audio/mpeg"), "image")).toContain("image");
-    expect(validateMediaFile(makeFile("large.wav", "audio/wav", 50 * 1024 * 1024 + 1), "audio")).toContain("50 MB");
+  it("rejects the wrong file kind and files over 50 MB", () => {
+    assert.equal(validateMediaFile(makeFile("demo.mp3", "audio/mpeg"), "audio"), null);
+    assert.match(validateMediaFile(makeFile("demo.mp3", "audio/mpeg"), "image") ?? "", /image/);
+    assert.match(validateMediaFile(makeFile("large.wav", "audio/wav", 50 * 1024 * 1024 + 1), "audio") ?? "", /50 MB/);
   });
 
-  it("recognizes streaming pages that need an external player", () => {
-    expect(isExternalStreamingPage("https://soundcloud.com/artist/demo")).toBe(true);
-    expect(isExternalStreamingPage("https://cdn.example.com/demo.mp3")).toBe(false);
+  it("sends streaming pages to their own player", () => {
+    assert.equal(isExternalStreamingPage("https://soundcloud.com/artist/demo"), true);
+    assert.equal(isExternalStreamingPage("https://cdn.example.com/demo.mp3"), false);
   });
 
-  it("deduplicates style tags and limits file extensions to safe characters", () => {
-    expect(splitCommaValues("ambient, drone, ambient, , field recording")).toEqual([
-      "ambient",
-      "drone",
-      "field recording",
-    ]);
-    expect(safeUploadFilename("My Demo.MP3!")).toBe("mp3");
+  it("deduplicates tags and keeps upload extensions safe", () => {
+    assert.deepEqual(splitCommaValues("ambient, drone, ambient, , field recording"), ["ambient", "drone", "field recording"]);
+    assert.equal(safeUploadFilename("My Demo.MP3!"), "mp3");
   });
 });
