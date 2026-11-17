@@ -19,9 +19,10 @@ async function resolveMediaUrls(media: ArtistMediaRecord[]): Promise<ArtistMedia
   );
 }
 
-export function useArtistSuggestions() {
+export function useArtistSuggestions(enabled = true) {
   return useQuery({
     queryKey: ["artist-suggestions"],
+    enabled,
     queryFn: async (): Promise<ArtistRecord[]> => {
       const { data, error } = await supabase
         .from("artists")

@@ -5,7 +5,7 @@ import {
   splitCommaValues,
   validateHttpUrl,
   validateMediaFile,
-} from "@/lib/artist-media";
+} from "./artist-media";
 
 const makeFile = (name: string, type: string, size = 100) =>
   new File([new Uint8Array(size)], name, { type });
