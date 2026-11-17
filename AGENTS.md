@@ -9,3 +9,4 @@
 - Run inventory photo recognition in the admin-or-manager (moderator role) checked `catalog-detect` edge function and save only user-reviewed rows to `space_tools`; this keeps the AI key server-side and prevents unreviewed guesses from entering inventory.
 - Keep camera recognition sequential and pause on failures; suppress exact repeated identities per explicit batch and release camera tracks on close/unmount so bulk capture cannot overlap requests or silently inflate quantities.
 - Stream recognition progress and the final reviewed candidate list across the browser boundary; this avoids buffering slow recognition and keeps interrupted replies from being mistaken for successful empty scans.
+- Reuse Fumbler's shared `artists`/`artist_media`/`user_artist_relationships` tables and private `artist-media` bucket for Follow suggestions (same backend); only artists with preview media are suggested, and uploads are shown through temporary signed links.

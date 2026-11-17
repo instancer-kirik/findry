@@ -11,6 +11,7 @@ import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
 import Discover from "./pages/Discover";
+import FollowArtists from "./pages/FollowArtists";
 import ArtistProfile from "./pages/ArtistProfile";
 import VenueDetail from "./pages/VenueDetail";
 import BrandDetail from "./pages/BrandDetail";
@@ -139,6 +140,7 @@ const App: React.FC = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/not-found" element={<NotFound />} />
         <Route path="/discover" element={<Discover />} />
+        <Route path="/follow" element={<FollowArtists />} />
         <Route path="/items" element={<Items />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/projects/:projectId" element={<ProjectDetail />} />
